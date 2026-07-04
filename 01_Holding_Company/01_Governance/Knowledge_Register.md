@@ -43,6 +43,8 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-008 | The Mind | LANG-001 | ADR-003, ADR-004 | Approved |
 | KNOW-009 | The Librarian | Future Partner | To be designed | Proposed |
 | KNOW-010 | Documentation First Rule | Knowledge Register | ADR-007 | Approved |
+| KNOW-011 | AOS Network Architecture | DNA-001 Chapter 2 | AOS-002 | Approved |
+| KNOW-012 | AOS Ecosystems | DNA-001 Chapter 3 | AOS-002, LANG-001 | Approved |
 
 ---
 

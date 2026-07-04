@@ -125,3 +125,212 @@ Its purpose is to preserve knowledge, improve decision making, and enable contin
 > Every project creates knowledge.
 >
 > Every piece of knowledge strengthens AOS.
+
+---
+
+# Chapter 2 — Architecture
+
+## Primary Question
+
+How is ALSAKKAF HOLDING GROUP organized?
+
+---
+
+## Architecture Philosophy
+
+AOS is designed as a network, not a traditional hierarchy.
+
+Traditional companies often operate through isolated departments.
+
+AOS operates through connected ecosystems, shared knowledge, collaborators, partners, projects, and continuous feedback.
+
+This allows ALSAKKAF HOLDING GROUP to learn, adapt, and grow without losing its identity.
+
+---
+
+## Architecture Overview
+
+```text
+                  Constitution
+                       │
+                       ▼
+                  Digital DNA
+                       │
+                       ▼
+                      AOS
+                       │
+    ┌──────────────────┼──────────────────┐
+    │                  │                  │
+ Governance        Ecosystems         Knowledge
+    │                  │                  │
+    └──────────────────┴──────────────────┘
+                       │
+                    Projects
+                       │
+              Collaborators + Partners
+                       │
+                    Solutions
+                       │
+                     Society
+                       │
+                    Knowledge
+                       │
+                      AOS
+
+
+                      ---
+
+# Chapter 3 — Ecosystems
+
+## Primary Question
+
+What are the major systems that make up AOS?
+
+---
+
+## Ecosystem Definition
+
+An ecosystem is a connected area of capability inside ALSAKKAF HOLDING GROUP.
+
+An ecosystem is more than a department.
+
+A department usually performs tasks.
+
+An ecosystem combines:
+
+- Collaborators
+- Partners
+- Knowledge
+- Projects
+- Tools
+- Processes
+- Decisions
+- Continuous improvement
+
+Each ecosystem has a purpose and contributes to the strength of AOS.
+
+---
+
+## Why AOS Uses Ecosystems
+
+AOS uses ecosystems because ALSAKKAF HOLDING GROUP is designed to grow, learn, and adapt.
+
+Traditional departments can become isolated.
+
+Ecosystems are designed to stay connected.
+
+This allows knowledge, people, Partners, and projects to move across the institution without losing alignment.
+
+---
+
+## Core Ecosystems
+
+The following ecosystems form the foundation of AOS.
+
+| Ecosystem | Purpose |
+|----------|---------|
+| Governance Ecosystem | Protects the institution’s principles, identity, decisions, and long-term direction |
+| Strategy Ecosystem | Defines priorities, growth direction, business portfolio decisions, and long-term planning |
+| Knowledge Ecosystem | Preserves, organizes, indexes, and teaches institutional knowledge |
+| Projects Ecosystem | Transforms problems, ideas, and opportunities into structured execution |
+| Technology Ecosystem | Builds and manages the digital systems, tools, automation, and infrastructure that support AOS |
+| Partner Ecosystem | Designs, manages, monitors, and improves AI Partners |
+| Collaborator Ecosystem | Supports people, learning, development, communication, and contribution |
+| Innovation Ecosystem | Identifies problems, researches solutions, experiments, and creates prototypes |
+| Business Ecosystem | Connects future companies and business units to AOS |
+| Wellbeing Ecosystem | Supports human wellbeing, culture, morale, energy, and employee experience |
+
+---
+
+## The Mind Ecosystems
+
+The Mind is the physical and cultural center of ALSAKKAF HOLDING GROUP.
+
+Inside The Mind, ecosystems may appear as named areas.
+
+| Area | Ecosystem Role |
+|------|----------------|
+| The Core | Leadership, executive decisions, and strategic direction |
+| Innovation Lab | Research, experimentation, and prototypes |
+| Future Builders Lab | Programs for children, students, interns, and future innovators |
+| The Forge | Product development, engineering, software, and AI systems |
+| Harmony | Human wellbeing, learning, culture, and employee experience |
+| The Nexus | Meetings, collaboration, and cross-company coordination |
+| The Observatory | Dashboards, analytics, AI monitoring, and business intelligence |
+| The Vault | Knowledge, legal records, intellectual property, patents, research, and history |
+| The Launchpad | Where new ideas begin and are validated |
+| The Pulse | Organizational health, morale, culture, performance, and wellbeing monitoring |
+
+---
+
+## Collaborators and Partners Inside Ecosystems
+
+Every ecosystem may include both Collaborators and Partners.
+
+Collaborators provide:
+
+- Judgment
+- Creativity
+- Leadership
+- Ethics
+- Empathy
+- Experience
+- Accountability
+
+Partners provide:
+
+- Research
+- Analysis
+- Automation
+- Monitoring
+- Organization
+- Speed
+- Consistency
+
+AOS is strongest when Collaborators and Partners work together inside the same ecosystem.
+
+---
+
+## Ecosystem Interaction
+
+Ecosystems should never operate in isolation.
+
+Projects connect ecosystems together.
+
+For example:
+
+A new automotive service idea may involve:
+
+- Strategy Ecosystem
+- Innovation Ecosystem
+- Projects Ecosystem
+- Technology Ecosystem
+- Partner Ecosystem
+- Knowledge Ecosystem
+- Business Ecosystem
+
+This ensures that ideas are not built randomly.
+
+They are evaluated, documented, developed, tested, and improved through AOS.
+
+---
+
+## Ecosystem Principle
+
+> Ecosystems are not silos.
+>
+> Ecosystems are connected capabilities that allow ALSAKKAF HOLDING GROUP to solve problems, preserve knowledge, and grow responsibly.
+
+---
+
+## Ecosystem Rule
+
+Every major function inside ALSAKKAF HOLDING GROUP must belong to an ecosystem.
+
+If a function does not clearly belong anywhere, AOS must decide whether to:
+
+1. Add it to an existing ecosystem.
+2. Create a new ecosystem.
+3. Reject it as unnecessary.
+
+
