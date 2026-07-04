@@ -334,3 +334,76 @@ If a function does not clearly belong anywhere, AOS must decide whether to:
 3. Reject it as unnecessary.
 
 
+---
+
+# Chapter 4 — The AOS Lifecycle
+
+## Primary Question
+
+How does an idea become a real solution inside AOS?
+
+---
+
+## Lifecycle Definition
+
+The AOS Lifecycle is the standard path used to transform ideas, problems, and opportunities into structured solutions.
+
+It exists to prevent random execution.
+
+Every major initiative inside ALSAKKAF HOLDING GROUP should move through the lifecycle before becoming a project, product, company, or system.
+
+---
+
+## Why the Lifecycle Exists
+
+ALSAKKAF HOLDING GROUP is built on ideas.
+
+However, ideas alone are not enough.
+
+Without a lifecycle, ideas can become distractions.
+
+With a lifecycle, ideas become structured opportunities.
+
+AOS uses the lifecycle to make sure every idea is:
+
+- Understood
+- Researched
+- Evaluated
+- Documented
+- Approved
+- Built responsibly
+- Converted into knowledge
+
+---
+
+## The AOS Lifecycle
+
+```text
+Dream
+  ↓
+Question
+  ↓
+Problem
+  ↓
+Research
+  ↓
+Architecture
+  ↓
+Decision
+  ↓
+Project
+  ↓
+Prototype
+  ↓
+Validation
+  ↓
+Implementation
+  ↓
+Solution
+  ↓
+Feedback
+  ↓
+Knowledge
+  ↓
+AOS Improves
+

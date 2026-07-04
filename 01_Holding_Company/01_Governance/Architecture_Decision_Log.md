@@ -38,6 +38,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-005 | Collaborators and Partners | Approved | 2026-07-04 |
 | ADR-006 | AOS University | Approved | 2026-07-04 |
 | ADR-007 | Documentation First and Knowledge Register | Approved | 2026-07-04 |
+| ADR-008 | The AOS Lifecycle | Approved | 2026-07-04 |
 
 ---
 

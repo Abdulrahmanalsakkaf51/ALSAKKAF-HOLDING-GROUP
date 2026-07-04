@@ -45,6 +45,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-010 | Documentation First Rule | Knowledge Register | ADR-007 | Approved |
 | KNOW-011 | AOS Network Architecture | DNA-001 Chapter 2 | AOS-002 | Approved |
 | KNOW-012 | AOS Ecosystems | DNA-001 Chapter 3 | AOS-002, LANG-001 | Approved |
+| KNOW-013 | The AOS Lifecycle | DNA-001 Chapter 4 | ADR-008, AOS-003 | Approved |
 
 ---
 
