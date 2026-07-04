@@ -407,3 +407,254 @@ Knowledge
   ↓
 AOS Improves
 
+---
+
+# Chapter 5 — Knowledge System
+
+## Primary Question
+
+How does AOS store, protect, teach, and reuse institutional knowledge?
+
+---
+
+## Knowledge Philosophy
+
+AOS treats knowledge as one of the most valuable assets of ALSAKKAF HOLDING GROUP.
+
+Ideas, decisions, lessons, systems, mistakes, reports, and improvements must not remain only in people's memories or in conversations.
+
+If knowledge is important, it must be documented.
+
+If it is documented, it must be discoverable.
+
+If it is discoverable, it can be reused, taught, improved, and protected.
+
+---
+
+## Knowledge Principle
+
+> Knowledge that is not documented cannot become institutional knowledge.
+
+---
+
+## Knowledge System Purpose
+
+The Knowledge System exists to make sure ALSAKKAF HOLDING GROUP can remember, learn, improve, and scale.
+
+Its purpose is to:
+
+- Preserve approved knowledge
+- Organize records clearly
+- Make information easy to find
+- Teach collaborators through AOS University
+- Support Partners with reliable institutional data
+- Prevent repeated mistakes
+- Strengthen decision-making over time
+
+---
+
+## Knowledge Layers
+
+AOS stores knowledge in layers.
+
+```text
+Constitution
+    ↓
+Digital DNA
+    ↓
+Governance Records
+    ↓
+Architecture Decision Records
+    ↓
+Standards
+    ↓
+Policies
+    ↓
+Processes
+    ↓
+Projects
+    ↓
+Lessons
+    ↓
+Reports
+    ↓
+Knowledge Register
+```
+
+Each layer has a different purpose.
+
+Together, they form the institutional memory of ALSAKKAF HOLDING GROUP.
+
+---
+
+## Core Knowledge Records
+
+The following records form the foundation of the Knowledge System.
+
+| Record | Purpose |
+|--------|---------|
+| Company Constitution | Defines the principles of the institution |
+| Digital DNA | Defines how AOS operates |
+| Company Language Standard | Defines institutional language |
+| Knowledge Register | Indexes approved knowledge |
+| Architecture Decision Log | Indexes approved architecture decisions |
+| ADR Files | Explain why important decisions were made |
+| AOS University Lessons | Teach institutional knowledge |
+| SOPs | Explain repeatable work processes |
+| Reports | Preserve performance, analysis, and learning |
+| Project Records | Preserve execution history and lessons learned |
+
+---
+
+## Knowledge Register
+
+The Knowledge Register is the master index of institutional knowledge.
+
+It does not replace documents.
+
+It tells collaborators and Partners where approved knowledge is stored.
+
+If a concept is approved, it should eventually appear in the Knowledge Register.
+
+---
+
+## The Vault
+
+The Vault is the long-term memory of ALSAKKAF HOLDING GROUP.
+
+It stores important institutional records such as:
+
+- Legal documents
+- Intellectual property
+- Patents
+- Research
+- Historical records
+- Approved decisions
+- Important reports
+- Long-term knowledge assets
+
+The Vault protects knowledge that must not be lost.
+
+---
+
+## AOS University
+
+AOS University teaches institutional knowledge.
+
+Governance documents define what the institution believes.
+
+Digital DNA defines how the institution works.
+
+AOS University teaches collaborators how to understand and apply that knowledge.
+
+AOS University turns stored knowledge into learned knowledge.
+
+---
+
+## Partners and Knowledge
+
+Partners should only support institutional work using reliable knowledge sources.
+
+In the future, Partners may help collaborators:
+
+- Search documents
+- Find approved records
+- Understand institutional terms
+- Locate policies
+- Recommend relevant lessons
+- Identify missing documentation
+
+Partners must support knowledge discovery, not replace human responsibility.
+
+---
+
+## The Librarian
+
+The Librarian is a proposed future Partner.
+
+Its purpose will be to help collaborators find institutional knowledge.
+
+The Librarian may answer questions such as:
+
+- Where is The Mind defined?
+- Which document explains Partners?
+- What lesson teaches the AOS Lifecycle?
+- Which ADR approved this decision?
+- Which template should I use for this task?
+
+The Librarian will act as the front desk of institutional knowledge.
+
+---
+
+## Knowledge Lifecycle
+
+Knowledge inside AOS follows a lifecycle.
+
+```text
+Idea
+  ↓
+Discussion
+  ↓
+Approval
+  ↓
+Documentation
+  ↓
+Indexing
+  ↓
+Teaching
+  ↓
+Use
+  ↓
+Improvement
+  ↓
+Updated Knowledge
+```
+
+This ensures knowledge does not stay static.
+
+Knowledge improves as the institution improves.
+
+---
+
+## Documentation Rule
+
+Important knowledge must be:
+
+1. Documented
+2. Approved
+3. Indexed
+4. Stored
+5. Taught when necessary
+6. Updated when changed
+
+---
+
+## Knowledge Ownership
+
+Every important document should have an owner.
+
+At the beginning, the owner may be the Founder.
+
+As ALSAKKAF HOLDING GROUP grows, ownership may move to ecosystems such as:
+
+- Governance Ecosystem
+- Knowledge Ecosystem
+- Technology Ecosystem
+- Partner Ecosystem
+- Projects Ecosystem
+- Collaborator Ecosystem
+
+Ownership ensures knowledge remains accurate.
+
+---
+
+## Knowledge System Rule
+
+> If it is approved, it must be documented.
+>
+> If it is documented, it must be discoverable.
+>
+> If it is discoverable, it can be taught.
+>
+> If it is taught, it can strengthen the institution.
+
