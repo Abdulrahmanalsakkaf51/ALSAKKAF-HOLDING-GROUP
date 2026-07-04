@@ -1,0 +1,64 @@
+# ALSAKKAF HOLDING GROUP
+
+# Knowledge Register
+
+> "If it is approved, it must be documented. If it is documented, it must be discoverable."
+
+---
+
+## Document Information
+
+| Field | Value |
+|-------|-------|
+| Document ID | KNOW-001 |
+| Document Type | Knowledge Register |
+| Status | Draft |
+| Version | 1.0 |
+| Owner | Abdulrahman Alsakkaf |
+| Approved By | CEO |
+
+---
+
+# Purpose
+
+The Knowledge Register is the master index of institutional knowledge within ALSAKKAF HOLDING GROUP.
+
+It does not contain the knowledge itself.
+
+Its purpose is to identify where every approved concept, document, lesson, policy, and architectural decision is stored.
+
+---
+
+# Knowledge Index
+
+| ID | Knowledge | Primary Location | Related Documents | Status |
+|----|-----------|------------------|-------------------|--------|
+| KNOW-001 | Company Constitution | GOV-001 / Company_Constitution.md | DNA-001 | Approved |
+| KNOW-002 | Digital DNA | DNA-001 / Digital_DNA.md | GOV-001, ADR-001 | Approved |
+| KNOW-003 | Company Language | LANG-001 / Company_Language_Standard.md | ADR-002, ADR-003, ADR-004, ADR-005 | Approved |
+| KNOW-004 | Architecture Decision Records | LOG-001 / Architecture_Decision_Log.md | ADR Folder | Approved |
+| KNOW-005 | AOS University | 07_AOS_University | ADR-006 | Approved |
+| KNOW-006 | Collaborators | LANG-001 | ADR-005 | Approved |
+| KNOW-007 | Partners | LANG-001 | ADR-005 | Approved |
+| KNOW-008 | The Mind | LANG-001 | ADR-003, ADR-004 | Approved |
+| KNOW-009 | The Librarian | Future Partner | To be designed | Proposed |
+| KNOW-010 | Documentation First Rule | Knowledge Register | ADR-007 | Approved |
+
+---
+
+# Knowledge Principle
+
+Knowledge is considered institutional only after it has been:
+
+1. Approved.
+2. Documented.
+3. Indexed.
+4. Made discoverable.
+
+---
+
+# Future Knowledge
+
+This register will continuously expand as ALSAKKAF HOLDING GROUP grows.
+
+Every new concept shall receive a unique Knowledge ID and be added to this register.
