@@ -50,6 +50,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-015 | The Vault | DNA-001 Chapter 5 | LANG-001, ADR-004 | Approved |
 | KNOW-016 | The Librarian | DNA-001 Chapter 5 | AOS-004 | Proposed |
 | KNOW-017 | Decision Framework | DNA-001 Chapter 6 | ADR-010, AOS-005 | Approved |
+| KNOW-018 | Technology Architecture | DNA-001 Chapter 7 | ADR-011, AOS-006 | Approved |
 
 ---
 

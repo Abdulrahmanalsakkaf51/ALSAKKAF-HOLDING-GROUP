@@ -41,6 +41,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-008 | The AOS Lifecycle | Approved | 2026-07-04 |
 | ADR-009 | Knowledge System | Approved | 2026-07-04 |
 | ADR-010 | Decision Framework | Approved | 2026-07-04 |
+| ADR-011 | Technology Architecture | Approved | 2026-07-05 |
 
 ---
 
