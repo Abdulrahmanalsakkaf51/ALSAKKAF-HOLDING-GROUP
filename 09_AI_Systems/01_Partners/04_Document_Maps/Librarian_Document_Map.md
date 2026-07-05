@@ -191,7 +191,7 @@ The following sources may be created later:
 | Librarian Workflow | Step-by-step use process | Draft |
 | Source Priority Map | More detailed source checking rules | Future |
 | Prompt Package | Clean reusable prompt package | Future |
-| Claude Build Instructions | Instructions for coding phase | Future |
+| Claude Build Instructions | Instructions for coding phase | Draft |
 | Prototype Test Log | Testing record for coded prototype | Future |
 
 ---

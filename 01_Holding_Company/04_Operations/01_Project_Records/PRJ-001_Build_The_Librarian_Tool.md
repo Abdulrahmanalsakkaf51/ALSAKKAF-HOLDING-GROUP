@@ -113,6 +113,7 @@ PRJ-001 should produce:
 | Test Questions | A reusable testing set for The Librarian | Completed |
 | Prompt Package | Clean reusable Librarian prompt | Draft |
 | Tool Requirements | Requirements for a future coded tool | Completed |
+| Claude Build Instructions | Instructions for building the first Librarian prototype with Claude | Completed |
 | Build Plan | Stages for turning the prompt into software | Not Started |
 
 ---
@@ -208,7 +209,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | PRJ-001-T003 | Create Librarian Document Map | Completed |
 | PRJ-001-T004 | Create Librarian Workflow | Completed |
 | PRJ-001-T005 | Create Tool Requirements | Completed |
-| PRJ-001-T006 | Prepare Claude build instructions | Not Started |
+| PRJ-001-T006 | Prepare Claude build instructions | Completed |
 | PRJ-001-T007 | Build simple prototype | Not Started |
 | PRJ-001-T008 | Test prototype | Not Started |
 | PRJ-001-T009 | Capture lessons learned | Not Started |
@@ -224,6 +225,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | 2026-07-06 | Librarian Workflow created as the second deliverable of PRJ-001. |
 | 2026-07-06 | PRJ-001 status updated from Approved to Active because execution has started. |
 | 2026-07-06 | Librarian Tool Requirements created as the third deliverable of PRJ-001. |
+| 2026-07-06 | Claude Build Instructions created to prepare for the first coded Librarian prototype. |
 
 
 ---
