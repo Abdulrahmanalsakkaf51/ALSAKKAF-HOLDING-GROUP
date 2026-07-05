@@ -100,7 +100,7 @@ Level 5 is not approved.
 
 | Partner ID | Partner Name | Type | Purpose | Authority Level | Status | Owner | Related Documents |
 |------------|--------------|------|---------|-----------------|--------|-------|-------------------|
-| PARTNER-001 | The Librarian | Knowledge Partner | Help users find approved institutional knowledge inside AOS | Level 1–3 | Designed | CEO | LIB-001, LPROMPT-001, POM-001, DNA-001, KNOW-001 | | Knowledge Partner | Help users find approved institutional knowledge inside AOS | Level 1–3 | Proposed | CEO | POM-001, DNA-001, KNOW-001 |
+| PARTNER-001 | The Librarian | Knowledge Partner | Help users find approved institutional knowledge inside AOS | Level 1–3 | Active | CEO | LIB-001, LPROMPT-001, LTEST-001, POM-001, DNA-001, KNOW-001 | | Knowledge Partner | Help users find approved institutional knowledge inside AOS | Level 1–3 | Proposed | CEO | POM-001, DNA-001, KNOW-001 |
 | PARTNER-002 | Founder Support Partner | Executive Support Partner | Support the Founder with planning, prioritization, summaries, and decision preparation | Level 1–3 | Proposed | CEO | POM-001, DNA-001 |
 | PARTNER-003 | Strategy Partner | Strategy Partner | Analyze ideas, compare options, and support strategic planning | Level 1–3 | Proposed | CEO | DNA-001 Chapter 6, ADR-010 |
 | PARTNER-004 | Research Partner | Research Partner | Research topics, industries, competitors, markets, and opportunities | Level 1–3 | Proposed | CEO | POM-001 |

@@ -49,6 +49,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-016 | Partner Registry | Approved | 2026-07-05 |
 | ADR-017 | Partner Workforce Architecture | Approved | 2026-07-05 |
 | ADR-018 | The Librarian | Approved | 2026-07-05 |
+| ADR-019 | Activate The Librarian | Approved | 2026-07-05 |
 
 
 ---
