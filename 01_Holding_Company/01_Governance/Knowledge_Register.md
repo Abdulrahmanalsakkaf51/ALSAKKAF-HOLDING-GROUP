@@ -62,6 +62,8 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-027 | The Librarian Test Log | LTEST-001 / PARTNER-001_The_Librarian_Test_Log.md | LIB-001, LPROMPT-001, PREG-001, ADR-019 | Passed |
 | KNOW-028 | The Librarian Activation | ADR-019 / Activate The Librarian | LIB-001, LTEST-001, PREG-001 | Approved |
 | KNOW-029 | Project Operating Model | PRJMODEL-001 / Project_Operating_Model.md | ADR-020, PROJECT-001 | Approved |
+| KNOW-030 | Project Register | PRJREG-001 / Project_Register.md | PRJMODEL-001, PRJ-001 | Approved |
+| KNOW-031 | PRJ-001 Build The Librarian Tool | PRJ-001 / PRJ-001_Build_The_Librarian_Tool.md | LIB-001, LPROMPT-001, LTEST-001, PRJMODEL-001 | Approved |
 
 
 ---
