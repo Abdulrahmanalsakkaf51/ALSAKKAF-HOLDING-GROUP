@@ -112,8 +112,8 @@ The purpose is to confirm that the local tool can answer the foundation Libraria
 |-------|-------|
 | Test Question | Where is the 30-Partner Company Cell explained? |
 | Expected Status | Approved |
-| Result | Pending |
-| Notes | Pending |
+| Result | Pass |
+| Notes | Tool correctly identified the Partner Workforce Architecture as the source for the 30-Partner Company Cell. |
 
 ---
 
@@ -123,8 +123,8 @@ The purpose is to confirm that the local tool can answer the foundation Libraria
 |-------|-------|
 | Test Question | What is The Librarian allowed to do? |
 | Expected Status | Active |
-| Result | Pending |
-| Notes | Pending |
+| Result | Pass |
+| Notes | Tool correctly explained The Librarian's allowed tasks and returned source, status, and recommended action. |
 
 ---
 
@@ -134,8 +134,8 @@ The purpose is to confirm that the local tool can answer the foundation Libraria
 |-------|-------|
 | Test Question | What is The Librarian not allowed to do? |
 | Expected Status | Active |
-| Result | Pending |
-| Notes | Pending |
+| Result | Pass |
+| Notes | Tool correctly explained The Librarian's restricted tasks and confirmed its limits. |
 
 ---
 
@@ -145,8 +145,8 @@ The purpose is to confirm that the local tool can answer the foundation Libraria
 |-------|-------|
 | Test Question | Which document should be updated when a new Partner is created? |
 | Expected Status | Approved |
-| Result | Pending |
-| Notes | Pending |
+| Result | Pass |
+| Notes | Tool correctly identified the Partner Registry as the main document to update when a new Partner is created. |
 
 ---
 
@@ -156,9 +156,8 @@ The purpose is to confirm that the local tool can answer the foundation Libraria
 |-------|-------|
 | Test Question | Is The Librarian active, designed, proposed, or approved? |
 | Expected Status | Active |
-| Result | Pending |
-| Notes | Pending |
-
+| Result | Pass |
+| Notes | Tool correctly identified The Librarian as Active and referenced its activation through testing and approval. |
 ---
 
 # 4. Pass Criteria
