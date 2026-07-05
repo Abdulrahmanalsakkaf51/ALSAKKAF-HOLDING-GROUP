@@ -103,9 +103,9 @@ The Librarian should be tested against these documents:
 | Expected Source | DNA-001 / Digital_DNA.md |
 | Expected Related Sources | KNOW-002 |
 | Expected Status | Approved |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
+| Actual Answer | Digital DNA is documented in Digital_DNA.md. It is the main document that defines the ALSAKKAF Operating System, including its philosophy, architecture, ecosystems, lifecycle, knowledge system, decision framework, technology architecture, growth model, The Mind, and future evolution. |
+| Result | Pass |
+| Notes | The Librarian correctly identified Digital DNA, gave the correct primary source, related it to KNOW-002 and ADR-001, confirmed the status as Approved, and recommended reviewing Digital_DNA.md first. |
 
 ---
 
@@ -117,9 +117,9 @@ The Librarian should be tested against these documents:
 | Expected Source | DNA-001 Chapter 9 |
 | Expected Related Sources | ADR-003, ADR-004, ADR-013, AOS-008, LANG-001, KNOW-020 |
 | Expected Status | Approved |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
+| Actual Answer | The Mind is defined in Digital DNA Chapter 9 — The Mind. It is described as the headquarters, cultural center, coordination center, and symbolic heart of ALSAKKAF HOLDING GROUP. It also has two forms: the Physical Mind, which is the future headquarters, and the Digital Mind, which is AOS. |
+| Result | Pass |
+| Notes | The Librarian correctly identified Digital DNA Chapter 9 as the primary source, included ADR-003, ADR-004, ADR-013, AOS-008, LANG-001, and KNOW-020 as related sources, confirmed Approved status, and recommended reviewing ADR-013. |
 
 ---
 
@@ -131,10 +131,9 @@ The Librarian should be tested against these documents:
 | Expected Source | POM-001 / Partner_Operating_Model.md |
 | Expected Related Sources | ADR-015, PARTNER-001, KNOW-022 |
 | Expected Status | Approved |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
-
+| Actual Answer | The Partner Operating Model defines how ALSAKKAF HOLDING GROUP uses Partners inside AOS. It explains what Partners are, how they support the Founder and future collaborators, what authority levels they may have, what boundaries they must follow, and how human accountability remains required. |
+| Result | Pass |
+| Notes | The Librarian correctly identified POM-001 as the primary source, connected it to ADR-015, the Partner Registry, Partner Workforce Architecture, and KNOW-022, confirmed Approved status, and recommended reviewing the Partner Registry next. |
 ---
 
 ## Test 005 — Partner Registry Approval
@@ -145,9 +144,9 @@ The Librarian should be tested against these documents:
 | Expected Source | ADR-016 |
 | Expected Related Sources | PREG-001, PARTNER-002, KNOW-023 |
 | Expected Status | Approved |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
+| Actual Answer | The Partner Registry was approved by ADR-016 — Partner Registry. This ADR established the Partner Registry as the official control record for Partners inside AOS. |
+| Result | Pass |
+| Notes | The Librarian correctly identified ADR-016 as the approval source, connected it to PREG-001, PARTNER-002, KNOW-023, and POM-001, confirmed Approved status, and recommended reviewing both the ADR and Partner Registry. |
 
 ---
 
