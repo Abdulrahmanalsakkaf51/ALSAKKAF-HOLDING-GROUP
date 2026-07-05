@@ -54,6 +54,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-019 | Growth Model | DNA-001 Chapter 8 | ADR-012, AOS-007 | Approved |
 | KNOW-020 | The Mind | DNA-001 Chapter 9 | ADR-003, ADR-004, ADR-013, AOS-008, LANG-001 | Approved |
 | KNOW-021 | Future Evolution | DNA-001 Chapter 10 | ADR-014, AOS-009 | Approved |
+| KNOW-022 | Partner Operating Model | POM-001 / Partner_Operating_Model.md | ADR-015, PARTNER-001 | Approved |
 
 ---
 
