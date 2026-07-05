@@ -46,6 +46,10 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-011 | AOS Network Architecture | DNA-001 Chapter 2 | AOS-002 | Approved |
 | KNOW-012 | AOS Ecosystems | DNA-001 Chapter 3 | AOS-002, LANG-001 | Approved |
 | KNOW-013 | The AOS Lifecycle | DNA-001 Chapter 4 | ADR-008, AOS-003 | Approved |
+| KNOW-014 | Knowledge System | DNA-001 Chapter 5 | ADR-009, AOS-004 | Approved |
+| KNOW-015 | The Vault | DNA-001 Chapter 5 | LANG-001, ADR-004 | Approved |
+| KNOW-016 | The Librarian | DNA-001 Chapter 5 | AOS-004 | Proposed |
+| KNOW-017 | Decision Framework | DNA-001 Chapter 6 | ADR-010, AOS-005 | Approved |
 
 ---
 

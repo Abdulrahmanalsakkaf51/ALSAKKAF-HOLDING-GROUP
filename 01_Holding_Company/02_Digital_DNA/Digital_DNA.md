@@ -658,3 +658,175 @@ Ownership ensures knowledge remains accurate.
 >
 > If it is taught, it can strengthen the institution.
 
+---
+
+# Chapter 6 — Decision Framework
+
+## Primary Question
+
+How does AOS make decisions?
+
+---
+
+## Decision Philosophy
+
+AOS decisions must be clear, responsible, documented, and aligned with the Constitution.
+
+ALSAKKAF HOLDING GROUP should not make decisions only because something is profitable, exciting, popular, or technologically possible.
+
+Every important decision must be tested against purpose, values, responsibility, and long-term impact.
+
+---
+
+## Why a Decision Framework Exists
+
+AOS exists to prevent random action.
+
+The Decision Framework helps ALSAKKAF HOLDING GROUP:
+
+- Avoid emotional decisions
+- Reduce unnecessary risk
+- Protect the institution’s principles
+- Prioritize meaningful problems
+- Align projects with the Constitution
+- Preserve decision history
+- Improve future judgment through documented learning
+
+---
+
+## Core Decision Questions
+
+Before approving any major idea, project, product, company, partnership, or system, AOS asks:
+
+1. What real problem does this solve?
+2. Who benefits from this solution?
+3. Can we deliver it responsibly and sustainably?
+
+If these questions cannot be answered clearly, the initiative should not move forward.
+
+---
+
+## Constitutional Decision Check
+
+Every major decision must also be checked against the Company Constitution.
+
+Before approval, AOS asks:
+
+1. Is it ethical?
+2. Does it create real value?
+3. Does it align with our purpose?
+4. Does it respect people and society?
+5. Would we still be proud of this decision twenty years from now?
+
+If the answer to any of these questions is "No", the decision must be reconsidered.
+
+---
+
+## Decision Levels
+
+Not every decision requires the same level of review.
+
+AOS separates decisions into levels.
+
+| Level | Type | Example | Required Review |
+|-------|------|---------|-----------------|
+| Level 1 | Daily Decision | Minor task or document update | Collaborator or owner |
+| Level 2 | Operational Decision | Process change or workflow update | Ecosystem owner |
+| Level 3 | Architectural Decision | AOS structure, language, systems, or core records | ADR required |
+| Level 4 | Strategic Decision | New business direction, major investment, or long-term commitment | CEO approval |
+| Level 5 | Constitutional Decision | Changes to purpose, principles, or identity | Founder / CEO approval |
+
+---
+
+## Architecture Decision Records
+
+Architectural decisions must be documented through ADRs.
+
+An ADR preserves:
+
+- What decision was made
+- Why it was made
+- Who approved it
+- What alternatives were considered
+- What consequences it creates
+
+This prevents future confusion and protects institutional memory.
+
+---
+
+## Decision Outcomes
+
+A decision may result in one of the following outcomes:
+
+| Outcome | Meaning |
+|---------|---------|
+| Approved | The initiative may move forward |
+| Rejected | The initiative should not continue |
+| Postponed | The initiative may be reconsidered later |
+| Needs Research | More information is required |
+| Needs Architecture | The structure must be designed before approval |
+| Needs Legal / Compliance Review | The decision requires additional risk review |
+
+---
+
+## The Role of Collaborators
+
+Collaborators contribute judgment, experience, creativity, ethics, and accountability.
+
+They are responsible for asking the right questions and making sure decisions are aligned with the institution’s values.
+
+---
+
+## The Role of Partners
+
+Partners may support decisions by:
+
+- Researching information
+- Analyzing options
+- Summarizing risks
+- Comparing alternatives
+- Finding related documents
+- Identifying missing knowledge
+- Supporting forecasts and scenarios
+
+Partners may assist decision-making, but they do not replace human accountability.
+
+Final responsibility remains with human leadership.
+
+---
+
+## Decision Documentation Rule
+
+Every major decision must be documented in the correct place.
+
+Examples:
+
+| Decision Type | Documentation Location |
+|--------------|------------------------|
+| Institutional architecture | ADR Folder |
+| Approved knowledge | Knowledge Register |
+| Learning material | AOS University |
+| Repeatable process | SOPs |
+| Strategic direction | Strategy records |
+| Operational performance | Reports |
+| Project execution | Project records |
+
+---
+
+## Decision Framework Principle
+
+> AOS does not decide based only on excitement, profit, or speed.
+>
+> AOS decides based on purpose, responsibility, evidence, alignment, and long-term value.
+
+---
+
+## Decision Rule
+
+No major initiative should move forward unless:
+
+1. The problem is clearly defined.
+2. The beneficiaries are understood.
+3. The path forward is responsible.
+4. The decision is documented.
+5. The decision aligns with the Constitution and Digital DNA.
