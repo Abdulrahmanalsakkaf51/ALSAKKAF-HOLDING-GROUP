@@ -58,7 +58,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-023 | Partner Registry | PREG-001 / Partner_Registry.md | ADR-016, PARTNER-002, POM-001 | Approved |
 | KNOW-024 | Partner Workforce Architecture | PWA-001 / Partner_Workforce_Architecture.md | ADR-017, PARTNER-003, POM-001, PREG-001 | Approved |
 | KNOW-025 | The Librarian Partner Profile | LIB-001 / PARTNER-001_The_Librarian.md | ADR-018, PARTNER-004, PREG-001, POM-001 | Designed |
-
+| KNOW-026 | The Librarian Prompt | LPROMPT-001 / PARTNER-001_The_Librarian_Prompt.md | LIB-001, PREG-001, PARTNER-004 | Draft |
 ---
 
 # Knowledge Principle
