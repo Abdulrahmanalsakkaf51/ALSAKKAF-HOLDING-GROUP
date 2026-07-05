@@ -107,7 +107,7 @@ PRJ-001 should produce:
 
 | Deliverable | Description | Status |
 |------------|-------------|--------|
-| Document Map | A list of key AOS documents and where they are located | Not Started |
+| Document Map | A list of key AOS documents and where they are located | Completed |
 | Librarian Workflow | Step-by-step process for using The Librarian | Not Started |
 | Source Priority Map | Which sources The Librarian should check first | Not Started |
 | Test Questions | A reusable testing set for The Librarian | Completed |
@@ -205,7 +205,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 |--------|------|--------|
 | PRJ-001-T001 | Create Project Register | In Progress |
 | PRJ-001-T002 | Create PRJ-001 project record | In Progress |
-| PRJ-001-T003 | Create Librarian Document Map | Not Started |
+| PRJ-001-T003 | Create Librarian Document Map | Completed |
 | PRJ-001-T004 | Create Librarian Workflow | Not Started |
 | PRJ-001-T005 | Create Tool Requirements | Not Started |
 | PRJ-001-T006 | Prepare Claude build instructions | Not Started |
@@ -220,6 +220,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | Date | Update |
 |------|--------|
 | 2026-07-06 | PRJ-001 created and approved as the first official project. |
+| 2026-07-06 | Librarian Document Map created as the first deliverable of PRJ-001. |
 
 ---
 
