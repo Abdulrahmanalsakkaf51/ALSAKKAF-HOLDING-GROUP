@@ -42,6 +42,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-009 | Knowledge System | Approved | 2026-07-04 |
 | ADR-010 | Decision Framework | Approved | 2026-07-04 |
 | ADR-011 | Technology Architecture | Approved | 2026-07-05 |
+| ADR-012 | Growth Model | Approved | 2026-07-05 |
 
 ---
 

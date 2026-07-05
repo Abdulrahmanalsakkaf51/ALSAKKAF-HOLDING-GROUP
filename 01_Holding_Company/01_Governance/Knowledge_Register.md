@@ -51,6 +51,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-016 | The Librarian | DNA-001 Chapter 5 | AOS-004 | Proposed |
 | KNOW-017 | Decision Framework | DNA-001 Chapter 6 | ADR-010, AOS-005 | Approved |
 | KNOW-018 | Technology Architecture | DNA-001 Chapter 7 | ADR-011, AOS-006 | Approved |
+| KNOW-019 | Growth Model | DNA-001 Chapter 8 | ADR-012, AOS-007 | Approved |
 
 ---
 
