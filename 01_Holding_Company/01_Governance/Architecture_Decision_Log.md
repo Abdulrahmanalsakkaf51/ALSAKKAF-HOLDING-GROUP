@@ -46,6 +46,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-013 | The Mind as Physical and Digital Center | Approved | 2026-07-05 |
 | ADR-014 | Future Evolution | Approved | 2026-07-05 |
 | ADR-015 | Partner Operating Model | Approved | 2026-07-05 |
+| ADR-016 | Partner Registry | Approved | 2026-07-05 |
 
 ---
 
