@@ -52,6 +52,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-017 | Decision Framework | DNA-001 Chapter 6 | ADR-010, AOS-005 | Approved |
 | KNOW-018 | Technology Architecture | DNA-001 Chapter 7 | ADR-011, AOS-006 | Approved |
 | KNOW-019 | Growth Model | DNA-001 Chapter 8 | ADR-012, AOS-007 | Approved |
+| KNOW-020 | The Mind | DNA-001 Chapter 9 | ADR-003, ADR-004, ADR-013, AOS-008, LANG-001 | Approved |
 
 ---
 

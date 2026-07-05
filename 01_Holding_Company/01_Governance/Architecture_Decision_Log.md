@@ -43,6 +43,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-010 | Decision Framework | Approved | 2026-07-04 |
 | ADR-011 | Technology Architecture | Approved | 2026-07-05 |
 | ADR-012 | Growth Model | Approved | 2026-07-05 |
+| ADR-013 | The Mind as Physical and Digital Center | Approved | 2026-07-05 |
 
 ---
 
