@@ -56,7 +56,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-021 | Future Evolution | DNA-001 Chapter 10 | ADR-014, AOS-009 | Approved |
 | KNOW-022 | Partner Operating Model | POM-001 / Partner_Operating_Model.md | ADR-015, PARTNER-001 | Approved |
 | KNOW-023 | Partner Registry | PREG-001 / Partner_Registry.md | ADR-016, PARTNER-002, POM-001 | Approved |
-
+| KNOW-024 | Partner Workforce Architecture | PWA-001 / Partner_Workforce_Architecture.md | ADR-017, PARTNER-003, POM-001, PREG-001 | Approved |
 ---
 
 # Knowledge Principle
