@@ -1,0 +1,88 @@
+{
+  "tool": "Librarian Tool",
+  "version": "0.1",
+  "partner_id": "PARTNER-001",
+  "partner_name": "The Librarian",
+  "entries": [
+    {
+      "keywords": ["aos", "alsakkaf operating system", "operating system"],
+      "answer": "AOS means ALSAKKAF Operating System. It is the internal operating system of ALSAKKAF HOLDING GROUP. It defines how the institution thinks, documents knowledge, makes decisions, organizes projects, uses Partners, and improves over time.",
+      "primary_source": "DNA-001 / 01_Holding_Company/02_Digital_DNA/Digital_DNA.md",
+      "related_sources": ["KNOW-002 — Digital DNA", "KNOW-011 — AOS Network Architecture", "KNOW-012 — AOS Ecosystems", "AOS University / 02_AOS"],
+      "status": "Approved",
+      "recommended_action": "Review Digital_DNA.md, especially Chapters 1–3, to understand the philosophy, architecture, and ecosystems of AOS."
+    },
+    {
+      "keywords": ["digital dna", "where is digital dna", "dna-001"],
+      "answer": "Digital DNA is documented in Digital_DNA.md. It is the main document that defines the ALSAKKAF Operating System, including its philosophy, architecture, ecosystems, lifecycle, knowledge system, decision framework, technology architecture, growth model, The Mind, and future evolution.",
+      "primary_source": "DNA-001 / 01_Holding_Company/02_Digital_DNA/Digital_DNA.md",
+      "related_sources": ["KNOW-002 — Digital DNA", "ADR-001 — Digital DNA", "AOS University / 02_AOS", "Architecture Decision Log"],
+      "status": "Approved",
+      "recommended_action": "Review Digital_DNA.md first, then check KNOW-002 and ADR-001."
+    },
+    {
+      "keywords": ["the mind", "mind defined", "physical mind", "digital mind"],
+      "answer": "The Mind is defined in Digital DNA Chapter 9 — The Mind. It is described as the headquarters, cultural center, coordination center, and symbolic heart of ALSAKKAF HOLDING GROUP. It also has two forms: the Physical Mind, which is the future headquarters, and the Digital Mind, which is AOS.",
+      "primary_source": "DNA-001 / 01_Holding_Company/02_Digital_DNA/Digital_DNA.md — Chapter 9",
+      "related_sources": ["ADR-003 — The Mind", "ADR-004 — The Mind Areas", "ADR-013 — The Mind as Physical and Digital Center", "AOS-008 — The Mind", "LANG-001", "KNOW-020"],
+      "status": "Approved",
+      "recommended_action": "Review Digital_DNA.md Chapter 9 first, then check ADR-013."
+    },
+    {
+      "keywords": ["partner operating model", "pom-001", "what is partner operating model"],
+      "answer": "The Partner Operating Model defines how ALSAKKAF HOLDING GROUP uses Partners inside AOS. It explains what Partners are, how they support the Founder and future collaborators, what authority levels they may have, what boundaries they must follow, and how human accountability remains required.",
+      "primary_source": "POM-001 / 09_AI_Systems/01_Partners/Partner_Operating_Model.md",
+      "related_sources": ["ADR-015 — Partner Operating Model", "PREG-001 — Partner Registry", "PWA-001 — Partner Workforce Architecture", "KNOW-022"],
+      "status": "Approved",
+      "recommended_action": "Review Partner_Operating_Model.md first, then check Partner_Registry.md."
+    },
+    {
+      "keywords": ["partner registry", "adr approved partner registry", "adr-016", "which adr approved the partner registry"],
+      "answer": "The Partner Registry was approved by ADR-016 — Partner Registry. This ADR established the Partner Registry as the official control record for Partners inside AOS.",
+      "primary_source": "ADR-016 / 01_Holding_Company/01_Governance/ADR/ADR-016_Partner_Registry.md",
+      "related_sources": ["PREG-001 / Partner_Registry.md", "PARTNER-002 — Partner Registry", "KNOW-023", "POM-001"],
+      "status": "Approved",
+      "recommended_action": "Review ADR-016, then review Partner_Registry.md."
+    },
+    {
+      "keywords": ["30 partner", "30-partner", "company cell", "partner workforce architecture", "pwa-001"],
+      "answer": "The 30-Partner Company Cell is explained in the Partner Workforce Architecture document. It defines a future company structure with 30 Partners, including a Company Lead Partner, Manager Partners, Supervisor Partners, Worker Partners, Specialist Support Partners, a Reporting Partner, and a Knowledge Partner.",
+      "primary_source": "PWA-001 / 09_AI_Systems/01_Partners/Partner_Workforce_Architecture.md",
+      "related_sources": ["ADR-017 — Partner Workforce Architecture", "PARTNER-003 — Partner Workforce Architecture", "KNOW-024", "POM-001", "PREG-001"],
+      "status": "Approved",
+      "recommended_action": "Review the Standard 30-Partner Company Cell section in PWA-001."
+    },
+    {
+      "keywords": ["librarian allowed", "allowed to do", "what can the librarian do"],
+      "answer": "The Librarian is allowed to help users find, understand, summarize, and reference approved institutional knowledge inside AOS. It may search institutional documents, identify related records, explain where a concept is defined, suggest which file should be reviewed, and help identify missing documentation.",
+      "primary_source": "LIB-001 / 09_AI_Systems/01_Partners/01_Partner_Profiles/PARTNER-001_The_Librarian.md",
+      "related_sources": ["LPROMPT-001 — The Librarian Prompt", "PREG-001 — Partner Registry", "POM-001 — Partner Operating Model", "KNOW-025"],
+      "status": "Active",
+      "recommended_action": "Review the Main Responsibilities, Allowed Tasks, and Authority Level sections in LIB-001."
+    },
+    {
+      "keywords": ["librarian not allowed", "restricted tasks", "what is the librarian not allowed to do"],
+      "answer": "The Librarian is not allowed to approve decisions, create new policy without approval, change official documents by itself, delete institutional records, replace the Knowledge Register, replace human judgment, or present proposed knowledge as approved knowledge.",
+      "primary_source": "LIB-001 / 09_AI_Systems/01_Partners/01_Partner_Profiles/PARTNER-001_The_Librarian.md",
+      "related_sources": ["LPROMPT-001 — The Librarian Prompt", "POM-001 — Partner Operating Model", "PREG-001 — Partner Registry", "KNOW-025"],
+      "status": "Active",
+      "recommended_action": "Review the Restricted Tasks section in LIB-001."
+    },
+    {
+      "keywords": ["new partner", "created partner", "document updated when a new partner is created"],
+      "answer": "When a new Partner is created, the main document that should be updated is the Partner Registry. The Partner Registry is the official control record for all Partners inside AOS. It tracks the Partner ID, name, type, purpose, authority level, status, owner, and related documents.",
+      "primary_source": "PREG-001 / 09_AI_Systems/01_Partners/Partner_Registry.md",
+      "related_sources": ["POM-001 — Partner Operating Model", "PWA-001 — Partner Workforce Architecture", "KNOW-001 — Knowledge Register", "ADR-016 — Partner Registry"],
+      "status": "Approved",
+      "recommended_action": "Add the new Partner to Partner_Registry.md first. If important, create a Partner Profile and update the Knowledge Register."
+    },
+    {
+      "keywords": ["librarian status", "is the librarian active", "designed proposed approved active"],
+      "answer": "The Librarian is currently Active. It passed foundation testing and was activated as the first prompt-based Knowledge Partner inside AOS.",
+      "primary_source": "PREG-001 / 09_AI_Systems/01_Partners/Partner_Registry.md",
+      "related_sources": ["LIB-001 — The Librarian Partner Profile", "LPROMPT-001 — The Librarian Prompt", "LTEST-001 — The Librarian Test Log", "ADR-019 — Activate The Librarian", "KNOW-025"],
+      "status": "Active",
+      "recommended_action": "Use The Librarian for AOS knowledge support, while keeping it limited to Authority Level 1–3."
+    }
+  ]
+}
