@@ -158,9 +158,9 @@ The Librarian should be tested against these documents:
 | Expected Source | PWA-001 / Partner_Workforce_Architecture.md |
 | Expected Related Sources | ADR-017, PARTNER-003, KNOW-024 |
 | Expected Status | Approved |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
+| Actual Answer | The 30-Partner Company Cell is explained in the Partner Workforce Architecture document. It defines a future company structure with 30 Partners, including a Company Lead Partner, Manager Partners, Supervisor Partners, Worker Partners, Specialist Support Partners, a Reporting Partner, and a Knowledge Partner. |
+| Result | Pass |
+| Notes | The Librarian correctly identified PWA-001 as the primary source, included ADR-017, PARTNER-003, KNOW-024, POM-001, and PREG-001 as related sources, confirmed Approved status, and recommended reviewing the Standard 30-Partner Company Cell section. |
 
 ---
 
@@ -172,9 +172,9 @@ The Librarian should be tested against these documents:
 | Expected Source | LIB-001 / PARTNER-001_The_Librarian.md |
 | Expected Related Sources | LPROMPT-001, PREG-001 |
 | Expected Status | Designed |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
+| Actual Answer | The Librarian is allowed to help users find, understand, summarize, and reference approved institutional knowledge inside AOS. It may search institutional documents, identify related records, explain where a concept is defined, suggest which file should be reviewed, and help identify missing documentation. |
+| Result | Pass |
+| Notes | The Librarian correctly identified LIB-001 as the primary source, connected the answer to LPROMPT-001, PREG-001, POM-001, and KNOW-025, confirmed Designed status, and recommended reviewing Main Responsibilities, Allowed Tasks, and Authority Level. |
 
 ---
 
@@ -186,9 +186,9 @@ The Librarian should be tested against these documents:
 | Expected Source | LIB-001 / PARTNER-001_The_Librarian.md |
 | Expected Related Sources | LPROMPT-001, POM-001 |
 | Expected Status | Designed |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
+| Actual Answer | The Librarian is not allowed to approve decisions, create new policy without approval, change official documents by itself, delete institutional records, replace the Knowledge Register, replace human judgment, or present proposed knowledge as approved knowledge. |
+| Result | Pass |
+| Notes | The Librarian correctly identified LIB-001 as the primary source, connected the answer to LPROMPT-001, POM-001, PREG-001, and KNOW-025, confirmed Designed status, and recommended reviewing the Restricted Tasks section. |
 
 ---
 
@@ -200,10 +200,9 @@ The Librarian should be tested against these documents:
 | Expected Source | PREG-001 / Partner_Registry.md |
 | Expected Related Sources | POM-001, PWA-001, Knowledge Register |
 | Expected Status | Approved |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
-
+| Actual Answer | When a new Partner is created, the main document that should be updated is the Partner Registry. The Partner Registry is the official control record for all Partners inside AOS. It tracks the Partner ID, name, type, purpose, authority level, status, owner, and related documents. |
+| Result | Pass |
+| Notes | The Librarian correctly identified PREG-001 as the primary source, connected it to POM-001, PWA-001, KNOW-001, ADR-016, and PARTNER-002, confirmed Approved status, and recommended creating a Partner Profile and updating the Knowledge Register when needed. |
 ---
 
 ## Test 010 — Librarian Status
@@ -214,10 +213,9 @@ The Librarian should be tested against these documents:
 | Expected Source | PREG-001 and LIB-001 |
 | Expected Related Sources | LPROMPT-001, KNOW-025 |
 | Expected Status | Designed |
-| Actual Answer | Pending |
-| Result | Pending |
-| Notes | Pending |
-
+| Actual Answer | The Librarian is currently Designed. It is no longer only proposed because its Partner Profile has been created. However, it is not yet active because it must complete testing before it can move to Active status. |
+| Result | Pass |
+| Notes | The Librarian correctly identified its current status as Designed, explained why it is not only Proposed and not yet Active, connected the answer to PREG-001, LIB-001, LPROMPT-001, LTEST-001, ADR-018, and KNOW-025, and recommended finishing the test log before review. |
 ---
 
 # 5. Pass Criteria
