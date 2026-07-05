@@ -188,7 +188,7 @@ The following sources may be created later:
 |--------------|---------|--------|
 | SOP System | Defines repeatable procedures | Future |
 | Tool Requirements | Requirements for coded Librarian Tool | Future |
-| Librarian Workflow | Step-by-step use process | Future |
+| Librarian Workflow | Step-by-step use process | Draft |
 | Source Priority Map | More detailed source checking rules | Future |
 | Prompt Package | Clean reusable prompt package | Future |
 | Claude Build Instructions | Instructions for coding phase | Future |
