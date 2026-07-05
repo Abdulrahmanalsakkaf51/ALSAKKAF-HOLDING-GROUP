@@ -66,6 +66,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-031 | PRJ-001 Build The Librarian Tool | PRJ-001 / PRJ-001_Build_The_Librarian_Tool.md | LIB-001, LPROMPT-001, LTEST-001, PRJMODEL-001 | Approved |
 | KNOW-032 | Librarian Document Map | LMAP-001 / Librarian_Document_Map.md | PRJ-001, LIB-001, LPROMPT-001 | Draft |
 | KNOW-033 | Librarian Workflow | LWORK-001 / Librarian_Workflow.md | PRJ-001, LIB-001, LMAP-001 | Draft |
+| KNOW-034 | Librarian Tool Requirements | LREQ-001 / Librarian_Tool_Requirements.md | PRJ-001, LIB-001, LWORK-001, LMAP-001 | Draft |
 
 
 ---

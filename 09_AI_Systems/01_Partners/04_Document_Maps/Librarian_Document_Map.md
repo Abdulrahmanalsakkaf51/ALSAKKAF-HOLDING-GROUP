@@ -187,7 +187,7 @@ The following sources may be created later:
 | Future Source | Purpose | Status |
 |--------------|---------|--------|
 | SOP System | Defines repeatable procedures | Future |
-| Tool Requirements | Requirements for coded Librarian Tool | Future |
+| Tool Requirements | Requirements for coded Librarian Tool | Draft |
 | Librarian Workflow | Step-by-step use process | Draft |
 | Source Priority Map | More detailed source checking rules | Future |
 | Prompt Package | Clean reusable prompt package | Future |
