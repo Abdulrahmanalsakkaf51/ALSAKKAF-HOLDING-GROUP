@@ -211,7 +211,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | PRJ-001-T005 | Create Tool Requirements | Completed |
 | PRJ-001-T006 | Prepare Claude build instructions | Completed |
 | PRJ-001-T007 | Build simple prototype | In Progress |
-| PRJ-001-T008 | Test prototype | Not Started |
+| PRJ-001-T008 | Test prototype | In Progress |
 | PRJ-001-T009 | Capture lessons learned | Not Started |
 
 ---
@@ -227,6 +227,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | 2026-07-06 | Librarian Tool Requirements created as the third deliverable of PRJ-001. |
 | 2026-07-06 | Claude Build Instructions created to prepare for the first coded Librarian prototype. |
 | 2026-07-06 | Librarian Tool v0.1 prototype files created. |
+| 2026-07-06 | Prototype Test Log created for Librarian Tool v0.1. |
 
 
 ---
