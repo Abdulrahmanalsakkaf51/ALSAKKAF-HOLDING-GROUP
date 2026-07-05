@@ -50,6 +50,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-017 | Partner Workforce Architecture | Approved | 2026-07-05 |
 | ADR-018 | The Librarian | Approved | 2026-07-05 |
 | ADR-019 | Activate The Librarian | Approved | 2026-07-05 |
+| ADR-020 | Project Operating Model | Approved | 2026-07-06 |
 
 
 ---
