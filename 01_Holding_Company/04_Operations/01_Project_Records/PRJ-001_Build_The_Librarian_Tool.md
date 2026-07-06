@@ -204,8 +204,8 @@ Later, The Librarian may become part of a larger Partner dashboard.
 
 | Task ID | Task | Status |
 |--------|------|--------|
-| PRJ-001-T001 | Create Project Register | In Progress |
-| PRJ-001-T002 | Create PRJ-001 project record | In Progress |
+| PRJ-001-T001 | Create Project Register | Completed |
+| PRJ-001-T002 | Create PRJ-001 project record | Completed |
 | PRJ-001-T003 | Create Librarian Document Map | Completed |
 | PRJ-001-T004 | Create Librarian Workflow | Completed |
 | PRJ-001-T005 | Create Tool Requirements | Completed |
@@ -232,6 +232,8 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | 2026-07-06 | Librarian Tool upgraded from v0.1 to v0.2 with improved search logic, help command, match score, and missing knowledge handling. |
 | 2026-07-06 | Librarian Tool upgraded from v0.2 to v0.3 to fix weak false-positive search matching and improve missing knowledge handling. |
 | 2026-07-06 | Librarian Tool upgraded from v0.3 to v0.4 with Markdown file search support. |
+| 2026-07-06 | PRJ-001 task status corrected: Project Register and PRJ-001 project record marked as Completed. |
+| 2026-07-06 | Librarian Tool v0.4 successfully tested Markdown file search using `search The Mind` and `search PRJ-001`. |
 
 
 ---

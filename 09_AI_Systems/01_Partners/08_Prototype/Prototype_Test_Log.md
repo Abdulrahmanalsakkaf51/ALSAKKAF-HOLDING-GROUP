@@ -258,3 +258,16 @@ During testing, the question:
 ```text
 Tell me about something not documented yet
 
+---
+
+# 12. Version 0.4 Markdown Search Test
+
+## Version 0.4 Improvement
+
+Version 0.4 added Markdown file search support.
+
+The tool can now search real `.md` files inside the project repository using the command:
+
+```text
+search [word or phrase]
+
