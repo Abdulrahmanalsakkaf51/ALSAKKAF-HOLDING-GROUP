@@ -1,4 +1,4 @@
-# Librarian Tool v0.1
+# Librarian Tool v0.2
 
 This is the first local prototype of PARTNER-001 — The Librarian.
 
@@ -59,3 +59,21 @@ It does not yet read all Markdown files automatically.
 It does not edit documents.
 
 It does not approve decisions.
+
+---
+
+## Version 0.2 Improvement
+
+Version 0.2 improves the search logic.
+
+It adds:
+
+- Better keyword matching
+- Match score
+- Help command
+- Suggested related topics when no strong match is found
+
+To see example questions, run the tool and type:
+
+```text
+help

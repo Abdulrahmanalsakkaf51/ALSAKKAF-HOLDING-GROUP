@@ -1,8 +1,10 @@
 import json
+import re
 from pathlib import Path
 
 
 DATA_FILE = Path(__file__).with_name("knowledge_map.json")
+MIN_MATCH_SCORE = 3
 
 
 def load_knowledge_map():
@@ -13,33 +15,64 @@ def load_knowledge_map():
         return json.load(file)
 
 
+def normalize_text(text):
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9\- ]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def tokenize(text):
+    return set(normalize_text(text).split())
+
+
 def score_entry(question, entry):
-    question_lower = question.lower()
+    question_normalized = normalize_text(question)
+    question_tokens = tokenize(question)
+
     score = 0
 
     for keyword in entry.get("keywords", []):
-        keyword_lower = keyword.lower()
-        if keyword_lower in question_lower:
-            score += len(keyword_lower)
+        keyword_normalized = normalize_text(keyword)
+        keyword_tokens = tokenize(keyword)
+
+        if not keyword_normalized:
+            continue
+
+        # Strong score for exact phrase match
+        if keyword_normalized in question_normalized:
+            score += len(keyword_tokens) * 5
+
+        # Medium score for shared words
+        shared_tokens = question_tokens.intersection(keyword_tokens)
+        score += len(shared_tokens) * 2
+
+        # Extra score for IDs like ADR-017, KNOW-024, POM-001
+        if re.search(r"[a-z]+-\d+", keyword_normalized):
+            if keyword_normalized in question_normalized:
+                score += 10
 
     return score
 
 
 def find_best_entry(question, entries):
-    best_entry = None
-    best_score = 0
+    scored_entries = []
 
     for entry in entries:
         score = score_entry(question, entry)
+        scored_entries.append((score, entry))
 
-        if score > best_score:
-            best_score = score
-            best_entry = entry
+    scored_entries.sort(key=lambda item: item[0], reverse=True)
 
-    return best_entry
+    best_score, best_entry = scored_entries[0]
+
+    if best_score < MIN_MATCH_SCORE:
+        return None, best_score, scored_entries[:5]
+
+    return best_entry, best_score, scored_entries[:5]
 
 
-def format_answer(entry):
+def format_answer(entry, score):
     related_sources = entry.get("related_sources", [])
 
     if related_sources:
@@ -62,10 +95,29 @@ Status:
 
 Recommended Action:
 {entry.get("recommended_action", "Review the relevant AOS documents.")}
+
+Match Score:
+{score}
 """.strip()
 
 
-def missing_answer(question):
+def format_suggestions(scored_entries):
+    suggestions = []
+
+    for score, entry in scored_entries:
+        keywords = entry.get("keywords", [])
+        if keywords:
+            suggestions.append(f"- {keywords[0]}")
+
+    if not suggestions:
+        return "No suggestions available."
+
+    return "\n".join(suggestions)
+
+
+def missing_answer(question, scored_entries):
+    suggestions = format_suggestions(scored_entries)
+
     return f"""
 Answer:
 I could not find a strong match for this question in the current Librarian knowledge map.
@@ -82,8 +134,32 @@ Missing / Needs Review
 Recommended Action:
 Add this question or related knowledge to the Librarian Document Map, Knowledge Register, or the correct AOS source document before treating it as institutional knowledge.
 
+Possible Related Topics:
+{suggestions}
+
 Question Asked:
 {question}
+""".strip()
+
+
+def show_help():
+    return """
+Available example questions:
+
+1. What is AOS?
+2. Where is Digital DNA documented?
+3. Where is The Mind defined?
+4. What is the Partner Operating Model?
+5. Which ADR approved the Partner Registry?
+6. Where is the 30-Partner Company Cell explained?
+7. What is The Librarian allowed to do?
+8. What is The Librarian not allowed to do?
+9. Which document should be updated when a new Partner is created?
+10. Is The Librarian active, designed, proposed, or approved?
+
+Commands:
+- help
+- exit
 """.strip()
 
 
@@ -92,10 +168,11 @@ def main():
     entries = data.get("entries", [])
 
     print("=" * 60)
-    print("ALSAKKAF HOLDING GROUP — Librarian Tool v0.1")
+    print("ALSAKKAF HOLDING GROUP — Librarian Tool v0.2")
     print("PARTNER-001 — The Librarian")
     print("=" * 60)
     print("Type your question below.")
+    print("Type 'help' to see example questions.")
     print("Type 'exit' to close.")
     print()
 
@@ -106,19 +183,27 @@ def main():
             print("The Librarian session is closed.")
             break
 
+        if question.lower() == "help":
+            print()
+            print("-" * 60)
+            print(show_help())
+            print("-" * 60)
+            print()
+            continue
+
         if not question:
             print("Please type a question.")
             continue
 
-        entry = find_best_entry(question, entries)
+        entry, score, scored_entries = find_best_entry(question, entries)
 
         print()
         print("-" * 60)
 
         if entry:
-            print(format_answer(entry))
+            print(format_answer(entry, score))
         else:
-            print(missing_answer(question))
+            print(missing_answer(question, scored_entries))
 
         print("-" * 60)
         print()
