@@ -247,3 +247,14 @@ The next improvement should focus on making the tool more useful by improving:
 - Future Markdown file reading
 - Future repository connection
 
+---
+
+# 10. Version 0.3 Regression Test
+
+## Issue Found in Version 0.2
+
+During testing, the question:
+
+```text
+Tell me about something not documented yet
+
