@@ -1,4 +1,4 @@
-# Librarian Tool v0.3
+# Librarian Tool v0.4
 
 
 This is the first local prototype of PARTNER-001 — The Librarian.
@@ -91,4 +91,25 @@ It improves search by:
 - Using the best keyword match instead of adding weak matches together
 - Raising the minimum match score
 - Returning Missing / Needs Review more reliably when knowledge is not documented
+
+---
+
+## Version 0.4 Improvement
+
+Version 0.4 adds Markdown file search.
+
+It adds:
+
+- `search` command
+- Search across project `.md` files
+- File path results
+- Matching line numbers
+- Best matching line preview
+- File search support when no strong knowledge map answer is found
+
+Example:
+
+```text
+search The Mind or search PRJ-001 and it will search within the files.
+
 

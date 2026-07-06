@@ -231,6 +231,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | 2026-07-06 | Librarian Tool v0.1 passed all 10 prototype foundation tests. |
 | 2026-07-06 | Librarian Tool upgraded from v0.1 to v0.2 with improved search logic, help command, match score, and missing knowledge handling. |
 | 2026-07-06 | Librarian Tool upgraded from v0.2 to v0.3 to fix weak false-positive search matching and improve missing knowledge handling. |
+| 2026-07-06 | Librarian Tool upgraded from v0.3 to v0.4 with Markdown file search support. |
 
 
 ---
