@@ -1,4 +1,5 @@
-# Librarian Tool v0.2
+# Librarian Tool v0.3
+
 
 This is the first local prototype of PARTNER-001 — The Librarian.
 
@@ -77,3 +78,17 @@ To see example questions, run the tool and type:
 
 ```text
 help
+
+---
+
+## Version 0.3 Improvement
+
+Version 0.3 fixes weak false-positive matching.
+
+It improves search by:
+
+- Ignoring common words
+- Using the best keyword match instead of adding weak matches together
+- Raising the minimum match score
+- Returning Missing / Needs Review more reliably when knowledge is not documented
+

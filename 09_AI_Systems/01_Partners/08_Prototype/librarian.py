@@ -4,7 +4,14 @@ from pathlib import Path
 
 
 DATA_FILE = Path(__file__).with_name("knowledge_map.json")
-MIN_MATCH_SCORE = 3
+MIN_MATCH_SCORE = 5
+
+STOPWORDS = {
+    "what", "is", "the", "a", "an", "of", "to", "do", "does", "did",
+    "me", "about", "something", "not", "yet", "where", "which", "when",
+    "how", "are", "and", "or", "in", "on", "for", "with", "be", "was",
+    "were", "this", "that", "tell"
+}
 
 
 def load_knowledge_map():
@@ -23,36 +30,55 @@ def normalize_text(text):
 
 
 def tokenize(text):
-    return set(normalize_text(text).split())
+    words = normalize_text(text).split()
+    return {word for word in words if word not in STOPWORDS and len(word) > 1}
+
+
+def score_keyword(question_normalized, question_tokens, keyword):
+    keyword_normalized = normalize_text(keyword)
+    keyword_tokens = tokenize(keyword)
+
+    if not keyword_normalized or not keyword_tokens:
+        return 0
+
+    score = 0
+
+    # Strong score for exact phrase match
+    if keyword_normalized in question_normalized:
+        score += len(keyword_tokens) * 5
+
+    # Medium score for meaningful shared words only
+    shared_tokens = question_tokens.intersection(keyword_tokens)
+    score += len(shared_tokens) * 2
+
+    # Extra score for IDs like ADR-017, KNOW-024, POM-001
+    if re.search(r"[a-z]+-\d+", keyword_normalized):
+        if keyword_normalized in question_normalized:
+            score += 10
+
+    return score
 
 
 def score_entry(question, entry):
     question_normalized = normalize_text(question)
     question_tokens = tokenize(question)
 
-    score = 0
+    if not question_tokens:
+        return 0
+
+    keyword_scores = []
 
     for keyword in entry.get("keywords", []):
-        keyword_normalized = normalize_text(keyword)
-        keyword_tokens = tokenize(keyword)
+        keyword_scores.append(
+            score_keyword(question_normalized, question_tokens, keyword)
+        )
 
-        if not keyword_normalized:
-            continue
+    if not keyword_scores:
+        return 0
 
-        # Strong score for exact phrase match
-        if keyword_normalized in question_normalized:
-            score += len(keyword_tokens) * 5
-
-        # Medium score for shared words
-        shared_tokens = question_tokens.intersection(keyword_tokens)
-        score += len(shared_tokens) * 2
-
-        # Extra score for IDs like ADR-017, KNOW-024, POM-001
-        if re.search(r"[a-z]+-\d+", keyword_normalized):
-            if keyword_normalized in question_normalized:
-                score += 10
-
-    return score
+    # Use best keyword match, not total score.
+    # This prevents weak repeated matches from creating false positives.
+    return max(keyword_scores)
 
 
 def find_best_entry(question, entries):
@@ -63,6 +89,9 @@ def find_best_entry(question, entries):
         scored_entries.append((score, entry))
 
     scored_entries.sort(key=lambda item: item[0], reverse=True)
+
+    if not scored_entries:
+        return None, 0, []
 
     best_score, best_entry = scored_entries[0]
 
@@ -105,12 +134,15 @@ def format_suggestions(scored_entries):
     suggestions = []
 
     for score, entry in scored_entries:
+        if score <= 0:
+            continue
+
         keywords = entry.get("keywords", [])
         if keywords:
             suggestions.append(f"- {keywords[0]}")
 
     if not suggestions:
-        return "No suggestions available."
+        return "No strong suggestions available."
 
     return "\n".join(suggestions)
 
@@ -168,7 +200,7 @@ def main():
     entries = data.get("entries", [])
 
     print("=" * 60)
-    print("ALSAKKAF HOLDING GROUP — Librarian Tool v0.2")
+    print("ALSAKKAF HOLDING GROUP — Librarian Tool v0.3")
     print("PARTNER-001 — The Librarian")
     print("=" * 60)
     print("Type your question below.")
