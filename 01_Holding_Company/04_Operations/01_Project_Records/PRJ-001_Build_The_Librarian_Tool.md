@@ -234,6 +234,7 @@ Later, The Librarian may become part of a larger Partner dashboard.
 | 2026-07-06 | Librarian Tool upgraded from v0.3 to v0.4 with Markdown file search support. |
 | 2026-07-06 | PRJ-001 task status corrected: Project Register and PRJ-001 project record marked as Completed. |
 | 2026-07-06 | Librarian Tool v0.4 successfully tested Markdown file search using `search The Mind` and `search PRJ-001`. |
+| 2026-07-08 | Librarian Tool v0.5 search ranking improvement tested and passed. Official records now rank above test logs unless the Founder is searching for test-related information. |
 
 
 ---

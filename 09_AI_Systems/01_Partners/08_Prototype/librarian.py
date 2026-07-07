@@ -2,16 +2,17 @@ import json
 import re
 from pathlib import Path
 
-
 DATA_FILE = Path(__file__).with_name("knowledge_map.json")
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MIN_MATCH_SCORE = 5
+MAX_FILE_RESULTS = 5
 
 STOPWORDS = {
-    "what", "is", "the", "a", "an", "of", "to", "do", "does", "did",
-    "me", "about", "something", "not", "yet", "where", "which", "when",
-    "how", "are", "and", "or", "in", "on", "for", "with", "be", "was",
-    "were", "this", "that", "tell"
+    "a", "an", "and", "are", "as", "at", "be", "by", "can", "do", "does",
+    "for", "from", "how", "i", "in", "is", "it", "me", "my", "of", "on",
+    "or", "our", "please", "show", "tell", "that", "the", "this", "to",
+    "us", "we", "what", "when", "where", "which", "who", "why", "with",
+    "you", "your", "about"
 }
 
 EXCLUDED_DIRS = {
@@ -22,177 +23,295 @@ EXCLUDED_DIRS = {
     "node_modules"
 }
 
+TEST_INTENT_WORDS = {
+    "test", "testing", "tests", "log", "logs", "prototype", "regression",
+    "passed", "failed", "result", "results"
+}
+
+MISSING_KNOWLEDGE_PATTERNS = {
+    "not documented yet",
+    "not recorded yet",
+    "not in the knowledge map",
+    "not in knowledge map",
+    "unknown topic",
+    "something not documented",
+    "something missing",
+    "missing knowledge"
+}
+
+
+
 
 def load_knowledge_map():
+    """Load the knowledge map safely."""
     if not DATA_FILE.exists():
-        raise FileNotFoundError(f"Missing knowledge map: {DATA_FILE}")
+        print(f"Error: knowledge map not found: {DATA_FILE}")
+        return []
 
-    with DATA_FILE.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with DATA_FILE.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+    except json.JSONDecodeError as error:
+        print(f"Error: knowledge_map.json is not valid JSON: {error}")
+        return []
+
+    if isinstance(data, list):
+        return data
+
+    if isinstance(data, dict):
+        if isinstance(data.get("entries"), list):
+            return data["entries"]
+
+        if isinstance(data.get("knowledge"), list):
+            return data["knowledge"]
+
+        entries = []
+        for key, value in data.items():
+            if isinstance(value, dict):
+                item = dict(value)
+                item.setdefault("topic", key)
+                entries.append(item)
+        return entries
+
+    return []
 
 
 def normalize_text(text):
-    text = text.lower()
-    text = re.sub(r"[^a-z0-9\- ]+", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
+    """Normalize text for matching."""
+    return re.sub(r"\s+", " ", str(text).lower()).strip()
 
 
 def tokenize(text):
-    words = normalize_text(text).split()
+    """Convert text into useful search tokens."""
+    words = re.findall(r"[a-zA-Z0-9_\-]+", normalize_text(text))
     return {word for word in words if word not in STOPWORDS and len(word) > 1}
 
 
-def score_keyword(question_normalized, question_tokens, keyword):
-    keyword_normalized = normalize_text(keyword)
-    keyword_tokens = tokenize(keyword)
+def has_test_intent(query):
+    """Detect if the user is intentionally searching for tests or logs."""
+    return bool(tokenize(query).intersection(TEST_INTENT_WORDS))
 
-    if not keyword_normalized or not keyword_tokens:
+def is_missing_knowledge_request(query):
+    """Detect when the user is intentionally asking for missing/unknown knowledge."""
+    query_norm = normalize_text(query)
+    return any(pattern in query_norm for pattern in MISSING_KNOWLEDGE_PATTERNS)
+
+
+
+
+def safe_list(value):
+    """Return a clean list from a string/list/other value."""
+    if value is None:
+        return []
+
+    if isinstance(value, list):
+        return [str(item) for item in value]
+
+    if isinstance(value, str):
+        return [value]
+
+    return [str(value)]
+
+
+def entry_text(entry):
+    """Combine important entry fields for scoring."""
+    parts = [
+        entry.get("topic", ""),
+        entry.get("title", ""),
+        entry.get("question", ""),
+        entry.get("answer", ""),
+        entry.get("primary_source", ""),
+        entry.get("source", ""),
+        entry.get("status", ""),
+        entry.get("recommended_action", "")
+    ]
+
+    parts.extend(safe_list(entry.get("keywords")))
+    parts.extend(safe_list(entry.get("related_sources")))
+
+    return " ".join(str(part) for part in parts if part)
+
+
+def score_keyword(query, keyword):
+    """Score one keyword against the query."""
+    query_norm = normalize_text(query)
+    keyword_norm = normalize_text(keyword)
+
+    if not keyword_norm:
         return 0
 
+    if query_norm == keyword_norm:
+        return 20
+
+    if query_norm in keyword_norm or keyword_norm in query_norm:
+        return 12
+
+    query_tokens = tokenize(query_norm)
+    keyword_tokens = tokenize(keyword_norm)
+
+    if not query_tokens or not keyword_tokens:
+        return 0
+
+    shared = query_tokens.intersection(keyword_tokens)
+    return len(shared) * 5
+
+
+def score_entry(query, entry):
+    """Score a knowledge-map entry."""
     score = 0
+    query_norm = normalize_text(query)
+    query_tokens = tokenize(query)
 
-    if keyword_normalized in question_normalized:
-        score += len(keyword_tokens) * 5
+    topic = normalize_text(entry.get("topic", entry.get("title", "")))
+    if topic:
+        if query_norm == topic:
+            score += 25
+        elif query_norm in topic or topic in query_norm:
+            score += 15
 
-    shared_tokens = question_tokens.intersection(keyword_tokens)
-    score += len(shared_tokens) * 2
+    for keyword in safe_list(entry.get("keywords")):
+        score += score_keyword(query, keyword)
 
-    if re.search(r"[a-z]+-\d+", keyword_normalized):
-        if keyword_normalized in question_normalized:
-            score += 10
+    full_text = normalize_text(entry_text(entry))
+    if query_norm and query_norm in full_text:
+        score += 8
+
+    entry_tokens = tokenize(full_text)
+    shared = query_tokens.intersection(entry_tokens)
+    score += len(shared) * 2
 
     return score
 
 
-def score_entry(question, entry):
-    question_normalized = normalize_text(question)
-    question_tokens = tokenize(question)
-
-    if not question_tokens:
-        return 0
-
-    keyword_scores = []
-
-    for keyword in entry.get("keywords", []):
-        keyword_scores.append(
-            score_keyword(question_normalized, question_tokens, keyword)
-        )
-
-    if not keyword_scores:
-        return 0
-
-    return max(keyword_scores)
-
-
-def find_best_entry(question, entries):
-    scored_entries = []
+def find_best_entry(query, entries):
+    """Find the best knowledge-map answer."""
+    best_entry = None
+    best_score = 0
 
     for entry in entries:
-        score = score_entry(question, entry)
-        scored_entries.append((score, entry))
+        if not isinstance(entry, dict):
+            continue
 
-    scored_entries.sort(key=lambda item: item[0], reverse=True)
+        score = score_entry(query, entry)
+        if score > best_score:
+            best_entry = entry
+            best_score = score
 
-    if not scored_entries:
-        return None, 0, []
+    if best_entry is None or best_score < MIN_MATCH_SCORE:
+        return None, best_score
 
-    best_score, best_entry = scored_entries[0]
+    return best_entry, best_score
 
-    if best_score < MIN_MATCH_SCORE:
-        return None, best_score, scored_entries[:5]
 
-    return best_entry, best_score, scored_entries[:5]
+def format_sources(value):
+    """Format source lists cleanly."""
+    sources = safe_list(value)
+    if not sources:
+        return "None recorded"
+    return ", ".join(sources)
 
 
 def format_answer(entry, score):
+    """Format a knowledge-map answer."""
+    answer = entry.get("answer", "No answer recorded.")
+    primary_source = entry.get("primary_source", entry.get("source", "No primary source recorded."))
     related_sources = entry.get("related_sources", [])
-
-    if related_sources:
-        related_text = "\n".join(f"- {source}" for source in related_sources)
-    else:
-        related_text = "None listed."
+    status = entry.get("status", "No status recorded.")
+    recommended_action = entry.get("recommended_action", "No recommended action recorded.")
 
     return f"""
 Answer:
-{entry.get("answer", "No answer available.")}
+{answer}
 
 Primary Source:
-{entry.get("primary_source", "Missing")}
+{primary_source}
 
 Related Sources:
-{related_text}
+{format_sources(related_sources)}
 
 Status:
-{entry.get("status", "Needs Review")}
+{status}
 
 Recommended Action:
-{entry.get("recommended_action", "Review the relevant AOS documents.")}
+{recommended_action}
 
 Match Score:
 {score}
 """.strip()
 
 
-def format_suggestions(scored_entries):
-    suggestions = []
+def format_suggestions(entries):
+    """Suggest available topics when no answer is found."""
+    topics = []
+    for entry in entries:
+        if isinstance(entry, dict):
+            topic = entry.get("topic") or entry.get("title")
+            if topic:
+                topics.append(str(topic))
 
-    for score, entry in scored_entries:
-        if score <= 0:
-            continue
+    if not topics:
+        return "No available topics found in knowledge_map.json."
 
-        keywords = entry.get("keywords", [])
-        if keywords:
-            suggestions.append(f"- {keywords[0]}")
-
-    if not suggestions:
-        return "No strong suggestions available."
-
-    return "\n".join(suggestions)
+    preview = topics[:10]
+    return "\n".join(f"- {topic}" for topic in preview)
 
 
 def should_skip_path(path):
+    """Skip unwanted directories."""
     return any(part in EXCLUDED_DIRS for part in path.parts)
 
 
 def read_text_file(path):
+    """Read a Markdown file safely."""
     try:
-        return path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
         return path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return ""
 
 
 def score_text_search(query, text):
-    query_normalized = normalize_text(query)
+    """Score raw Markdown file content."""
+    query_norm = normalize_text(query)
     query_tokens = tokenize(query)
-    text_normalized = normalize_text(text)
+    text_norm = normalize_text(text)
+    text_tokens = tokenize(text)
 
     if not query_tokens:
         return 0
 
     score = 0
 
-    if query_normalized and query_normalized in text_normalized:
-        score += 20
+    if query_norm and query_norm in text_norm:
+        score += 30
+
+    shared = query_tokens.intersection(text_tokens)
+    score += len(shared) * 8
 
     for token in query_tokens:
-        count = text_normalized.count(token)
-        score += min(count, 10) * 2
-
-    if re.search(r"[a-z]+-\d+", query_normalized):
-        if query_normalized in text_normalized:
-            score += 25
+        occurrences = text_norm.count(token)
+        score += min(occurrences, 10)
 
     return score
 
 
-def find_best_line(query, lines):
-    best_score = 0
-    best_line_number = 1
+def find_best_line(query, text):
+    """Find the best matching line in a Markdown file."""
+    query_tokens = tokenize(query)
+    best_line_number = 0
     best_line = ""
+    best_score = 0
 
-    for index, line in enumerate(lines, start=1):
-        score = score_text_search(query, line)
+    for index, line in enumerate(text.splitlines(), start=1):
+        line_norm = normalize_text(line)
+        line_tokens = tokenize(line)
+
+        if not line_tokens:
+            continue
+
+        score = len(query_tokens.intersection(line_tokens)) * 10
+
+        if normalize_text(query) and normalize_text(query) in line_norm:
+            score += 30
 
         if score > best_score:
             best_score = score
@@ -202,33 +321,113 @@ def find_best_line(query, lines):
     return best_line_number, best_line, best_score
 
 
-def search_markdown_files(query, limit=5):
+def get_path_priority(relative_path, query):
+    """
+    Rank official company sources above lower-priority notes/test logs.
+
+    This is the main v0.5 improvement.
+    """
+    path_text = str(relative_path).replace("\\", "/").lower()
+    filename = Path(relative_path).name.lower()
+    test_intent = has_test_intent(query)
+
+    priority = 0
+
+    if filename == "knowledge_register.md":
+        priority += 45
+
+    if filename == "digital_dna.md":
+        priority += 40
+
+    if filename in {
+        "company_constitution.md",
+        "company_language_standard.md",
+        "architecture_decision_log.md",
+        "vision.md"
+    }:
+        priority += 35
+
+    if "/01_governance/adr/" in path_text:
+        priority += 30
+
+    if filename in {
+        "partner_registry.md",
+        "project_register.md",
+        "partner_operating_model.md",
+        "partner_workforce_architecture.md",
+        "project_operating_model.md"
+    }:
+        priority += 30
+
+    if "/04_operations/01_project_records/" in path_text:
+        priority += 28
+
+    if "/01_partner_profiles/" in path_text:
+        priority += 24
+
+    if "/05_workflows/" in path_text:
+        priority += 22
+
+    if "/02_partner_prompts/" in path_text:
+        priority += 12
+
+    if "/07_aos_university/" in path_text:
+        priority += 18
+
+    if "/08_prototype/" in path_text:
+        priority += 5
+
+    is_test_log = (
+        "/03_test_logs/" in path_text
+        or "test_log" in filename
+        or "test-log" in filename
+        or "prototype_test_log" in filename
+    )
+
+    if is_test_log and test_intent:
+        priority += 35
+    elif is_test_log:
+        priority -= 35
+
+    return priority
+
+
+def search_markdown_files(query, limit=MAX_FILE_RESULTS):
+    """Search Markdown files and rank by content score + source priority."""
     results = []
+
+    if not REPO_ROOT.exists():
+        return results
 
     for path in REPO_ROOT.rglob("*.md"):
         if should_skip_path(path):
             continue
 
-        try:
-            text = read_text_file(path)
-        except OSError:
+        text = read_text_file(path)
+        if not text.strip():
             continue
-
-        file_score = score_text_search(query, text)
-
-        if file_score <= 0:
-            continue
-
-        lines = text.splitlines()
-        line_number, best_line, line_score = find_best_line(query, lines)
 
         relative_path = path.relative_to(REPO_ROOT)
+        content_score = score_text_search(query, text)
+
+        if content_score <= 0:
+            continue
+
+        line_number, best_line, line_score = find_best_line(query, text)
+        priority_score = get_path_priority(relative_path, query)
+        total_score = content_score + priority_score + line_score
+
+        if total_score < MIN_MATCH_SCORE:
+            continue
 
         results.append({
             "path": str(relative_path),
-            "score": file_score,
             "line_number": line_number,
-            "best_line": best_line
+            "best_line": best_line,
+            "content_score": content_score,
+            "priority_score": priority_score,
+            "line_score": line_score,
+            "score": total_score
         })
 
     results.sort(key=lambda item: item["score"], reverse=True)
@@ -236,143 +435,129 @@ def search_markdown_files(query, limit=5):
 
 
 def format_file_search_results(results):
+    """Format Markdown search results."""
     if not results:
-        return """
-File Search:
-No matching Markdown files were found.
-""".strip()
+        return "No matching Markdown files found."
 
-    output = ["File Search Results:"]
+    lines = []
+    for index, result in enumerate(results, start=1):
+        lines.append(f"{index}. {result['path']}")
+        lines.append(f"   Line: {result['line_number']}")
+        lines.append(f"   Match Score: {result['score']}")
+        lines.append(f"   Source Priority: {result['priority_score']}")
+        lines.append(f"   Best Line: {result['best_line']}")
+        lines.append("")
 
-    for result in results:
-        output.append("")
-        output.append(f"- File: {result['path']}")
-        output.append(f"  Line: {result['line_number']}")
-        output.append(f"  Match Score: {result['score']}")
-        if result["best_line"]:
-            output.append(f"  Best Match: {result['best_line']}")
-
-    return "\n".join(output)
+    return "\n".join(lines).strip()
 
 
-def missing_answer(question, scored_entries):
-    suggestions = format_suggestions(scored_entries)
-    file_results = search_markdown_files(question)
-    file_results_text = format_file_search_results(file_results)
+def missing_answer(query, entries):
+    """Return a safe missing-answer response with possible file matches."""
+    file_results = search_markdown_files(query)
 
     return f"""
 Answer:
-I could not find a strong match for this question in the current Librarian knowledge map.
+I could not find a confirmed answer in the knowledge map.
 
 Primary Source:
-Missing
+No confirmed primary source found in knowledge_map.json.
 
 Related Sources:
-None identified from the knowledge map.
+Possible Markdown file matches:
+{format_file_search_results(file_results)}
 
 Status:
 Missing / Needs Review
 
 Recommended Action:
-Review the file search results below. If the knowledge exists, add it to the Librarian knowledge map or Knowledge Register. If it does not exist, document it before treating it as institutional knowledge.
+Review the possible file matches above. If one of them is correct, update knowledge_map.json or the relevant AOS record so The Librarian can answer this more confidently in the future.
 
-Possible Related Topics:
-{suggestions}
-
-{file_results_text}
-
-Question Asked:
-{question}
+Available Knowledge Map Topics:
+{format_suggestions(entries)}
 """.strip()
 
 
 def show_help():
+    """Show available commands."""
     return """
-Available example questions:
+Available commands:
 
-1. What is AOS?
-2. Where is Digital DNA documented?
-3. Where is The Mind defined?
-4. What is the Partner Operating Model?
-5. Which ADR approved the Partner Registry?
-6. Where is the 30-Partner Company Cell explained?
-7. What is The Librarian allowed to do?
-8. What is The Librarian not allowed to do?
-9. Which document should be updated when a new Partner is created?
-10. Is The Librarian active, designed, proposed, or approved?
+1. Ask a normal question
+Example:
+What is AOS?
 
-Commands:
-- help
-- search [word or phrase]
-- exit
-
-Examples:
+2. Search Markdown files
+Example:
 search The Mind
 search PRJ-001
-search Partner Registry
+search Librarian test
+
+3. Show help
+help
+
+4. Exit
+exit
+
+Version:
+The Librarian Tool v0.5
+
+Main v0.5 Improvement:
+Official company records are ranked above test logs unless the user is clearly searching for tests or logs.
 """.strip()
 
 
 def main():
-    data = load_knowledge_map()
-    entries = data.get("entries", [])
+    """Run the Librarian Tool."""
+    entries = load_knowledge_map()
 
-    print("=" * 60)
-    print("ALSAKKAF HOLDING GROUP — Librarian Tool v0.4")
-    print("PARTNER-001 — The Librarian")
-    print("=" * 60)
-    print("Type your question below.")
-    print("Type 'help' to see example questions.")
-    print("Type 'search [word or phrase]' to search Markdown files.")
-    print("Type 'exit' to close.")
+    print("The Librarian Tool v0.5")
+    print("Type 'help' for commands or 'exit' to close.")
     print()
 
     while True:
-        question = input("Ask The Librarian: ").strip()
+        query = input("Ask The Librarian: ").strip()
 
-        if question.lower() in ["exit", "quit", "close"]:
-            print("The Librarian session is closed.")
+        if not query:
+            continue
+
+        if query.lower() in {"exit", "quit"}:
+            print("Closing The Librarian.")
             break
 
-        if question.lower() == "help":
+        if query.lower() == "help":
             print()
-            print("-" * 60)
             print(show_help())
-            print("-" * 60)
             print()
             continue
 
-        if question.lower().startswith("search "):
-            search_query = question[7:].strip()
-
-            print()
-            print("-" * 60)
+        if query.lower().startswith("search "):
+            search_query = query[7:].strip()
 
             if not search_query:
-                print("Please type something after 'search'.")
-            else:
-                results = search_markdown_files(search_query)
-                print(format_file_search_results(results))
+                print("Please write what you want to search for after 'search'.")
+                print()
+                continue
 
-            print("-" * 60)
+            results = search_markdown_files(search_query)
+            print()
+            print("Markdown Search Results:")
+            print(format_file_search_results(results))
             print()
             continue
 
-        if not question:
-            print("Please type a question.")
+        print()
+
+        if is_missing_knowledge_request(query):
+            print(missing_answer(query, entries))
+            print()
             continue
 
-        entry, score, scored_entries = find_best_entry(question, entries)
+        best_entry, score = find_best_entry(query, entries)
 
-        print()
-        print("-" * 60)
-
-        if entry:
-            print(format_answer(entry, score))
+        if best_entry:
+            print(format_answer(best_entry, score))
         else:
-            print(missing_answer(question, scored_entries))
-
-        print("-" * 60)
+            print(missing_answer(query, entries))
         print()
 
 

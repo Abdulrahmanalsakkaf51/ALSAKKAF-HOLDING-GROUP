@@ -271,3 +271,56 @@ The tool can now search real `.md` files inside the project repository using the
 ```text
 search [word or phrase]
 
+---
+
+# v0.5 Test — Search Ranking Improvement
+
+## Test Date
+
+2026-07-08
+
+## Version Tested
+
+The Librarian Tool v0.5
+
+## Purpose
+
+Test whether The Librarian Tool v0.5 correctly ranks official company records above test logs, unless the Founder is intentionally searching for tests or logs.
+
+## Test Commands
+
+| Test | Command | Expected Result | Result |
+|------|---------|-----------------|--------|
+| 1 | help | Show v0.5 help and commands | Passed |
+| 2 | search The Mind | Official records appear before test logs | Passed |
+| 3 | search PRJ-001 | Knowledge Register and project records appear before test logs | Passed |
+| 4 | search Librarian test | Test logs are allowed to rank higher because the query has test intent | Passed |
+| 5 | What is AOS? | Knowledge map answer works normally | Passed |
+| 6 | Tell me about something not documented yet | Returns Missing / Needs Review | Passed |
+
+## Results
+
+The v0.5 ranking improvement worked successfully.
+
+The search results for `search The Mind` prioritized official records including:
+
+- Digital DNA
+- Knowledge Register
+- Company Language Standard
+- Architecture Decision Log
+- ADR-013
+
+The search results for `search PRJ-001` prioritized official records including:
+
+- Knowledge Register
+- PRJ-001 project record
+- Project Operating Model
+- Project Register
+- ADR-020
+
+The search results for `search Librarian test` correctly allowed test-related sources to appear because the query clearly requested testing information.
+
+The missing knowledge test was corrected after an initial false match. The query:
+
+```text
+Tell me about something not documented yet
