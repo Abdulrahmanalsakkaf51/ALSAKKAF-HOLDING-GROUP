@@ -70,6 +70,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-035 | Claude Build Instructions | LBUILD-001 / Claude_Build_Instructions.md | PRJ-001, LREQ-001, LWORK-001, LMAP-001 | Draft |
 | KNOW-036 | Librarian Tool v0.4 Prototype | 09_AI_Systems/01_Partners/08_Prototype | PRJ-001, LIB-001, LREQ-001, LBUILD-001 | Working Prototype |
 | KNOW-037 | Librarian Tool Prototype Test Log | LPROTO-TEST-001 / Prototype_Test_Log.md | PRJ-001, KNOW-036, LREQ-001, LBUILD-001 | Passed |
+| KNOW-039 | Atlas Founder Executive Partner | ATLAS-001 / PARTNER-002_Atlas.md | ADR-021, PARTNER-005, PREG-001, POM-001 | Designed |
 
 
 
