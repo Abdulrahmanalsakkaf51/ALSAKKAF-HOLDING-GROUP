@@ -63,7 +63,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-028 | The Librarian Activation | ADR-019 / Activate The Librarian | LIB-001, LTEST-001, PREG-001 | Approved |
 | KNOW-029 | Project Operating Model | PRJMODEL-001 / Project_Operating_Model.md | ADR-020, PROJECT-001 | Approved |
 | KNOW-030 | Project Register | PRJREG-001 / Project_Register.md | PRJMODEL-001, PRJ-001 | Approved |
-| KNOW-031 | PRJ-001 Build The Librarian Tool | PRJ-001 / PRJ-001_Build_The_Librarian_Tool.md | LIB-001, LPROMPT-001, LTEST-001, PRJMODEL-001 | Approved |
+| KNOW-031 | PRJ-001 Build The Librarian Tool | PRJ-001 / PRJ-001_Build_The_Librarian_Tool.md | LIB-001, LPROMPT-001, LTEST-001, LPROTO-TEST-001, PRJLESSON-001, PRJMODEL-001 | Completed |
 | KNOW-032 | Librarian Document Map | LMAP-001 / Librarian_Document_Map.md | PRJ-001, LIB-001, LPROMPT-001 | Draft |
 | KNOW-033 | Librarian Workflow | LWORK-001 / Librarian_Workflow.md | PRJ-001, LIB-001, LMAP-001 | Draft |
 | KNOW-034 | Librarian Tool Requirements | LREQ-001 / Librarian_Tool_Requirements.md | PRJ-001, LIB-001, LWORK-001, LMAP-001 | Draft |
@@ -76,6 +76,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-042 | Atlas Activation | ADR-022 / Activate Atlas | ATLAS-001, APROMPT-001, ATEST-001, PREG-001 | Approved |
 | KNOW-043 | Atlas Daily Briefing Workflow | ABRIEF-001 / Atlas_Daily_Briefing_Workflow.md | ATLAS-001, APROMPT-001, ATEST-001, ADR-022 | Active |
 | KNOW-044 | PRJ-001 Lessons Learned | PRJLESSON-001 / PRJ-001_Lessons_Learned.md | PRJ-001, KNOW-036, KNOW-037, LIB-001 | Approved |
+| KNOW-045 | PRJ-001 Completion | PRJ-001 Completion / PRJ-001_Build_The_Librarian_Tool.md | PRJ-001, PRJLESSON-001, KNOW-036, KNOW-037, KNOW-044 | Completed |
 
 
 ---

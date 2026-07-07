@@ -63,7 +63,7 @@ No official project should exist without a Project Register entry.
 
 | Project ID | Project Name | Type | Purpose | Status | Owner | Supporting Partners | Related Records |
 |------------|--------------|------|---------|--------|-------|---------------------|-----------------|
-| PRJ-001 | Build The Librarian Tool | Partner / Technology Project | Turn The Librarian from a prompt-based Partner into a practical working knowledge tool | Active | CEO | The Librarian, Technology Partner, Project Partner | LIB-001, LPROMPT-001, LTEST-001, PRJMODEL-001 |
+| PRJ-001 | Build The Librarian Tool | Partner / Technology Project | Turn The Librarian from a prompt-based Partner into a practical working knowledge tool | Completed | CEO | The Librarian, Technology Partner, Project Partner | LIB-001, LPROMPT-001, LTEST-001, LPROTO-TEST-001, PRJLESSON-001, PRJMODEL-001 |
 
 ---
 
