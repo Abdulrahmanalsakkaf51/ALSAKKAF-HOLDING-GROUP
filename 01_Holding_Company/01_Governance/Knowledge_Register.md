@@ -74,6 +74,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-040 | Atlas Prompt | APROMPT-001 / PARTNER-002_Atlas_Prompt.md | ATLAS-001, ADR-021, PARTNER-005, PREG-001 | Draft |
 | KNOW-041 | Atlas Test Log | ATEST-001 / PARTNER-002_Atlas_Test_Log.md | ATLAS-001, APROMPT-001, ADR-021, PREG-001 | Passed |
 | KNOW-042 | Atlas Activation | ADR-022 / Activate Atlas | ATLAS-001, APROMPT-001, ATEST-001, PREG-001 | Approved |
+| KNOW-043 | Atlas Daily Briefing Workflow | ABRIEF-001 / Atlas_Daily_Briefing_Workflow.md | ATLAS-001, APROMPT-001, ATEST-001, ADR-022 | Active |
 
 
 ---
