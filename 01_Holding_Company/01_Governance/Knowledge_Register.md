@@ -72,6 +72,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-037 | Librarian Tool Prototype Test Log | LPROTO-TEST-001 / Prototype_Test_Log.md | PRJ-001, KNOW-036, LREQ-001, LBUILD-001 | Passed |
 | KNOW-039 | Atlas Founder Executive Partner | ATLAS-001 / PARTNER-002_Atlas.md | ADR-021, PARTNER-005, PREG-001, POM-001 | Designed |
 | KNOW-040 | Atlas Prompt | APROMPT-001 / PARTNER-002_Atlas_Prompt.md | ATLAS-001, ADR-021, PARTNER-005, PREG-001 | Draft |
+| KNOW-041 | Atlas Test Log | ATEST-001 / PARTNER-002_Atlas_Test_Log.md | ATLAS-001, APROMPT-001, ADR-021, PREG-001 | Draft |
 
 
 ---
