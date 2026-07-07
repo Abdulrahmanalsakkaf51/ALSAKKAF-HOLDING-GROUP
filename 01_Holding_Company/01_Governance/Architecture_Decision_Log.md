@@ -52,6 +52,7 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-019 | Activate The Librarian | Approved | 2026-07-05 |
 | ADR-020 | Project Operating Model | Approved | 2026-07-06 |
 | ADR-021 | Atlas Founder Executive Partner | Approved | 2026-07-06 |
+| ADR-022 | Activate Atlas | Approved | 2026-07-08 |
 
 
 ---

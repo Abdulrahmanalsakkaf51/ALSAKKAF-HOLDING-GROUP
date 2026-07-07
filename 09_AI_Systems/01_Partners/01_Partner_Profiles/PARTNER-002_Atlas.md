@@ -14,7 +14,7 @@
 | Partner ID | PARTNER-002 |
 | Partner Name | Atlas |
 | Partner Type | Founder Executive Partner |
-| Status | Designed |
+| Status | Active |
 | Version | 1.0 |
 | Owner | Abdulrahman Alsakkaf |
 | Authority Level | Level 1–3 |
