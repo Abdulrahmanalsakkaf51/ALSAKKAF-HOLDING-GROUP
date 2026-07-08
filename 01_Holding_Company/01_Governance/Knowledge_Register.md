@@ -77,6 +77,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-043 | Atlas Daily Briefing Workflow | ABRIEF-001 / Atlas_Daily_Briefing_Workflow.md | ATLAS-001, APROMPT-001, ATEST-001, ADR-022 | Active |
 | KNOW-044 | PRJ-001 Lessons Learned | PRJLESSON-001 / PRJ-001_Lessons_Learned.md | PRJ-001, KNOW-036, KNOW-037, LIB-001 | Approved |
 | KNOW-045 | PRJ-001 Completion | PRJ-001 Completion / PRJ-001_Build_The_Librarian_Tool.md | PRJ-001, PRJLESSON-001, KNOW-036, KNOW-037, KNOW-044 | Completed |
+| KNOW-046 | PRJ-002 Build Atlas Daily Briefing System | PRJ-002 / PRJ-002_Build_Atlas_Daily_Briefing_System.md | ATLAS-001, ABRIEF-001, ADR-022, PRJMODEL-001 | Active |
 
 
 ---

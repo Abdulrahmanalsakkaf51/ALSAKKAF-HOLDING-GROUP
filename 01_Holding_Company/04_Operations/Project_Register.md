@@ -64,6 +64,7 @@ No official project should exist without a Project Register entry.
 | Project ID | Project Name | Type | Purpose | Status | Owner | Supporting Partners | Related Records |
 |------------|--------------|------|---------|--------|-------|---------------------|-----------------|
 | PRJ-001 | Build The Librarian Tool | Partner / Technology Project | Turn The Librarian from a prompt-based Partner into a practical working knowledge tool | Completed | CEO | The Librarian, Technology Partner, Project Partner | LIB-001, LPROMPT-001, LTEST-001, LPROTO-TEST-001, PRJLESSON-001, PRJMODEL-001 |
+| PRJ-002 | Build Atlas Daily Briefing System | Partner / Founder Support Project | Turn Atlas Daily Briefing from an approved workflow into a practical working Founder support system | Active | CEO | Atlas, The Librarian, Project Partner | ATLAS-001, APROMPT-001, ATEST-001, ABRIEF-001, ADR-022, PRJMODEL-001 |
 
 ---
 
