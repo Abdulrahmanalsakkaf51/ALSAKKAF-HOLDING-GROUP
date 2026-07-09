@@ -150,7 +150,7 @@ Atlas may not:
 | Atlas Daily Briefing Source Map | Defines what sources Atlas checks | Completed |
 | Atlas Daily Briefing Template | Standard briefing template | Completed |
 | Atlas Daily Briefing Test Log | Records daily briefing tests | Completed |
-| Atlas Daily Briefing Lessons Learned | Captures what the company learns | Not Started |
+| Atlas Daily Briefing Lessons Learned | Captures what the company learns | Completed |
 | Project Completion Decision | Decides whether PRJ-002 is complete or needs a tool build | Not Started |
 
 ---
@@ -165,7 +165,7 @@ Atlas may not:
 | PRJ-002-T004 | Create Atlas Daily Briefing Template | Completed |
 | PRJ-002-T005 | Create Atlas Daily Briefing Test Log | Completed |
 | PRJ-002-T006 | Test Atlas Daily Briefing | Completed |
-| PRJ-002-T007 | Capture lessons learned | Not Started |
+| PRJ-002-T007 | Capture lessons learned | Completed |
 | PRJ-002-T008 | Decide whether to complete PRJ-002 or build a tool version | Not Started |
 
 ---
@@ -210,6 +210,7 @@ PRJ-002 is successful if:
 | 2026-07-09 | Atlas Daily Briefing Template created as ATEMPLATE-001. |
 | 2026-07-09 | Atlas Daily Briefing Test Log created as ABRIEFTEST-001. |
 | 2026-07-09 | Atlas Daily Briefing manual tests ABRIEF-T001 to ABRIEF-T010 passed. |
+| 2026-07-09 | PRJ-002 lessons learned were documented in PRJLESSON-002. |
 
 
 ---
