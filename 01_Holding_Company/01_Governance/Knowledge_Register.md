@@ -84,6 +84,9 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-050 | PRJ-002 Lessons Learned | PRJLESSON-002 / PRJ-002_Lessons_Learned.md | PRJ-002, ABRIEF-001, ASMAP-001, ATEMPLATE-001, ABRIEFTEST-001 | Approved |
 | KNOW-051 | PRJ-002 Completion | PRJ-002 Completion / PRJ-002_Build_Atlas_Daily_Briefing_System.md | PRJ-002, PRJLESSON-002, ABRIEFTEST-001, ATEMPLATE-001, ASMAP-001 | Completed |
 | KNOW-052 | PRJ-003 Build Markdown Audit Tool | PRJ-003 / PRJ-003_Build_Markdown_Audit_Tool.md | PRJ-001, PRJ-002, PRJMODEL-001 | Active |
+| KNOW-053 | Markdown Audit Tool Requirements | MAREQ-001 / Markdown_Audit_Tool_Requirements.md | PRJ-003, KNOW-052, PRJMODEL-001 | Approved |
+
+
 
 ---
 

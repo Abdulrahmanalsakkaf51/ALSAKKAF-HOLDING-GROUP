@@ -123,7 +123,7 @@ The Markdown Audit Tool may not:
 
 | Deliverable | Description | Status |
 |-------------|-------------|--------|
-| Markdown Audit Tool Requirements | Defines what the tool should check | Not Started |
+| Markdown Audit Tool Requirements | Defines what the tool should check | Completed |
 | Markdown Audit Tool Prototype | Local Python tool | Not Started |
 | Markdown Audit Test Log | Records tool test results | Not Started |
 | Markdown Audit Lessons Learned | Captures what the company learns | Not Started |
@@ -137,7 +137,7 @@ The Markdown Audit Tool may not:
 |---------|------|--------|
 | PRJ-003-T001 | Create PRJ-003 project record | Completed |
 | PRJ-003-T002 | Add PRJ-003 to Project Register | Completed |
-| PRJ-003-T003 | Create Markdown Audit Tool Requirements | Not Started |
+| PRJ-003-T003 | Create Markdown Audit Tool Requirements | Completed |
 | PRJ-003-T004 | Build Markdown Audit Tool prototype | Not Started |
 | PRJ-003-T005 | Test Markdown Audit Tool | Not Started |
 | PRJ-003-T006 | Record test results | Not Started |
@@ -182,6 +182,8 @@ PRJ-003 is successful if:
 | Date | Progress |
 |------|----------|
 | 2026-07-10 | PRJ-003 created to build the Markdown Audit Tool. |
+| 2026-07-10 | Markdown Audit Tool Requirements created as MAREQ-001. |
+
 
 ---
 
