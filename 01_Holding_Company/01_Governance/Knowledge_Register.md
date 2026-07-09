@@ -80,7 +80,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-046 | PRJ-002 Build Atlas Daily Briefing System | PRJ-002 / PRJ-002_Build_Atlas_Daily_Briefing_System.md | ATLAS-001, ABRIEF-001, ADR-022, PRJMODEL-001 | Active |
 | KNOW-047 | Atlas Daily Briefing Source Map | ASMAP-001 / Atlas_Daily_Briefing_Source_Map.md | PRJ-002, ATLAS-001, ABRIEF-001, PREG-001, PRJREG-001 | Active |
 | KNOW-048 | Atlas Daily Briefing Template | ATEMPLATE-001 / Atlas_Daily_Briefing_Template.md | PRJ-002, ATLAS-001, ABRIEF-001, ASMAP-001 | Active |
-| KNOW-049 | Atlas Daily Briefing Test Log | ABRIEFTEST-001 / Atlas_Daily_Briefing_Test_Log.md | PRJ-002, ATLAS-001, ABRIEF-001, ASMAP-001, ATEMPLATE-001 | Draft |
+| KNOW-049 | Atlas Daily Briefing Test Log | ABRIEFTEST-001 / Atlas_Daily_Briefing_Test_Log.md | PRJ-002, ATLAS-001, ABRIEF-001, ASMAP-001, ATEMPLATE-001 | Passed |
 
 
 

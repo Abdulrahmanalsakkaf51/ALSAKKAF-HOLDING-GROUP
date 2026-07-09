@@ -164,7 +164,7 @@ Atlas may not:
 | PRJ-002-T003 | Create Atlas Daily Briefing Source Map | Completed |
 | PRJ-002-T004 | Create Atlas Daily Briefing Template | Completed |
 | PRJ-002-T005 | Create Atlas Daily Briefing Test Log | Completed |
-| PRJ-002-T006 | Test Atlas Daily Briefing | Not Started |
+| PRJ-002-T006 | Test Atlas Daily Briefing | Completed |
 | PRJ-002-T007 | Capture lessons learned | Not Started |
 | PRJ-002-T008 | Decide whether to complete PRJ-002 or build a tool version | Not Started |
 
@@ -209,6 +209,7 @@ PRJ-002 is successful if:
 | 2026-07-09 | Atlas Daily Briefing Source Map created as ASMAP-001. |
 | 2026-07-09 | Atlas Daily Briefing Template created as ATEMPLATE-001. |
 | 2026-07-09 | Atlas Daily Briefing Test Log created as ABRIEFTEST-001. |
+| 2026-07-09 | Atlas Daily Briefing manual tests ABRIEF-T001 to ABRIEF-T010 passed. |
 
 
 ---
