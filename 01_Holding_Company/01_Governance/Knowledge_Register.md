@@ -77,12 +77,12 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-043 | Atlas Daily Briefing Workflow | ABRIEF-001 / Atlas_Daily_Briefing_Workflow.md | ATLAS-001, APROMPT-001, ATEST-001, ADR-022 | Active |
 | KNOW-044 | PRJ-001 Lessons Learned | PRJLESSON-001 / PRJ-001_Lessons_Learned.md | PRJ-001, KNOW-036, KNOW-037, LIB-001 | Approved |
 | KNOW-045 | PRJ-001 Completion | PRJ-001 Completion / PRJ-001_Build_The_Librarian_Tool.md | PRJ-001, PRJLESSON-001, KNOW-036, KNOW-037, KNOW-044 | Completed |
-| KNOW-046 | PRJ-002 Build Atlas Daily Briefing System | PRJ-002 / PRJ-002_Build_Atlas_Daily_Briefing_System.md | ATLAS-001, ABRIEF-001, ADR-022, PRJMODEL-001 | Active |
+| KNOW-046 | PRJ-002 Build Atlas Daily Briefing System | PRJ-002 / PRJ-002_Build_Atlas_Daily_Briefing_System.md | ATLAS-001, ABRIEF-001, ASMAP-001, ATEMPLATE-001, ABRIEFTEST-001, PRJLESSON-002, ADR-022, PRJMODEL-001 | Completed |
 | KNOW-047 | Atlas Daily Briefing Source Map | ASMAP-001 / Atlas_Daily_Briefing_Source_Map.md | PRJ-002, ATLAS-001, ABRIEF-001, PREG-001, PRJREG-001 | Active |
 | KNOW-048 | Atlas Daily Briefing Template | ATEMPLATE-001 / Atlas_Daily_Briefing_Template.md | PRJ-002, ATLAS-001, ABRIEF-001, ASMAP-001 | Active |
 | KNOW-049 | Atlas Daily Briefing Test Log | ABRIEFTEST-001 / Atlas_Daily_Briefing_Test_Log.md | PRJ-002, ATLAS-001, ABRIEF-001, ASMAP-001, ATEMPLATE-001 | Passed |
 | KNOW-050 | PRJ-002 Lessons Learned | PRJLESSON-002 / PRJ-002_Lessons_Learned.md | PRJ-002, ABRIEF-001, ASMAP-001, ATEMPLATE-001, ABRIEFTEST-001 | Approved |
-
+| KNOW-051 | PRJ-002 Completion | PRJ-002 Completion / PRJ-002_Build_Atlas_Daily_Briefing_System.md | PRJ-002, PRJLESSON-002, ABRIEFTEST-001, ATEMPLATE-001, ASMAP-001 | Completed |
 
 
 ---
