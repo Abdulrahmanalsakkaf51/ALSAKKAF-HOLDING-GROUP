@@ -65,6 +65,7 @@ No official project should exist without a Project Register entry.
 |------------|--------------|------|---------|--------|-------|---------------------|-----------------|
 | PRJ-001 | Build The Librarian Tool | Partner / Technology Project | Turn The Librarian from a prompt-based Partner into a practical working knowledge tool | Completed | CEO | The Librarian, Technology Partner, Project Partner | LIB-001, LPROMPT-001, LTEST-001, LPROTO-TEST-001, PRJLESSON-001, PRJMODEL-001 |
 | PRJ-002 | Build Atlas Daily Briefing System | Partner / Founder Support Project | Turn Atlas Daily Briefing from an approved workflow into a practical working Founder support system | Completed | CEO | Atlas, The Librarian, Project Partner | ATLAS-001, APROMPT-001, ATEST-001, ABRIEF-001, ADR-022, PRJMODEL-001 |
+| PRJ-003 | Build Markdown Audit Tool | Quality / Technology Project | Build a simple tool to check Markdown files for broken formatting, unclosed code blocks, and documentation issues | Active | CEO | Atlas, The Librarian, Technology Partner | PRJMODEL-001, PRJ-001, PRJ-002 |
 
 ---
 
