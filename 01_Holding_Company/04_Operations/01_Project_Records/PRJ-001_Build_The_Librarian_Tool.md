@@ -6,7 +6,7 @@
 
 ---
 
-## Project Information
+## Document Information
 
 | Field | Value |
 |-------|-------|
@@ -69,6 +69,26 @@ The first goal is not to build a complex AI application.
 The first goal is to create a clean working foundation that can later become software.
 
 ---
+
+
+# Project Tasks
+
+| Task ID | Task | Status |
+|---------|------|--------|
+| PRJ-001-T001 | Create The Librarian document map | Completed |
+| PRJ-001-T002 | Create The Librarian workflow | Completed |
+| PRJ-001-T003 | Create tool requirements | Completed |
+| PRJ-001-T004 | Prepare build instructions | Completed |
+| PRJ-001-T005 | Build local Python prototype | Completed |
+| PRJ-001-T006 | Test The Librarian Tool | Completed |
+| PRJ-001-T007 | Improve prototype to v0.5 | Completed |
+| PRJ-001-T008 | Record test results | Completed |
+| PRJ-001-T009 | Capture lessons learned | Completed |
+| PRJ-001-T010 | Complete PRJ-001 | Completed |
+
+---
+
+
 
 # 4. Scope
 
