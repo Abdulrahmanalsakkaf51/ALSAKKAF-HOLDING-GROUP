@@ -96,6 +96,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-062 | PRJ-004 Lessons Learned | PRJLESSON-004 / PRJ-004_Lessons_Learned.md | PRJ-004, ADDA-001, PARTNER-002, KNOW-061 | Approved |
 | KNOW-063 | PRJ-004 Completion | PRJ-004 Completion / PRJ-004_AOS_Data_and_Deployment_Architecture.md | PRJ-004, ADDA-001, PRJLESSON-004, KNOW-061, KNOW-062 | Completed |
 | KNOW-064 | PRJ-005 Atlas Super Assistant Architecture | PRJ-005 / PRJ-005_Atlas_Super_Assistant_Architecture.md | PRJ-004, ADDA-001, PARTNER-002, PRJ-006 | Active |
+| KNOW-065 | Atlas Super Assistant Architecture | ASAA-001 / 01_Holding_Company/09_Architecture/Atlas_Super_Assistant_Architecture.md | PRJ-005, ADDA-001, PARTNER-002, PRJ-006 | Approved |
 
 
 
