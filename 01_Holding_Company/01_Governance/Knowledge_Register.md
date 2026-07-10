@@ -85,6 +85,8 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-051 | PRJ-002 Completion | PRJ-002 Completion / PRJ-002_Build_Atlas_Daily_Briefing_System.md | PRJ-002, PRJLESSON-002, ABRIEFTEST-001, ATEMPLATE-001, ASMAP-001 | Completed |
 | KNOW-052 | PRJ-003 Build Markdown Audit Tool | PRJ-003 / PRJ-003_Build_Markdown_Audit_Tool.md | PRJ-001, PRJ-002, PRJMODEL-001 | Active |
 | KNOW-053 | Markdown Audit Tool Requirements | MAREQ-001 / Markdown_Audit_Tool_Requirements.md | PRJ-003, KNOW-052, PRJMODEL-001 | Approved |
+| KNOW-054 | Markdown Audit Tool v0.1 Prototype | markdown_audit.py / 09_AI_Systems/02_Tools/Markdown_Audit | PRJ-003, MAREQ-001, KNOW-053 | Working Prototype |
+| KNOW-055 | Markdown Audit Tool Test Log | MATEST-001 / Markdown_Audit_Test_Log.md | PRJ-003, MAREQ-001, KNOW-054 | Passed |
 
 
 
