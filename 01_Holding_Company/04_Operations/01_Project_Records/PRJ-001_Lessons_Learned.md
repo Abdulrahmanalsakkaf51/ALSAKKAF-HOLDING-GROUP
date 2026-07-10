@@ -42,3 +42,4 @@ The Librarian Tool was built as a local Python prototype inside:
 
 ```text
 09_AI_Systems/01_Partners/08_Prototype
+```
