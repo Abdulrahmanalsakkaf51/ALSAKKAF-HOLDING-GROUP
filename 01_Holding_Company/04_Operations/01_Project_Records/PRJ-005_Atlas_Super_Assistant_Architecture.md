@@ -323,7 +323,7 @@ PRJ-006 builds the Partner creation system.
 | Atlas Execution Model | Defines action and approval flow | Completed |
 | Atlas Learning Loop | Defines safe learning and improvement | Completed |
 | Atlas Competitive Difference | Defines why Atlas is different | Completed |
-| PRJ-005 Lessons Learned | Captures what the company learns | Not Started |
+| PRJ-005 Lessons Learned | Captures what the company learns | Completed |
 | Project Completion Decision | Decides whether PRJ-005 is complete | Not Started |
 
 ---
@@ -340,7 +340,7 @@ PRJ-006 builds the Partner creation system.
 | PRJ-005-T006 | Define Atlas learning loop | Completed |
 | PRJ-005-T007 | Define Atlas competitive difference | Completed |
 | PRJ-005-T008 | Run Markdown Audit Tool | Not Started |
-| PRJ-005-T009 | Capture lessons learned | Not Started |
+| PRJ-005-T009 | Capture lessons learned | Completed |
 | PRJ-005-T010 | Complete PRJ-005 | Not Started |
 
 ---
@@ -365,6 +365,10 @@ PRJ-006 builds the Partner creation system.
 |------|----------|
 | 2026-07-10 | PRJ-005 created to define Atlas Super Assistant Architecture. |
 | 2026-07-10 | Main Atlas Super Assistant Architecture document created as ASAA-001. |
+| 2026-07-10 | PRJ-005 lessons learned were documented in PRJLESSON-005. |
+
+
+
 ---
 
 # 18. Recommended Next Action
