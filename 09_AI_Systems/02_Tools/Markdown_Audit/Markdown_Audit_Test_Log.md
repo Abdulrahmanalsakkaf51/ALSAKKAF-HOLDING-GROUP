@@ -165,3 +165,64 @@ The Markdown Audit Tool proved its value.
 The tool should remain read-only.
 
 Official documents should be fixed manually after reviewing audit results.
+
+
+---
+
+# 11. Version 0.2 Follow-Up Test
+
+Markdown Audit Tool v0.2 was tested after improving the tool to reduce false positives.
+
+The purpose of v0.2 was to make the audit results more useful before manually fixing old documents.
+
+---
+
+## v0.2 Test Output Summary
+
+| Item | v0.1 Result | v0.2 Result |
+|------|-------------|-------------|
+| Markdown files scanned | 85 | 85 |
+| Total issues found | 45 | 15 |
+| Errors | 15 | 10 |
+| Warnings | 20 | 4 |
+| Info | 10 | 1 |
+
+---
+
+## v0.2 Improvements
+
+| Improvement | Result |
+|-------------|--------|
+| README files no longer reported as very short files | Passed |
+| AOS University files no longer reported for missing Document Information | Passed |
+| Knowledge Register duplicate ID detection improved | Passed |
+| Duplicate Knowledge ID false positives removed | Passed |
+| Remaining results are more focused | Passed |
+
+---
+
+## Remaining Issues After v0.2
+
+The remaining issues are:
+
+| Issue Type | Count |
+|------------|-------|
+| Unclosed Code Blocks | 10 |
+| Missing Document Information | 2 |
+| Missing Project Tasks | 1 |
+| Very Short File | 1 |
+| Possible Broken Table | 1 |
+
+---
+
+## v0.2 Test Result
+
+Markdown Audit Tool v0.2 passed.
+
+The tool successfully reduced false positives from 45 total issues to 15 focused issues.
+
+The tool remained read-only and did not edit, delete, commit, or push files.
+
+Recommended next action:
+
+Commit Markdown Audit Tool v0.2, then manually fix the remaining unclosed code block errors one file at a time.

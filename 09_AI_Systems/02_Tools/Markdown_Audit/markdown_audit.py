@@ -2,6 +2,8 @@ import re
 from pathlib import Path
 from collections import defaultdict
 
+TOOL_VERSION = "v0.2"
+
 TOOL_FILE = Path(__file__).resolve()
 REPO_ROOT = TOOL_FILE.parents[3]
 
@@ -41,9 +43,7 @@ def add_issue(issues, file_path, issue_type, line_number, message, severity):
 
 
 def check_unclosed_code_blocks(relative_path, lines, issues):
-    """
-    Detect Markdown code blocks that start with ``` but do not close.
-    """
+    """Detect Markdown code blocks that start with ``` but do not close."""
     fence_open = False
     opening_line = None
 
@@ -99,8 +99,8 @@ def check_broken_tables(relative_path, lines, issues):
     """
     Detect possible broken Markdown tables.
 
-    This check looks for a table separator row and then compares column counts
-    in the table rows around it.
+    This check looks for a table separator row and compares column counts
+    in the rows below it.
     """
     index = 0
 
@@ -140,13 +140,11 @@ def check_broken_tables(relative_path, lines, issues):
             continue
 
         expected_columns = len(header_cells)
-
-        # Check header, separator, and rows below until table ends.
-        table_start = index - 1
         table_end = index + 1
 
         while table_end < len(lines):
             row_cells = split_table_row(lines[table_end])
+
             if not row_cells:
                 break
 
@@ -165,12 +163,29 @@ def check_broken_tables(relative_path, lines, issues):
         index = table_end
 
 
-def check_missing_document_information(relative_path, text, issues):
-    """Detect files missing Document Information."""
-    filename = Path(relative_path).name.lower()
+def is_readme(relative_path):
+    """Detect README files."""
+    return Path(relative_path).name.lower() == "readme.md"
 
-    # README files may not need Document Information.
-    if filename == "readme.md":
+
+def is_aos_university_file(relative_path):
+    """Detect AOS University files."""
+    path_text = str(relative_path).replace("\\", "/")
+    return path_text.startswith("07_AOS_University/")
+
+
+def check_missing_document_information(relative_path, text, issues):
+    """
+    Detect files missing Document Information.
+
+    v0.2 reduces false positives:
+    - README files are ignored.
+    - AOS University lesson files are ignored for now.
+    """
+    if is_readme(relative_path):
+        return
+
+    if is_aos_university_file(relative_path):
         return
 
     if "document information" not in text.lower():
@@ -186,9 +201,10 @@ def check_missing_document_information(relative_path, text, issues):
 
 def check_status_field(relative_path, text, issues):
     """Detect important documents missing a Status field."""
-    filename = Path(relative_path).name.lower()
+    if is_readme(relative_path):
+        return
 
-    if filename == "readme.md":
+    if is_aos_university_file(relative_path):
         return
 
     lower_text = text.lower()
@@ -205,7 +221,15 @@ def check_status_field(relative_path, text, issues):
 
 
 def check_empty_or_short_file(relative_path, lines, issues):
-    """Detect empty or very short Markdown files."""
+    """
+    Detect empty or very short Markdown files.
+
+    v0.2 reduces false positives:
+    - README files can be short.
+    """
+    if is_readme(relative_path):
+        return
+
     non_empty_lines = [line for line in lines if line.strip()]
 
     if not non_empty_lines:
@@ -271,27 +295,51 @@ def check_project_record_completeness(relative_path, text, issues):
         )
 
 
-def check_duplicate_knowledge_ids(relative_path, text, issues):
-    """Detect duplicate KNOW IDs inside the Knowledge Register."""
+def extract_knowledge_id_from_table_row(line):
+    """
+    Extract KNOW ID only from the first column of a Markdown table row.
+
+    This prevents false positives caused by KNOW IDs appearing in related-record columns.
+    """
+    cells = split_table_row(line)
+
+    if not cells:
+        return None
+
+    if not cells:
+        return None
+
+    first_cell = cells[0].strip()
+
+    if re.fullmatch(r"KNOW-\d{3}", first_cell):
+        return first_cell
+
+    return None
+
+
+def check_duplicate_knowledge_ids(relative_path, lines, issues):
+    """Detect duplicate KNOW IDs only in the first column of Knowledge Register rows."""
     filename = Path(relative_path).name
 
     if filename != "Knowledge_Register.md":
         return
 
-    matches = re.findall(r"\bKNOW-\d{3}\b", text)
-    counts = defaultdict(int)
+    counts = defaultdict(list)
 
-    for match in matches:
-        counts[match] += 1
+    for line_number, line in enumerate(lines, start=1):
+        knowledge_id = extract_knowledge_id_from_table_row(line)
 
-    for knowledge_id, count in sorted(counts.items()):
-        if count > 1:
+        if knowledge_id:
+            counts[knowledge_id].append(line_number)
+
+    for knowledge_id, line_numbers in sorted(counts.items()):
+        if len(line_numbers) > 1:
             add_issue(
                 issues,
                 relative_path,
                 "Duplicate Knowledge ID",
-                1,
-                f"{knowledge_id} appears {count} times in the Knowledge Register.",
+                line_numbers[0],
+                f"{knowledge_id} appears in the first column {len(line_numbers)} times. Lines: {line_numbers}",
                 "Error"
             )
 
@@ -309,7 +357,7 @@ def scan_markdown_file(path):
     check_status_field(relative_path, text, issues)
     check_empty_or_short_file(relative_path, lines, issues)
     check_project_record_completeness(relative_path, text, issues)
-    check_duplicate_knowledge_ids(relative_path, text, issues)
+    check_duplicate_knowledge_ids(relative_path, lines, issues)
 
     return issues
 
@@ -329,7 +377,7 @@ def find_markdown_files():
 
 def print_report(all_issues, scanned_count):
     """Print the audit report."""
-    print("Markdown Audit Tool v0.1")
+    print(f"Markdown Audit Tool {TOOL_VERSION}")
     print("=" * 60)
     print(f"Repository: {REPO_ROOT}")
     print(f"Markdown files scanned: {scanned_count}")
