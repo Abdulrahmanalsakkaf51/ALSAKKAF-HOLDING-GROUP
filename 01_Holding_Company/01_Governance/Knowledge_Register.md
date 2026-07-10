@@ -92,6 +92,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-058 | PRJ-003 Lessons Learned | PRJLESSON-003 / PRJ-003_Lessons_Learned.md | PRJ-003, MAREQ-001, MATEST-001, KNOW-057 | Approved |
 | KNOW-059 | PRJ-003 Completion | PRJ-003 Completion / PRJ-003_Build_Markdown_Audit_Tool.md | PRJ-003, PRJLESSON-003, MATEST-001, KNOW-057, KNOW-058 | Completed |
 | KNOW-060 | PRJ-004 AOS Data & Deployment Architecture | PRJ-004 / PRJ-004_AOS_Data_and_Deployment_Architecture.md | PRJ-003, DNA-001, AOS-001, PARTNER-002 | Active |
+| KNOW-061 | AOS Data & Deployment Architecture | ADDA-001 / AOS_Data_and_Deployment_Architecture.md | PRJ-004, PARTNER-002, PRJ-005, PRJ-006 | Approved |
 
 
 
