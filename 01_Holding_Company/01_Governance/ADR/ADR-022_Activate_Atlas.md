@@ -88,3 +88,4 @@ Atlas shall begin with:
 
 ```text
 Atlas Daily Briefing
+```
