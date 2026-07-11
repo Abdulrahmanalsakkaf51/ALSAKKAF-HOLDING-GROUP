@@ -418,7 +418,143 @@ Atlas must be deployable without mixing customer data.
 
 ---
 
-# 19. Competitive Difference
+---
+
+# 19. Default Filing Principle
+
+Atlas should not ask the Founder where to save routine files when AOS already has a rule for that file type.
+
+Atlas should use default filing rules based on:
+
+| Factor | Example |
+|--------|---------|
+| Company | Holding company, ecommerce company, marketing agency, automotive, real estate, investments |
+| Department | Finance, operations, marketing, HR, projects, reports |
+| File type | Excel, Word, PDF, Markdown, image, video, report |
+| Purpose | Expenses, revenue, meeting notes, training material, campaign plan |
+| Date | Month, quarter, year |
+| Sensitivity | Public, private, personal work, sensitive, credentials |
+
+The standard flow should be:
+
+```text
+CEO request
+↓
+Atlas identifies company and file type
+↓
+Atlas saves file in approved AOS location
+↓
+Atlas gives file metadata to The Librarian
+↓
+The Librarian indexes the file
+↓
+Atlas can retrieve the file later for reports and dashboards
+```
+
+Atlas should ask the Founder only when:
+
+- the company is unclear,
+- the file is sensitive,
+- no filing rule exists,
+- the folder does not exist,
+- the file may overwrite another file,
+- approval is required by policy.
+
+If Atlas asks once and the Founder gives a location, AOS should record that as a future filing rule after approval.
+
+---
+
+# 20. Librarian Indexing Principle
+
+The Librarian is the Knowledge Partner.
+
+The Librarian should help AOS know where files are stored and how to find them later.
+
+The Librarian should track:
+
+| Metadata | Purpose |
+|----------|---------|
+| File name | Identify the file |
+| File path | Locate the file |
+| Company | Know which company the file belongs to |
+| Department | Know the business function |
+| File type | Know the document format |
+| Date | Support monthly, quarterly, and yearly reports |
+| Sensitivity level | Protect private or sensitive data |
+| Related project | Connect file to work history |
+| Related dashboard | Support future reporting |
+
+The Librarian should not expose sensitive data in public AOS files.
+
+Sensitive file indexing must follow the AOS Data & Deployment Architecture.
+
+---
+
+# 21. Local Dashboard Reporting Principle
+
+When the Founder asks about company performance, Atlas should answer in a dashboard-style format whenever possible.
+
+Atlas should use approved data sources first.
+
+Atlas must not invent numbers.
+
+Atlas should provide:
+
+| Dashboard Item | Purpose |
+|----------------|---------|
+| KPI summary | Main number such as revenue, expenses, profit, growth |
+| Company breakdown | Shows performance by company |
+| Time comparison | Compares this month, last month, quarter, or year |
+| Charts | Visualizes trends and comparisons |
+| Source note | Shows where the data came from |
+| Last updated | Shows freshness of the data |
+| Missing data warning | Shows incomplete or outdated records |
+| Recommended action | Gives the next practical step |
+
+Dashboard reporting should be local by default.
+
+Local tools may generate:
+
+- Excel summaries,
+- charts,
+- CSV reports,
+- PDF reports,
+- dashboard images,
+- Markdown reports,
+- CEO briefing pages.
+
+Online AI should not be required for basic dashboards, numbers, charts, or file generation.
+
+Online AI may be used only when deeper interpretation, strategy, forecasting, or external research is needed.
+
+---
+
+# 22. Local Report Generation Principle
+
+Atlas should be able to create local reports without paid AI when the task is rule-based.
+
+Examples of local report generation:
+
+| Request | Local Handling |
+|---------|----------------|
+| Create expense Excel files | Use local spreadsheet tool |
+| Create revenue chart | Use local charting tool |
+| Create monthly company summary | Use approved data and template |
+| Create CEO dashboard page | Use local report template |
+| Save files to the correct company folder | Use AOS filing rules |
+| Index files for retrieval | Use The Librarian |
+
+This reduces cost and makes AOS more resilient.
+
+The principle is:
+
+```text
+Data and charts are local by default.
+AI reasoning is used only when needed.
+```
+
+
+# 23. Competitive Difference
 
 Atlas is not only a Jarvis clone.
 
@@ -442,7 +578,7 @@ AOS builds AI-operated organizations.
 
 ---
 
-# 20. Relationship to PRJ-006
+# 24. Relationship to PRJ-006
 
 PRJ-005 defines Atlas Super Assistant Architecture.
 
@@ -460,7 +596,7 @@ PRJ-006 defines how more Partners are created.
 
 ---
 
-# 21. What Atlas Must Never Do Early
+# 25. What Atlas Must Never Do Early
 
 Atlas must not:
 
@@ -478,7 +614,7 @@ Atlas must not:
 
 ---
 
-# 22. Future Build Stages
+# 26. Future Build Stages
 
 Atlas Super Assistant should be built in stages.
 
@@ -495,7 +631,7 @@ Atlas Super Assistant should be built in stages.
 
 ---
 
-# 23. Final Architecture Rule
+# 27. Final Architecture Rule
 
 The final rule is:
 
@@ -506,7 +642,7 @@ but controlled enough to remain trusted.
 
 ---
 
-# 24. Status
+# 28. Status
 
 This architecture is approved as the first version of the Atlas Super Assistant Architecture.
 

@@ -366,6 +366,7 @@ PRJ-006 builds the Partner creation system.
 | 2026-07-10 | PRJ-005 created to define Atlas Super Assistant Architecture. |
 | 2026-07-10 | Main Atlas Super Assistant Architecture document created as ASAA-001. |
 | 2026-07-10 | PRJ-005 lessons learned were documented in PRJLESSON-005. |
+| 2026-07-10 | Atlas default filing, Librarian indexing, and local dashboard reporting principles were added to ASAA-001. |
 
 
 
