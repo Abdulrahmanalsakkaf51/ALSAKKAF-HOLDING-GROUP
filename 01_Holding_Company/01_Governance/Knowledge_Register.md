@@ -127,6 +127,16 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-093 | Partner Creation Lifecycle | PCL-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/Partner_Creation_Lifecycle.md | PRJ-006, APFA-001, PREG-001, POM-001 | Draft |
 | KNOW-094 | Partner Routing and Cost Control Model | PRCC-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/Partner_Routing_and_Cost_Control_Model.md | PRJ-006, APFA-001, ADDA-001, PCL-001 | Draft |
 | KNOW-095 | Partner Learning System | PLS-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/Partner_Learning_System.md | PRJ-006, APFA-001, PCL-001, PRCC-001 | Draft |
+| KNOW-096 | Partner Request Template | PFT-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Request_Template.md | PRJ-006, APFA-001, PCL-001, PREG-001 | Active |
+| KNOW-097 | Partner Profile Template | PFT-002 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Profile_Template.md | PRJ-006, APFA-001, PCL-001, PREG-001, POM-001 | Active |
+| KNOW-098 | Partner Skill Template | PFT-003 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Skill_Template.md | PRJ-006, APFA-001, PCL-001, PRCC-001 | Active |
+| KNOW-099 | Partner Test Log Template | PFT-004 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Test_Log_Template.md | PRJ-006, APFA-001, PCL-001 | Active |
+| KNOW-100 | Partner Activation Checklist | PFT-005 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Activation_Checklist.md | PRJ-006, APFA-001, PCL-001, PREG-001 | Active |
+| KNOW-101 | Partner Performance Review Template | PFT-006 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Performance_Review_Template.md | PRJ-006, APFA-001, PLS-001 | Active |
+| KNOW-102 | Partner Retirement Template | PFT-007 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Retirement_Template.md | PRJ-006, APFA-001, PCL-001, PREG-001 | Active |
+| KNOW-103 | Partner Task Assignment Template | PFT-008 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Task_Assignment_Template.md | PRJ-006, APFA-001, PRCC-001 | Active |
+| KNOW-104 | Partner Learning Log Template | PFT-009 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Learning_Log_Template.md | PRJ-006, APFA-001, PLS-001 | Active |
+| KNOW-105 | Partner Budget Approval Template | PFT-010 / 09_AI_Systems/01_Partners/09_Partner_Factory/01_Templates/Partner_Budget_Approval_Template.md | PRJ-006, APFA-001, PRCC-001, ADDA-001 | Active |
 
 
 

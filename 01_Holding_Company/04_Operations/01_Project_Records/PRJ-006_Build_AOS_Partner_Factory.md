@@ -169,6 +169,7 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | Partner Creation Lifecycle | Stage-by-stage Partner creation process | Draft |
 | Partner Routing and Cost Control Model | Routing, model tiers, and budget rules for many Partners | Draft |
 | Partner Learning System | Safe learning, feedback, and versioning model for Partners | Draft |
+| Partner Factory Template Pack | Reusable templates covering the full Partner lifecycle, from request to retirement | Active |
 | Knowledge Register Updates | New KNOW rows for all PRJ-006 documents | Active |
 
 ---
@@ -188,6 +189,8 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | PRJ-006-T009 | Run Markdown Audit Tool | Completed |
 | PRJ-006-T010 | Founder review and approval | Not Started |
 | PRJ-006-T011 | First Partner built through the Factory lifecycle | Not Started |
+| PRJ-006-T012 | Create Partner Factory Template Pack (01_Templates) | Completed |
+| PRJ-006-T013 | Update Knowledge Register with Template Pack KNOW rows | Completed |
 
 ---
 
@@ -211,6 +214,7 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | 2026-07-12 | 09_Partner_Factory folder created under 09_AI_Systems/01_Partners. |
 | 2026-07-12 | AOS Partner Factory Architecture, Partner Creation Lifecycle, Partner Routing and Cost Control Model, and Partner Learning System documents drafted. |
 | 2026-07-12 | Knowledge Register updated with new rows for all PRJ-006 documents. |
+| 2026-07-12 | Partner Factory Template Pack created (01_Templates): Partner Request, Partner Profile, Partner Skill, Partner Test Log, Partner Activation Checklist, Partner Performance Review, Partner Retirement, Partner Task Assignment, Partner Learning Log, and Partner Budget Approval templates. Knowledge Register updated with KNOW-096 through KNOW-105. |
 
 ---
 
