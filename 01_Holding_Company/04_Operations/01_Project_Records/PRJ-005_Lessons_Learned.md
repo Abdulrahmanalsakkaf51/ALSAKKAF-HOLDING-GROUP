@@ -308,7 +308,48 @@ After PRJ-005 lessons learned, the recommended next steps are:
 
 ---
 
-# 8. Final Lesson
+---
+
+# 8. Follow-Up Lesson — Filing and Dashboard Intelligence
+
+After the first PRJ-005 lessons learned were documented, the Founder clarified an important operating requirement.
+
+Atlas should not ask the CEO where to save routine files when AOS already has approved filing rules.
+
+Atlas should know where routine company files belong, save them in the correct location, and pass file metadata to The Librarian so the files can be found later for dashboards, reports, and CEO requests.
+
+The Founder also clarified that company performance answers should appear in a dashboard-style format whenever possible.
+
+This means Atlas should use local data and local reporting tools to generate:
+
+- KPI summaries,
+- charts,
+- company breakdowns,
+- Excel summaries,
+- PDF reports,
+- dashboard pages,
+- source notes,
+- missing data warnings,
+- recommended actions.
+
+Lesson:
+
+| Lesson | Meaning |
+|--------|---------|
+| Atlas should operate like a business system, not only a chatbot | Routine filing, indexing, dashboards, and reports should be handled through AOS rules and local tools whenever possible |
+
+This lesson strengthens the Atlas Super Assistant Architecture.
+
+It also prepares future work for:
+
+| Future System | Purpose |
+|---------------|---------|
+| AOS Filing Rules | Decide where files are saved |
+| Librarian Indexing System | Track files and metadata |
+| Local Dashboard Skill | Create charts and reports without paid AI |
+| CEO Reporting Skill | Answer company questions in a dashboard-style format |
+
+# 9. Final Lesson
 
 PRJ-005 proved that Atlas should not be built as a generic AI assistant.
 
@@ -320,7 +361,7 @@ The final lesson is:
 
 ---
 
-# 9. Status
+# 10. Status
 
 PRJ-005 has produced the main Atlas Super Assistant Architecture and captured its lessons learned.
 
