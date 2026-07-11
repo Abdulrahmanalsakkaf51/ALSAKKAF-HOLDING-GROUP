@@ -104,6 +104,12 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-070 | Claude Project Instructions | CLAUDE-001 / CLAUDE.md | OPS-001, PRJ-006, ASAA-001 | Active |
 | KNOW-071 | Claude AOS Live Build Skill | CSKILL-001 / .claude/skills/aos-live-build/SKILL.md | OPS-001, CLAUDE-001 | Active |
 | KNOW-072 | Claude Markdown Audit Skill | CSKILL-002 / .claude/skills/aos-markdown-audit/SKILL.md | PRJ-003, OPS-001, CLAUDE-001 | Active |
+| KNOW-073 | AOS Market Intelligence and Financial Assumptions | STRAT-001 / 01_Holding_Company/03_Strategy/AOS_Market_Intelligence_and_Financial_Assumptions.md | PRJ-006, OPS-001, STRAT-002 | Draft |
+| KNOW-074 | AOS Client Acquisition and Delivery Model | STRAT-002 / 01_Holding_Company/03_Strategy/AOS_Client_Acquisition_and_Delivery_Model.md | PRJ-006, OPS-001, STRAT-001 | Draft |
+| KNOW-075 | Claude Holding Company Operator Skill | CSKILL-003 / .claude/skills/aos-holding-company-operator/SKILL.md | OPS-001, CLAUDE-001, STRAT-001 | Active |
+| KNOW-076 | Claude Client Acquisition Engine Skill | CSKILL-004 / .claude/skills/aos-client-acquisition-engine/SKILL.md | OPS-001, CLAUDE-001, STRAT-002 | Active |
+| KNOW-077 | Claude Financial Forecast Skill | CSKILL-005 / .claude/skills/aos-financial-forecast/SKILL.md | OPS-001, CLAUDE-001, STRAT-001 | Active |
+| KNOW-078 | Claude Learning Loop Skill | CSKILL-006 / .claude/skills/aos-learning-loop/SKILL.md | OPS-001, CLAUDE-001, STRAT-002 | Active |
 
 
 
