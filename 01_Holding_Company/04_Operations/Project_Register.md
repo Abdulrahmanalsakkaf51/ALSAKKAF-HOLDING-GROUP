@@ -68,6 +68,7 @@ No official project should exist without a Project Register entry.
 | PRJ-003 | Build Markdown Audit Tool | Quality / Technology Project | Build a simple tool to check Markdown files for broken formatting, unclosed code blocks, and documentation issues | Completed | CEO | Atlas, The Librarian, Technology Partner | PRJMODEL-001, PRJ-001, PRJ-002 |
 | PRJ-004 | AOS Data & Deployment Architecture | Architecture / Technology Project | Define where AOS data lives, what works offline, what connects online, how Atlas controls cost, and how future device agents and cloud AI are safely deployed | Completed | CEO | Atlas, The Librarian, Technology Partner | PRJ-003, DNA-001, AOS-001, MAREQ-001 |
 | PRJ-005 | Atlas Super Assistant Architecture | Architecture / Partner Project | Define Atlas as the super assistant and operating Partner for executive support, skills, app coordination, device agents, learning loops, and future customer deployment | Completed | CEO | Atlas, The Librarian, Technology Partner | PRJ-004, ADDA-001, PARTNER-002, AOS-001, DNA-001 |
+| PRJ-006 | Build AOS Partner Factory | AI Systems / Partner Infrastructure | Create the system for creating, testing, approving, activating, assigning, monitoring, improving, and retiring AOS Partners | Active | CEO | Atlas, The Librarian, future Partners | PRJ-005, ASAA-001, OPS-001, AOS_Claude_Skill_Roadmap, AOS_Inspiration_Register |
 
 ---
 

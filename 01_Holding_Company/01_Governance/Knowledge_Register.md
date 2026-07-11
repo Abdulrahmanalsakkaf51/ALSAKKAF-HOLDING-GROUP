@@ -122,6 +122,11 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-088 | Claude QA Auditor Skill | CSKILL-014 / .claude/skills/aos-qa-auditor/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
 | KNOW-089 | Claude Release Manager Skill | CSKILL-015 / .claude/skills/aos-release-manager/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
 | KNOW-090 | Claude Product Designer Skill | CSKILL-016 / .claude/skills/aos-product-designer/SKILL.md | OPS-001, CLAUDE-001, STRAT-002, STRAT-004 | Active |
+| KNOW-091 | PRJ-006 Build AOS Partner Factory | PRJ-006 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-006_Build_AOS_Partner_Factory.md | PRJ-005, ASAA-001, OPS-001, APFA-001, PCL-001, PRCC-001, PLS-001 | Active |
+| KNOW-092 | AOS Partner Factory Architecture | APFA-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/AOS_Partner_Factory_Architecture.md | PRJ-006, ASAA-001, ADDA-001, POM-001, PREG-001, PWA-001 | Draft |
+| KNOW-093 | Partner Creation Lifecycle | PCL-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/Partner_Creation_Lifecycle.md | PRJ-006, APFA-001, PREG-001, POM-001 | Draft |
+| KNOW-094 | Partner Routing and Cost Control Model | PRCC-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/Partner_Routing_and_Cost_Control_Model.md | PRJ-006, APFA-001, ADDA-001, PCL-001 | Draft |
+| KNOW-095 | Partner Learning System | PLS-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/Partner_Learning_System.md | PRJ-006, APFA-001, PCL-001, PRCC-001 | Draft |
 
 
 
