@@ -110,6 +110,18 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-076 | Claude Client Acquisition Engine Skill | CSKILL-004 / .claude/skills/aos-client-acquisition-engine/SKILL.md | OPS-001, CLAUDE-001, STRAT-002 | Active |
 | KNOW-077 | Claude Financial Forecast Skill | CSKILL-005 / .claude/skills/aos-financial-forecast/SKILL.md | OPS-001, CLAUDE-001, STRAT-001 | Active |
 | KNOW-078 | Claude Learning Loop Skill | CSKILL-006 / .claude/skills/aos-learning-loop/SKILL.md | OPS-001, CLAUDE-001, STRAT-002 | Active |
+| KNOW-079 | AOS Inspiration Register | STRAT-003 / 01_Holding_Company/03_Strategy/AOS_Inspiration_Register.md | PRJ-006, OPS-001, STRAT-004 | Draft |
+| KNOW-080 | AOS Claude Skill Roadmap | STRAT-004 / 01_Holding_Company/03_Strategy/AOS_Claude_Skill_Roadmap.md | PRJ-006, OPS-001, STRAT-003 | Draft |
+| KNOW-081 | Claude CEO Command Center Skill | CSKILL-007 / .claude/skills/aos-ceo-command-center/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
+| KNOW-082 | Claude Dashboard Builder Skill | CSKILL-008 / .claude/skills/aos-dashboard-builder/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
+| KNOW-083 | Claude YouTube Shorts Factory Skill | CSKILL-009 / .claude/skills/aos-youtube-shorts-factory/SKILL.md | OPS-001, CLAUDE-001, STRAT-001, STRAT-004 | Active |
+| KNOW-084 | Claude Marketing Ads Factory Skill | CSKILL-010 / .claude/skills/aos-marketing-ads-factory/SKILL.md | OPS-001, CLAUDE-001, STRAT-001, STRAT-004 | Active |
+| KNOW-085 | Claude Guardian Cybersecurity Skill | CSKILL-011 / .claude/skills/aos-guardian-cybersecurity/SKILL.md | OPS-001, CLAUDE-001, STRAT-001, STRAT-004 | Active |
+| KNOW-086 | Claude CTO Architect Skill | CSKILL-012 / .claude/skills/aos-cto-architect/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
+| KNOW-087 | Claude Document Engineer Skill | CSKILL-013 / .claude/skills/aos-document-engineer/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
+| KNOW-088 | Claude QA Auditor Skill | CSKILL-014 / .claude/skills/aos-qa-auditor/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
+| KNOW-089 | Claude Release Manager Skill | CSKILL-015 / .claude/skills/aos-release-manager/SKILL.md | OPS-001, CLAUDE-001, STRAT-004 | Active |
+| KNOW-090 | Claude Product Designer Skill | CSKILL-016 / .claude/skills/aos-product-designer/SKILL.md | OPS-001, CLAUDE-001, STRAT-002, STRAT-004 | Active |
 
 
 
