@@ -100,6 +100,10 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-066 | PRJ-005 Lessons Learned | PRJLESSON-005 / PRJ-005_Lessons_Learned.md | PRJ-005, ASAA-001, PARTNER-002, KNOW-065 | Approved |
 | KNOW-067 | Atlas Filing and Dashboard Principles | ASAA-001 / 01_Holding_Company/09_Architecture/Atlas_Super_Assistant_Architecture.md | PRJ-005, ASAA-001, ADDA-001, PARTNER-001, PARTNER-002 | Approved |
 | KNOW-068 | PRJ-005 Completion | PRJ-005 Completion / PRJ-005_Atlas_Super_Assistant_Architecture.md | PRJ-005, ASAA-001, PRJLESSON-005, KNOW-065, KNOW-066, KNOW-067 | Completed |
+| KNOW-069 | AOS Live Build Protocol | OPS-001 / 01_Holding_Company/04_Operations/02_Protocols/AOS_Live_Build_Protocol.md | PRJ-005, PRJ-006, ASAA-001, ADDA-001 | Active |
+| KNOW-070 | Claude Project Instructions | CLAUDE-001 / CLAUDE.md | OPS-001, PRJ-006, ASAA-001 | Active |
+| KNOW-071 | Claude AOS Live Build Skill | CSKILL-001 / .claude/skills/aos-live-build/SKILL.md | OPS-001, CLAUDE-001 | Active |
+| KNOW-072 | Claude Markdown Audit Skill | CSKILL-002 / .claude/skills/aos-markdown-audit/SKILL.md | PRJ-003, OPS-001, CLAUDE-001 | Active |
 
 
 
