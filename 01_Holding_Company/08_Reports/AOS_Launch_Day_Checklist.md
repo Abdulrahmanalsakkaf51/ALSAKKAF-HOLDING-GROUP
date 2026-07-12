@@ -87,7 +87,7 @@ All new documents in this launch package: the Atlas CEO Command Center files, th
 
 # 7. Accounts Still Needed
 
-- Permanent branded business email (temporary email now in use — see Section 8)
+- Permanent branded business email (pending domain purchase — Contact: atlasos5555@gmail.com in use for launch, see Section 8)
 - Social accounts (YouTube, Instagram, TikTok, Facebook, Threads, LinkedIn) per STRAT-009
 - Website hosting account (GitHub Pages, Cloudflare Pages, or Netlify per STRAT-012)
 
@@ -95,13 +95,16 @@ All new documents in this launch package: the Atlas CEO Command Center files, th
 
 # 8. Email Still Needed
 
-A **temporary** contact email is now approved and live on the landing page: **atlasos5555@gmail.com**. A permanent, branded business email is still needed and remains a future CEO decision — Guardian should confirm the temporary mailbox has a strong unique password and 2FA before it is used for real client inquiries.
+**Contact: atlasos5555@gmail.com**
+**Status: Temporary launch contact email approved by Founder.**
+
+This is used for launch only and is explicitly not labeled permanent. The permanent, branded business email is pending domain purchase — expected to become `contact@[future-domain]`, `services@[future-domain]`, and `atlas@[future-domain]` once a domain is purchased (see `AOS_Website_Publishing_and_Contact_Readiness.md`, STRAT-015, Section 4A). Guardian should confirm the temporary mailbox has a strong unique password and 2FA before it is used for real client inquiries. No new email account has been created and no credentials are stored anywhere in this repository.
 
 ---
 
 # 9. Contact Method Still Needed
 
-The temporary email above now appears everywhere a contact method is shown on the landing page. A permanent contact channel is still pending CEO decision.
+Contact: atlasos5555@gmail.com now appears everywhere a contact method is shown on the landing page. Permanent domain-based contact addresses remain pending domain purchase.
 
 ---
 
@@ -138,7 +141,7 @@ $0 collected so far. The payment link is active and ready but has not yet been s
 # 15. Exact Next Actions
 
 1. Approve landing page
-2. Choose contact email — **Done (temporary):** atlasos5555@gmail.com is live pending a permanent branded address
+2. Choose contact email — **Done:** Contact: atlasos5555@gmail.com (Status: Temporary launch contact email approved by Founder)
 3. Publish website
 4. Fill first 25 leads
 5. Approve outreach template

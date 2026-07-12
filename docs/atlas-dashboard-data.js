@@ -29,10 +29,10 @@ const atlasDashboardData = {
   ],
   "proposedPartners": "Marketing, Client Acquisition, Content, Reporting, Ecommerce, Finance, and Legal/Compliance Partners are proposed only - not active.",
   "ceoDecisions": [
-    "Choose a permanent branded contact email (temporary: atlasos5555@gmail.com is live).",
     "Approve landing page v2 copy before publishing.",
     "Approve first outreach batch before anything is sent.",
-    "Decide when to publish the website (GitHub Pages / Cloudflare Pages / Netlify)."
+    "Decide when to publish the website (GitHub Pages / Cloudflare Pages / Netlify).",
+    "Decide when to purchase a domain and set up permanent contact@/services@/atlas@[future-domain] addresses."
   ],
   "risks": [
     "No real leads are loaded yet in Lead_Tracker.csv.",
@@ -52,7 +52,7 @@ const atlasDashboardData = {
     "Fill first 25 leads in Lead_Tracker.csv.",
     "Approve outreach templates before drafting a batch."
   ],
-  "lastUpdated": "2026-07-13 01:36:41"
+  "lastUpdated": "2026-07-13 01:48:26"
 };
 
 function renderAtlasDashboard(data) {

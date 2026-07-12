@@ -42,7 +42,7 @@ This folder holds the static AOS AI Workflow Starter Pack landing page and the l
 The landing page (`index.html`) does not go live until all of the following are complete:
 
 1. CEO review and approval of the final copy (Version 2, premium/dark redesign, "3 automations for the price of one" offer)
-2. Contact email — a temporary address (`atlasos5555@gmail.com`) is now live on the page pending a permanent branded address
+2. Contact email — **Contact: atlasos5555@gmail.com** (Status: Temporary launch contact email approved by Founder; not a permanent address — see STRAT-015 for the future domain-based email plan)
 3. Guardian security review (no exposed secrets, no unsafe embeds, payment link confirmed as the only active one)
 4. Explicit CEO approval to publish (Phase 2 of STRAT-012)
 
@@ -63,7 +63,7 @@ Both are plain static files. Double-clicking them (or using your editor's "Open 
 
 # What Still Requires CEO Approval Before Publishing
 
-1. Contact email — temporary (`atlasos5555@gmail.com`) is live; a permanent branded address still requires CEO decision
+1. Contact email — **Contact: atlasos5555@gmail.com** (Status: Temporary launch contact email approved by Founder; permanent domain-based addresses still pending domain purchase)
 2. Final landing page copy approved
 3. Guardian security review complete
 4. Explicit CEO go-live approval
@@ -78,3 +78,4 @@ See `AOS_Website_Publishing_and_Contact_Readiness.md` (STRAT-015) for the full p
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version — landing page and local Atlas dashboard created |
 | 1.1 | 2026-07-13 | Added local preview instructions and a pre-publish approval checklist, cross-referencing new STRAT-015 |
+| 1.2 | 2026-07-13 | Clarified contact email phrasing: "Contact: atlasos5555@gmail.com" / "Status: Temporary launch contact email approved by Founder" — not labeled permanent |

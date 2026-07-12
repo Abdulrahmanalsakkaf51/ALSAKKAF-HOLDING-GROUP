@@ -13,7 +13,7 @@
 | Document ID | STRAT-015 |
 | Document Type | Strategy — Publishing Readiness |
 | Status | Active |
-| Version | 1.1 |
+| Version | 1.2 |
 | Owner | Abdulrahman Alsakkaf |
 | Date | 2026-07-13 |
 | Related System | AOS |
@@ -48,9 +48,24 @@ All three serve over HTTPS by default. The final choice is a CEO decision, not a
 
 # 4. Contact Email Decision Needed
 
-A **temporary** contact email is now live on the landing page's "Request Custom Quote" path: **atlasos5555@gmail.com**, approved by the Founder as an interim measure. A permanent, branded address is still a future CEO decision.
+**Contact: atlasos5555@gmail.com**
+**Status: Temporary launch contact email approved by Founder.**
 
-This is a CEO decision, consistent with `AOS_Channel_and_Account_Setup_Runbook.md` (STRAT-009) — the Founder chooses and creates the address manually; it is never created or chosen automatically. Guardian should confirm the temporary mailbox uses a strong unique password and 2FA before it receives real client inquiries.
+This is the live contact address on the landing page's "Request Custom Quote" path. It is explicitly **not** labeled or treated as permanent — it is a launch-stage placeholder only, consistent with `AOS_Channel_and_Account_Setup_Runbook.md` (STRAT-009): the Founder chooses and creates every address manually; nothing is created or chosen automatically. Guardian should confirm the temporary mailbox uses a strong unique password and 2FA before it receives real client inquiries.
+
+No new email account has been created for this update, and no credentials, passwords, or recovery details are stored anywhere in this repository.
+
+---
+
+# 4A. Future Permanent Business Email (Pending Domain Purchase)
+
+A permanent, branded business email is **not yet created** and depends on purchasing a domain (Phase 3 of `AOS_Static_Website_and_Free_Hosting_Plan.md`, STRAT-012). Once a domain is purchased, the expected permanent addresses are:
+
+- `contact@[future-domain]`
+- `services@[future-domain]`
+- `atlas@[future-domain]`
+
+No domain has been purchased yet, and `[future-domain]` is a placeholder, not a real domain name. Domain purchase and any resulting email account creation remain manual, CEO-only actions — never automated, and never delegated to Atlas or any Partner.
 
 ---
 
@@ -101,7 +116,7 @@ Before go-live, Guardian confirms:
 # 11. Publishing Checklist
 
 1. [ ] Landing page copy approved by the CEO (Version 2, premium/dark redesign)
-2. [x] Temporary contact email in place (atlasos5555@gmail.com) — [ ] permanent branded address still pending
+2. [x] Temporary contact email in place — Contact: atlasos5555@gmail.com (Status: Temporary launch contact email approved by Founder) — [ ] permanent domain-based addresses still pending domain purchase
 3. [ ] Guardian security review complete (Section 10)
 4. [ ] Hosting option chosen (Section 3)
 5. [ ] Explicit CEO approval to publish (Phase 2, per STRAT-012)
@@ -126,3 +141,4 @@ No step in this checklist may be skipped. Publishing does not happen until all f
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version |
 | 1.1 | 2026-07-13 | Temporary contact email (atlasos5555@gmail.com) approved and now live on the landing page; publishing checklist updated; cross-referenced STRAT-016 |
+| 1.2 | 2026-07-13 | Corrected phrasing to "Contact: atlasos5555@gmail.com" / "Status: Temporary launch contact email approved by Founder" — explicitly not labeled permanent; added Section 4A documenting the future domain-based email plan (contact@/services@/atlas@[future-domain]), pending domain purchase |

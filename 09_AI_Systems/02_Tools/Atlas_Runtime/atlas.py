@@ -221,10 +221,10 @@ def guardian_notes(cfg):
 
 def ceo_decisions(cfg):
     return [
-        "Choose a permanent branded contact email (temporary: atlasos5555@gmail.com is live).",
         "Approve landing page v2 copy before publishing.",
         "Approve first outreach batch before anything is sent.",
         "Decide when to publish the website (GitHub Pages / Cloudflare Pages / Netlify).",
+        "Decide when to purchase a domain and set up permanent contact@/services@/atlas@[future-domain] addresses.",
     ]
 
 
