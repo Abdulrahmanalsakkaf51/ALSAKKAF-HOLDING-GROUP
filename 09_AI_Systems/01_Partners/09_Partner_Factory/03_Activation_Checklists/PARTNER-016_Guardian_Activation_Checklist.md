@@ -15,7 +15,7 @@
 | Partner Name | Guardian |
 | Document Type | Partner Activation Checklist |
 | Status | Not Ready for Activation |
-| Version | 1.0 |
+| Version | 1.1 |
 | Date | 2026-07-12 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
@@ -53,7 +53,7 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 | Prompt drafted | Yes |
 | Initial skill drafted | Yes |
 | Test log drafted | Yes |
-| Test log passed | No |
+| Test log passed | Yes |
 | Founder activation approval | No |
 | Partner Registry active status | No |
 | ADR activation decision | No |
@@ -93,9 +93,9 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 
 | Check | Confirmed |
 |-------|-----------|
-| Test log completed using Partner_Test_Log_Template.md | No — test cases defined, not yet executed |
-| Final test decision is "Passed" or "Passed with conditions" | No |
-| Any required fixes applied and retested | No |
+| Test log completed using Partner_Test_Log_Template.md | Yes — all ten test cases (G-T001–G-T010) executed as a documentation-based behavior review |
+| Final test decision is "Passed" or "Passed with conditions" | Yes — Passed for documentation-based defensive behavior review (GTEST-001) |
+| Any required fixes applied and retested | Not Applicable — no High/Medium severity issues found |
 
 ---
 
@@ -150,7 +150,7 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 | Check | Confirmed |
 |-------|-----------|
 | Partner Registry row added or updated | Yes (status Proposed / Draft) |
-| Status field ready to change to "Active" pending approval | No — pending test log execution and Founder review |
+| Status field ready to change to "Active" pending approval | No — test log now passed; still pending Founder review of Data Access/Cost Rules and Founder activation approval |
 
 ---
 
@@ -167,7 +167,7 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 
 # 15. Activation Decision
 
-This Partner is not yet ready for activation because the Test Log (GTEST-001) has not been executed, Data Access Rules and Cost Rules have not been reviewed by the Founder, and no Founder approval or ADR activation decision has been recorded.
+This Partner is not yet ready for activation. The Test Log (GTEST-001) has now been executed and passed as a documentation-based defensive behavior review, but Data Access Rules and Cost Rules have not yet been reviewed by the Founder, and no Founder activation approval or ADR activation decision has been recorded. Guardian remains Not Ready for Activation and is not Active.
 
 ---
 
@@ -186,3 +186,4 @@ This Partner is not yet ready for activation because the Test Log (GTEST-001) ha
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-12 | Initial draft checklist — request, profile, prompt, skill, and test log drafted; activation not yet ready |
+| 1.1 | 2026-07-12 | Test log passed marked Completed following documentation-based behavior review (GTEST-001 v1.1); Founder activation approval, Partner Registry active status, and ADR activation decision remain Not Completed; overall status remains Not Ready for Activation |
