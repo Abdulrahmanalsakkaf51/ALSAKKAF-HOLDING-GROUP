@@ -145,6 +145,30 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-111 | Guardian Activation Checklist | GACT-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/03_Activation_Checklists/PARTNER-016_Guardian_Activation_Checklist.md | PRJ-006, GUARD-001, GTEST-001, PREG-001, ADR-023 | Active |
 | KNOW-112 | AOS Governance, Risk, Compliance & Assurance Roadmap | GRCA-001 / 01_Holding_Company/01_Governance/AOS_GRC_and_Assurance_Roadmap.md | PRJ-006, PREG-001, GUARD-001, APFA-001, PCL-001 | Draft |
 | KNOW-113 | Guardian Activation ADR | ADR-023 / 01_Holding_Company/01_Governance/ADR/ADR-023_Activate_Guardian.md | PRJ-006, GUARD-001, GTEST-001, GACT-001, PREG-001 | Approved |
+| KNOW-114 | PRJ-007 Launch AOS Revenue Engine | PRJ-007 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-007_Launch_AOS_Revenue_Engine.md | PRJ-006, STRAT-001, STRAT-002, STRAT-003, STRAT-004, GRCA-001 | Active |
+| KNOW-115 | AOS Revenue Launch Master Plan | STRAT-005 / 01_Holding_Company/03_Strategy/AOS_Revenue_Launch_Master_Plan.md | PRJ-007, STRAT-006, STRAT-007 | Active |
+| KNOW-116 | AOS 14-Day Revenue Sprint | STRAT-006 / 01_Holding_Company/03_Strategy/AOS_14_Day_Revenue_Sprint.md | PRJ-007, STRAT-005, STRAT-008 | Active |
+| KNOW-117 | AOS Service Offer Catalog | STRAT-007 / 01_Holding_Company/03_Strategy/AOS_Service_Offer_Catalog.md | PRJ-007, STRAT-005, STRAT-008 | Active |
+| KNOW-118 | AOS Client Lead Pipeline and Outreach System | STRAT-008 / 01_Holding_Company/03_Strategy/AOS_Client_Lead_Pipeline_and_Outreach_System.md | PRJ-007, STRAT-007, GRCA-001 | Active |
+| KNOW-119 | AOS Channel and Account Setup Runbook | STRAT-009 / 01_Holding_Company/03_Strategy/AOS_Channel_and_Account_Setup_Runbook.md | PRJ-007, STRAT-010, GRCA-001 | Active |
+| KNOW-120 | AOS Multi-Platform Content Factory | STRAT-010 / 01_Holding_Company/03_Strategy/AOS_Multi_Platform_Content_Factory.md | PRJ-007, STRAT-006, STRAT-009 | Active |
+| KNOW-121 | AOS Dropshipping and Marketplace Experiment | STRAT-011 / 01_Holding_Company/03_Strategy/AOS_Dropshipping_and_Marketplace_Experiment.md | PRJ-007, STRAT-005, STRAT-013, GRCA-001 | Active |
+| KNOW-122 | AOS Static Website and Free Hosting Plan | STRAT-012 / 01_Holding_Company/03_Strategy/AOS_Static_Website_and_Free_Hosting_Plan.md | PRJ-007, STRAT-009, STRAT-013 | Active |
+| KNOW-123 | AOS Revenue Dashboard Spec | STRAT-013 / 01_Holding_Company/03_Strategy/AOS_Revenue_Dashboard_Spec.md | PRJ-007, STRAT-008, STRAT-010, STRAT-011 | Active |
+| KNOW-124 | Lead Tracker Template | RLT-001 / 01_Holding_Company/07_Templates/Revenue_Launch/Lead_Tracker_Template.md | PRJ-007, STRAT-008 | Active |
+| KNOW-125 | Client Qualification Template | RLT-002 / 01_Holding_Company/07_Templates/Revenue_Launch/Client_Qualification_Template.md | PRJ-007, STRAT-008 | Active |
+| KNOW-126 | Outreach Email Template | RLT-003 / 01_Holding_Company/07_Templates/Revenue_Launch/Outreach_Email_Template.md | PRJ-007, STRAT-008 | Active |
+| KNOW-127 | Social DM Template | RLT-004 / 01_Holding_Company/07_Templates/Revenue_Launch/Social_DM_Template.md | PRJ-007, STRAT-008 | Active |
+| KNOW-128 | Proposal Template | RLT-005 / 01_Holding_Company/07_Templates/Revenue_Launch/Proposal_Template.md | PRJ-007, STRAT-007, STRAT-008 | Active |
+| KNOW-129 | Service Delivery Checklist | RLT-006 / 01_Holding_Company/07_Templates/Revenue_Launch/Service_Delivery_Checklist.md | PRJ-007, STRAT-007 | Active |
+| KNOW-130 | Client Report Template | RLT-007 / 01_Holding_Company/07_Templates/Revenue_Launch/Client_Report_Template.md | PRJ-007, STRAT-007 | Active |
+| KNOW-131 | Content Calendar Template | RLT-008 / 01_Holding_Company/07_Templates/Revenue_Launch/Content_Calendar_Template.md | PRJ-007, STRAT-010 | Active |
+| KNOW-132 | Social Bio Template | RLT-009 / 01_Holding_Company/07_Templates/Revenue_Launch/Social_Bio_Template.md | PRJ-007, STRAT-009 | Active |
+| KNOW-133 | Website Copy Template | RLT-010 / 01_Holding_Company/07_Templates/Revenue_Launch/Website_Copy_Template.md | PRJ-007, STRAT-012 | Active |
+| KNOW-134 | Dropshipping Product Test Template | RLT-011 / 01_Holding_Company/07_Templates/Revenue_Launch/Dropshipping_Product_Test_Template.md | PRJ-007, STRAT-011 | Active |
+| KNOW-135 | Revenue Dashboard Data Template | RLT-012 / 01_Holding_Company/07_Templates/Revenue_Launch/Revenue_Dashboard_Data_Template.md | PRJ-007, STRAT-013 | Active |
+| KNOW-136 | AOS Revenue Launch CEO Briefing | RLBRIEF-001 / 01_Holding_Company/08_Reports/AOS_Revenue_Launch_CEO_Briefing.md | PRJ-007, STRAT-005 | Active |
+| KNOW-137 | AOS Payment Portal Readiness Plan | STRAT-014 / 01_Holding_Company/03_Strategy/AOS_Payment_Portal_Readiness_Plan.md | PRJ-007, STRAT-005, STRAT-007, STRAT-008, STRAT-009, STRAT-012, GRCA-001 | Active |
 
 
 
