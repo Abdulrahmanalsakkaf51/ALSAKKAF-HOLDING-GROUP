@@ -5,6 +5,21 @@
   "currency": "USD",
   "payment_link": "https://www.paypal.com/ncp/payment/2AN8FH99X682C",
   "delivery_time": "5-7 business days",
+  "offer_positioning": "3 automations for the price of one",
+  "automations": [
+    {
+      "name": "Lead / Client Tracking Automation",
+      "includes": ["1 business workflow review", "1 simple dashboard/reporting plan (tracking view)"]
+    },
+    {
+      "name": "Internal Operations Automation",
+      "includes": ["1 AI workflow map", "1 document structure recommendation", "1 implementation checklist"]
+    },
+    {
+      "name": "CEO / Management Visibility Automation",
+      "includes": ["1 simple dashboard/reporting plan (visibility view)", "1 follow-up improvement recommendation"]
+    }
+  ],
   "deliverables": [
     "1 business workflow review",
     "1 AI workflow map",

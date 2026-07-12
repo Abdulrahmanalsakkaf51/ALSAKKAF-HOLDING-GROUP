@@ -13,12 +13,12 @@
 | Document ID | STRAT-015 |
 | Document Type | Strategy — Publishing Readiness |
 | Status | Active |
-| Version | 1.0 |
+| Version | 1.1 |
 | Owner | Abdulrahman Alsakkaf |
 | Date | 2026-07-13 |
 | Related System | AOS |
 | Related Project | PRJ-007 |
-| Related Documents | STRAT-012, STRAT-014, RLWEB-001, GRCA-001, PRJ-007 |
+| Related Documents | STRAT-012, STRAT-014, STRAT-016, RLWEB-001, GRCA-001, PRJ-007 |
 
 ---
 
@@ -48,9 +48,9 @@ All three serve over HTTPS by default. The final choice is a CEO decision, not a
 
 # 4. Contact Email Decision Needed
 
-No real contact email has been chosen yet. The landing page's "Request Custom Quote" path currently shows the placeholder: **"Contact email to be added after CEO approval."**
+A **temporary** contact email is now live on the landing page's "Request Custom Quote" path: **atlasos5555@gmail.com**, approved by the Founder as an interim measure. A permanent, branded address is still a future CEO decision.
 
-This is a CEO decision, consistent with `AOS_Channel_and_Account_Setup_Runbook.md` (STRAT-009) — the Founder chooses and creates the address manually; it is never created or chosen automatically.
+This is a CEO decision, consistent with `AOS_Channel_and_Account_Setup_Runbook.md` (STRAT-009) — the Founder chooses and creates the address manually; it is never created or chosen automatically. Guardian should confirm the temporary mailbox uses a strong unique password and 2FA before it receives real client inquiries.
 
 ---
 
@@ -100,8 +100,8 @@ Before go-live, Guardian confirms:
 
 # 11. Publishing Checklist
 
-1. [ ] Landing page copy approved by the CEO
-2. [ ] Contact email chosen and the "Request Custom Quote" placeholder updated
+1. [ ] Landing page copy approved by the CEO (Version 2, premium/dark redesign)
+2. [x] Temporary contact email in place (atlasos5555@gmail.com) — [ ] permanent branded address still pending
 3. [ ] Guardian security review complete (Section 10)
 4. [ ] Hosting option chosen (Section 3)
 5. [ ] Explicit CEO approval to publish (Phase 2, per STRAT-012)
@@ -125,3 +125,4 @@ No step in this checklist may be skipped. Publishing does not happen until all f
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version |
+| 1.1 | 2026-07-13 | Temporary contact email (atlasos5555@gmail.com) approved and now live on the landing page; publishing checklist updated; cross-referenced STRAT-016 |

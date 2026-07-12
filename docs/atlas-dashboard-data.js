@@ -29,8 +29,8 @@ const atlasDashboardData = {
   ],
   "proposedPartners": "Marketing, Client Acquisition, Content, Reporting, Ecommerce, Finance, and Legal/Compliance Partners are proposed only - not active.",
   "ceoDecisions": [
-    "Choose contact email for Request Custom Quote.",
-    "Approve landing page copy before publishing.",
+    "Choose a permanent branded contact email (temporary: atlasos5555@gmail.com is live).",
+    "Approve landing page v2 copy before publishing.",
     "Approve first outreach batch before anything is sent.",
     "Decide when to publish the website (GitHub Pages / Cloudflare Pages / Netlify)."
   ],
@@ -47,13 +47,12 @@ const atlasDashboardData = {
     "Any real account (email, social, website host) requires manual CEO creation and a Guardian security review before use."
   ],
   "nextActions": [
-    "Approve landing page copy.",
-    "Choose contact email.",
+    "Approve landing page v2 copy.",
     "Publish website (after approval).",
     "Fill first 25 leads in Lead_Tracker.csv.",
     "Approve outreach templates before drafting a batch."
   ],
-  "lastUpdated": "2026-07-13 01:01:27"
+  "lastUpdated": "2026-07-13 01:36:41"
 };
 
 function renderAtlasDashboard(data) {

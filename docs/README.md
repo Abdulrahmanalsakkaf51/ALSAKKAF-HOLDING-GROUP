@@ -41,8 +41,8 @@ This folder holds the static AOS AI Workflow Starter Pack landing page and the l
 
 The landing page (`index.html`) does not go live until all of the following are complete:
 
-1. CEO review and approval of the final copy
-2. A real contact email chosen and added in place of the "Contact email to be added after CEO approval" placeholder
+1. CEO review and approval of the final copy (Version 2, premium/dark redesign, "3 automations for the price of one" offer)
+2. Contact email — a temporary address (`atlasos5555@gmail.com`) is now live on the page pending a permanent branded address
 3. Guardian security review (no exposed secrets, no unsafe embeds, payment link confirmed as the only active one)
 4. Explicit CEO approval to publish (Phase 2 of STRAT-012)
 
@@ -63,7 +63,7 @@ Both are plain static files. Double-clicking them (or using your editor's "Open 
 
 # What Still Requires CEO Approval Before Publishing
 
-1. Contact email chosen (replacing the "Contact email to be added after CEO approval" placeholder)
+1. Contact email — temporary (`atlasos5555@gmail.com`) is live; a permanent branded address still requires CEO decision
 2. Final landing page copy approved
 3. Guardian security review complete
 4. Explicit CEO go-live approval

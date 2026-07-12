@@ -87,7 +87,7 @@ All new documents in this launch package: the Atlas CEO Command Center files, th
 
 # 7. Accounts Still Needed
 
-- Dedicated business email
+- Permanent branded business email (temporary email now in use — see Section 8)
 - Social accounts (YouTube, Instagram, TikTok, Facebook, Threads, LinkedIn) per STRAT-009
 - Website hosting account (GitHub Pages, Cloudflare Pages, or Netlify per STRAT-012)
 
@@ -95,13 +95,13 @@ All new documents in this launch package: the Atlas CEO Command Center files, th
 
 # 8. Email Still Needed
 
-A dedicated business email has not yet been chosen. Until it is, the landing page's "Request Custom Quote" path uses the placeholder: *"Contact email to be added after CEO approval."*
+A **temporary** contact email is now approved and live on the landing page: **atlasos5555@gmail.com**. A permanent, branded business email is still needed and remains a future CEO decision — Guardian should confirm the temporary mailbox has a strong unique password and 2FA before it is used for real client inquiries.
 
 ---
 
 # 9. Contact Method Still Needed
 
-Same placeholder as above appears everywhere a contact method would otherwise be shown, until the CEO approves a specific email or contact channel.
+The temporary email above now appears everywhere a contact method is shown on the landing page. A permanent contact channel is still pending CEO decision.
 
 ---
 
@@ -138,7 +138,7 @@ $0 collected so far. The payment link is active and ready but has not yet been s
 # 15. Exact Next Actions
 
 1. Approve landing page
-2. Choose contact email
+2. Choose contact email — **Done (temporary):** atlasos5555@gmail.com is live pending a permanent branded address
 3. Publish website
 4. Fill first 25 leads
 5. Approve outreach template

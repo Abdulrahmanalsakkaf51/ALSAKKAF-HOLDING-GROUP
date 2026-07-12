@@ -13,12 +13,12 @@
 | Document ID | STRAT-007 |
 | Document Type | Strategy — Service Catalog |
 | Status | Active |
-| Version | 1.1 |
+| Version | 1.2 |
 | Date | 2026-07-13 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
 | Related Project | PRJ-007 |
-| Related Documents | STRAT-001, STRAT-002, STRAT-005, STRAT-006, STRAT-014, PRJ-007 |
+| Related Documents | STRAT-001, STRAT-002, STRAT-005, STRAT-006, STRAT-014, STRAT-016, PRJ-007 |
 
 ---
 
@@ -42,21 +42,22 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 3. AI Workflow Starter Pack
+# 3. AI Workflow Starter Pack — "3 Automations for the Price of One"
 
 | Field | Entry |
 |-------|-------|
 | Tier | Standard |
-| Target customer | Small business owner or team lead doing repetitive manual work (data entry, document drafting, scheduling, reporting) |
-| Problem solved | Manual, repetitive tasks consume owner/staff time that should go to growth work |
-| Deliverables | 2–3 documented AI-assisted workflows (e.g. document drafting templates, structured reporting prompts, task checklists), a short usage guide |
+| Positioning | 3 automations for the price of one: (1) Lead / Client Tracking Automation, (2) Internal Operations Automation, (3) CEO / Management Visibility Automation — one scoped engagement, three concrete outcomes, not three times the work |
+| Target customer | Small business owner or team lead doing repetitive manual work (data entry, document drafting, scheduling, reporting) with no lead-tracking system and no visibility into how the business is performing |
+| Problem solved | Leads get lost, internal work isn't documented, and the owner finds out how the business is doing too late — all three fixed in one engagement |
+| Deliverables | **Automation 1 — Lead/Client Tracking:** 1 business workflow review, 1 dashboard/reporting plan (tracking view). **Automation 2 — Internal Operations:** 1 AI workflow map, 1 document structure recommendation, 1 implementation checklist. **Automation 3 — CEO/Management Visibility:** 1 dashboard/reporting plan (visibility view), 1 follow-up improvement recommendation |
 | Delivery time | 5–7 business days |
-| Price range (AED) | 2,500–5,000 |
-| What Atlas/Partners do | Atlas drafts workflow templates and usage guide from client's described process; The Librarian indexes the finished workflow documents for reuse in future engagements |
-| What CEO approves | Final workflow scope, final price, and the delivered package before handoff |
+| Price range (AED) | 2,500–5,000 (public USD price: $399 via the approved PayPal link, see Payment status below) |
+| What Atlas/Partners do | Atlas drafts the workflow review, AI workflow map, document structure recommendation, dashboard/reporting plan, implementation checklist, and follow-up recommendation from the client's described process; The Librarian indexes the finished documents for reuse in future engagements |
+| What CEO approves | Final scope across all 3 automations, final price, and the delivered package before handoff |
 | Cost to deliver | Founder/Claude session time only; no paid tools required at this tier |
 | Profit estimate | High margin — primarily time cost; planning estimate only, not guaranteed |
-| Risk notes | Client's actual process may be more complex than described; scope creep risk — confirm scope in writing before starting |
+| Risk notes | Client's actual process may be more complex than described; scope creep risk — confirm the 3-automation scope in writing before starting; this is one scoped engagement, not an open-ended systems overhaul |
 | Upsell path | Small Business Dashboard Starter Pack or Client Operations Cleanup |
 | Payment status | **Active** — approved PayPal public payment link, $399 USD: https://www.paypal.com/ncp/payment/2AN8FH99X682C. Consultation-first: for any request that isn't clearly the standard package, offer a free intro call before the payment link. See `AOS_Payment_Portal_Readiness_Plan.md` (STRAT-014). |
 
@@ -219,3 +220,4 @@ These are planning ranges for early clients. Final pricing for any real client a
 |---------|------|---------|
 | 1.0 | 2026-07-12 | Initial catalog created for AOS Revenue Launch Operating Package (PRJ-007) |
 | 1.1 | 2026-07-13 | Added Payment Status field to all eight offers: AI Workflow Starter Pack marked Active with the approved PayPal public payment link ($399 USD); all other offers marked Request Custom Quote pending separate approval. Cross-referenced new STRAT-014 Payment Portal Readiness Plan. |
+| 1.2 | 2026-07-13 | Repositioned AI Workflow Starter Pack as "3 automations for the price of one" (Lead/Client Tracking, Internal Operations, CEO/Management Visibility Automation); same underlying 6 deliverables, price, and timeline — repositioning only, no scope inflation. Cross-referenced new STRAT-016 Lead Targeting and First Market Framework. |

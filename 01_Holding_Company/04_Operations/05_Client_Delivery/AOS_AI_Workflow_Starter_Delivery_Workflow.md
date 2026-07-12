@@ -13,18 +13,34 @@
 | Document ID | RLCD-001 |
 | Document Type | Delivery Workflow |
 | Status | Active |
-| Version | 1.0 |
+| Version | 1.1 |
 | Date | 2026-07-13 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
 | Related Project | PRJ-007 |
-| Related Documents | PRJ-007, STRAT-007, RLAG-001, RLAG-002 |
+| Related Documents | PRJ-007, STRAT-007, STRAT-016, RLAG-001, RLAG-002 |
 
 ---
 
 # 1. Purpose
 
 This is the master workflow for delivering the AOS AI Workflow Starter Pack ($399 USD) once a client pays. It exists so that the first real payment does not catch AOS unprepared.
+
+Temporary contact email for delivery communication: **atlasos5555@gmail.com** (pending a permanent branded address).
+
+---
+
+# 1A. The Offer: 3 Automations for the Price of One
+
+This single, scoped engagement delivers three concrete outcomes for the client, not three times the work:
+
+| Automation | What It Covers | Maps to Stages |
+|------------|------------------|-----------------|
+| 1 — Lead / Client Tracking Automation | A working system to capture, track, and follow up on leads/clients | Stage 3 (Workflow Review) + Stage 6 (Dashboard Plan, tracking view) |
+| 2 — Internal Operations Automation | One repetitive internal process documented, mapped, and made repeatable | Stage 4 (AI Workflow Map) + Stage 5 (Document Structure) + Stage 7 (Implementation Checklist) |
+| 3 — CEO / Management Visibility Automation | A lightweight view of what's happening in the business | Stage 6 (Dashboard Plan, visibility view) + Stage 8 (Follow-Up Recommendation) |
+
+All three automations are produced within the same 5-7 business day timeline and the same $399 USD price — the same six underlying deliverables (Stages 3-8 below), reframed around three business outcomes the client can immediately recognize.
 
 ---
 
@@ -83,3 +99,4 @@ Delivery target: **5-7 business days** from payment confirmation.
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version |
+| 1.1 | 2026-07-13 | Added Section 1A mapping the delivery stages to the new "3 Automations for the Price of One" offer positioning; added temporary contact email (atlasos5555@gmail.com); referenced STRAT-016 |

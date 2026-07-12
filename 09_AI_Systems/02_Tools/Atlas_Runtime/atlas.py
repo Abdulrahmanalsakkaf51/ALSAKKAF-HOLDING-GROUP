@@ -221,8 +221,8 @@ def guardian_notes(cfg):
 
 def ceo_decisions(cfg):
     return [
-        "Choose contact email for Request Custom Quote.",
-        "Approve landing page copy before publishing.",
+        "Choose a permanent branded contact email (temporary: atlasos5555@gmail.com is live).",
+        "Approve landing page v2 copy before publishing.",
         "Approve first outreach batch before anything is sent.",
         "Decide when to publish the website (GitHub Pages / Cloudflare Pages / Netlify).",
     ]
@@ -231,8 +231,7 @@ def ceo_decisions(cfg):
 def next_five_actions(m):
     if m["leads_found"] == 0:
         return [
-            "Approve landing page copy.",
-            "Choose contact email.",
+            "Approve landing page v2 copy.",
             "Publish website (after approval).",
             "Fill first 25 leads in Lead_Tracker.csv.",
             "Approve outreach templates before drafting a batch.",
@@ -610,14 +609,19 @@ def cmd_proposal(cfg, args):
     lines.append("## Offer")
     lines.append("")
     lines.append(f"{cfg['active_offer']} - ${cfg['price_usd']} {cfg['currency']}")
+    lines.append(f"Positioning: {cfg.get('offer_positioning', '')}")
     lines.append(f"Delivery time: {cfg['delivery_time']}")
     lines.append("")
     lines.append("Payments are processed in USD.")
     lines.append("")
-    lines.append("## What's Included")
+    lines.append("## 3 Automations for the Price of One")
     lines.append("")
-    for d in cfg["deliverables"]:
-        lines.append(f"- {d}")
+    for i, a in enumerate(cfg.get("automations", []), start=1):
+        lines.append(f"**{i}. {a['name']}**")
+        for item in a["includes"]:
+            lines.append(f"- {item}")
+        lines.append("")
+    lines.append("One scoped engagement - not three times the work, three times the outcome.")
     lines.append("")
     lines.append("## Not Sure This Is the Right Fit?")
     lines.append("")
@@ -753,13 +757,15 @@ def cmd_delivery_checklist(cfg, args):
 
     lines = ["# Client Delivery Checklist", ""]
     lines.extend(doc_info_block("delivery-checklist"))
-    lines.extend([f"Client: {client}", f"Offer: {cfg['active_offer']} - ${cfg['price_usd']} {cfg['currency']}",
+    lines.extend([f"Client: {client}", f"Offer: {cfg['active_offer']} - ${cfg['price_usd']} {cfg['currency']} ({cfg.get('offer_positioning', '')})",
               f"Delivery time: {cfg['delivery_time']}", f"Generated: {now_iso()}", "", "---", ""])
     lines.append("## Delivery Steps")
     lines.append("")
     lines.append("- [ ] Client intake form completed")
-    for d in cfg["deliverables"]:
-        lines.append(f"- [ ] {d} delivered")
+    for a in cfg.get("automations", []):
+        lines.append(f"- [ ] {a['name']} delivered")
+        for item in a["includes"]:
+            lines.append(f"      - [ ] {item}")
     lines.append("- [ ] Final client report sent")
     lines.append("- [ ] Client sign-off received")
     lines.append("- [ ] Lessons learned logged (internal)")
