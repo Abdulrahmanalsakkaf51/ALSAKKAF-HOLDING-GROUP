@@ -1,0 +1,57 @@
+# ALSAKKAF HOLDING GROUP
+
+# docs — AOS AI Services Landing Page & Atlas Dashboard
+
+> "Nothing in this folder is published until the CEO says so."
+
+---
+
+## Document Information
+
+| Field | Value |
+|-------|-------|
+| Document ID | RLWEB-001 |
+| Owner | Abdulrahman Alsakkaf |
+| Status | Active |
+| Version | 1.0 |
+| Created | 2026-07-13 |
+| Related Documents | PRJ-007, STRAT-007, STRAT-012, STRAT-014 |
+
+---
+
+# Purpose
+
+This folder holds the static AOS AI Workflow Starter Pack landing page and the local Atlas CEO dashboard. **Neither is published yet.** Publishing the landing page is a public action and requires explicit CEO approval (GitHub Pages or another host, per `AOS_Static_Website_and_Free_Hosting_Plan.md`, STRAT-012, Phase 2).
+
+---
+
+# What's Inside
+
+| File | Description |
+|------|-------------|
+| `index.html` | Public landing page selling the AOS AI Workflow Starter Pack ($399 USD via the approved PayPal link) |
+| `styles.css` | Styling for the landing page — plain CSS, no frameworks, no external dependencies |
+| `atlas-dashboard.html` | Internal, local-only Atlas CEO dashboard (leads, outreach, content, payments, risks, next actions) |
+| `atlas-dashboard.css` | Styling for the Atlas dashboard |
+| `atlas-dashboard-data.js` | Local static data file feeding the Atlas dashboard — edit values by hand as real numbers come in; no external calls, no tracking |
+
+---
+
+# Before Publishing
+
+The landing page (`index.html`) does not go live until all of the following are complete:
+
+1. CEO review and approval of the final copy
+2. A real contact email chosen and added in place of the "Contact email to be added after CEO approval" placeholder
+3. Guardian security review (no exposed secrets, no unsafe embeds, payment link confirmed as the only active one)
+4. Explicit CEO approval to publish (Phase 2 of STRAT-012)
+
+The Atlas dashboard (`atlas-dashboard.html`) is an internal tool only. It should never be linked from the public landing page and should not be published to a public host in its current form.
+
+---
+
+# Revision History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-07-13 | Initial version — landing page and local Atlas dashboard created |

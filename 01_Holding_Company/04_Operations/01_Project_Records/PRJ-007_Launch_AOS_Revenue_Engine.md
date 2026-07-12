@@ -218,6 +218,14 @@ The following actions always require explicit CEO approval before they happen, r
 | 2026-07-12 | PRJ-007 added to Project Register and project record created. |
 | 2026-07-12 | AOS Revenue Launch Operating Package created: Master Plan, 14-Day Sprint, Service Offer Catalog, Client Lead Pipeline and Outreach System, Channel and Account Setup Runbook, Multi-Platform Content Factory, Dropshipping and Marketplace Experiment, Static Website and Free Hosting Plan, Revenue Dashboard Spec, Revenue Launch Template Pack (12 templates), and CEO Briefing. Knowledge Register updated with new rows for every document. |
 | 2026-07-13 | PayPal public payment link added for AOS AI Workflow Starter Pack — $399. New AOS Payment Portal Readiness Plan (STRAT-014) created; Service Offer Catalog, Static Website and Free Hosting Plan, CEO Briefing, and Website Copy Template updated to reference the active link, the USD currency rule, the Request Custom Quote policy for other offers, and the Guardian security note. No credentials stored. |
+| 2026-07-13 | AOS Launch Version v1 created. |
+| 2026-07-13 | Static landing page v1 created in docs folder. |
+| 2026-07-13 | Atlas CEO Command Center v1 created. |
+| 2026-07-13 | Local Atlas Dashboard v1 created. |
+| 2026-07-13 | Lead generation execution system created. |
+| 2026-07-13 | Partner revenue task routing created. |
+| 2026-07-13 | Content execution package created. |
+| 2026-07-13 | Atlas Revenue Operator prompt created. |
 
 ---
 

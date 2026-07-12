@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas CEO Dashboard — AOS Launch v1</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="atlas-dashboard.css">
+</head>
+<body>
+
+<header class="dash-header">
+  <div class="dash-container">
+    <h1>Atlas CEO Dashboard</h1>
+    <p class="dash-subtitle">Internal tool — local and static. Not published, not linked from the public site.</p>
+  </div>
+</header>
+
+<main class="dash-container dash-grid">
+
+  <section class="card">
+    <h2>Founder Mission</h2>
+    <p id="founder-mission">—</p>
+  </section>
+
+  <section class="card">
+    <h2>Today's Revenue Target</h2>
+    <p id="revenue-target-note">—</p>
+  </section>
+
+  <section class="card">
+    <h2>Active Offer</h2>
+    <p id="active-offer">—</p>
+  </section>
+
+  <section class="card">
+    <h2>Payment Link</h2>
+    <p id="payment-link">—</p>
+    <p class="card-status" id="payment-link-status">—</p>
+  </section>
+
+  <section class="card">
+    <h2>Leads</h2>
+    <p>Leads found: <span id="leads-found">0</span></p>
+    <p>Leads qualified: <span id="leads-qualified">0</span></p>
+  </section>
+
+  <section class="card">
+    <h2>Outreach</h2>
+    <p>Outreach drafted: <span id="outreach-drafted">0</span></p>
+    <p>Outreach sent: <span id="outreach-sent">0</span></p>
+  </section>
+
+  <section class="card">
+    <h2>Content</h2>
+    <p>Posts drafted: <span id="content-drafted">0</span></p>
+    <p>Posts published: <span id="content-published">0</span></p>
+  </section>
+
+  <section class="card">
+    <h2>Website</h2>
+    <p id="website-status">—</p>
+  </section>
+
+  <section class="card">
+    <h2>Payments</h2>
+    <p>Payments received: <span id="payments-received">0</span></p>
+    <p>Revenue collected: <span id="revenue-collected">$0</span></p>
+  </section>
+
+  <section class="card">
+    <h2>Partner Tasks</h2>
+    <ul id="active-partners-list"></ul>
+    <p class="card-status" id="proposed-partners-note">—</p>
+  </section>
+
+  <section class="card">
+    <h2>CEO Decisions</h2>
+    <ul id="ceo-decisions-list"></ul>
+  </section>
+
+  <section class="card card-warning">
+    <h2>Risks</h2>
+    <ul id="risks-list"></ul>
+  </section>
+
+  <section class="card card-wide">
+    <h2>Next Actions</h2>
+    <ol id="next-actions-list"></ol>
+  </section>
+
+</main>
+
+<footer class="dash-footer">
+  <div class="dash-container">
+    <p>AOS Launch Version v1 &middot; Local, static, no external dependencies, no tracking.</p>
+  </div>
+</footer>
+
+<script src="atlas-dashboard-data.js"></script>
+</body>
+</html>
