@@ -14,13 +14,13 @@
 | Partner ID | PARTNER-016 |
 | Partner Name | Guardian |
 | Partner Type | Risk Partner |
-| Status | Draft / Proposed |
-| Version | 1.0 |
+| Status | Active |
+| Version | 1.1 |
 | Date | 2026-07-12 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
 | Related Project | PRJ-006 |
-| Related Documents | GREQ-001, GPROMPT-001, GTEST-001, GSKILL-001, GACT-001, PREG-001, POM-001, APFA-001, PCL-001, CSKILL-011 |
+| Related Documents | GREQ-001, GPROMPT-001, GTEST-001, GSKILL-001, GACT-001, PREG-001, POM-001, APFA-001, PCL-001, CSKILL-011, ADR-023 |
 
 ---
 
@@ -152,15 +152,15 @@ The Librarian indexes Guardian's approved policy documents, checklists, risk reg
 | Profile completed | Yes |
 | Skills defined | Yes |
 | Prompt/instructions completed | Yes |
-| Test log passed | No |
+| Test log passed | Yes |
 | Permission level assigned | Yes |
-| Data access approved | No — drafted, pending Founder review |
-| Cost rules approved | No — drafted, pending Founder review |
+| Data access approved | Yes |
+| Cost rules approved | Yes |
 | Knowledge Register updated | Yes |
-| Partner Registry updated | Yes (status Proposed / Draft) |
-| Founder approval captured | No |
+| Partner Registry updated | Yes (status Active) |
+| Founder approval captured | Yes |
 
-See `PARTNER-016_Guardian_Activation_Checklist.md` (GACT-001) for the full gate. Guardian is not Active.
+See `PARTNER-016_Guardian_Activation_Checklist.md` (GACT-001) for the full gate. Guardian is Active per `ADR-023_Activate_Guardian.md`.
 
 ---
 
@@ -176,6 +176,7 @@ See `PARTNER-016_Guardian_Activation_Checklist.md` (GACT-001) for the full gate.
 - GTEST-001 — Guardian Test Log
 - GSKILL-001 — Guardian Cybersecurity Risk Review Skill
 - GACT-001 — Guardian Activation Checklist
+- ADR-023 — Activate Guardian
 
 ---
 
@@ -184,3 +185,4 @@ See `PARTNER-016_Guardian_Activation_Checklist.md` (GACT-001) for the full gate.
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-12 | Initial draft profile |
+| 1.1 | 2026-07-12 | Status changed to Active following passed documentation-based test review (GTEST-001) and ADR-023 — Activate Guardian; Activation Requirements table updated to reflect completed gates |

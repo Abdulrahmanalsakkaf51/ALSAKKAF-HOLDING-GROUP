@@ -14,13 +14,13 @@
 | Partner ID | PARTNER-016 |
 | Partner Name | Guardian |
 | Document Type | Partner Activation Checklist |
-| Status | Not Ready for Activation |
-| Version | 1.1 |
+| Status | Active |
+| Version | 1.2 |
 | Date | 2026-07-12 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
 | Related Project | PRJ-006 |
-| Related Documents | PFT-005, GUARD-001, GPROMPT-001, GTEST-001, GSKILL-001, GREQ-001 |
+| Related Documents | PFT-005, GUARD-001, GPROMPT-001, GTEST-001, GSKILL-001, GREQ-001, ADR-023 |
 
 ---
 
@@ -54,9 +54,9 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 | Initial skill drafted | Yes |
 | Test log drafted | Yes |
 | Test log passed | Yes |
-| Founder activation approval | No |
-| Partner Registry active status | No |
-| ADR activation decision | No |
+| Founder activation approval | Yes |
+| Partner Registry active status | Yes |
+| ADR activation decision | Yes |
 
 ---
 
@@ -114,7 +114,7 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 |-------|-----------|
 | Approved data sources listed | Yes (drafted in profile) |
 | Forbidden/restricted data explicitly listed | Yes (drafted in profile) |
-| Founder has reviewed data access rules | No |
+| Founder has reviewed data access rules | Yes |
 
 ---
 
@@ -149,8 +149,8 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 
 | Check | Confirmed |
 |-------|-----------|
-| Partner Registry row added or updated | Yes (status Proposed / Draft) |
-| Status field ready to change to "Active" pending approval | No — test log now passed; still pending Founder review of Data Access/Cost Rules and Founder activation approval |
+| Partner Registry row added or updated | Yes (status Active) |
+| Status field ready to change to "Active" pending approval | Yes — changed to Active per ADR-023 |
 
 ---
 
@@ -158,16 +158,16 @@ Guardian must not be marked "Active" in the Partner Registry until every item on
 
 | Field | Entry |
 |-------|-------|
-| Approved By | Not yet approved |
-| Date | Not applicable |
-| Decision | Not yet decided |
-| Notes | Guardian's draft package is complete; test execution and Founder review are still required before any approval decision |
+| Approved By | Abdulrahman Alsakkaf (Founder/CEO) |
+| Date | 2026-07-12 |
+| Decision | Approved |
+| Notes | Approved for activation following passed documentation-based defensive behavior review (GTEST-001) and recorded in ADR-023 — Activate Guardian |
 
 ---
 
 # 15. Activation Decision
 
-This Partner is not yet ready for activation. The Test Log (GTEST-001) has now been executed and passed as a documentation-based defensive behavior review, but Data Access Rules and Cost Rules have not yet been reviewed by the Founder, and no Founder activation approval or ADR activation decision has been recorded. Guardian remains Not Ready for Activation and is not Active.
+This Partner is activated. The Test Log (GTEST-001) was executed and passed as a documentation-based defensive behavior review; Data Access Rules and Cost Rules have been reviewed by the Founder; Founder activation approval has been captured (Section 14); and the ADR activation decision (ADR-023 — Activate Guardian) has been recorded and approved. The Partner Registry (PREG-001) reflects PARTNER-016 Guardian as Active. Guardian is approved for defensive governance, risk review, policy, checklist, documentation, and digital trust planning only, per ADR-023.
 
 ---
 
@@ -178,6 +178,7 @@ This Partner is not yet ready for activation. The Test Log (GTEST-001) has now b
 - PREG-001 — Partner Registry
 - GUARD-001 — Guardian Partner Profile
 - GTEST-001 — Guardian Test Log
+- ADR-023 — Activate Guardian
 
 ---
 
@@ -187,3 +188,4 @@ This Partner is not yet ready for activation. The Test Log (GTEST-001) has now b
 |---------|------|---------|
 | 1.0 | 2026-07-12 | Initial draft checklist — request, profile, prompt, skill, and test log drafted; activation not yet ready |
 | 1.1 | 2026-07-12 | Test log passed marked Completed following documentation-based behavior review (GTEST-001 v1.1); Founder activation approval, Partner Registry active status, and ADR activation decision remain Not Completed; overall status remains Not Ready for Activation |
+| 1.2 | 2026-07-12 | Founder activation approval, Partner Registry active status, and ADR activation decision marked Completed following Founder direction and ADR-023 — Activate Guardian; Founder Approval Captured (Section 14) and Activation Decision (Section 15) recorded; Status changed to Active |

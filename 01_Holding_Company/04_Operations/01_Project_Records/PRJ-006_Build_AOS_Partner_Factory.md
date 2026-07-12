@@ -188,7 +188,7 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | PRJ-006-T008 | Update Knowledge Register with new rows | Completed |
 | PRJ-006-T009 | Run Markdown Audit Tool | Completed |
 | PRJ-006-T010 | Founder review and approval | Not Started |
-| PRJ-006-T011 | First Partner built through the Factory lifecycle | In Progress — Guardian (PARTNER-016) draft package created; test log passed (documentation-based review); not yet activated pending Founder activation approval and ADR activation decision |
+| PRJ-006-T011 | First Partner built through the Factory lifecycle | Completed — Guardian (PARTNER-016) built end-to-end through the Factory lifecycle (request, profile, prompt, skill, test log, activation checklist) and activated via ADR-023 |
 | PRJ-006-T012 | Create Partner Factory Template Pack (01_Templates) | Completed |
 | PRJ-006-T013 | Update Knowledge Register with Template Pack KNOW rows | Completed |
 
@@ -219,6 +219,7 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | 2026-07-12 | AOS Governance, Risk, Compliance & Assurance Roadmap created to separate Guardian from future risk, compliance, audit, and HR / People control functions. |
 | 2026-07-12 | AOS GRC & Assurance Roadmap corrected: existing PARTNER-011 and PARTNER-014 confirmed for Risk Management and HR / People (purpose text clarified, IDs unchanged); new PARTNER-017 and PARTNER-018 placeholders added for Compliance and Internal Audit, replacing the earlier duplicate PARTNER-017/PARTNER-020 rows. |
 | 2026-07-12 | PARTNER-016 Guardian documentation-based defensive behavior tests completed and passed. Guardian remains not active pending Founder activation approval and ADR activation decision. |
+| 2026-07-12 | PARTNER-016 Guardian activated as Cybersecurity & Digital Trust Partner after documentation-based defensive behavior tests passed and ADR activation decision was created. ADR-023 — Activate Guardian recorded and Approved; Partner Registry, Guardian Profile (GUARD-001), and Activation Checklist (GACT-001) updated to Active. PRJ-006-T011 (first Partner built through the Factory lifecycle) marked Completed. PRJ-006 itself remains Active, not complete. |
 
 ---
 
