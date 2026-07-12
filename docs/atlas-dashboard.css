@@ -97,6 +97,22 @@ body {
   border-color: var(--color-warning-border);
 }
 
+.card-guardian {
+  background: #eef3fb;
+  border-color: var(--color-primary);
+}
+
+.card-guardian h2 {
+  color: var(--color-primary);
+}
+
+.dash-footer code {
+  background: var(--color-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.85rem;
+}
+
 .card-wide {
   grid-column: 1 / -1;
 }

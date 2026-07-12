@@ -1,0 +1,61 @@
+{
+  "repo_name": "ALSAKKAF HOLDING GROUP",
+  "active_offer": "AOS AI Workflow Starter Pack",
+  "price_usd": 399,
+  "currency": "USD",
+  "payment_link": "https://www.paypal.com/ncp/payment/2AN8FH99X682C",
+  "delivery_time": "5-7 business days",
+  "deliverables": [
+    "1 business workflow review",
+    "1 AI workflow map",
+    "1 document structure recommendation",
+    "1 simple dashboard/reporting plan",
+    "1 implementation checklist",
+    "1 follow-up improvement recommendation"
+  ],
+  "active_partners": [
+    "PARTNER-001 - The Librarian - indexing, knowledge retrieval, filing, document classification",
+    "PARTNER-002 - Atlas - CEO command, planning, lead scoring, reporting, task routing",
+    "PARTNER-016 - Guardian - security, compliance, credential protection, risk review"
+  ],
+  "proposed_partners_note": "Marketing, Client Acquisition, Content, Reporting, Ecommerce, Finance, and Legal/Compliance Partners are proposed only - not active.",
+  "paths": {
+    "lead_tracker": "01_Holding_Company/04_Operations/03_Revenue_Operations/Lead_Tracker.csv",
+    "outreach_tracker": "01_Holding_Company/04_Operations/03_Revenue_Operations/Outreach_Tracker.csv",
+    "client_pipeline": "01_Holding_Company/04_Operations/03_Revenue_Operations/Client_Pipeline.csv",
+    "content_calendar": "01_Holding_Company/04_Operations/04_Content_Operations/Content_Calendar.csv",
+    "content_analytics": "01_Holding_Company/04_Operations/04_Content_Operations/Content_Analytics_Tracker.csv",
+    "dashboard_data_js": "docs/atlas-dashboard-data.js",
+    "landing_page": "docs/index.html",
+    "output_dir": "01_Holding_Company/08_Reports/Atlas_Output",
+    "proposal_drafts_dir": "01_Holding_Company/08_Reports/Atlas_Output/Proposal_Drafts",
+    "outreach_drafts_dir": "01_Holding_Company/08_Reports/Atlas_Output/Outreach_Drafts",
+    "content_packs_dir": "01_Holding_Company/08_Reports/Atlas_Output/Content_Packs",
+    "client_delivery_dir": "01_Holding_Company/08_Reports/Atlas_Output/Client_Delivery",
+    "revenue_reports_dir": "01_Holding_Company/08_Reports/Atlas_Output/Revenue_Reports"
+  },
+  "health_check_required_paths": [
+    "01_Holding_Company/04_Operations/03_Revenue_Operations/Lead_Tracker.csv",
+    "01_Holding_Company/04_Operations/03_Revenue_Operations/Outreach_Tracker.csv",
+    "01_Holding_Company/04_Operations/03_Revenue_Operations/Client_Pipeline.csv",
+    "01_Holding_Company/04_Operations/04_Content_Operations/Content_Calendar.csv",
+    "01_Holding_Company/04_Operations/04_Content_Operations/Content_Analytics_Tracker.csv",
+    "docs/atlas-dashboard-data.js",
+    "docs/index.html",
+    "01_Holding_Company/08_Reports/Atlas_Output"
+  ],
+  "health_check_payment_link_files": [
+    "docs/index.html",
+    "docs/atlas-dashboard-data.js",
+    "01_Holding_Company/03_Strategy/AOS_Payment_Portal_Readiness_Plan.md",
+    "01_Holding_Company/03_Strategy/AOS_Service_Offer_Catalog.md"
+  ],
+  "credential_scan_dirs": [
+    "09_AI_Systems/02_Tools/Atlas_Runtime",
+    "docs",
+    "01_Holding_Company/04_Operations/03_Revenue_Operations",
+    "01_Holding_Company/04_Operations/04_Content_Operations",
+    "01_Holding_Company/08_Reports"
+  ],
+  "credential_scan_extensions": [".md", ".js", ".json", ".py", ".ps1", ".bat", ".html", ".css", ".csv"]
+}

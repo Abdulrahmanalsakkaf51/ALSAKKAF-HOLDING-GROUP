@@ -13,6 +13,7 @@
   <div class="dash-container">
     <h1>Atlas CEO Dashboard</h1>
     <p class="dash-subtitle">Internal tool — local and static. Not published, not linked from the public site.</p>
+    <p class="dash-subtitle">Last updated: <span id="last-updated">—</span></p>
   </div>
 </header>
 
@@ -43,6 +44,7 @@
     <h2>Leads</h2>
     <p>Leads found: <span id="leads-found">0</span></p>
     <p>Leads qualified: <span id="leads-qualified">0</span></p>
+    <p class="card-status" id="leads-note">—</p>
   </section>
 
   <section class="card">
@@ -55,6 +57,13 @@
     <h2>Content</h2>
     <p>Posts drafted: <span id="content-drafted">0</span></p>
     <p>Posts published: <span id="content-published">0</span></p>
+    <p>Total tracked views: <span id="total-views">0</span></p>
+  </section>
+
+  <section class="card">
+    <h2>Pipeline</h2>
+    <p>Active pipeline entries: <span id="pipeline-active">0</span></p>
+    <p>Payment links sent: <span id="payment-links-sent">0</span></p>
   </section>
 
   <section class="card">
@@ -82,6 +91,11 @@
   <section class="card card-warning">
     <h2>Risks</h2>
     <ul id="risks-list"></ul>
+  </section>
+
+  <section class="card card-guardian">
+    <h2>Guardian Notes</h2>
+    <ul id="guardian-notes-list"></ul>
   </section>
 
   <section class="card card-wide">

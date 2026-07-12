@@ -1,0 +1,1 @@
+Placeholder folder for Atlas Runtime output. Files here are drafts/reports only — nothing is sent, published, or spent automatically. See ../README.md.

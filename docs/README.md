@@ -13,9 +13,9 @@
 | Document ID | RLWEB-001 |
 | Owner | Abdulrahman Alsakkaf |
 | Status | Active |
-| Version | 1.0 |
+| Version | 1.1 |
 | Created | 2026-07-13 |
-| Related Documents | PRJ-007, STRAT-007, STRAT-012, STRAT-014 |
+| Related Documents | PRJ-007, STRAT-007, STRAT-012, STRAT-014, STRAT-015 |
 
 ---
 
@@ -50,8 +50,31 @@ The Atlas dashboard (`atlas-dashboard.html`) is an internal tool only. It should
 
 ---
 
+# Previewing Locally
+
+| To Preview | Do This |
+|------------|---------|
+| The landing page | Open `docs/index.html` directly in a browser — no server needed |
+| The Atlas dashboard | Open `docs/atlas-dashboard.html` directly in a browser — no server needed |
+
+Both are plain static files. Double-clicking them (or using your editor's "Open with Live Preview/Browser") is enough — nothing needs to be installed or run.
+
+---
+
+# What Still Requires CEO Approval Before Publishing
+
+1. Contact email chosen (replacing the "Contact email to be added after CEO approval" placeholder)
+2. Final landing page copy approved
+3. Guardian security review complete
+4. Explicit CEO go-live approval
+
+See `AOS_Website_Publishing_and_Contact_Readiness.md` (STRAT-015) for the full publishing checklist and hosting options.
+
+---
+
 # Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version — landing page and local Atlas dashboard created |
+| 1.1 | 2026-07-13 | Added local preview instructions and a pre-publish approval checklist, cross-referencing new STRAT-015 |

@@ -179,6 +179,21 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-145 | Content Operations Package | RLCONTENT-001 / 01_Holding_Company/04_Operations/04_Content_Operations/Multi_Platform_Content_Execution_Plan.md | PRJ-007, STRAT-010 | Active |
 | KNOW-146 | AOS Launch Day Checklist | RLLAUNCH-001 / 01_Holding_Company/08_Reports/AOS_Launch_Day_Checklist.md | PRJ-007, STRAT-005, STRAT-006, STRAT-009, STRAT-012, STRAT-014 | Active |
 | KNOW-147 | Atlas Revenue Operator Prompt v1 | ARPROMPT-001 / 09_AI_Systems/01_Partners/02_Partner_Prompts/PARTNER-002_Atlas_Revenue_Operator_Prompt.md | PRJ-007, APROMPT-001, RTASK-001 | Active |
+| KNOW-148 | Atlas Super Assistant v1 Acceleration Plan | ASAP-001 / 01_Holding_Company/09_Architecture/Atlas_Super_Assistant_v1_Acceleration_Plan.md | PRJ-007, ASAA-001, PREG-001, GRCA-001 | Active |
+| KNOW-149 | Atlas Runtime Local Tool | ARUN-001 / 09_AI_Systems/02_Tools/Atlas_Runtime/atlas.py | PRJ-007, RTASK-001, ARPROMPT-001, ARTEST-001 | Active |
+| KNOW-150 | Atlas Output Folder | RLOUT-009 / 01_Holding_Company/08_Reports/Atlas_Output/README.md | PRJ-007, ARUN-001 | Active |
+| KNOW-151 | Atlas Dashboard v2 | RLWEB-002 / docs/atlas-dashboard.html | PRJ-007, RLWEB-001, ARUN-001 | Active |
+| KNOW-152 | Atlas Generated Template Package | RLAG-001 / 01_Holding_Company/07_Templates/Revenue_Launch/Atlas_Generated/Proposal_AI_Workflow_Starter_Template.md | PRJ-007, STRAT-007, ARUN-001 | Active |
+| KNOW-153 | First 72 Hours Revenue Playbook | RLOP-005 / 01_Holding_Company/04_Operations/03_Revenue_Operations/First_72_Hours_Revenue_Playbook.md | PRJ-007, STRAT-006, RLOP-001, ARUN-001 | Active |
+| KNOW-154 | AOS AI Workflow Starter Delivery Engine | RLCD-001 / 01_Holding_Company/04_Operations/05_Client_Delivery/AOS_AI_Workflow_Starter_Delivery_Workflow.md | PRJ-007, STRAT-007, RLAG-001 | Active |
+| KNOW-155 | Website Publishing and Contact Readiness Plan | STRAT-015 / 01_Holding_Company/03_Strategy/AOS_Website_Publishing_and_Contact_Readiness.md | PRJ-007, STRAT-012, STRAT-014, RLWEB-001 | Active |
+| KNOW-156 | Founder Quick Start | RLQS-001 / AOS_FOUNDER_QUICK_START.md | PRJ-007, RLLAUNCH-001, RLOP-005, ARUN-001 | Active |
+| KNOW-157 | Atlas Runtime System Test Log | ARTEST-001 / 09_AI_Systems/02_Tools/Atlas_Runtime/Atlas_Runtime_Test_Log.md | PRJ-007, ARUN-001 | Passed |
+| KNOW-158 | Claude Subagent - Atlas Product Engineer | CAGENT-001 / .claude/agents/atlas-product-engineer.md | ASAP-001, ARUN-001, PRJ-007 | Active |
+| KNOW-159 | Claude Subagent - Atlas Revenue Operator | CAGENT-002 / .claude/agents/atlas-revenue-operator.md | ASAP-001, RTASK-001, ARPROMPT-001, PRJ-007 | Active |
+| KNOW-160 | Claude Subagent - Guardian Security Reviewer | CAGENT-003 / .claude/agents/guardian-security-reviewer.md | ASAP-001, GUARD-001, ADR-023, PRJ-007 | Active |
+| KNOW-161 | Claude Subagent - Librarian Indexer | CAGENT-004 / .claude/agents/librarian-indexer.md | ASAP-001, LIB-001, PRJ-007 | Active |
+| KNOW-162 | Claude Subagent - QA Release Auditor | CAGENT-005 / .claude/agents/qa-release-auditor.md | ASAP-001, PRJ-007 | Active |
 
 
 
