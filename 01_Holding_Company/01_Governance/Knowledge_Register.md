@@ -143,6 +143,7 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-109 | Guardian Test Log | GTEST-001 / 09_AI_Systems/01_Partners/03_Test_Logs/PARTNER-016_Guardian_Test_Log.md | PRJ-006, GUARD-001, GPROMPT-001 | Draft / Not Passed Yet |
 | KNOW-110 | Guardian Cybersecurity Risk Review Skill | GSKILL-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/04_Partner_Skills/PARTNER-016_Guardian_Cybersecurity_Risk_Review_Skill.md | PRJ-006, GUARD-001, GTEST-001 | Draft |
 | KNOW-111 | Guardian Activation Checklist | GACT-001 / 09_AI_Systems/01_Partners/09_Partner_Factory/03_Activation_Checklists/PARTNER-016_Guardian_Activation_Checklist.md | PRJ-006, GUARD-001, GTEST-001, PREG-001 | Not Ready for Activation |
+| KNOW-112 | AOS Governance, Risk, Compliance & Assurance Roadmap | GRCA-001 / 01_Holding_Company/01_Governance/AOS_GRC_and_Assurance_Roadmap.md | PRJ-006, PREG-001, GUARD-001, APFA-001, PCL-001 | Draft |
 
 
 

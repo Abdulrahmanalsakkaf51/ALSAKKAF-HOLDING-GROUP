@@ -216,6 +216,8 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | 2026-07-12 | Knowledge Register updated with new rows for all PRJ-006 documents. |
 | 2026-07-12 | Partner Factory Template Pack created (01_Templates): Partner Request, Partner Profile, Partner Skill, Partner Test Log, Partner Activation Checklist, Partner Performance Review, Partner Retirement, Partner Task Assignment, Partner Learning Log, and Partner Budget Approval templates. Knowledge Register updated with KNOW-096 through KNOW-105. |
 | 2026-07-12 | PARTNER-016 Guardian draft package created through Partner Factory templates: Partner Request, Partner Profile, Prompt, Cybersecurity Risk Review Skill, Test Log (drafted, not executed), and Activation Checklist (Not Ready for Activation). Assigned PARTNER-016 rather than PARTNER-003 to avoid overwriting the existing unbuilt "Strategy Partner" placeholder row. Partner Registry updated with a Proposed / Draft row; Knowledge Register updated with KNOW-106 through KNOW-111. Guardian is not activated. |
+| 2026-07-12 | AOS Governance, Risk, Compliance & Assurance Roadmap created to separate Guardian from future risk, compliance, audit, and HR / People control functions. |
+| 2026-07-12 | AOS GRC & Assurance Roadmap corrected: existing PARTNER-011 and PARTNER-014 confirmed for Risk Management and HR / People (purpose text clarified, IDs unchanged); new PARTNER-017 and PARTNER-018 placeholders added for Compliance and Internal Audit, replacing the earlier duplicate PARTNER-017/PARTNER-020 rows. |
 
 ---
 
