@@ -188,7 +188,7 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | PRJ-006-T008 | Update Knowledge Register with new rows | Completed |
 | PRJ-006-T009 | Run Markdown Audit Tool | Completed |
 | PRJ-006-T010 | Founder review and approval | Not Started |
-| PRJ-006-T011 | First Partner built through the Factory lifecycle | Not Started |
+| PRJ-006-T011 | First Partner built through the Factory lifecycle | In Progress — Guardian (PARTNER-016) draft package created; test log not yet executed, not yet activated |
 | PRJ-006-T012 | Create Partner Factory Template Pack (01_Templates) | Completed |
 | PRJ-006-T013 | Update Knowledge Register with Template Pack KNOW rows | Completed |
 
@@ -215,6 +215,7 @@ The Partner Learning System (created under this project) defines how lessons, fe
 | 2026-07-12 | AOS Partner Factory Architecture, Partner Creation Lifecycle, Partner Routing and Cost Control Model, and Partner Learning System documents drafted. |
 | 2026-07-12 | Knowledge Register updated with new rows for all PRJ-006 documents. |
 | 2026-07-12 | Partner Factory Template Pack created (01_Templates): Partner Request, Partner Profile, Partner Skill, Partner Test Log, Partner Activation Checklist, Partner Performance Review, Partner Retirement, Partner Task Assignment, Partner Learning Log, and Partner Budget Approval templates. Knowledge Register updated with KNOW-096 through KNOW-105. |
+| 2026-07-12 | PARTNER-016 Guardian draft package created through Partner Factory templates: Partner Request, Partner Profile, Prompt, Cybersecurity Risk Review Skill, Test Log (drafted, not executed), and Activation Checklist (Not Ready for Activation). Assigned PARTNER-016 rather than PARTNER-003 to avoid overwriting the existing unbuilt "Strategy Partner" placeholder row. Partner Registry updated with a Proposed / Draft row; Knowledge Register updated with KNOW-106 through KNOW-111. Guardian is not activated. |
 
 ---
 

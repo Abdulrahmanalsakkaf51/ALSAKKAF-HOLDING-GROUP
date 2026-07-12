@@ -115,6 +115,7 @@ Level 5 is not approved.
 | PARTNER-013 | Company Lead Partner | Company Partner | Support the management of a future company inside the holding group | Level 1–3 | Proposed | CEO | PWA-001 / Partner_Workforce_Architecture.md |
 | PARTNER-014 | HR Partner | Operations Partner | Support future collaborator onboarding, role descriptions, learning paths, and culture documents | Level 1–3 | Proposed | CEO | Harmony, AOS University |
 | PARTNER-015 | Customer Support Partner | Operations Partner | Support customer inquiries, FAQs, support workflows, and service quality | Level 1–3 | Proposed | CEO | Future SOPs |
+| PARTNER-016 | Guardian | Risk Partner | Protect AOS, Atlas, Partners, company knowledge, client work, files, credentials, dashboards, marketing systems, and future integrations through cybersecurity governance, risk review, safe testing plans, security checklists, incident documentation, and digital trust controls | Level 1–3 | Proposed / Draft | CEO | GREQ-001, GUARD-001, GPROMPT-001, GTEST-001, GSKILL-001, GACT-001, CSKILL-011, PRJ-006 |
 
 ---
 
