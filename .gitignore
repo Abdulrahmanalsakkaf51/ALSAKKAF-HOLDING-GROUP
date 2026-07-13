@@ -1,0 +1,14 @@
+# ALSAKKAF HOLDING GROUP - repository ignore rules
+# Purpose: keep regenerated Atlas Runtime outputs out of git noise.
+# Atlas_Output reports are rebuilt by atlas.py on every run and are not
+# official records; the README and .gitkeep placeholders stay tracked.
+
+# Generated Atlas Runtime reports
+01_Holding_Company/08_Reports/Atlas_Output/**/*.md
+!01_Holding_Company/08_Reports/Atlas_Output/**/README.md
+!01_Holding_Company/08_Reports/Atlas_Output/**/.gitkeep*
+!01_Holding_Company/08_Reports/Atlas_Output/**/.gitkeep_readme.txt
+
+# Python bytecode caches (created if a test imports atlas.py)
+__pycache__/
+*.pyc
