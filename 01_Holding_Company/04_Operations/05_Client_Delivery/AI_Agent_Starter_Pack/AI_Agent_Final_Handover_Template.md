@@ -70,7 +70,7 @@ You have one revision round within 7 days of this handover — details in the re
 | Delivered by | ALSAKKAF HOLDING GROUP — AOS AI Services |
 | Client acceptance received | [date / pending] |
 | Setup session completed | [date / pending] |
-| Contact | atlasos5555@gmail.com (temporary launch contact email) |
+| Contact | support@alsakkafsystems.com (support) / abdulrahman@alsakkafsystems.com (Founder) |
 
 Thank you for trusting a new service with real work. We built this honestly and we support what we ship.
 
@@ -81,3 +81,4 @@ Thank you for trusting a new service with real work. We built this honestly and 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version (PRJ-009) |
+| 1.1 | 2026-07-14 | Handover contact updated to professional addresses (support@ / abdulrahman@ at alsakkafsystems.com) |

@@ -22,7 +22,7 @@ const atlasDashboardData = {
   "contentDrafted": 2,
   "contentPublished": 0,
   "totalViews": 0,
-  "websiteStatus": "Built, not yet published - see docs/README.md",
+  "websiteStatus": "Live at https://alsakkafsystems.com (GitHub Pages + custom domain)",
   "activePartners": [
     "PARTNER-001 - The Librarian - indexing, knowledge retrieval, filing, document classification",
     "PARTNER-002 - Atlas - CEO command, planning, lead scoring, reporting, task routing",
@@ -30,16 +30,16 @@ const atlasDashboardData = {
   ],
   "proposedPartners": "Marketing, Client Acquisition, Content, Reporting, Ecommerce, Finance, and Legal/Compliance Partners are proposed only - not active.",
   "ceoDecisions": [
-    "Approve landing page v2 copy before publishing.",
     "Approve first outreach batch before anything is sent.",
-    "Decide when to publish the website (GitHub Pages / Cloudflare Pages / Netlify).",
-    "Decide when to purchase a domain and set up permanent contact@/services@/atlas@[future-domain] addresses."
+    "Check the professional inboxes daily: hello@, sales@, services@, support@ (alsakkafsystems.com).",
+    "Approve each Founding Client Pilot application before accepting it (max 3 pilot projects).",
+    "Approve any further landing page copy change before it is pushed live."
   ],
   "risks": [
     "No real leads are loaded yet in Lead_Tracker.csv.",
     "No outreach has been sent yet - nothing is CEO-approved to send until reviewed.",
     "$0 collected so far. Revenue is not guaranteed - target ranges are planning estimates only.",
-    "Website is built locally but not yet published (requires CEO approval).",
+    "Website is live at https://alsakkafsystems.com - any copy change goes live on the next approved push.",
     "No credentials are stored by this tool or in this repository."
   ],
   "guardianNotes": [
@@ -53,7 +53,7 @@ const atlasDashboardData = {
     "Fill first 25 leads in Lead_Tracker.csv.",
     "Approve outreach templates before drafting a batch."
   ],
-  "lastUpdated": "2026-07-13 05:29:14"
+  "lastUpdated": "2026-07-14 01:44:33"
 };
 
 function renderAtlasDashboard(data) {

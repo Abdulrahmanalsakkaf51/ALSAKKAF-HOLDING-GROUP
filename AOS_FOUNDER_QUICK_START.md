@@ -13,7 +13,7 @@
 | Document ID | RLQS-001 |
 | Document Type | Founder Quick Start Guide |
 | Status | Active |
-| Version | 1.1 |
+| Version | 1.2 |
 | Owner | Abdulrahman Alsakkaf |
 | Date | 2026-07-13 |
 | Related System | AOS |
@@ -64,7 +64,7 @@ Start with `Day_1_Publish_and_Prepare.md`.
 
 # 4. Open the Landing Page
 
-Open `docs/index.html` directly in a browser to preview, or visit the live site: https://abdulrahmanalsakkaf51.github.io/ALSAKKAF-HOLDING-GROUP/ — both offers have active PayPal links ($399 Workflow Pack and $450 AI Agent Pack).
+Open `docs/index.html` directly in a browser to preview, or visit the live site: https://alsakkafsystems.com — both offers have active PayPal links ($399 Workflow Pack and $450 AI Agent Pack), and the Founding Client Program takes applications by email (sales@alsakkafsystems.com).
 
 ---
 
@@ -116,9 +116,9 @@ Produces a day's worth of platform-ready draft posts (LinkedIn, Threads, Instagr
 
 ---
 
-# 10. Publish the Website (Later)
+# 10. Website and Email Status
 
-Do not publish until `AOS_Website_Publishing_and_Contact_Readiness.md` (STRAT-015) checklist is fully complete: copy approved, contact email chosen, Guardian review done, and your explicit go-live approval given.
+The website is live at https://alsakkafsystems.com (GitHub Pages + custom domain). Professional email is active: hello@ (general), sales@ (quotes/pilot applications), services@ (service enquiries), support@ (support), abdulrahman@ (Founder), atlas@ (Atlas) — all @alsakkafsystems.com. Any landing page change goes live on the next approved push, so every copy change still needs your review, a Guardian check, and your explicit push approval (STRAT-015).
 
 ---
 
@@ -146,3 +146,4 @@ Nothing in this system can send a message, publish content, create a real accoun
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version |
 | 1.1 | 2026-07-13 | Added PRJ-009 revenue sprint section and the new Atlas commands (revenue-sprint, ai-agent-proposal, ai-agent-delivery, first-5-outreach); landing page note now covers both offers |
+| 1.2 | 2026-07-14 | Live site now https://alsakkafsystems.com; Section 10 rewritten from "Publish the Website (Later)" to current website/email status with the professional address structure |

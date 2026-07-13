@@ -13,7 +13,7 @@
 | Document ID | RLCD-001 |
 | Document Type | Delivery Workflow |
 | Status | Active |
-| Version | 1.2 |
+| Version | 1.3 |
 | Date | 2026-07-13 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
@@ -26,8 +26,8 @@
 
 This is the master workflow for delivering the AOS AI Workflow Starter Pack ($399 USD) once a client pays. It exists so that the first real payment does not catch AOS unprepared.
 
-**Contact: atlasos5555@gmail.com**
-**Status: Temporary launch contact email approved by Founder.**
+**Contact: services@alsakkafsystems.com (service enquiries) / support@alsakkafsystems.com (delivery support)**
+**Status: Professional domain email active (alsakkafsystems.com) — see STRAT-015.**
 
 Used for delivery communication for now. Not a permanent address — the permanent, domain-based addresses (`contact@`, `services@`, `atlas@[future-domain]`) are pending domain purchase, per `AOS_Website_Publishing_and_Contact_Readiness.md` (STRAT-015, Section 4A).
 
@@ -104,3 +104,4 @@ Delivery target: **5-7 business days** from payment confirmation.
 | 1.0 | 2026-07-13 | Initial version |
 | 1.1 | 2026-07-13 | Added Section 1A mapping the delivery stages to the new "3 Automations for the Price of One" offer positioning; added temporary contact email (atlasos5555@gmail.com); referenced STRAT-016 |
 | 1.2 | 2026-07-13 | Corrected contact email phrasing to "Contact: atlasos5555@gmail.com" / "Status: Temporary launch contact email approved by Founder" — explicitly not labeled permanent; referenced future domain-based email plan in STRAT-015 |
+| 1.3 | 2026-07-14 | Contact updated to professional domain addresses (services@ / support@ at alsakkafsystems.com); temporary Gmail address retired from live use |

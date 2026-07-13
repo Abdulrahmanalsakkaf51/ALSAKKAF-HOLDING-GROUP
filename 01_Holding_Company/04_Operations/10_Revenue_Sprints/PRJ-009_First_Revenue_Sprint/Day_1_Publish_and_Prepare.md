@@ -31,7 +31,7 @@
 
 - [ ] Open `docs\index.html` in your browser (double-click the file)
 - [ ] Check: both offers show correctly — $399 with PayPal button, $450 with Request Custom Quote only
-- [ ] Check: contact email shows atlasos5555@gmail.com marked as temporary
+- [ ] Check: professional contact addresses show correctly (hello@ / sales@ / services@ / abdulrahman@ at alsakkafsystems.com)
 - [ ] Click the PayPal link once to confirm it opens the correct $399 checkout — do not pay
 - [ ] Read every section out loud once; fix anything that sounds wrong before publishing
 

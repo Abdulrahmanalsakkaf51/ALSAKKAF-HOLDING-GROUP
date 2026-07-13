@@ -47,7 +47,7 @@ A revision round is one consolidated list of requested changes, delivered back w
 
 # 3. How to Request a Revision
 
-1. Collect all requested changes into one email to atlasos5555@gmail.com (temporary launch contact email).
+1. Collect all requested changes into one email to support@alsakkafsystems.com.
 2. For each item, say which document it concerns and what outcome you want.
 3. We confirm scope within 1 business day, then deliver within 3 business days.
 
@@ -64,3 +64,4 @@ Small questions are always welcome. Larger changes after the 7-day window are sc
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version (PRJ-009) |
+| 1.1 | 2026-07-14 | Revision request contact updated to professional support address (support@alsakkafsystems.com) |

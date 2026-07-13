@@ -6,8 +6,10 @@
   "payment_link": "https://www.paypal.com/ncp/payment/2AN8FH99X682C",
   "delivery_time": "5-7 business days",
   "offer_positioning": "3 automations for the price of one",
-  "contact_email": "atlasos5555@gmail.com",
-  "contact_email_note": "Temporary launch contact email approved by Founder - not a permanent address (see STRAT-015)",
+  "public_brand": "ALSAKKAF Systems",
+  "public_website": "https://alsakkafsystems.com",
+  "contact_email": "hello@alsakkafsystems.com",
+  "contact_email_note": "Professional domain email active on alsakkafsystems.com: hello@ (general), sales@ (quotes/pilot applications), services@ (service enquiries), support@ (support), abdulrahman@ (Founder), atlas@ (Atlas). See STRAT-015.",
   "automations": [
     {
       "name": "Lead / Client Tracking Automation",

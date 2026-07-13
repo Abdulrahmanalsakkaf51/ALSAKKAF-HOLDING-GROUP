@@ -24,7 +24,12 @@ REPO_ROOT = SCRIPT_DIR.parents[2]
 
 PAYPAL_LINK_399 = "https://www.paypal.com/ncp/payment/2AN8FH99X682C"
 PAYPAL_LINK_450 = "https://www.paypal.com/ncp/payment/2WXPECSR3UH68"
-CONTACT_EMAIL = "atlasos5555@gmail.com"
+OLD_GMAIL = "atlasos5555@gmail.com"  # retired temporary launch address; must not appear on the live site
+CONTACT_GENERAL = "hello@alsakkafsystems.com"
+CONTACT_SALES = "sales@alsakkafsystems.com"
+CONTACT_SERVICES = "services@alsakkafsystems.com"
+CONTACT_FOUNDER = "abdulrahman@alsakkafsystems.com"
+PUBLIC_DOMAIN = "alsakkafsystems.com"
 
 CREDENTIAL_PATTERN = re.compile(
     r"(?i)\b(password|passwd|pwd|secret|api[_-]?key|apikey|client[_-]?secret|"
@@ -63,8 +68,19 @@ def main():
         landing = ""
     check("$399 offer present", "$399" in landing and "AI Workflow Starter Pack" in landing)
     check("$450 AI Agent offer present", "$450" in landing and "AI Agent Starter Pack" in landing)
-    check("Temporary contact email present", CONTACT_EMAIL in landing)
-    check("Temporary email labeled as temporary", "Temporary launch contact email" in landing)
+    check("Retired Gmail address absent from landing page", OLD_GMAIL not in landing)
+    check("General contact (hello@) present", CONTACT_GENERAL in landing)
+    check("Sales contact (sales@) present", CONTACT_SALES in landing)
+    check("Services contact (services@) present", CONTACT_SERVICES in landing)
+    check("Founder contact (abdulrahman@) present", CONTACT_FOUNDER in landing)
+    check("Custom domain referenced on landing page", PUBLIC_DOMAIN in landing)
+    check("Public brand ALSAKKAF Systems present", "ALSAKKAF Systems" in landing)
+    check("Founder section present", 'id="founder"' in landing and "Founder-led" in landing)
+    check("Founding Client Program present",
+          'id="founding-client"' in landing and "Founding Client Program" in landing)
+    check("Pilot pricing shown without new payment links",
+          "$149 USD" in landing and "$199 USD" in landing
+          and "mailto:" + CONTACT_SALES + "?subject=Founding%20Client%20Pilot%20Application" in landing)
 
     # 2. Payment link discipline: each offer has exactly its own link
     print("\n[2] Payment link discipline")
@@ -84,11 +100,17 @@ def main():
         custom_section = landing[custom_start:custom_end if custom_end != -1 else None]
         check("Custom AOS Build has no PayPal link",
               PAYPAL_LINK_399 not in custom_section and PAYPAL_LINK_450 not in custom_section)
-        check("Custom AOS Build uses a mailto Request Quote button", "mailto:" + CONTACT_EMAIL in custom_section)
+        check("Custom AOS Build uses a mailto Request Quote button", "mailto:" + CONTACT_SALES in custom_section)
+    pilot_start = landing.find('id="founding-client"')
+    if pilot_start != -1:
+        pilot_end = landing.find("</section>", pilot_start)
+        pilot_section = landing[pilot_start:pilot_end if pilot_end != -1 else None]
+        check("Founding Client Program has no PayPal link (mailto application only)",
+              PAYPAL_LINK_399 not in pilot_section and PAYPAL_LINK_450 not in pilot_section)
     check("No empty href attributes on landing page", 'href=""' not in landing and "href='" + "'" not in landing)
     check("No quote button points at a bare anchor",
           'href="#contact">Request' not in landing and 'href="#">Request' not in landing)
-    check("Quote CTAs use mailto links", landing.count("mailto:" + CONTACT_EMAIL) >= 4)
+    check("Quote CTAs use sales mailto links", landing.count("mailto:" + CONTACT_SALES) >= 3)
 
     ai_proposal_tpl = read_text(
         "01_Holding_Company/07_Templates/Revenue_Launch/AI_Agent_Starter_Pack/AI_Agent_Starter_Proposal_Template.md"

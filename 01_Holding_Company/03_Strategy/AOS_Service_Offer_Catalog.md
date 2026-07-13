@@ -13,7 +13,7 @@
 | Document ID | STRAT-007 |
 | Document Type | Strategy — Service Catalog |
 | Status | Active |
-| Version | 1.4 |
+| Version | 1.5 |
 | Date | 2026-07-13 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
@@ -83,7 +83,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 | Profit estimate | High margin — primarily time cost; planning estimate only, not guaranteed |
 | Risk notes | Client may expect autonomous AI employees — the proposal must state plainly these are AI assistants operating under the client's approval; never promise guaranteed revenue, trading profits, automatic email sending, automatic account creation, paid integrations, API automation, or custom software development unless separately quoted and approved |
 | Upsell path | AI Workflow Starter Pack (systems around the agents) or AI Executive Assistant Setup |
-| Payment status | **Active** — approved PayPal public payment link, $450 USD: https://www.paypal.com/ncp/payment/2WXPECSR3UH68. Created and approved by the Founder on 2026-07-13 per the STRAT-014 Section 8 gate. Consultation-first option remains: clients who want scope confirmed first email the temporary contact address before paying. |
+| Payment status | **Active** — approved PayPal public payment link, $450 USD: https://www.paypal.com/ncp/payment/2WXPECSR3UH68. Created and approved by the Founder on 2026-07-13 per the STRAT-014 Section 8 gate. Consultation-first option remains: clients who want scope confirmed first email sales@alsakkafsystems.com before paying. |
 
 ---
 
@@ -235,6 +235,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 - Offers referencing "proposed" Partners (Marketing Partner, Reporting Partner) do not require those Partners to be active — Atlas and the Founder can deliver these offers directly today; the Partner references describe the intended future owner once activated through the Partner Factory (PRJ-006).
 - Two offers in this catalog have active payment links: the AI Workflow Starter Pack ($399 USD, PayPal) and the AI Agent Starter Pack ($450 USD, PayPal). Every other offer shows "Request Custom Quote" until the CEO creates and approves a separate payment link for it. See `AOS_Payment_Portal_Readiness_Plan.md` (STRAT-014) for the full payment policy, currency rule, and Guardian security note.
 - No credential, password, 2FA code, recovery code, API key, or bank detail is ever stored in this catalog — only the public checkout URLs for the two approved offers.
+- **Founding Client Program (limited pilot):** up to 3 approved Founding Client projects at discounted pilot pricing — AOS AI Workflow Starter Pilot $149 USD (normal $399) and AOS AI Agent Starter Pilot $199 USD (normal $450). Pilots are applied for by email to sales@alsakkafsystems.com (subject: Founding Client Pilot Application) and have **no payment links** — the CEO approves each application and arranges payment individually. The standard $399 and $450 offers and their PayPal links remain active and unchanged.
 
 ---
 
@@ -247,3 +248,4 @@ These are planning ranges for early clients. Final pricing for any real client a
 | 1.2 | 2026-07-13 | Repositioned AI Workflow Starter Pack as "3 automations for the price of one" (Lead/Client Tracking, Internal Operations, CEO/Management Visibility Automation); same underlying 6 deliverables, price, and timeline — repositioning only, no scope inflation. Cross-referenced new STRAT-016 Lead Targeting and First Market Framework. |
 | 1.3 | 2026-07-13 | Added AI Agent Starter Pack — "3 AI Agents for the Price of One" ($450 USD, Request Custom Quote, payment link pending Founder approval) as new Section 4 for PRJ-009 First Revenue Acquisition Sprint; renumbered later sections. |
 | 1.4 | 2026-07-13 | AI Agent Starter Pack payment status set to Active: Founder created and approved its PayPal public payment link ($450 USD). Catalog-wide notes updated to two active links. |
+| 1.5 | 2026-07-14 | Consultation-first contact updated to sales@alsakkafsystems.com (professional domain email replaced the temporary Gmail address); Founding Client Program pilot pricing recorded ($149/$199 USD, email application only, no new payment links, max 3 projects) |

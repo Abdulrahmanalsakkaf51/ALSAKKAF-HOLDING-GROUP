@@ -14,7 +14,7 @@
 | Project Name | First Revenue Acquisition Sprint |
 | Project Type | Revenue / Client Acquisition / Sales Execution |
 | Status | Active |
-| Version | 1.0 |
+| Version | 1.1 |
 | Date Created | 2026-07-13 |
 | Owner | Founder / CEO |
 | Primary Partner | Atlas (PARTNER-002) |
@@ -134,7 +134,7 @@ Daily rhythm: run `py 09_AI_Systems\02_Tools\Atlas_Runtime\atlas.py war-room`, o
 
 ## 8.1 Website Publishing
 
-Follow STRAT-015 (Website Publishing and Contact Readiness). Landing page in docs/ shows both offers, the temporary contact email (atlasos5555@gmail.com), and the $399 PayPal link only. Publishing itself is a manual CEO action via GitHub Pages after explicit approval.
+Follow STRAT-015 (Website Publishing and Contact Readiness). The site is live at https://alsakkafsystems.com (GitHub Pages + Founder-purchased custom domain) under the public brand ALSAKKAF Systems, showing both offers with their approved PayPal links and the professional contact addresses (hello@/sales@/services@/abdulrahman@ at alsakkafsystems.com). Publishing and every later copy change remain manual CEO-approved actions. (Launch phase used the temporary contact email atlasos5555@gmail.com and the $399 link only — see Progress Log.)
 
 ## 8.2 Lead Research
 
@@ -202,6 +202,12 @@ Day 5 focuses on trust assets: proof-of-work posts drafted from real (anonymized
 | 2026-07-13 | Founder approved the AI Agent Starter Pack public PayPal payment link ($450 USD). Link added to landing page, catalog (STRAT-007 v1.4), payment plan (STRAT-014 v1.1), atlas_config.json, proposal templates, and payment checklist Path B. Offer is now fully active. |
 | 2026-07-13 | Live-site fix: hero Atlas Command Center preview layout bug corrected (title span was styled as a 9px dot, causing overlapping text); responsive stacking added for mobile; reduced-motion support unchanged. |
 | 2026-07-13 | Request Quote buttons fixed: all quote CTAs now use mailto links to the temporary contact address with pre-filled subjects; no button leads to an empty page. |
+| 2026-07-14 | Founder purchased alsakkafsystems.com. |
+| 2026-07-14 | Professional email system activated: hello@, sales@, services@, support@, abdulrahman@, and atlas@ at alsakkafsystems.com. |
+| 2026-07-14 | Public website connected to the custom domain: https://alsakkafsystems.com (GitHub Pages, docs/CNAME added). |
+| 2026-07-14 | GitHub Pages DNS check passed. |
+| 2026-07-14 | Professional contact addresses replaced temporary Gmail contact details across the landing page, docs/README, Atlas config, quick start, STRAT-007, STRAT-015, and client-facing templates; all CTA mailto routing updated (hello@ questions, sales@ quotes/pilot, services@ service enquiries, abdulrahman@ Founder). |
+| 2026-07-14 | Founder-led public trust upgrade added to the landing page: public brand refined to ALSAKKAF Systems (AOS AI Services service line, ALSAKKAF HOLDING GROUP vision preserved), Founder profile section with contact button, "Why work with ALSAKKAF Systems?" trust cards, and Founding Client Program (max 3 pilots: $149 Workflow / $199 AI Agent, email application only, no new payment links; $399/$450 PayPal offers unchanged). |
 
 ---
 
@@ -210,3 +216,4 @@ Day 5 focuses on trust assets: proof-of-work posts drafted from real (anonymized
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version — First Revenue Acquisition Sprint |
+| 1.1 | 2026-07-14 | Domain milestone logged (alsakkafsystems.com live, professional email active); Section 8.1 updated to current published state; Founder trust upgrade and Founding Client Program recorded |

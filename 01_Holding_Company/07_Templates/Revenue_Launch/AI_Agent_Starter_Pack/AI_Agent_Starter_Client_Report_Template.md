@@ -58,8 +58,8 @@ Send this one-page report with the final handover (or after the setup session). 
 
 **A request:** if the agents earn their place in your week, a short testimonial (2-3 sentences) would mean a lot to a new service that runs on honesty. No pressure either way.
 
-[Founder name] — AOS AI Services, ALSAKKAF HOLDING GROUP
-atlasos5555@gmail.com
+[Founder name] — ALSAKKAF Systems, AOS AI Services
+abdulrahman@alsakkafsystems.com
 
 ---
 
@@ -68,3 +68,4 @@ atlasos5555@gmail.com
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version (PRJ-009) |
+| 1.1 | 2026-07-14 | Signature updated to ALSAKKAF Systems brand and professional Founder address (abdulrahman@alsakkafsystems.com) |

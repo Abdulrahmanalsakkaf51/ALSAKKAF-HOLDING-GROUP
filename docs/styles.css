@@ -752,3 +752,65 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- ALSAKKAF Systems public identity: Founder, trust, Founding Client Program --- */
+
+.founder-card p {
+  color: var(--text-1);
+  max-width: 720px;
+}
+
+.trust-card h3 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cyan-soft);
+  margin-bottom: 10px;
+}
+
+.pilot-banner {
+  border-color: rgba(255, 210, 122, 0.45);
+  margin-top: 24px;
+}
+
+.pilot-prices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.pilot-price {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+}
+
+.pilot-price h3 {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.pilot-price .big-price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.pilot-price .big-price span {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text-2);
+  text-decoration: line-through;
+  margin-bottom: 2px;
+}
+
+@media (max-width: 640px) {
+  .pilot-prices {
+    grid-template-columns: 1fr;
+  }
+}

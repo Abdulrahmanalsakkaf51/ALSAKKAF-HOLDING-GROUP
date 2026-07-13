@@ -53,8 +53,8 @@ Fixed scope, $450 USD one-time, no subscription, no software to install.
 Would it be worth a short call this week to see if it fits? If not, no problem — happy to just send over the one-page overview.
 
 [Founder name]
-AOS AI Services — ALSAKKAF HOLDING GROUP
-atlasos5555@gmail.com
+ALSAKKAF Systems — AOS AI Services
+abdulrahman@alsakkafsystems.com
 
 ---
 
@@ -69,3 +69,4 @@ Hi [first name] — just floating this back up. If the timing's wrong, a simple 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version (PRJ-009) |
+| 1.1 | 2026-07-14 | Signature updated to ALSAKKAF Systems brand and professional Founder address (abdulrahman@alsakkafsystems.com) |

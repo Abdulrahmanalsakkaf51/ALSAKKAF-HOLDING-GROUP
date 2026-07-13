@@ -210,7 +210,7 @@ def risk_lines(m, cfg):
         risks.append("No outreach has been sent yet - nothing is CEO-approved to send until reviewed.")
     if m["payments_received"] == 0:
         risks.append(f"$0 collected so far. Revenue is not guaranteed - target ranges are planning estimates only.")
-    risks.append("Website is built locally but not yet published (requires CEO approval).")
+    risks.append("Website is live at https://alsakkafsystems.com - any copy change goes live on the next approved push.")
     risks.append("No credentials are stored by this tool or in this repository.")
     return risks
 
@@ -225,10 +225,10 @@ def guardian_notes(cfg):
 
 def ceo_decisions(cfg):
     return [
-        "Approve landing page v2 copy before publishing.",
         "Approve first outreach batch before anything is sent.",
-        "Decide when to publish the website (GitHub Pages / Cloudflare Pages / Netlify).",
-        "Decide when to purchase a domain and set up permanent contact@/services@/atlas@[future-domain] addresses.",
+        "Check the professional inboxes daily: hello@, sales@, services@, support@ (alsakkafsystems.com).",
+        "Approve each Founding Client Pilot application before accepting it (max 3 pilot projects).",
+        "Approve any further landing page copy change before it is pushed live.",
     ]
 
 
@@ -501,7 +501,7 @@ def cmd_dashboard(cfg, args):
     dash_path = rp(cfg["paths"]["dashboard_data_js"])
 
     leads_note = "No real leads entered yet." if m["leads_found"] == 0 else f"{m['leads_found']} real lead(s) on file."
-    website_status = "Built, not yet published - see docs/README.md"
+    website_status = "Live at https://alsakkafsystems.com (GitHub Pages + custom domain)"
 
     risks = risk_lines(m, cfg)
     decisions = ceo_decisions(cfg)

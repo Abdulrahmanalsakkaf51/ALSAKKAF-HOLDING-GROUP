@@ -71,8 +71,8 @@ Date: [date] · Valid for: 14 days
 **To proceed:** reply to this email with "Let's go" and we'll send the intake form the same day.
 
 [Founder name]
-ALSAKKAF HOLDING GROUP — AOS AI Services
-atlasos5555@gmail.com
+ALSAKKAF Systems — AOS AI Services
+abdulrahman@alsakkafsystems.com
 
 ---
 
@@ -81,3 +81,4 @@ atlasos5555@gmail.com
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version (PRJ-009) |
+| 1.1 | 2026-07-14 | Signature updated to ALSAKKAF Systems brand and professional Founder address (abdulrahman@alsakkafsystems.com) |
