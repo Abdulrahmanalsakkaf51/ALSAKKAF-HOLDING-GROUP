@@ -13,12 +13,12 @@
 | Document ID | RLQS-001 |
 | Document Type | Founder Quick Start Guide |
 | Status | Active |
-| Version | 1.0 |
+| Version | 1.1 |
 | Owner | Abdulrahman Alsakkaf |
 | Date | 2026-07-13 |
 | Related System | AOS |
-| Related Project | PRJ-007 |
-| Related Documents | PRJ-007, RLLAUNCH-001, RLOP-005 |
+| Related Project | PRJ-007, PRJ-009 |
+| Related Documents | PRJ-007, PRJ-009, RLLAUNCH-001, RLOP-005, RSP-001 |
 
 ---
 
@@ -48,9 +48,23 @@ Or just double-click **`RUN_ATLAS_COMMAND_CENTER.bat`** (or the `.ps1` version) 
 
 ---
 
+# 3b. Run the Revenue Sprint (PRJ-009)
+
+```
+py "09_AI_Systems\02_Tools\Atlas_Runtime\atlas.py" revenue-sprint
+```
+
+Generates the sprint status report: offers, publish status, leads, outreach, proposals, payments, and your next actions. Then open the sprint folder and follow today's day file:
+
+`01_Holding_Company/04_Operations/10_Revenue_Sprints/PRJ-009_First_Revenue_Sprint/`
+
+Start with `Day_1_Publish_and_Prepare.md`.
+
+---
+
 # 4. Open the Landing Page
 
-Open `docs/index.html` directly in a browser. This previews the AOS AI Workflow Starter Pack sales page — it is **not published** yet.
+Open `docs/index.html` directly in a browser. This previews the sales page with both offers — the AI Workflow Starter Pack ($399, active PayPal link) and the AI Agent Starter Pack ($450, Request Custom Quote) — it is **not published** yet.
 
 ---
 
@@ -82,7 +96,13 @@ Produces a daily CEO briefing from your current tracker data.
 py "09_AI_Systems\02_Tools\Atlas_Runtime\atlas.py" proposal
 ```
 
-Drafts a proposal for the AOS AI Workflow Starter Pack ($399 USD). Review and personalize before sending — Atlas never sends it for you.
+Drafts a proposal for the AOS AI Workflow Starter Pack ($399 USD). For the AI Agent Starter Pack ($450 USD, no payment link yet) use:
+
+```
+py "09_AI_Systems\02_Tools\Atlas_Runtime\atlas.py" ai-agent-proposal
+```
+
+Review and personalize before sending — Atlas never sends anything for you. Related: `ai-agent-delivery` generates the $450 delivery checklist, and `first-5-outreach` generates the sprint outreach pack (drafts only, never invents leads).
 
 ---
 
@@ -125,3 +145,4 @@ Nothing in this system can send a message, publish content, create a real accoun
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version |
+| 1.1 | 2026-07-13 | Added PRJ-009 revenue sprint section and the new Atlas commands (revenue-sprint, ai-agent-proposal, ai-agent-delivery, first-5-outreach); landing page note now covers both offers |

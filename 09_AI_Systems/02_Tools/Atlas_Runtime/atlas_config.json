@@ -6,6 +6,8 @@
   "payment_link": "https://www.paypal.com/ncp/payment/2AN8FH99X682C",
   "delivery_time": "5-7 business days",
   "offer_positioning": "3 automations for the price of one",
+  "contact_email": "atlasos5555@gmail.com",
+  "contact_email_note": "Temporary launch contact email approved by Founder - not a permanent address (see STRAT-015)",
   "automations": [
     {
       "name": "Lead / Client Tracking Automation",
@@ -28,6 +30,48 @@
     "1 implementation checklist",
     "1 follow-up improvement recommendation"
   ],
+  "second_offer": {
+    "name": "AOS AI Agent Starter Pack",
+    "price_usd": 450,
+    "currency": "USD",
+    "positioning": "3 AI agents for the price of one",
+    "delivery_time": "5-7 business days",
+    "payment_status": "Request Custom Quote - payment link pending Founder approval",
+    "agents": [
+      {
+        "name": "Manager Agent",
+        "role": "Organizes priorities, tasks, decisions, summaries, and next actions"
+      },
+      {
+        "name": "Research / Analyst Agent",
+        "role": "Researches the business, competitors, customers, content ideas, workflows, and market signals"
+      },
+      {
+        "name": "Operations / Implementation Agent",
+        "role": "Turns decisions into checklists, workflows, templates, reports, and execution plans"
+      }
+    ],
+    "deliverables": [
+      "3 custom AI agent profiles",
+      "3 custom AI agent prompts",
+      "Agent task routing map",
+      "Business-specific workflow",
+      "Simple dashboard/reporting template",
+      "Implementation guide",
+      "Approval/safety rules",
+      "30-minute explanation/setup session"
+    ],
+    "never_promise": [
+      "Fully autonomous AI employees",
+      "Guaranteed revenue",
+      "Trading profits",
+      "Automatic email sending",
+      "Automatic account creation",
+      "Paid integrations",
+      "API automation",
+      "Custom software development (unless separately quoted and approved)"
+    ]
+  },
   "active_partners": [
     "PARTNER-001 - The Librarian - indexing, knowledge retrieval, filing, document classification",
     "PARTNER-002 - Atlas - CEO command, planning, lead scoring, reporting, task routing",
@@ -41,7 +85,11 @@
     "content_calendar": "01_Holding_Company/04_Operations/04_Content_Operations/Content_Calendar.csv",
     "content_analytics": "01_Holding_Company/04_Operations/04_Content_Operations/Content_Analytics_Tracker.csv",
     "dashboard_data_js": "docs/atlas-dashboard-data.js",
+    "dashboard_html": "docs/atlas-dashboard.html",
     "landing_page": "docs/index.html",
+    "revenue_sprint_dir": "01_Holding_Company/04_Operations/10_Revenue_Sprints/PRJ-009_First_Revenue_Sprint",
+    "ai_agent_delivery_dir": "01_Holding_Company/04_Operations/05_Client_Delivery/AI_Agent_Starter_Pack",
+    "ai_agent_templates_dir": "01_Holding_Company/07_Templates/Revenue_Launch/AI_Agent_Starter_Pack",
     "output_dir": "01_Holding_Company/08_Reports/Atlas_Output",
     "proposal_drafts_dir": "01_Holding_Company/08_Reports/Atlas_Output/Proposal_Drafts",
     "outreach_drafts_dir": "01_Holding_Company/08_Reports/Atlas_Output/Outreach_Drafts",
@@ -70,6 +118,10 @@
     "docs",
     "01_Holding_Company/04_Operations/03_Revenue_Operations",
     "01_Holding_Company/04_Operations/04_Content_Operations",
+    "01_Holding_Company/04_Operations/05_Client_Delivery",
+    "01_Holding_Company/04_Operations/06_Market_Intelligence",
+    "01_Holding_Company/04_Operations/10_Revenue_Sprints",
+    "01_Holding_Company/07_Templates/Revenue_Launch",
     "01_Holding_Company/08_Reports"
   ],
   "credential_scan_extensions": [".md", ".js", ".json", ".py", ".ps1", ".bat", ".html", ".css", ".csv"]

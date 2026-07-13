@@ -8,6 +8,7 @@ const atlasDashboardData = {
   "revenueCollected": 0.0,
   "paymentsReceived": 0,
   "activeOffer": "AOS AI Workflow Starter Pack - $399 USD",
+  "secondOffer": "AOS AI Agent Starter Pack - $450 USD - Request Custom Quote - payment link pending Founder approval",
   "paymentLink": "https://www.paypal.com/ncp/payment/2AN8FH99X682C",
   "paymentLinkStatus": "Active - only approved link",
   "currency": "USD",
@@ -52,7 +53,7 @@ const atlasDashboardData = {
     "Fill first 25 leads in Lead_Tracker.csv.",
     "Approve outreach templates before drafting a batch."
   ],
-  "lastUpdated": "2026-07-13 01:48:26"
+  "lastUpdated": "2026-07-13 04:27:15"
 };
 
 function renderAtlasDashboard(data) {
@@ -77,6 +78,7 @@ function renderAtlasDashboard(data) {
   setText("revenue-collected", "$" + data.revenueCollected);
   setText("payments-received", data.paymentsReceived);
   setText("active-offer", data.activeOffer);
+  setText("second-offer", data.secondOffer || "");
   setText("payment-link", data.paymentLink);
   setText("payment-link-status", data.paymentLinkStatus);
   setText("leads-found", data.leadsFound);

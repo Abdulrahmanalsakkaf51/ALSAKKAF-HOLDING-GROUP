@@ -195,6 +195,15 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-161 | Claude Subagent - Librarian Indexer | CAGENT-004 / .claude/agents/librarian-indexer.md | ASAP-001, LIB-001, PRJ-007 | Active |
 | KNOW-162 | Claude Subagent - QA Release Auditor | CAGENT-005 / .claude/agents/qa-release-auditor.md | ASAP-001, PRJ-007 | Active |
 | KNOW-163 | AOS Lead Targeting and First Market Framework | STRAT-016 / 01_Holding_Company/03_Strategy/AOS_Lead_Targeting_and_First_Market_Framework.md | PRJ-007, STRAT-005, STRAT-007, STRAT-008, RLOP-001 | Active |
+| KNOW-164 | AOS Company Operating System v0.7 Master Blueprint (target architecture; corrected v1.1) | AOS7-001 / 01_Holding_Company/09_Architecture/AOS_Company_Operating_System_v0_7_Master_Blueprint.md | PRJ-008, PRJ-009, STRAT-005 | Active - Target Architecture |
+| KNOW-165 | PRJ-009 First Revenue Acquisition Sprint project record | PRJ-009 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-009_First_Revenue_Acquisition_Sprint.md | PRJ-007, PRJ-008, STRAT-007, STRAT-016 | Active |
+| KNOW-166 | AOS AI Agent Starter Pack service ($450 USD, 3 AI agents for the price of one) | STRAT-007 v1.3 Section 4 / 01_Holding_Company/03_Strategy/AOS_Service_Offer_Catalog.md | PRJ-009, STRAT-014, AIAD-001 | Active - Request Custom Quote |
+| KNOW-167 | AI Agent Starter Pack Delivery System (workflow, intake, profiles, prompts, routing, guide, safety, handover, revisions) | AIAD-001 to AIAD-009 / 01_Holding_Company/04_Operations/05_Client_Delivery/AI_Agent_Starter_Pack/ | PRJ-009, STRAT-007, RLCD-001 | Active |
+| KNOW-168 | AI Agent Starter Pack Templates (proposal, outreach email, LinkedIn DM, Instagram DM, call script, objections, client report) | AIAT-001 to AIAT-007 / 01_Holding_Company/07_Templates/Revenue_Launch/AI_Agent_Starter_Pack/ | PRJ-009, STRAT-007, STRAT-016 | Active |
+| KNOW-169 | First Revenue Sprint Execution System (master plan, Day 1-7 files, leads/outreach/proposal/payment/delivery/lessons templates) | RSP-001 to RSP-014 / 01_Holding_Company/04_Operations/10_Revenue_Sprints/PRJ-009_First_Revenue_Sprint/ | PRJ-009, STRAT-016, RLOP-002 | Active |
+| KNOW-170 | First Revenue Target Market Decision Pack (13 candidate markets scored) | MKTI-001 / 01_Holding_Company/04_Operations/06_Market_Intelligence/First_Revenue_Target_Market_Decision_Pack.md | PRJ-009, STRAT-016 | Active |
+| KNOW-171 | AOS No-Hype Revenue Reality (Founder reality anchor; trading systems research-only rule) | STRAT-017 / 01_Holding_Company/03_Strategy/AOS_No_Hype_Revenue_Reality.md | PRJ-009, STRAT-005, RSP-001 | Active |
+| KNOW-172 | PRJ-009 Revenue Sprint Release Test (30 checks; Atlas Runtime v1.2 commands: revenue-sprint, ai-agent-proposal, ai-agent-delivery, first-5-outreach) | 09_AI_Systems/02_Tools/Atlas_Runtime/test_prj_009_revenue_sprint.py | PRJ-009, ARUN-001 | Passed |
 
 
 

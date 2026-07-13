@@ -13,11 +13,11 @@
 | Document ID | STRAT-007 |
 | Document Type | Strategy — Service Catalog |
 | Status | Active |
-| Version | 1.2 |
+| Version | 1.3 |
 | Date | 2026-07-13 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
-| Related Project | PRJ-007 |
+| Related Project | PRJ-007, PRJ-009 |
 | Related Documents | STRAT-001, STRAT-002, STRAT-005, STRAT-006, STRAT-014, STRAT-016, PRJ-007 |
 
 ---
@@ -35,7 +35,7 @@ Every offer here is designed to be deliverable using AOS's existing documented P
 | Tier | Price Range (AED) | Typical Offers |
 |------|--------------------|-----------------|
 | Entry | 750–1,500 | Website / Landing Page Starter, Social Content Factory Setup (light) |
-| Standard | 2,500–5,000 | AI Workflow Starter Pack, Small Business Dashboard Starter Pack, Social Content Factory Setup (full), Client Operations Cleanup, Training Material Builder |
+| Standard | 2,500–5,000 | AI Workflow Starter Pack ($399 USD public price), AI Agent Starter Pack ($450 USD public price), Small Business Dashboard Starter Pack, Social Content Factory Setup (full), Client Operations Cleanup, Training Material Builder |
 | Premium | 7,500–15,000 | AI Executive Assistant Setup, Marketing Campaign Starter |
 
 These are planning ranges for early clients. Final pricing for any real client always requires explicit CEO approval, per the Pricing Approval Rule in `AOS_Client_Lead_Pipeline_and_Outreach_System.md` (STRAT-008). No price is finalized by Atlas or any Partner.
@@ -63,7 +63,31 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 4. Small Business Dashboard Starter Pack
+# 4. AI Agent Starter Pack — "3 AI Agents for the Price of One"
+
+| Field | Entry |
+|-------|-------|
+| Tier | Standard |
+| Positioning | 3 AI agents for the price of one: (1) Manager Agent, (2) Research / Analyst Agent, (3) Operations / Implementation Agent — one scoped engagement, three working AI assistants built around the client's business |
+| Target customer | Small business owner or solo professional who wants AI working inside the business daily — organizing priorities, researching the market, and turning decisions into execution — without hiring or building custom software |
+| Problem solved | The owner uses AI randomly (or not at all): no structured agents, no routing, no safety rules, no repeatable way to get value from AI every day |
+| Deliverables | 3 custom AI agent profiles; 3 custom AI agent prompts; agent task routing map; business-specific workflow connecting the agents; simple dashboard/reporting template; implementation guide; approval/safety rules; 30-minute explanation/setup session |
+| Agent 1 — Manager Agent | Organizes priorities, tasks, decisions, summaries, and next actions |
+| Agent 2 — Research / Analyst Agent | Researches the business, competitors, customers, content ideas, workflows, and market signals |
+| Agent 3 — Operations / Implementation Agent | Turns decisions into checklists, workflows, templates, reports, and execution plans |
+| Delivery time | 5–7 business days |
+| Price (USD) | $450 public price |
+| What Atlas/Partners do | Atlas drafts the agent profiles, prompts, routing map, workflow, dashboard template, and implementation guide from the client's intake answers; The Librarian indexes the finished (anonymized) structures for reuse |
+| What CEO approves | Final scope, final price, the delivered package before handover, and the setup session booking |
+| Cost to deliver | Founder/Claude session time only; deliverable without custom software coding unless separately quoted |
+| Profit estimate | High margin — primarily time cost; planning estimate only, not guaranteed |
+| Risk notes | Client may expect autonomous AI employees — the proposal must state plainly these are AI assistants operating under the client's approval; never promise guaranteed revenue, trading profits, automatic email sending, automatic account creation, paid integrations, API automation, or custom software development unless separately quoted and approved |
+| Upsell path | AI Workflow Starter Pack (systems around the agents) or AI Executive Assistant Setup |
+| Payment status | **Request Custom Quote — payment link pending Founder approval.** No PayPal link exists for this offer yet; the Founder must create and approve one before it can be published anywhere. Until then all conversations route through the temporary contact email. |
+
+---
+
+# 5. Small Business Dashboard Starter Pack
 
 | Field | Entry |
 |-------|-------|
@@ -83,7 +107,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 5. Social Content Factory Setup
+# 6. Social Content Factory Setup
 
 | Field | Entry |
 |-------|-------|
@@ -103,7 +127,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 6. Website / Landing Page Starter
+# 7. Website / Landing Page Starter
 
 | Field | Entry |
 |-------|-------|
@@ -123,7 +147,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 7. AI Executive Assistant Setup
+# 8. AI Executive Assistant Setup
 
 | Field | Entry |
 |-------|-------|
@@ -143,7 +167,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 8. Client Operations Cleanup
+# 9. Client Operations Cleanup
 
 | Field | Entry |
 |-------|-------|
@@ -163,7 +187,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 9. Training Material Builder
+# 10. Training Material Builder
 
 | Field | Entry |
 |-------|-------|
@@ -183,7 +207,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 10. Marketing Campaign Starter
+# 11. Marketing Campaign Starter
 
 | Field | Entry |
 |-------|-------|
@@ -203,21 +227,22 @@ These are planning ranges for early clients. Final pricing for any real client a
 
 ---
 
-# 11. Catalog-Wide Notes
+# 12. Catalog-Wide Notes
 
 - All "cost to deliver" and "profit estimate" fields are planning estimates only, not guarantees. Actual cost and profit depend on client complexity, scope discipline, and delivery time.
 - Final pricing, final scope, and final delivery commitment for any real client always require explicit CEO approval before a proposal is sent, per the Pricing Approval Rule and Proposal Approval Rule in `AOS_Client_Lead_Pipeline_and_Outreach_System.md` (STRAT-008).
 - No offer in this catalog authorizes Atlas or any Partner to access a client's real accounts, spend a client's money, or publish on a client's behalf without a separate, explicit authorization from both the client and the CEO.
 - Offers referencing "proposed" Partners (Marketing Partner, Reporting Partner) do not require those Partners to be active — Atlas and the Founder can deliver these offers directly today; the Partner references describe the intended future owner once activated through the Partner Factory (PRJ-006).
-- The AI Workflow Starter Pack is the only offer in this catalog with an active payment link ($399 USD, PayPal). Every other offer shows "Request Custom Quote" until the CEO approves a separate payment link for it. See `AOS_Payment_Portal_Readiness_Plan.md` (STRAT-014) for the full payment policy, currency rule, and Guardian security note.
+- The AI Workflow Starter Pack is the only offer in this catalog with an active payment link ($399 USD, PayPal). Every other offer — including the AI Agent Starter Pack ($450 USD) — shows "Request Custom Quote" until the CEO creates and approves a separate payment link for it. See `AOS_Payment_Portal_Readiness_Plan.md` (STRAT-014) for the full payment policy, currency rule, and Guardian security note.
 - No payment link, credential, password, 2FA code, recovery code, API key, or bank detail is ever stored in this catalog — only the public checkout URL for the one approved offer.
 
 ---
 
-# 12. Revision History
+# 13. Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-12 | Initial catalog created for AOS Revenue Launch Operating Package (PRJ-007) |
 | 1.1 | 2026-07-13 | Added Payment Status field to all eight offers: AI Workflow Starter Pack marked Active with the approved PayPal public payment link ($399 USD); all other offers marked Request Custom Quote pending separate approval. Cross-referenced new STRAT-014 Payment Portal Readiness Plan. |
 | 1.2 | 2026-07-13 | Repositioned AI Workflow Starter Pack as "3 automations for the price of one" (Lead/Client Tracking, Internal Operations, CEO/Management Visibility Automation); same underlying 6 deliverables, price, and timeline — repositioning only, no scope inflation. Cross-referenced new STRAT-016 Lead Targeting and First Market Framework. |
+| 1.3 | 2026-07-13 | Added AI Agent Starter Pack — "3 AI Agents for the Price of One" ($450 USD, Request Custom Quote, payment link pending Founder approval) as new Section 4 for PRJ-009 First Revenue Acquisition Sprint; renumbered later sections. |

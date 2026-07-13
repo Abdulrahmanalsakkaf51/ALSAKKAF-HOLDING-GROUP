@@ -685,3 +685,39 @@ a {
     transition: none;
   }
 }
+
+/* --- AI Agent Starter Pack (PRJ-009) --- */
+.badge-new {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0b0e14;
+  background: linear-gradient(135deg, var(--gold), var(--cyan));
+  vertical-align: middle;
+}
+
+.inline-link {
+  color: var(--cyan-soft);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(124, 230, 255, 0.35);
+}
+
+.inline-link:hover {
+  color: var(--cyan);
+  border-bottom-color: var(--cyan);
+}
+
+.agent-card .num {
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.agent-banner {
+  border-color: rgba(139, 107, 255, 0.45);
+}
