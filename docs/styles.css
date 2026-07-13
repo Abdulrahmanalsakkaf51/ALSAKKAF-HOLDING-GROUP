@@ -364,7 +364,8 @@ a {
   opacity: 0.7;
 }
 
-.dash-preview-bar span {
+.dash-preview-bar span:not(.dash-preview-title) {
+  flex: 0 0 auto;
   width: 9px;
   height: 9px;
   border-radius: 50%;
@@ -376,9 +377,19 @@ a {
 .dash-preview-bar span:nth-child(3) { background: #4ade80; }
 
 .dash-preview-title {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
   font-size: 0.78rem;
   color: var(--text-2);
   margin-left: 8px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dash-preview-grid {
@@ -720,4 +731,24 @@ a {
 
 .agent-banner {
   border-color: rgba(139, 107, 255, 0.45);
+}
+
+/* --- Hero dashboard preview: responsive fixes (PRJ-009 live-site pass) --- */
+@media (max-width: 600px) {
+  .dash-preview {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .dash-preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dash-tile .value {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .dash-preview-grid {
+    grid-template-columns: 1fr;
+  }
 }

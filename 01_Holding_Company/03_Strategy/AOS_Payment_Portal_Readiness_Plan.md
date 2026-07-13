@@ -13,11 +13,11 @@
 | Document ID | STRAT-014 |
 | Document Type | Strategy — Payment Readiness |
 | Status | Active |
-| Version | 1.0 |
+| Version | 1.1 |
 | Date | 2026-07-13 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
-| Related Project | PRJ-007 |
+| Related Project | PRJ-007, PRJ-009 |
 | Related Documents | STRAT-005, STRAT-007, STRAT-008, STRAT-009, STRAT-012, GRCA-001, PRJ-007 |
 
 ---
@@ -28,25 +28,25 @@ This document defines how ALSAKKAF HOLDING GROUP collects payment for AOS AI Ser
 
 ---
 
-# 2. Current Approved Payment Method
+# 2. Current Approved Payment Methods
 
-| Field | Value |
-|-------|-------|
-| Offer | AOS AI Workflow Starter Pack |
-| Price | $399 USD |
-| Payment method | PayPal public payment link |
-| Link | https://www.paypal.com/ncp/payment/2AN8FH99X682C |
-| Approved by | Abdulrahman Alsakkaf (Founder/CEO) |
-| Status | Active — the only live payment link for launch |
-| Date approved | 2026-07-13 |
+| Field | Offer 1 | Offer 2 |
+|-------|---------|---------|
+| Offer | AOS AI Workflow Starter Pack | AOS AI Agent Starter Pack |
+| Price | $399 USD | $450 USD |
+| Payment method | PayPal public payment link | PayPal public payment link |
+| Link | https://www.paypal.com/ncp/payment/2AN8FH99X682C | https://www.paypal.com/ncp/payment/2WXPECSR3UH68 |
+| Approved by | Abdulrahman Alsakkaf (Founder/CEO) | Abdulrahman Alsakkaf (Founder/CEO) |
+| Status | Active | Active |
+| Date approved | 2026-07-13 | 2026-07-13 |
 
-This is the **only active payment link** across the entire AOS Revenue Launch Operating Package. No other offer has an approved payment link at this time.
+These are the **only two active payment links** across AOS. No other offer has an approved payment link at this time. Both were created by the Founder in PayPal and provided as public checkout URLs, per the Section 8 approval gate.
 
 ---
 
-# 3. What This Link Is — and Is Not
+# 3. What These Links Are — and Are Not
 
-This is a **public PayPal payment/checkout link** — the same kind of link a business shares to let a customer pay for a specific item. It is safe to store in AOS Markdown documents and on the public website, because it does not grant access to any account.
+These are **public PayPal payment/checkout links** — the same kind of link a business shares to let a customer pay for a specific item. They are safe to store in AOS Markdown documents and on the public website, because they do not grant access to any account.
 
 It is explicitly **not** a credential. The following must never be stored in this repository, in any AOS Markdown file, or anywhere Atlas or any Partner can read:
 
@@ -62,7 +62,7 @@ If any task, request, or workflow would require entering or storing any of the a
 
 # 4. Other Offers — Payment Status
 
-Every other offer in `AOS_Service_Offer_Catalog.md` (STRAT-007) — Small Business Dashboard Starter Pack, Social Content Factory Setup, Website / Landing Page Starter, AI Executive Assistant Setup, Client Operations Cleanup, Training Material Builder, and Marketing Campaign Starter — has **no active payment link**.
+Every other offer in `AOS_Service_Offer_Catalog.md` (STRAT-007) — Custom AOS Build, Small Business Dashboard Starter Pack, Social Content Factory Setup, Website / Landing Page Starter, AI Executive Assistant Setup, Client Operations Cleanup, Training Material Builder, and Marketing Campaign Starter — has **no active payment link**.
 
 These offers must display **"Request Custom Quote"** instead of a payment button, on the website and in any client-facing material, until the CEO approves a separate payment link for each.
 
@@ -132,3 +132,4 @@ No Partner or Claude session may propose, create, or activate a payment link on 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version — approved PayPal public payment link recorded for AOS AI Workflow Starter Pack ($399 USD) |
+| 1.1 | 2026-07-13 | Second approved PayPal public payment link recorded for AOS AI Agent Starter Pack ($450 USD), provided by the Founder per the Section 8 gate (PRJ-009) |

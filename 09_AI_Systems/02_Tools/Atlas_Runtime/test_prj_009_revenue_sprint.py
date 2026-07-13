@@ -22,7 +22,8 @@ sys.dont_write_bytecode = True  # keep the repo free of __pycache__ artifacts
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
 
-PAYPAL_LINK = "https://www.paypal.com/ncp/payment/2AN8FH99X682C"
+PAYPAL_LINK_399 = "https://www.paypal.com/ncp/payment/2AN8FH99X682C"
+PAYPAL_LINK_450 = "https://www.paypal.com/ncp/payment/2WXPECSR3UH68"
 CONTACT_EMAIL = "atlasos5555@gmail.com"
 
 CREDENTIAL_PATTERN = re.compile(
@@ -65,27 +66,54 @@ def main():
     check("Temporary contact email present", CONTACT_EMAIL in landing)
     check("Temporary email labeled as temporary", "Temporary launch contact email" in landing)
 
-    # 2. PayPal link only for the $399 offer
+    # 2. Payment link discipline: each offer has exactly its own link
     print("\n[2] Payment link discipline")
-    check("Approved PayPal link present on landing page", PAYPAL_LINK in landing)
+    check("$399 PayPal link present on landing page", PAYPAL_LINK_399 in landing)
+    check("$450 PayPal link present on landing page", PAYPAL_LINK_450 in landing)
     agent_start = landing.find('id="agent-offer"')
     check("AI Agent offer section exists on landing page", agent_start != -1)
     if agent_start != -1:
         agent_end = landing.find("</section>", agent_start)
         agent_section = landing[agent_start:agent_end if agent_end != -1 else None]
-        check("No PayPal link inside the $450 AI Agent section", PAYPAL_LINK not in agent_section)
-        check("$450 section uses Request Custom Quote", "Request Custom Quote" in agent_section)
+        check("$450 link present inside the AI Agent section", PAYPAL_LINK_450 in agent_section)
+        check("$399 link NOT inside the AI Agent section", PAYPAL_LINK_399 not in agent_section)
+    custom_start = landing.find('id="custom-quote"')
+    check("Custom AOS Build section exists on landing page", custom_start != -1)
+    if custom_start != -1:
+        custom_end = landing.find("</section>", custom_start)
+        custom_section = landing[custom_start:custom_end if custom_end != -1 else None]
+        check("Custom AOS Build has no PayPal link",
+              PAYPAL_LINK_399 not in custom_section and PAYPAL_LINK_450 not in custom_section)
+        check("Custom AOS Build uses a mailto Request Quote button", "mailto:" + CONTACT_EMAIL in custom_section)
+    check("No empty href attributes on landing page", 'href=""' not in landing and "href='" + "'" not in landing)
+    check("No quote button points at a bare anchor",
+          'href="#contact">Request' not in landing and 'href="#">Request' not in landing)
+    check("Quote CTAs use mailto links", landing.count("mailto:" + CONTACT_EMAIL) >= 4)
 
     ai_proposal_tpl = read_text(
         "01_Holding_Company/07_Templates/Revenue_Launch/AI_Agent_Starter_Pack/AI_Agent_Starter_Proposal_Template.md"
     )
     check("AI Agent proposal template exists", ai_proposal_tpl is not None)
     if ai_proposal_tpl:
-        check("No PayPal link in AI Agent proposal template", PAYPAL_LINK not in ai_proposal_tpl)
+        check("$450 link in AI Agent proposal template (proposal stage is allowed)",
+              PAYPAL_LINK_450 in ai_proposal_tpl)
+        check("$399 link not in AI Agent proposal template", PAYPAL_LINK_399 not in ai_proposal_tpl)
+
+    # Cold outreach templates must not carry any payment link (first-contact rule)
+    outreach_templates = [
+        "01_Holding_Company/07_Templates/Revenue_Launch/AI_Agent_Starter_Pack/AI_Agent_Starter_Outreach_Email.md",
+        "01_Holding_Company/07_Templates/Revenue_Launch/AI_Agent_Starter_Pack/AI_Agent_Starter_LinkedIn_DM.md",
+        "01_Holding_Company/07_Templates/Revenue_Launch/AI_Agent_Starter_Pack/AI_Agent_Starter_Instagram_DM.md",
+    ]
+    dirty = [t for t in outreach_templates
+             if (read_text(t) or "") and (PAYPAL_LINK_399 in read_text(t) or PAYPAL_LINK_450 in read_text(t))]
+    check("No payment link in any cold outreach template", not dirty, f"links found in: {dirty}")
 
     config_text = read_text("09_AI_Systems/02_Tools/Atlas_Runtime/atlas_config.json") or ""
     second_block = config_text[config_text.find('"second_offer"'):config_text.find('"active_partners"')]
-    check("Config second_offer has no payment link", PAYPAL_LINK not in second_block and second_block != "")
+    check("Config second_offer has the $450 payment link",
+          PAYPAL_LINK_450 in second_block and second_block != "")
+    check("Config second_offer does not reuse the $399 link", PAYPAL_LINK_399 not in second_block)
 
     # 3. AI Agent delivery system
     print("\n[3] AI Agent Starter Pack delivery system")
@@ -183,8 +211,11 @@ def main():
     register = read_text("01_Holding_Company/04_Operations/Project_Register.md") or ""
     check("PRJ-009 in Project Register", "PRJ-009" in register)
     catalog = read_text("01_Holding_Company/03_Strategy/AOS_Service_Offer_Catalog.md") or ""
-    check("AI Agent Starter Pack in Service Offer Catalog",
-          "AI Agent Starter Pack" in catalog and "payment link pending Founder approval" in catalog)
+    check("AI Agent Starter Pack in Service Offer Catalog with active $450 link",
+          "AI Agent Starter Pack" in catalog and PAYPAL_LINK_450 in catalog)
+    payment_plan = read_text("01_Holding_Company/03_Strategy/AOS_Payment_Portal_Readiness_Plan.md") or ""
+    check("Payment Portal Readiness Plan records both approved links",
+          PAYPAL_LINK_399 in payment_plan and PAYPAL_LINK_450 in payment_plan)
 
     # Summary
     print("\n" + "=" * 60)

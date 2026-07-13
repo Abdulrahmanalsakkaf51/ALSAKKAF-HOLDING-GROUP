@@ -49,7 +49,7 @@ Write short honest answers in `Sprint_Lessons_Learned_Template.md`:
 - [ ] Keep or switch market (write the decision and reason)
 - [ ] Set week 2 numbers: leads to add, messages to send, follow-ups scheduled
 - [ ] Pick the one process improvement that would most increase replies — only one
-- [ ] If the $450 offer got traction: remind the Founder task list — create and approve its PayPal link so the offer can go fully live
+- [ ] Note which offer converted better; both offers now have active PayPal links, so pricing/positioning is the lever to adjust, not payment friction
 
 # 5. Close the Sprint
 

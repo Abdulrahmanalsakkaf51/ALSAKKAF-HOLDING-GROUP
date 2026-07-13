@@ -8,7 +8,7 @@ const atlasDashboardData = {
   "revenueCollected": 0.0,
   "paymentsReceived": 0,
   "activeOffer": "AOS AI Workflow Starter Pack - $399 USD",
-  "secondOffer": "AOS AI Agent Starter Pack - $450 USD - Request Custom Quote - payment link pending Founder approval",
+  "secondOffer": "AOS AI Agent Starter Pack - $450 USD - Active - approved PayPal payment link",
   "paymentLink": "https://www.paypal.com/ncp/payment/2AN8FH99X682C",
   "paymentLinkStatus": "Active - only approved link",
   "currency": "USD",
@@ -53,7 +53,7 @@ const atlasDashboardData = {
     "Fill first 25 leads in Lead_Tracker.csv.",
     "Approve outreach templates before drafting a batch."
   ],
-  "lastUpdated": "2026-07-13 04:27:15"
+  "lastUpdated": "2026-07-13 05:29:14"
 };
 
 function renderAtlasDashboard(data) {

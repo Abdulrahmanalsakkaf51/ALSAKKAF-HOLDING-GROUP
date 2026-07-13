@@ -13,7 +13,7 @@
 | Document ID | STRAT-007 |
 | Document Type | Strategy — Service Catalog |
 | Status | Active |
-| Version | 1.3 |
+| Version | 1.4 |
 | Date | 2026-07-13 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS |
@@ -83,7 +83,7 @@ These are planning ranges for early clients. Final pricing for any real client a
 | Profit estimate | High margin — primarily time cost; planning estimate only, not guaranteed |
 | Risk notes | Client may expect autonomous AI employees — the proposal must state plainly these are AI assistants operating under the client's approval; never promise guaranteed revenue, trading profits, automatic email sending, automatic account creation, paid integrations, API automation, or custom software development unless separately quoted and approved |
 | Upsell path | AI Workflow Starter Pack (systems around the agents) or AI Executive Assistant Setup |
-| Payment status | **Request Custom Quote — payment link pending Founder approval.** No PayPal link exists for this offer yet; the Founder must create and approve one before it can be published anywhere. Until then all conversations route through the temporary contact email. |
+| Payment status | **Active** — approved PayPal public payment link, $450 USD: https://www.paypal.com/ncp/payment/2WXPECSR3UH68. Created and approved by the Founder on 2026-07-13 per the STRAT-014 Section 8 gate. Consultation-first option remains: clients who want scope confirmed first email the temporary contact address before paying. |
 
 ---
 
@@ -233,8 +233,8 @@ These are planning ranges for early clients. Final pricing for any real client a
 - Final pricing, final scope, and final delivery commitment for any real client always require explicit CEO approval before a proposal is sent, per the Pricing Approval Rule and Proposal Approval Rule in `AOS_Client_Lead_Pipeline_and_Outreach_System.md` (STRAT-008).
 - No offer in this catalog authorizes Atlas or any Partner to access a client's real accounts, spend a client's money, or publish on a client's behalf without a separate, explicit authorization from both the client and the CEO.
 - Offers referencing "proposed" Partners (Marketing Partner, Reporting Partner) do not require those Partners to be active — Atlas and the Founder can deliver these offers directly today; the Partner references describe the intended future owner once activated through the Partner Factory (PRJ-006).
-- The AI Workflow Starter Pack is the only offer in this catalog with an active payment link ($399 USD, PayPal). Every other offer — including the AI Agent Starter Pack ($450 USD) — shows "Request Custom Quote" until the CEO creates and approves a separate payment link for it. See `AOS_Payment_Portal_Readiness_Plan.md` (STRAT-014) for the full payment policy, currency rule, and Guardian security note.
-- No payment link, credential, password, 2FA code, recovery code, API key, or bank detail is ever stored in this catalog — only the public checkout URL for the one approved offer.
+- Two offers in this catalog have active payment links: the AI Workflow Starter Pack ($399 USD, PayPal) and the AI Agent Starter Pack ($450 USD, PayPal). Every other offer shows "Request Custom Quote" until the CEO creates and approves a separate payment link for it. See `AOS_Payment_Portal_Readiness_Plan.md` (STRAT-014) for the full payment policy, currency rule, and Guardian security note.
+- No credential, password, 2FA code, recovery code, API key, or bank detail is ever stored in this catalog — only the public checkout URLs for the two approved offers.
 
 ---
 
@@ -246,3 +246,4 @@ These are planning ranges for early clients. Final pricing for any real client a
 | 1.1 | 2026-07-13 | Added Payment Status field to all eight offers: AI Workflow Starter Pack marked Active with the approved PayPal public payment link ($399 USD); all other offers marked Request Custom Quote pending separate approval. Cross-referenced new STRAT-014 Payment Portal Readiness Plan. |
 | 1.2 | 2026-07-13 | Repositioned AI Workflow Starter Pack as "3 automations for the price of one" (Lead/Client Tracking, Internal Operations, CEO/Management Visibility Automation); same underlying 6 deliverables, price, and timeline — repositioning only, no scope inflation. Cross-referenced new STRAT-016 Lead Targeting and First Market Framework. |
 | 1.3 | 2026-07-13 | Added AI Agent Starter Pack — "3 AI Agents for the Price of One" ($450 USD, Request Custom Quote, payment link pending Founder approval) as new Section 4 for PRJ-009 First Revenue Acquisition Sprint; renumbered later sections. |
+| 1.4 | 2026-07-13 | AI Agent Starter Pack payment status set to Active: Founder created and approved its PayPal public payment link ($450 USD). Catalog-wide notes updated to two active links. |

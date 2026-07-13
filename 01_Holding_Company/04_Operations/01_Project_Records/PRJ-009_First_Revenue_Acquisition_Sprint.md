@@ -55,7 +55,7 @@ The sprint succeeds on real-world movement, not on documents produced.
 | Publishing the website | Requires explicit CEO approval and manual GitHub Pages action |
 | Sending any outreach message or email | CEO approval gate; manual send only |
 | Creating accounts, ads, or spending money | CEO manual action only |
-| Creating a PayPal link for the $450 offer | Pending Founder creation and approval; until then: Request Custom Quote |
+| Creating PayPal links inside AOS | Payment links are always created by the Founder in PayPal and provided as public URLs; Atlas/Claude never generate or configure them (the $450 link was created this way on 2026-07-13) |
 | Inventing real leads | Atlas never invents leads; research is a manual Founder task |
 | Activating new Partners or changing Partner IDs/statuses | Requires Partner Factory lifecycle plus Founder approval |
 | Custom software development, API automation, paid integrations | Not included in either offer unless separately quoted and approved |
@@ -68,7 +68,7 @@ The sprint succeeds on real-world movement, not on documents produced.
 | Offer | Price | Positioning | Payment |
 |-------|-------|-------------|---------|
 | AOS AI Workflow Starter Pack | $399 USD | 3 Automations for the Price of One | Active PayPal link (approved) |
-| AOS AI Agent Starter Pack | $450 USD | 3 AI Agents for the Price of One | Request Custom Quote — payment link pending Founder approval |
+| AOS AI Agent Starter Pack | $450 USD | 3 AI Agents for the Price of One | Active PayPal link (approved 2026-07-13) |
 | Custom AOS Build | Custom | Business-specific AI agent systems | Request Quote |
 
 The $450 AI Agent Starter Pack delivers: 3 custom AI agent profiles, 3 custom AI agent prompts, an agent task routing map, a business-specific workflow, a simple dashboard/reporting template, an implementation guide, approval/safety rules, and a 30-minute explanation/setup session.
@@ -91,7 +91,7 @@ Never promised: fully autonomous AI employees, guaranteed revenue, trading profi
 | 8 | No-Hype Revenue Reality (STRAT-017) | Done |
 | 9 | Release test (30 checks) + registers + final checks | Done |
 | 10 | Execute the 7-day sprint (Founder manual work: leads, outreach, proposal, payment) | Not started |
-| 11 | Founder: create and approve $450 PayPal payment link | Not started |
+| 11 | Founder: create and approve $450 PayPal payment link | Done (2026-07-13) |
 | 12 | Sprint review, lessons learned, week 2 decision | Not started |
 
 ---
@@ -150,7 +150,7 @@ Use First_Client_Proposal_Template.md (sprint folder) or the AI Agent Starter Pr
 
 ## 8.5 Payment
 
-$399 offer: send the approved PayPal link only after a prospect agrees to buy. $450 offer: Request Custom Quote until the Founder creates and approves its payment link. Record status manually in Client_Pipeline.csv. Follow First_Payment_Checklist.md.
+Both offers have Founder-approved public PayPal links ($399 and $450). Links are sent only after a prospect agrees to buy (or in an approved proposal) — never in first cold contact. Record status manually in Client_Pipeline.csv. Follow First_Payment_Checklist.md (Path A: $399, Path B: $450).
 
 ## 8.6 Service Delivery
 
@@ -197,6 +197,11 @@ Day 5 focuses on trust assets: proof-of-work posts drafted from real (anonymized
 | 2026-07-13 | Target Market Decision Pack (MKTI-001, 13 markets) and No-Hype Revenue Reality (STRAT-017) created. |
 | 2026-07-13 | Atlas Runtime upgraded to v1.2: revenue-sprint, ai-agent-proposal, ai-agent-delivery, first-5-outreach commands added and smoke-tested; dashboard shows both offers; Founder Quick Start v1.1. |
 | 2026-07-13 | Release test test_prj_009_revenue_sprint.py built and run: 30/30 PASS. Knowledge Register updated (KNOW-164 to KNOW-172). |
+| 2026-07-13 | Sprint Day 1: health-check PASS, revenue-sprint report generated, landing page and dashboard verified locally. Founder decision: YES - publish the website today via GitHub Pages (main branch, /docs folder). Publishing is the Founder's manual browser action; awaiting live-URL confirmation. |
+| 2026-07-13 | Website published through GitHub Pages. Live URL confirmed by Founder: https://abdulrahmanalsakkaf51.github.io/ALSAKKAF-HOLDING-GROUP/ |
+| 2026-07-13 | Founder approved the AI Agent Starter Pack public PayPal payment link ($450 USD). Link added to landing page, catalog (STRAT-007 v1.4), payment plan (STRAT-014 v1.1), atlas_config.json, proposal templates, and payment checklist Path B. Offer is now fully active. |
+| 2026-07-13 | Live-site fix: hero Atlas Command Center preview layout bug corrected (title span was styled as a 9px dot, causing overlapping text); responsive stacking added for mobile; reduced-motion support unchanged. |
+| 2026-07-13 | Request Quote buttons fixed: all quote CTAs now use mailto links to the temporary contact address with pre-filled subjects; no button leads to an empty page. |
 
 ---
 

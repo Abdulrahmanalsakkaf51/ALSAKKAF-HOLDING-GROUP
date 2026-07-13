@@ -29,7 +29,7 @@ This folder holds the static AOS AI Workflow Starter Pack landing page and the l
 
 | File | Description |
 |------|-------------|
-| `index.html` | Public landing page selling the AOS AI Workflow Starter Pack ($399 USD via the approved PayPal link) |
+| `index.html` | Public landing page selling the AOS AI Workflow Starter Pack ($399 USD) and the AOS AI Agent Starter Pack ($450 USD), each via its own approved PayPal link |
 | `styles.css` | Styling for the landing page — plain CSS, no frameworks, no external dependencies |
 | `atlas-dashboard.html` | Internal, local-only Atlas CEO dashboard (leads, outreach, content, payments, risks, next actions) |
 | `atlas-dashboard.css` | Styling for the Atlas dashboard |
@@ -37,14 +37,16 @@ This folder holds the static AOS AI Workflow Starter Pack landing page and the l
 
 ---
 
-# Before Publishing
+# Publishing Status
 
-The landing page (`index.html`) does not go live until all of the following are complete:
+The landing page is **live** at https://abdulrahmanalsakkaf51.github.io/ALSAKKAF-HOLDING-GROUP/ (published 2026-07-13 via GitHub Pages, main branch `/docs`, after explicit CEO approval).
 
-1. CEO review and approval of the final copy (Version 2, premium/dark redesign, "3 automations for the price of one" offer)
+Every update to `index.html` goes live on the next `git push` to main. The pre-update gates remain:
+
+1. CEO review and approval of any copy change
 2. Contact email — **Contact: atlasos5555@gmail.com** (Status: Temporary launch contact email approved by Founder; not a permanent address — see STRAT-015 for the future domain-based email plan)
-3. Guardian security review (no exposed secrets, no unsafe embeds, payment link confirmed as the only active one)
-4. Explicit CEO approval to publish (Phase 2 of STRAT-012)
+3. Guardian security review (no exposed secrets, no unsafe embeds, only the two approved payment links: $399 and $450)
+4. Explicit CEO approval to push
 
 The Atlas dashboard (`atlas-dashboard.html`) is an internal tool only. It should never be linked from the public landing page and should not be published to a public host in its current form.
 

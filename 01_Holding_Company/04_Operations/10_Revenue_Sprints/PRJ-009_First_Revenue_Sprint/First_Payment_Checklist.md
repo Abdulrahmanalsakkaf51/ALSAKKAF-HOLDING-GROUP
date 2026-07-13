@@ -36,13 +36,13 @@
 - [ ] Send a same-day confirmation email: thank you + intake form + delivery timeline
 - [ ] Open `First_Client_Delivery_Start_Checklist.md` and start it
 
-# 3. Path B — $450 AI Agent Starter Pack (no link yet)
+# 3. Path B — $450 AI Agent Starter Pack (active link)
 
-- [ ] Do NOT improvise a payment method. The $450 offer has no approved payment link.
-- [ ] Founder action required: create the $450 PayPal payment link in your own PayPal account (manual, outside Claude/Atlas), then approve it explicitly before it is used or stored anywhere in AOS
-- [ ] Until that exists: confirm the agreement in writing and tell the client payment details follow within 1 business day
-- [ ] If the Founder chooses, the existing manual PayPal invoice feature (sent from your own account) may bridge one deal — Founder's own action, never stored in the repo
-- [ ] After payment confirms: same as Path A — pipeline updated, confirmation + intake sent, delivery checklist started
+- [ ] Send the approved PayPal link by email, together with a one-paragraph scope recap: `https://www.paypal.com/ncp/payment/2WXPECSR3UH68`
+- [ ] Update `Client_Pipeline.csv`: Payment Link Sent = Yes, Payment Status = Link Sent
+- [ ] When PayPal confirms payment (check your own PayPal account manually): Payment Status = Paid, record date and amount
+- [ ] Send a same-day confirmation email: thank you + AI Agent intake form (AIAD-002) + delivery timeline
+- [ ] Open `First_Client_Delivery_Start_Checklist.md` and start it
 
 # 4. Always
 

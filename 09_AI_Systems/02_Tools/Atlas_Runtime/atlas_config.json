@@ -36,7 +36,8 @@
     "currency": "USD",
     "positioning": "3 AI agents for the price of one",
     "delivery_time": "5-7 business days",
-    "payment_status": "Request Custom Quote - payment link pending Founder approval",
+    "payment_status": "Active - approved PayPal payment link",
+    "payment_link": "https://www.paypal.com/ncp/payment/2WXPECSR3UH68",
     "agents": [
       {
         "name": "Manager Agent",

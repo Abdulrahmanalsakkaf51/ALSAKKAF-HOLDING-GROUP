@@ -36,7 +36,7 @@ For whichever base you use:
 
 - [ ] Their problem, in their words (from the call or their reply — not your assumption)
 - [ ] One concrete example per deliverable tied to their business
-- [ ] Correct payment path: $399 → PayPal link included only in the proposal (never cold); $450 → "payment details arranged by email once you confirm" (no link exists yet)
+- [ ] Correct payment path: $399 and $450 each have their own approved PayPal link — included only in the proposal or after a confirmed yes, never in cold outreach
 - [ ] Timeline stated from intake answers received, not from payment date
 - [ ] The honest-scope paragraph stays in — it closes more deals with serious buyers than it loses
 

@@ -70,7 +70,7 @@
 | Lead target | | |
 | Outreach target | | |
 | One process improvement | | |
-| Blockers for Founder action (e.g., $450 payment link) | | |
+| Blockers for Founder action | | |
 
 # 7. Register Updates
 

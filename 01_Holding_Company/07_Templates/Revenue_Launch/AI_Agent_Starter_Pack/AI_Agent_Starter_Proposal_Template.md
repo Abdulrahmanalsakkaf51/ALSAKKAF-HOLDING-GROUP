@@ -25,7 +25,7 @@
 # 1. Rules Before Sending
 
 1. CEO reviews and approves every proposal before it is sent.
-2. No PayPal link in this proposal — the $450 offer is Request Custom Quote until its payment link is Founder-approved. Payment is arranged by email after agreement.
+2. The $450 offer has a Founder-approved PayPal payment link. It appears only in this proposal or after a confirmed yes — never in cold outreach messages.
 3. Personalize every bracketed section from the actual conversation with the prospect. Never send with brackets left in.
 4. No guarantees, no invented case studies, no fake claims.
 
@@ -62,7 +62,7 @@ Date: [date] · Valid for: 14 days
 
 **Timeline.** 5-7 business days from the day we receive your completed intake answers (a short questionnaire — about 20 minutes of your time).
 
-**Investment.** $450 USD, one-time. One scoped engagement — three working agents. Payment details are arranged by email once you confirm. No subscription.
+**Investment.** $450 USD, one-time. One scoped engagement — three working agents. No subscription. When you're ready: https://www.paypal.com/ncp/payment/2WXPECSR3UH68 (secure PayPal checkout, USD). Prefer to confirm scope first? Just reply — payment can wait until your questions are answered.
 
 **Honest scope.** These are AI assistants that work under your review and approval. We do not deliver autonomous AI employees, guaranteed revenue, automatic email sending, account creation, paid integrations, API automation, or custom software — if you need any of those later, we scope and quote them separately.
 

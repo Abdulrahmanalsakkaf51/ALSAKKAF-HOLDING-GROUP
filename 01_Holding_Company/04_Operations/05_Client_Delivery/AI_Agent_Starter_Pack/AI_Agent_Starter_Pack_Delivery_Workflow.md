@@ -27,7 +27,7 @@
 | Field | Value |
 |-------|-------|
 | Service | AOS AI Agent Starter Pack |
-| Price | $450 USD (Request Custom Quote until payment link approved) |
+| Price | $450 USD (approved PayPal payment link — see First_Payment_Checklist Path B) |
 | Positioning | 3 AI Agents for the Price of One |
 | Delivery time | 5-7 business days after intake answers received |
 | Coding required | None — deliverable without custom software unless separately quoted |

@@ -56,7 +56,7 @@ Every day of this sprint produces real-world movement: something published, rese
 | Offer | Price | Payment |
 |-------|-------|---------|
 | AOS AI Workflow Starter Pack — 3 Automations for the Price of One | $399 USD | Approved PayPal link (send only after a yes) |
-| AOS AI Agent Starter Pack — 3 AI Agents for the Price of One | $450 USD | Request Custom Quote — payment link pending |
+| AOS AI Agent Starter Pack — 3 AI Agents for the Price of One | $450 USD | Approved PayPal link (send only after a yes) |
 
 Lead with whichever fits the lead's pain. When in doubt: businesses drowning in untracked work → $399; owners curious about "using AI properly" → $450.
 

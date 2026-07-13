@@ -64,7 +64,7 @@ Start with `Day_1_Publish_and_Prepare.md`.
 
 # 4. Open the Landing Page
 
-Open `docs/index.html` directly in a browser. This previews the sales page with both offers — the AI Workflow Starter Pack ($399, active PayPal link) and the AI Agent Starter Pack ($450, Request Custom Quote) — it is **not published** yet.
+Open `docs/index.html` directly in a browser to preview, or visit the live site: https://abdulrahmanalsakkaf51.github.io/ALSAKKAF-HOLDING-GROUP/ — both offers have active PayPal links ($399 Workflow Pack and $450 AI Agent Pack).
 
 ---
 
@@ -96,7 +96,7 @@ Produces a daily CEO briefing from your current tracker data.
 py "09_AI_Systems\02_Tools\Atlas_Runtime\atlas.py" proposal
 ```
 
-Drafts a proposal for the AOS AI Workflow Starter Pack ($399 USD). For the AI Agent Starter Pack ($450 USD, no payment link yet) use:
+Drafts a proposal for the AOS AI Workflow Starter Pack ($399 USD). For the AI Agent Starter Pack ($450 USD, active PayPal link) use:
 
 ```
 py "09_AI_Systems\02_Tools\Atlas_Runtime\atlas.py" ai-agent-proposal

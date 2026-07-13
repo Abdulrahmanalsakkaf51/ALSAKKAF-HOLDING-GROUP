@@ -641,7 +641,7 @@ def cmd_proposal(cfg, args):
     lines.append("")
     lines.append(f"Once you're ready to proceed: {cfg['payment_link']}")
     lines.append("")
-    lines.append("This is the only active payment link. Any other service is Request Custom Quote until a separate link is approved.")
+    lines.append("Active payment links exist only for the $399 AI Workflow Starter Pack and the $450 AI Agent Starter Pack. Any other service is Request Custom Quote until a separate link is approved.")
     lines.append("")
     lines.append("## Next Steps")
     lines.append("")
@@ -892,6 +892,8 @@ def cmd_revenue_sprint(cfg, args):
     has_399 = "399" in landing_text
     has_450 = "450" in landing_text
     has_link = cfg["payment_link"] in landing_text
+    second_link = second.get("payment_link", "")
+    has_second_link = bool(second_link) and second_link in landing_text
 
     proposals_dir = rp(cfg["paths"]["proposal_drafts_dir"])
     proposal_count = len(list(proposals_dir.glob("*.md"))) if proposals_dir.exists() else 0
@@ -918,7 +920,9 @@ def cmd_revenue_sprint(cfg, args):
     lines.append(f"- Landing page file exists: {'Yes' if landing.exists() else 'NO - missing'}")
     lines.append(f"- $399 offer on page: {'Yes' if has_399 else 'NO'}")
     lines.append(f"- $450 offer on page: {'Yes' if has_450 else 'NO'}")
-    lines.append(f"- Approved PayPal link on page: {'Yes' if has_link else 'NO'}")
+    lines.append(f"- Approved $399 PayPal link on page: {'Yes' if has_link else 'NO'}")
+    if second_link:
+        lines.append(f"- Approved $450 PayPal link on page: {'Yes' if has_second_link else 'NO'}")
     lines.append("- Published to the public internet: manual CEO action - Atlas cannot verify or perform "
                  "publishing. Record the Day 1 publish decision in the sprint plan.")
     lines.append("")
@@ -941,7 +945,10 @@ def cmd_revenue_sprint(cfg, args):
     lines.append("")
     lines.append(f"- Payment links sent: {m['payment_links_sent']} | Payments received: {m['payments_received']}")
     lines.append(f"- Revenue collected: ${m['revenue_collected']:.2f} {cfg['currency']} (real tracker count, never a projection)")
-    lines.append(f"- $450 offer payment link: pending Founder creation and approval - Request Custom Quote until then")
+    if second_link:
+        lines.append("- $450 offer payment link: ACTIVE (approved by Founder)")
+    else:
+        lines.append("- $450 offer payment link: pending Founder creation and approval - Request Custom Quote until then")
     lines.append("")
     lines.append("## Next Actions")
     lines.append("")
@@ -1011,15 +1018,22 @@ def cmd_ai_agent_proposal(cfg, args):
     lines.append("")
     lines.append("## Payment")
     lines.append("")
-    lines.append("Request Custom Quote - payment details are arranged by email once you confirm. "
-                 "No payment link is included in this proposal; the payment link for this offer is "
-                 "pending Founder approval.")
+    if second.get("payment_link"):
+        lines.append(f"Once you're ready to proceed: {second['payment_link']}")
+        lines.append("")
+        lines.append("Payments are processed in USD via PayPal's secure public checkout. This link is "
+                     "sent only after interest is confirmed - never in first cold contact.")
+    else:
+        lines.append("Request Custom Quote - payment details are arranged by email once you confirm. "
+                     "No payment link is included in this proposal; the payment link for this offer is "
+                     "pending Founder approval.")
     lines.append("")
     lines.append("## Next Steps")
     lines.append("")
     lines.append("1. Reply to confirm, or ask any question first.")
-    lines.append("2. We send the intake form (about 20 minutes to complete).")
-    lines.append("3. Delivery within 5-7 business days of your answers, then your 30-minute setup session.")
+    lines.append("2. Pay via the link above when ready (or ask us anything first).")
+    lines.append("3. We send the intake form (about 20 minutes to complete).")
+    lines.append("4. Delivery within 5-7 business days of your answers, then your 30-minute setup session.")
     lines.append("")
     lines.append("---")
     lines.append("")

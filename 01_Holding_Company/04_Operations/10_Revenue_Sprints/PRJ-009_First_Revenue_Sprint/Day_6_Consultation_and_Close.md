@@ -33,8 +33,8 @@
 - [ ] Book/hold the call the same day if possible (discovery script: AIAT-005; objections: AIAT-006)
 - [ ] On the call: understand their business first, match the offer honestly, or say "not a fit" plainly
 - [ ] After the call, same day: send the personalized proposal (Day 4 draft, updated with their words)
-- [ ] If they say yes to the $399 pack: open `First_Payment_Checklist.md` and follow it exactly
-- [ ] If they say yes to the $450 pack: confirm scope by email; payment arrangement per the checklist's custom-quote path (no PayPal link exists for $450 yet)
+- [ ] If they say yes to the $399 pack: open `First_Payment_Checklist.md` and follow Path A exactly
+- [ ] If they say yes to the $450 pack: open `First_Payment_Checklist.md` and follow Path B exactly (approved $450 PayPal link, sent only after the written yes)
 - [ ] Update `Client_Pipeline.csv` after every step
 
 # 3. If a Payment Arrives
