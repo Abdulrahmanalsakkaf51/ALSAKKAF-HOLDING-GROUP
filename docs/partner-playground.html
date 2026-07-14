@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AOS Partner Playground — ALSAKKAF Systems | Try an AI Partner Team Safely</title>
+<meta name="description" content="Pick your industry and business pain, see a recommended AI Partner team, and watch safe demonstration workflows run — no signup, no API keys, no data collected.">
+<link rel="canonical" href="https://alsakkafsystems.com/partner-playground.html">
+<link rel="icon" type="image/svg+xml" href="assets/brand/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32x32.png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="manifest" href="assets/brand/site.webmanifest">
+<meta property="og:title" content="AOS Partner Playground — ALSAKKAF Systems">
+<meta property="og:description" content="See how an AI Partner team would work in your business — safe demonstration mode, nothing sent, nothing stored.">
+<meta property="og:image" content="https://alsakkafsystems.com/assets/brand/social/og-image.png">
+<meta property="og:url" content="https://alsakkafsystems.com/partner-playground.html">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="partner-playground.css">
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand-logo" href="index.html" aria-label="ALSAKKAF Systems home">
+      <img src="assets/brand/alsakkaf-systems-logo-light.svg" alt="ALSAKKAF Systems" height="40">
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="#team-builder">Team Builder</a>
+      <a href="#demos">Demos</a>
+      <a href="#playground-cta">Build This</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero pg-hero">
+  <div class="container hero-inner">
+    <div class="hero-badge">AOS AI Services &middot; Interactive Demo</div>
+    <h1>The AOS <span class="grad">Partner Playground</span></h1>
+    <p class="subheadline">Pick your industry and your biggest operational pain. See the AI Partner team we would recommend, then watch realistic demonstration workflows run — right here in your browser.</p>
+    <div class="safe-mode-banner" role="note">
+      <strong>SAFE DEMONSTRATION MODE</strong>
+      <span>Everything on this page is a scripted simulation that runs entirely in your browser. No AI model is called, no data is collected or sent anywhere, no API keys are used, and nothing here is live production AI. It shows the workflow structure our Partner teams follow.</span>
+    </div>
+  </div>
+</section>
+
+<section id="team-builder" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow">Step 1 &amp; 2</div>
+      <h2>Tell us where it hurts.</h2>
+      <p class="lede">Choose an industry and the business pain you feel most. The recommendation updates instantly — nothing is submitted.</p>
+    </div>
+
+    <div class="picker-block">
+      <h3>Your industry</h3>
+      <div class="chip-row" id="industry-row" role="listbox" aria-label="Select your industry"></div>
+    </div>
+
+    <div class="picker-block">
+      <h3>Your business pain</h3>
+      <div class="chip-row" id="pain-row" role="listbox" aria-label="Select your business pain"></div>
+    </div>
+
+    <div class="card team-card" id="team-panel" hidden>
+      <div class="eyebrow">Recommended Partner Team</div>
+      <h3 id="team-title"></h3>
+      <p id="team-note"></p>
+      <div class="team-grid" id="team-grid"></div>
+      <p class="label-legend"><span class="p-label p-active">Active Partner</span> exists and works inside our own company today. <span class="p-label p-concept">Concept Partner</span> and <span class="p-label p-proposed">Proposed Partner</span> are roles we design and build for your deployment — they are not pre-built products.</p>
+    </div>
+  </div>
+</section>
+
+<section id="demos" class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow">Step 3</div>
+      <h2>Watch a Partner team work.</h2>
+      <p class="lede">Each demo plays a scripted workflow the way a deployed Partner team runs it: work comes in, Partners process it, a human approves the result.</p>
+    </div>
+    <div class="demo-grid" id="demo-grid"></div>
+  </div>
+</section>
+
+<section id="stage-section" class="section" hidden>
+  <div class="container">
+    <div class="card stage-card">
+      <div class="stage-head">
+        <div>
+          <div class="eyebrow" id="stage-eyebrow">Demo</div>
+          <h2 id="stage-title"></h2>
+          <p id="stage-desc"></p>
+        </div>
+        <button class="btn btn-secondary" id="stage-replay" type="button">Replay</button>
+      </div>
+      <div class="stage-warning" id="stage-warning" hidden></div>
+      <div class="stage-body">
+        <div class="stage-log-wrap">
+          <h3>Workflow activity</h3>
+          <ol class="stage-log" id="stage-log" aria-live="polite"></ol>
+        </div>
+        <div class="stage-outputs">
+          <h3>Outputs produced</h3>
+          <div class="output-tabs" id="output-tabs" role="tablist"></div>
+          <div class="output-panel" id="output-panel"></div>
+        </div>
+      </div>
+      <p class="sim-note">Simulated demonstration output — scripted in advance, not generated by a live AI model, and based on fictional example data.</p>
+    </div>
+  </div>
+</section>
+
+<section id="playground-cta" class="section">
+  <div class="container">
+    <div class="card contact-card">
+      <h2>Want this working in your business — for real?</h2>
+      <p>The playground shows the structure. A real deployment is built around your actual workflow, your data rules, and your approval gates — with a human in control of every important decision.</p>
+      <div class="cta-row" style="justify-content:center;">
+        <a class="btn btn-primary" href="mailto:services@alsakkafsystems.com?subject=Build%20This%20For%20My%20Business">Build This For My Business</a>
+        <a class="btn btn-secondary" href="mailto:sales@alsakkafsystems.com?subject=Request%20Custom%20Deployment">Request Custom Deployment</a>
+      </div>
+      <p class="contact-placeholder">services@alsakkafsystems.com &middot; sales@alsakkafsystems.com</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; 2026 ALSAKKAF Systems — AOS AI Services. Part of the ALSAKKAF HOLDING GROUP vision. &middot; <a href="index.html">alsakkafsystems.com</a></p>
+  </div>
+</footer>
+
+<script src="partner-playground.js"></script>
+</body>
+</html>

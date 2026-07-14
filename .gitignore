@@ -12,3 +12,8 @@
 # Python bytecode caches (created if a test imports atlas.py)
 __pycache__/
 *.pyc
+
+# Partner Runtime and Department Supervisor local state (regenerated on every
+# run: approval queues, memory DB, logs, draft outputs, daily plans)
+09_AI_Systems/02_Tools/Partner_Runtime/Runtime_State/
+09_AI_Systems/02_Tools/Department_Supervisor/Supervisor_State/

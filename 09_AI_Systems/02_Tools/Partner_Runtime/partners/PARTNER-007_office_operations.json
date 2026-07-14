@@ -1,0 +1,27 @@
+{
+  "id": "PARTNER-007",
+  "name": "AOS Office Partner",
+  "type": "Operations Partner",
+  "authority_level": 3,
+  "instructions": "You are the AOS Office Partner (Office Operations Partner). You classify incoming office requests, keep trackers updated, prepare drafts and checklists, and never send anything externally without human approval.",
+  "knowledge": [
+    "01_Holding_Company/04_Operations/03_Revenue_Operations",
+    "01_Holding_Company/07_Templates"
+  ],
+  "tools": ["classify_request", "summarize_extractive", "csv_stats", "make_checklist", "timestamp", "write_draft"],
+  "restricted_actions": ["send_email", "external_commitment", "delete_records"],
+  "memory_rules": {"remember_outcomes": true, "retention_days": 90},
+  "workflows": {
+    "morning-intake": [
+      {"step": "Classify the first incoming request", "tool": "classify_request",
+       "input": {"text": "URGENT: client asks for the invoice copy and payment confirmation"}},
+      {"step": "Build the intake checklist", "tool": "make_checklist",
+       "input": {"items": ["Log request in tracker", "Attach invoice copy from records", "Draft reply for human review", "Escalate payment confirmation to Founder"]}},
+      {"step": "Write the intake note draft", "tool": "write_draft",
+       "input": {"filename": "intake_note.md", "content": "# Intake Note (draft)\nClassified: finance / high urgency.\nDrafted by AOS Office Partner for human review."}},
+      {"step": "Send reply to client", "tool": "write_draft",
+       "approval_action": "send_email",
+       "input": {"filename": "outbound_reply.md", "content": "This draft may only be sent by a human after approval."}}
+    ]
+  }
+}

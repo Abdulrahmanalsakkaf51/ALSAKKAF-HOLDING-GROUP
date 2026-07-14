@@ -1,0 +1,55 @@
+{
+  "policy_id": "SUPPOL-001",
+  "department": "Operations (demo scope)",
+  "version": "1.0",
+  "approved_scope": [
+    "tracker updates",
+    "document preparation",
+    "report drafting",
+    "lead verification",
+    "outreach drafting",
+    "filing and organization",
+    "meeting preparation",
+    "quality review",
+    "follow-up tasks"
+  ],
+  "max_tasks_per_day": 8,
+  "autonomy_conditions": [
+    "inside approved department scope",
+    "within existing policies",
+    "within approved permissions",
+    "within budget (zero-cost local work by default)",
+    "reversible",
+    "not legally sensitive"
+  ],
+  "escalation_triggers": {
+    "termination": ["terminate", "termination", "dismiss", "fire "],
+    "discipline": ["discipline", "disciplinary", "warning letter"],
+    "salary": ["salary", "raise", "bonus", "compensation", "pay change"],
+    "legal": ["legal", "lawsuit", "contract interpretation", "law "],
+    "external_commitment": ["sign", "commit", "supplier", "vendor", "purchase", "book venue", "quote acceptance"],
+    "policy_change": ["policy change", "new policy", "change the rule"],
+    "sensitive_data": ["credential", "password", "private data", "student record", "medical"],
+    "high_cost": ["budget increase", "paid tool", "subscription", "invoice above"],
+    "irreversible": ["delete", "destroy", "shred", "permanently remove"]
+  },
+  "partner_roster": {
+    "office": "AOS Office Partner (PARTNER-007, Proposed)",
+    "reporting": "Reporting Partner (PARTNER-012, Proposed)",
+    "research": "Research Partner (PARTNER-004, Proposed)",
+    "acquisition": "Client Acquisition Partner (PARTNER-019, Proposed)",
+    "supervisor": "Department Supervisor (self - escalates to human)"
+  },
+  "task_type_routing": {
+    "tracker": "office",
+    "filing": "office",
+    "document": "office",
+    "meeting": "office",
+    "report": "reporting",
+    "kpi": "reporting",
+    "verify": "research",
+    "research": "research",
+    "outreach": "acquisition",
+    "follow-up": "acquisition"
+  }
+}

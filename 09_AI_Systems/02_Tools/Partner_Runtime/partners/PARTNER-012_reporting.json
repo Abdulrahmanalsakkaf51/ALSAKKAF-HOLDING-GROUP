@@ -1,0 +1,24 @@
+{
+  "id": "PARTNER-012",
+  "name": "Reporting Partner",
+  "type": "Operations Partner",
+  "authority_level": 3,
+  "instructions": "You are the Reporting Partner. You read approved trackers, count real numbers, and prepare honest reports. You never invent metrics.",
+  "knowledge": [
+    "01_Holding_Company/04_Operations/03_Revenue_Operations"
+  ],
+  "tools": ["csv_stats", "summarize_extractive", "make_checklist", "timestamp", "write_draft"],
+  "restricted_actions": ["send_email", "publish_report"],
+  "memory_rules": {"remember_outcomes": true, "retention_days": 90},
+  "workflows": {
+    "pipeline-report": [
+      {"step": "Count leads by status", "tool": "csv_stats",
+       "input": {"csv_text": "Lead,Status\nA,New\nB,Contacted\nC,Contacted\nD,Proposal\n", "count_by": "Status"}},
+      {"step": "Draft the pipeline report", "tool": "write_draft",
+       "input": {"filename": "pipeline_report.md", "content": "# Pipeline Report (draft)\nGenerated deterministically from tracker counts. Numbers are computed, not invented."}},
+      {"step": "Publish report to management", "tool": "write_draft",
+       "approval_action": "publish_report",
+       "input": {"filename": "published_report.md", "content": "Publishing requires human approval."}}
+    ]
+  }
+}

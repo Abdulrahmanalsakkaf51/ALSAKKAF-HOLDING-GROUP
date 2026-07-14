@@ -204,6 +204,30 @@ Its purpose is to identify where every approved concept, document, lesson, polic
 | KNOW-170 | First Revenue Target Market Decision Pack (13 candidate markets scored) | MKTI-001 / 01_Holding_Company/04_Operations/06_Market_Intelligence/First_Revenue_Target_Market_Decision_Pack.md | PRJ-009, STRAT-016 | Active |
 | KNOW-171 | AOS No-Hype Revenue Reality (Founder reality anchor; trading systems research-only rule) | STRAT-017 / 01_Holding_Company/03_Strategy/AOS_No_Hype_Revenue_Reality.md | PRJ-009, STRAT-005, RSP-001 | Active |
 | KNOW-172 | PRJ-009 Revenue Sprint Release Test (30 checks; Atlas Runtime v1.2 commands: revenue-sprint, ai-agent-proposal, ai-agent-delivery, first-5-outreach) | 09_AI_Systems/02_Tools/Atlas_Runtime/test_prj_009_revenue_sprint.py | PRJ-009, ARUN-001 | Passed |
+| KNOW-173 | PRJ-010 ALSAKKAF Brand Identity System v1 project record | PRJ-010 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-010_ALSAKKAF_Brand_Identity_System_v1.md | BRAND-001, BRAND-002, PRJ-011 | Active |
+| KNOW-174 | Brand Asset Library (geometric-A SVG family, favicon, icons, OG image, webmanifest) | BRAND-001 / docs/assets/brand/README.md | PRJ-010, BRAND-002, RLWEB-001 | Active |
+| KNOW-175 | Logo Usage Guide | BRAND-002 / docs/assets/brand/Logo_Usage_Guide.md | PRJ-010, BRAND-001 | Active |
+| KNOW-176 | Brand PNG Generator Tool (standard library only) | 09_AI_Systems/02_Tools/Brand_Assets/generate_brand_png.py | PRJ-010, BRAND-001 | Active |
+| KNOW-177 | PRJ-011 AOS Interactive Partner Playground project record | PRJ-011 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-011_AOS_Interactive_Partner_Playground.md | RLWEB-001, PREG-001 | Active |
+| KNOW-178 | Partner Playground (safe demonstration mode: team recommender + six scripted demos) | docs/partner-playground.html / .css / .js | PRJ-011, PRJ-010, RLWEB-001 | Active (built, not published) |
+| KNOW-179 | PRJ-012 AOS Partner Runtime v1 project record | PRJ-012 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-012_AOS_Partner_Runtime_v1.md | PRT-001, APFA-001, PCL-001, PRCC-001 | Active |
+| KNOW-180 | AOS Partner Runtime v1 (engine, loader, tools, approval gates, memory, adapters, router; 17 tests passed) | PRT-001 / 09_AI_Systems/02_Tools/Partner_Runtime/ | PRJ-012, PREG-001 | Active |
+| KNOW-181 | PRJ-013 AOS Office Partner and Department Supervisor project record | PRJ-013 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-013_AOS_Office_Partner_and_Department_Supervisor.md | OFSKILL-001, SUPPOL-001 | Active |
+| KNOW-182 | Office Toolbelt (native XLSX/DOCX/files/email-draft/data/tracker/template tools; 10 tests passed) | 09_AI_Systems/02_Tools/Office_Toolbelt/ | PRJ-013, OFSKILL-001, OFS-001, OFQ-001 | Active |
+| KNOW-183 | Office File Management Standard | OFS-001 / 09_AI_Systems/02_Tools/Office_Toolbelt/Office_File_Management_Standard.md | PRJ-013, OFQ-001 | Active |
+| KNOW-184 | Office Document Quality Checklist | OFQ-001 / 09_AI_Systems/02_Tools/Office_Toolbelt/Office_Document_Quality_Checklist.md | PRJ-013, OFS-001 | Active |
+| KNOW-185 | Department Supervisor prototype (bounded planning, escalation, follow-ups; 13 tests passed) | SUPPOL-001 / 09_AI_Systems/02_Tools/Department_Supervisor/ | PRJ-013, PARTNER-020 | Active |
+| KNOW-186 | PRJ-014 Local / Hybrid Atlas Intelligence project record | PRJ-014 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-014_Local_Hybrid_Atlas_Intelligence.md | SRS-001, POD-001, PLK-001, ACB-001 | Active |
+| KNOW-187 | First Internal Operational Partner Pod definition and lifecycle documents (PARTNER-004, 007, 012, 019) | POD-001 / 09_AI_Systems/01_Partners/05_Pods/POD-001_First_Internal_Operational_Pod.md | PRJ-014, PREG-001, pod request/profile/prompt/skill/test/activation documents | Designed |
+| KNOW-188 | Pod Tools (lead verifier, outreach composer, pipeline reporter; 13 tests passed) | 09_AI_Systems/02_Tools/Pod_Tools/ | POD-001, RSSKILL-001, CASKILL-001, RPTSKILL-001 | Active |
+| KNOW-189 | Skill Routing Standard and Skill Router (13 tests passed) | SRS-001 / 09_AI_Systems/02_Tools/Skill_Router/ | PRJ-014, PRCC-001, CSKILL-017 to CSKILL-022 | Active |
+| KNOW-190 | AOS-native Claude skills: office-operator, task-planner, policy-retriever, people-operations, reporting, file-librarian | CSKILL-017 to CSKILL-022 / .claude/skills/ | PRJ-014, SRS-001 | Active |
+| KNOW-191 | AOS Policy and Law Knowledge System (UAE private-sector demo pack; 17 tests passed) | PLK-001 / 09_AI_Systems/02_Tools/Policy_Knowledge/ | PRJ-014, CSKILL-019, CSKILL-020 | Active (demo pack) |
+| KNOW-192 | Atlas Capability Benchmark v1 (103 tasks; deterministic-local result 81/103, 0 failed, 22 require AI) | ACB-001 / 09_AI_Systems/02_Tools/Capability_Benchmark/ | PRJ-014, ACB-REPORT-001 | Active |
+| KNOW-193 | PRJ-015 Customer Deployment System and Enterprise Education project record | PRJ-015 / 01_Holding_Company/04_Operations/01_Project_Records/PRJ-015_Customer_Deployment_and_Enterprise_Education.md | CDP-001, EEDC-001, FQA-001 | Active |
+| KNOW-194 | AOS Three-Partner Customer Deployment Process (14 stages, scope honesty, deployment options) | CDP-001 / 01_Holding_Company/04_Operations/05_Client_Delivery/AOS_Three_Partner_Customer_Deployment_Process.md | PRJ-015, STRAT-007, AIAD-001 | Active |
+| KNOW-195 | AOS Education Enterprise Deployment Concept (CONCEPT PROPOSAL — not implemented, not endorsed) | EEDC-001 / 01_Holding_Company/03_Strategy/AOS_Education_Enterprise_Deployment_Concept.md | PRJ-015, CDP-001, POD-001 | Concept Proposal |
+| KNOW-196 | AOS Founder Sales and Technical Q&A (22 questions, honest language rules) | FQA-001 / 01_Holding_Company/03_Strategy/AOS_Founder_Sales_and_Technical_QA.md | PRJ-015, ACB-001, PLK-001, STRAT-017 | Active |
 
 
 

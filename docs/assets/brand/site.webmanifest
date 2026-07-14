@@ -1,0 +1,26 @@
+{
+  "name": "ALSAKKAF Systems - AOS AI Services",
+  "short_name": "ALSAKKAF",
+  "description": "Practical AI workflows and agent systems for growing businesses.",
+  "icons": [
+    {
+      "src": "/assets/brand/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/brand/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/brand/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#0A2342",
+  "background_color": "#05070d",
+  "display": "browser",
+  "start_url": "/"
+}

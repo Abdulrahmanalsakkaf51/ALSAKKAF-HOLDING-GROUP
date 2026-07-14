@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="ALSAKKAF HOLDING GROUP mark">
+  <defs>
+    <linearGradient id="ahg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1E6FFF"/>
+      <stop offset="1" stop-color="#38D6FF"/>
+    </linearGradient>
+  </defs>
+  <polygon points="50,10 12,92 28,92 50,44" fill="#0A2342"/>
+  <polygon points="50,10 88,92 72,92 50,44" fill="url(#ahg-grad)"/>
+  <polygon points="41,64 59,64 64,76 36,76" fill="#38D6FF"/>
+</svg>
