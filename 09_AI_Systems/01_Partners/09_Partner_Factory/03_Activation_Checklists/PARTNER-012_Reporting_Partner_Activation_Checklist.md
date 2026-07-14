@@ -27,7 +27,7 @@
 | 3 | Prompt completed | Yes (RPTPROMPT-001) |
 | 4 | Skill defined | Yes (RPTSKILL-001) |
 | 5 | Tool-layer tests passed | Yes (RPTTEST-001, 2026-07-14) |
-| 6 | Prompt-level tests passed | No — pending Founder session |
+| 6 | Prompt-level tests passed | Yes (RPTTEST-001 v1.1, 6/6, 2026-07-14; Guardian review GAR-001: READY) |
 | 7 | Data access and cost rules approved | Pending Founder |
 | 8 | Partner Registry status updated | Designed (activation pending) |
 | 9 | Knowledge Register updated | Yes |

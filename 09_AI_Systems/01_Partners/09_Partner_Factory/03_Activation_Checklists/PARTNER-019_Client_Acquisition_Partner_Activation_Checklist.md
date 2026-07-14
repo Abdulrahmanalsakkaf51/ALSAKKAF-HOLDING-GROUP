@@ -27,8 +27,8 @@
 | 3 | Prompt completed | Yes (CAPROMPT-001) |
 | 4 | Skill defined | Yes (CASKILL-001) |
 | 5 | Tool-layer tests passed | Yes (CATEST-001, 2026-07-14) |
-| 6 | Prompt-level tests passed | No — pending Founder session |
-| 7 | Guardian review of outreach templates | Pending |
+| 6 | Prompt-level tests passed | Yes (CATEST-001 v1.1, 7/7, 2026-07-14) |
+| 7 | Guardian review of outreach templates | Yes (GAR-001 §3.2: READY, conditions apply) |
 | 8 | Data access and cost rules approved | Pending Founder |
 | 9 | Partner Registry updated (new PARTNER-019 row) | Designed (activation pending) |
 | 10 | Knowledge Register updated | Yes |

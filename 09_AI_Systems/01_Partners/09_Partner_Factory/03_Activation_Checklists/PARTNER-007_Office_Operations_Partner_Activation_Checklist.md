@@ -28,7 +28,7 @@
 | 4 | Skill defined | Yes (OFSKILL-001) |
 | 5 | Standards defined | Yes (OFS-001, OFQ-001) |
 | 6 | Six real task tests passed | Yes (OFTEST-001, 2026-07-14) |
-| 7 | Prompt-level tests passed | No — pending Founder session |
+| 7 | Prompt-level tests passed | Yes (OFTEST-001 v1.1, 6/6 practical on real data, 2026-07-14; Guardian review GAR-001: READY, conditions apply) |
 | 8 | Data access and cost rules approved | Pending Founder |
 | 9 | Partner Registry status updated | Designed (activation pending) |
 | 10 | Knowledge Register updated | Yes |

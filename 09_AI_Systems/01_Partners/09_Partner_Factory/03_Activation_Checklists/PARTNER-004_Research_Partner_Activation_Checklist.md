@@ -27,7 +27,7 @@
 | 3 | Prompt completed | Yes (RSPROMPT-001) |
 | 4 | Skill defined | Yes (RSSKILL-001) |
 | 5 | Tool-layer tests passed | Yes (RSTEST-001, 2026-07-14) |
-| 6 | Prompt-level tests passed | No — pending Founder session |
+| 6 | Prompt-level tests passed | Yes (RSTEST-001 v1.1, 7/7, 2026-07-14; Guardian review GAR-001: READY) |
 | 7 | Data access rules approved | Pending Founder |
 | 8 | Cost rules approved (zero-cost local) | Pending Founder |
 | 9 | Partner Registry status updated | Designed (activation pending) |

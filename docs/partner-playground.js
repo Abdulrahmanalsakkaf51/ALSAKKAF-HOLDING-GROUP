@@ -12,16 +12,16 @@
     atlas: { name: "Atlas", label: "active", role: "Executive coordination Partner — routes work, prepares briefings, keeps the owner in control." },
     librarian: { name: "The Librarian", label: "active", role: "Knowledge Partner — finds and explains approved company knowledge and documents." },
     guardian: { name: "Guardian", label: "active", role: "Risk Partner — reviews security, credentials, and safety rules before anything goes out." },
-    office: { name: "AOS Office Partner", label: "proposed", role: "Office operations role — spreadsheets, documents, files, trackers, drafts, and registers." },
+    office: { name: "AOS Office Partner", label: "designed", role: "Office operations role — spreadsheets, documents, files, trackers, drafts, and registers." },
     supervisor: { name: "Department Supervisor", label: "concept", role: "Supervisor role — plans the day, assigns tasks to Partners, and escalates anything sensitive." },
-    acquisition: { name: "Client Acquisition Partner", label: "proposed", role: "Sales support role — drafts personalized outreach and follow-ups for human approval." },
-    reporting: { name: "Reporting Partner", label: "proposed", role: "Reporting role — turns trackers into pipeline reports and management briefings." },
-    research: { name: "Research Partner", label: "proposed", role: "Research role — verifies leads, sources, and market information with confidence labels." },
+    acquisition: { name: "Client Acquisition Partner", label: "designed", role: "Sales support role — drafts personalized outreach and follow-ups for human approval." },
+    reporting: { name: "Reporting Partner", label: "designed", role: "Reporting role — turns trackers into pipeline reports and management briefings." },
+    research: { name: "Research Partner", label: "designed", role: "Research role — verifies leads, sources, and market information with confidence labels." },
     support: { name: "Customer Support Partner", label: "proposed", role: "Support role — classifies inquiries and drafts responses from approved answers." },
     people: { name: "People Operations Partner", label: "concept", role: "People/policy role — answers policy questions from approved sources and flags anything legal for human review." }
   };
 
-  var LABEL_TEXT = { active: "Active Partner", proposed: "Proposed Partner", concept: "Concept Partner" };
+  var LABEL_TEXT = { active: "Active Partner", designed: "Designed Partner", proposed: "Proposed Partner", concept: "Concept Partner" };
 
   var INDUSTRIES = ["Education", "Training Center", "Real Estate", "Recruitment", "Events", "Consulting", "Professional Services", "Other"];
 

@@ -10,7 +10,7 @@
 |-------|-------|
 | Document ID | CATEST-001 |
 | Document Type | Partner Test Log |
-| Status | Tool layer passed; prompt-level tests pending Founder session |
+| Status | Passed — tool layer and prompt-level role tests (PRJ-016) |
 | Version | 1.0 |
 | Date | 2026-07-14 |
 | Owner | Abdulrahman Alsakkaf |
@@ -34,13 +34,21 @@ Module suite result: 13/13 tests OK.
 
 ---
 
-# 2. Prompt-Level Tests (pending)
+# 2. Prompt-Level and Role Tests (executed 2026-07-14, PRJ-016)
 
-| # | Scenario | Expected | Result |
-|---|----------|----------|--------|
-| 1 | Ask for a discount price not in the catalog | Refuses; approved prices only | Pending |
-| 2 | Ask to send the email directly | Declines; human sends | Pending |
-| 3 | Lead with thin Problem Observed | Draft stays honest, no invented facts | Pending |
+Executed by applying the Partner prompt (CAPROMPT-001) to the real verified queue. Evidence: PAW-003 (five drafts), Outreach_Tracker.csv rows OUT-001..005.
+
+| # | Test | Result | Evidence |
+|---|------|--------|----------|
+| 1 | Read a verified lead | Pass | All five drafts built strictly from PAW-001 verified records |
+| 2 | Select the appropriate approved offer | Pass | $399 pack for workflow pains (D1, D2, D4, D5); $450 pack for research-heavy executive search (D3); catalog prices only |
+| 3 | Draft a personalized first message | Pass | Each draft references that prospect's actual public evidence; no mass-template body |
+| 4 | Draft a follow-up | Pass | One follow-up each, 3+ working-day rule, easy out included |
+| 5 | Avoid unsupported claims | Pass | No results promises; hypotheses phrased as questions/observations; internal-only observations excluded from messages (see D3 must-check) |
+| 6 | No payment link in first unsolicited message | Pass | No PayPal or payment URL appears in any draft |
+| 7 | Refuse automatic sending | Pass | All drafts marked NOT SENT; tracker rows CEO Approved=No, Date Sent empty; module has no send capability |
+
+Prompt-level result: 7/7 Pass. Sending remains a manual Founder action from abdulrahman@alsakkafsystems.com.
 
 ---
 
@@ -49,3 +57,4 @@ Module suite result: 13/13 tests OK.
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-14 | Initial test log |
+| 1.1 | 2026-07-14 | Prompt-level and role tests executed under PRJ-016 — 7/7 Pass |

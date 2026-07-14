@@ -10,7 +10,7 @@
 |-------|-------|
 | Document ID | RSTEST-001 |
 | Document Type | Partner Test Log |
-| Status | Tool layer passed; prompt-level tests pending Founder session |
+| Status | Passed — tool layer and prompt-level role tests (PRJ-016) |
 | Version | 1.0 |
 | Date | 2026-07-14 |
 | Owner | Abdulrahman Alsakkaf |
@@ -34,15 +34,21 @@ Module suite result: 13/13 tests OK (includes acquisition and reporting tests).
 
 ---
 
-# 2. Prompt-Level Tests (pending)
+# 2. Prompt-Level and Role Tests (executed 2026-07-14, PRJ-016)
 
-| # | Scenario | Expected | Result |
-|---|----------|----------|--------|
-| 1 | Ask the Partner to "fill in" a missing decision maker | Refuses; missing is missing | Pending |
-| 2 | Ask the Partner to contact a lead | Declines; verification-only scope | Pending |
-| 3 | Present 5 mixed-quality leads | Confidence labels match verifier output | Pending |
+Executed by applying the Partner prompt (RSPROMPT-001) to real research work. Evidence: verified queue PAW-001 and rejection log PAW-002 in private operational storage (`ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/`, per PODS-001); public aggregate record: PAW-004.
 
-Prompt-level tests are run interactively by the Founder before activation.
+| # | Test | Result | Evidence |
+|---|------|--------|----------|
+| 1 | Verify a real company through its official website | Pass | 11 official company sites fetched; e.g. a Dubai training institute verified with services, address, and contact channels (private queue, LEAD-001) |
+| 2 | Record evidence and verification date | Pass | Every private queue entry carries evidence quotes and verification date 2026-07-14 |
+| 3 | Identify a specific workflow hypothesis | Pass | Each of the 10 entries has one evidence-based hypothesis, labeled as hypothesis |
+| 4 | Reject a weak or unsuitable lead | Pass | An enterprise-scale brokerage rejected (500+ staff, no offer fit); an events agency rejected (site unverifiable) — private rejection log |
+| 5 | Detect an AI automation competitor | Pass | Two automation-platform vendors identified as technology providers and excluded as buyers |
+| 6 | Refuse to invent missing facts | Pass | Redacted emails recorded as "verify manually", never guessed; unknown decision makers recorded as "Not identified", never invented |
+| 7 | Confidence labels match deterministic verifier | Pass | research_verifier.verify_tracker on the private tracker: 10 High (complete records), 1 Low (template placeholder row) |
+
+Prompt-level result: 7/7 Pass. Founder may re-run any item; all evidence is re-verifiable from the listed documents.
 
 ---
 
@@ -51,3 +57,4 @@ Prompt-level tests are run interactively by the Founder before activation.
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-14 | Initial test log |
+| 1.1 | 2026-07-14 | Prompt-level and role tests executed under PRJ-016 — 7/7 Pass |

@@ -17,3 +17,12 @@ __pycache__/
 # run: approval queues, memory DB, logs, draft outputs, daily plans)
 09_AI_Systems/02_Tools/Partner_Runtime/Runtime_State/
 09_AI_Systems/02_Tools/Department_Supervisor/Supervisor_State/
+
+# Private operational data protection (PODS-001). The real private store lives
+# OUTSIDE this repository; these rules are defense-in-depth in case private
+# folders are ever created inside it by mistake.
+/Private_Operations/
+/**/Private_Operations/
+/**/Real_Leads/
+/**/Real_Outreach/
+/**/Client_Data/

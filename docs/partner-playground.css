@@ -124,6 +124,12 @@
   border: 1px solid rgba(255, 210, 122, 0.35);
 }
 
+.p-designed {
+  background: rgba(63, 216, 255, 0.1);
+  color: var(--cyan-soft);
+  border: 1px solid rgba(63, 216, 255, 0.35);
+}
+
 .label-legend {
   font-size: 0.82rem;
   margin-top: 8px;
