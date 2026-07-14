@@ -1,6 +1,6 @@
 # ALSAKKAF HOLDING GROUP
 
-# ADR-026 — Activate PARTNER-012 Reporting Partner (DRAFT)
+# ADR-026 — Activate PARTNER-012 Reporting Partner
 
 ---
 
@@ -10,9 +10,9 @@
 |-------|-------|
 | Document ID | ADR-026 |
 | Document Type | Architecture Decision Record |
-| Status | DRAFT — awaiting Founder decision |
-| Version | 0.1 |
-| Date | 2026-07-14 |
+| Status | Approved |
+| Version | 1.0 |
+| Date | 2026-07-15 |
 | Owner | Abdulrahman Alsakkaf |
 | Related Documents | RPTPROF-001, RPTTEST-001 v1.1, RPTACT-001, GAR-001, POD-001, PRJ-016 |
 
@@ -42,9 +42,20 @@ Identical to ADR-024 §5.
 
 | Field | Value |
 |-------|-------|
-| Founder decision | PENDING |
-| Date | — |
-| Signature | — |
+| Founder decision | APPROVED |
+| Date | 2026-07-15 |
+| Signature | Abdulrahman Alsakkaf — recorded via Founder master execution order |
+
+---
+
+# 7. Standing Activation Conditions (Founder Order, 2026-07-15)
+
+1. Authority level: Level 3 — Bounded Internal Operation.
+2. External email remains a manual, Founder-only action; nothing is ever sent automatically.
+3. No spending authority; no price changes; no contracts or legal commitments.
+4. No credential access or credential storage of any kind.
+5. No private operational data may return to the public repository (PODS-001 boundary).
+6. Guardian may suspend this Partner and escalate to the Founder, but may not independently activate any Partner.
 
 ---
 
@@ -53,3 +64,4 @@ Identical to ADR-024 §5.
 | Version | Date | Changes |
 |---------|------|---------|
 | 0.1 | 2026-07-14 | Draft prepared under PRJ-016 |
+| 1.0 | 2026-07-15 | Founder approval recorded; Partner activated at Level 3 (Bounded Internal Operation) with standing conditions |

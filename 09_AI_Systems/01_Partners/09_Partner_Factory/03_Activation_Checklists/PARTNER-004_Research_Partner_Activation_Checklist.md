@@ -10,7 +10,7 @@
 |-------|-------|
 | Document ID | RSACT-001 |
 | Document Type | Partner Activation Checklist |
-| Status | Open — awaiting Founder decision |
+| Status | Complete — Partner activated (ADR-024, 2026-07-15) |
 | Version | 1.0 |
 | Date | 2026-07-14 |
 | Owner | Abdulrahman Alsakkaf |
@@ -28,11 +28,11 @@
 | 4 | Skill defined | Yes (RSSKILL-001) |
 | 5 | Tool-layer tests passed | Yes (RSTEST-001, 2026-07-14) |
 | 6 | Prompt-level tests passed | Yes (RSTEST-001 v1.1, 7/7, 2026-07-14; Guardian review GAR-001: READY) |
-| 7 | Data access rules approved | Pending Founder |
-| 8 | Cost rules approved (zero-cost local) | Pending Founder |
-| 9 | Partner Registry status updated | Designed (activation pending) |
+| 7 | Data access rules approved | Approved (ADR-024, 2026-07-15) |
+| 8 | Cost rules approved (zero-cost local) | Approved (ADR-024, 2026-07-15) |
+| 9 | Partner Registry status updated | Active (2026-07-15) |
 | 10 | Knowledge Register updated | Yes |
-| 11 | Founder activation approval (ADR) | NOT GRANTED — Partner remains inactive |
+| 11 | Founder activation approval (ADR) | GRANTED — ADR-024 approved by the Founder on 2026-07-15; Level 3 Bounded Internal Operation |
 
 The Partner must NOT be treated as Active until item 11 is complete.
 
@@ -43,3 +43,4 @@ The Partner must NOT be treated as Active until item 11 is complete.
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-14 | Initial checklist |
+| 1.1 | 2026-07-15 | Founder approval recorded via ADR-024; checklist closed with Partner Active |

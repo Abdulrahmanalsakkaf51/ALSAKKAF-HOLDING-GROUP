@@ -1,0 +1,45 @@
+1
+00:00:00,000 --> 00:00:06,000
+Everyone is talking about AI agents. Let me show you
+what one actually looks like — doing real work.
+
+2
+00:00:06,000 --> 00:00:14,000
+This is an AI Partner. Not a chatbot waiting for questions —
+a role, with a written job description.
+
+3
+00:00:14,000 --> 00:00:22,000
+This one runs office operations. It has rules: what it may read,
+what it must produce, and what it is never allowed to do.
+
+4
+00:00:22,000 --> 00:00:32,000
+Watch. I drop a meeting note into its folder. It drafts the
+tracker update, and prepares the weekly report — then it stops.
+
+5
+00:00:32,000 --> 00:00:42,000
+It doesn't send anything. It can't. Every output waits
+in a drafts folder, for a human.
+
+6
+00:00:42,000 --> 00:00:52,000
+That's the difference. A chatbot answers you. A Partner works
+for you — inside rules you wrote, with you approving every result.
+
+7
+00:00:52,000 --> 00:01:00,000
+A Manager, a Researcher, and an Operations Partner can carry
+most of a small business's paperwork.
+
+8
+00:01:00,000 --> 00:01:14,000
+AI drafts. Humans decide. That is the entire philosophy —
+and it's why this works for real businesses.
+
+9
+00:01:14,000 --> 00:01:28,000
+I'm Abdulrahman. I run my company this way, and I build these
+Partners for small businesses. Full demos are on this channel —
+and at alsakkafsystems.com.

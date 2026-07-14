@@ -10,7 +10,7 @@
 |-------|-------|
 | Document ID | OFACT-001 |
 | Document Type | Partner Activation Checklist |
-| Status | Open — awaiting Founder decision |
+| Status | Complete — Partner activated (ADR-027, 2026-07-15) |
 | Version | 1.0 |
 | Date | 2026-07-14 |
 | Owner | Abdulrahman Alsakkaf |
@@ -29,10 +29,10 @@
 | 5 | Standards defined | Yes (OFS-001, OFQ-001) |
 | 6 | Six real task tests passed | Yes (OFTEST-001, 2026-07-14) |
 | 7 | Prompt-level tests passed | Yes (OFTEST-001 v1.1, 6/6 practical on real data, 2026-07-14; Guardian review GAR-001: READY, conditions apply) |
-| 8 | Data access and cost rules approved | Pending Founder |
-| 9 | Partner Registry status updated | Designed (activation pending) |
+| 8 | Data access and cost rules approved | Approved (ADR-027, 2026-07-15) |
+| 9 | Partner Registry status updated | Active (2026-07-15) |
 | 10 | Knowledge Register updated | Yes |
-| 11 | Founder activation approval (ADR) | NOT GRANTED — Partner remains inactive |
+| 11 | Founder activation approval (ADR) | GRANTED — ADR-027 approved by the Founder on 2026-07-15; Level 3 Bounded Internal Operation |
 
 The Partner must NOT be treated as Active until item 11 is complete.
 
@@ -43,3 +43,4 @@ The Partner must NOT be treated as Active until item 11 is complete.
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-14 | Initial checklist |
+| 1.1 | 2026-07-15 | Founder approval recorded via ADR-027; checklist closed with Partner Active |

@@ -53,6 +53,11 @@ Every major architectural decision must be documented, approved, and preserved.
 | ADR-020 | Project Operating Model | Approved | 2026-07-06 |
 | ADR-021 | Atlas Founder Executive Partner | Approved | 2026-07-06 |
 | ADR-022 | Activate Atlas | Approved | 2026-07-08 |
+| ADR-023 | Activate Guardian | Approved | 2026-07-12 |
+| ADR-024 | Activate PARTNER-004 Research Partner (Level 3 Bounded Internal Operation) | Approved | 2026-07-15 |
+| ADR-025 | Activate PARTNER-019 Client Acquisition Partner (Level 3 Bounded Internal Operation) | Approved | 2026-07-15 |
+| ADR-026 | Activate PARTNER-012 Reporting Partner (Level 3 Bounded Internal Operation) | Approved | 2026-07-15 |
+| ADR-027 | Activate PARTNER-007 Office Operations Partner (Level 3 Bounded Internal Operation) | Approved | 2026-07-15 |
 
 
 ---

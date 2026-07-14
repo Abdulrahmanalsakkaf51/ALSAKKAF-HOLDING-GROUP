@@ -80,12 +80,12 @@ No automatic email sending. No external account creation. No credentials stored.
 | 1 | Website wording patch ($450 package language, badge check) | Done |
 | 2 | Partner prompt-level and practical tests, test logs updated | Done |
 | 3 | Guardian activation review (GAR-002) | Done |
-| 4 | Founder activation packages + ADR drafts | Done — awaiting Founder decisions |
+| 4 | Founder activation packages + ADR drafts | Done — all four ADRs approved 2026-07-15 |
 | 5 | 10-prospect verified queue + rejection log | Done |
 | 6 | 5 outreach drafts, NOT SENT | Done — awaiting Founder approval |
 | 7 | Daily revenue briefing tool + tests | Done |
 | 8 | Trading Research Lab project (PRJ-017, design only) | Done |
-| 9 | Founder: activation decisions, outreach approvals, first sends | Pending Founder |
+| 9 | Founder: activation decisions, outreach approvals, first sends | Activations approved 2026-07-15; outreach approvals and first sends remain pending Founder |
 
 ---
 
@@ -95,6 +95,7 @@ No automatic email sending. No external account creation. No credentials stored.
 |------|--------|
 | 2026-07-14 | Project created. Preflight confirmed HEAD fbd6c86 clean. Real-lead baseline: 0. Prospect research, Partner tests, Guardian review, activation packages, drafts, and briefing tool built this session. |
 | 2026-07-14 | Privacy separation completed per PODS-001: real prospect records (PAW-001..003), real tracker rows, and Founder briefings moved to private operational storage with SHA-256 verified copies; public repository sanitized to templates, aggregates (PAW-004), and a fictional demonstration (PAW-005). Public trackers restored to template form. |
+| 2026-07-15 | Founder approved ADR-024..027. PARTNER-004, PARTNER-019, PARTNER-012, PARTNER-007 set to Active at Level 3 (Bounded Internal Operation): no sending, no spending, no price changes, no contracts, no credentials, PODS-001 boundary enforced; Guardian may suspend and escalate but not activate. External email remains manual Founder-only. |
 
 ---
 

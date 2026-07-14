@@ -1,0 +1,28 @@
+1
+00:00:00,000 --> 00:00:04,000
+A chatbot answers questions.
+An AI Partner does a job.
+
+2
+00:00:04,000 --> 00:00:10,000
+This Partner has a written role: what it reads,
+what it produces, what it may never do.
+
+3
+00:00:10,000 --> 00:00:16,000
+I drop in a meeting note —
+it drafts the tracker and the report.
+
+4
+00:00:16,000 --> 00:00:22,000
+Then it stops. Nothing gets sent.
+Everything waits in a drafts folder for a human.
+
+5
+00:00:22,000 --> 00:00:26,000
+That rule is permanent.
+
+6
+00:00:26,000 --> 00:00:36,000
+That's an AI Partner.
+The full 90-second demo is on the channel.

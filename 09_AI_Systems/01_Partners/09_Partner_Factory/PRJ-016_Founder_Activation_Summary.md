@@ -12,7 +12,7 @@
 |-------|-------|
 | Document ID | PAS-001 |
 | Document Type | Founder Activation Summary |
-| Status | Awaiting Founder decisions |
+| Status | Complete — all four activations approved 2026-07-15 |
 | Version | 1.0 |
 | Date | 2026-07-14 |
 | Owner | Abdulrahman Alsakkaf |
@@ -25,10 +25,10 @@
 
 | Partner | Role | Tests | Guardian (GAR-001) | ADR | Decision |
 |---------|------|-------|--------------------|-----|----------|
-| PARTNER-004 | Research / Market Intelligence | Tool 13/13; role 7/7 | READY (read-only public-web scope must be in ADR) | ADR-024 | PENDING |
-| PARTNER-019 | Client Acquisition | Tool 13/13; role 7/7 | READY (manual send only; Guardian re-review of template changes) | ADR-025 | PENDING |
-| PARTNER-012 | Reporting | Tool 13/13; role 6/6 | READY | ADR-026 | PENDING |
-| PARTNER-007 | Office Operations | Tool 10/10; role 6/6 on real data | READY (official registers stay human-only) | ADR-027 | PENDING |
+| PARTNER-004 | Research / Market Intelligence | Tool 13/13; role 7/7 | READY (read-only public-web scope must be in ADR) | ADR-024 | APPROVED 2026-07-15 |
+| PARTNER-019 | Client Acquisition | Tool 13/13; role 7/7 | READY (manual send only; Guardian re-review of template changes) | ADR-025 | APPROVED 2026-07-15 |
+| PARTNER-012 | Reporting | Tool 13/13; role 6/6 | READY | ADR-026 | APPROVED 2026-07-15 |
+| PARTNER-007 | Office Operations | Tool 10/10; role 6/6 on real data | READY (official registers stay human-only) | ADR-027 | APPROVED 2026-07-15 |
 
 Recommended initial authority for all four: **Level 3 — bounded internal operation** (Prepare). All external sending remains a manual Founder action from abdulrahman@alsakkafsystems.com.
 
@@ -57,3 +57,4 @@ No autonomous sending. No credential access. No customer-data handling. No Level
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-14 | Initial summary for four activation decisions |
+| 1.1 | 2026-07-15 | Founder approved all four activations (Level 3 Bounded Internal Operation); registry set to Active |

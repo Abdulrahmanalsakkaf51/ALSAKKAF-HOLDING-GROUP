@@ -121,17 +121,27 @@ class PartnerStatusIntegrityTests(unittest.TestCase):
         self.registry = open(p("09_AI_Systems", "01_Partners",
                                "Partner_Registry.md"), encoding="utf-8").read()
 
-    def test_only_three_active_partners(self):
+    def test_active_partner_set(self):
+        # Founder approved ADR-024..027 on 2026-07-15: the four pod
+        # Partners joined the original three Active Partners.
         rows = re.findall(r"^\| (PARTNER-\d+) \|.*?\| (\w[\w –-]*?) \| CEO \|",
                           self.registry, re.M)
         active = {pid for pid, status in rows if status.strip() == "Active"}
-        self.assertEqual(active, {"PARTNER-001", "PARTNER-002", "PARTNER-016"})
+        self.assertEqual(active, {"PARTNER-001", "PARTNER-002", "PARTNER-016",
+                                  "PARTNER-004", "PARTNER-007", "PARTNER-012",
+                                  "PARTNER-019"})
 
-    def test_pod_partners_not_active(self):
-        for pid in ("PARTNER-004", "PARTNER-007", "PARTNER-012", "PARTNER-019",
-                    "PARTNER-020"):
+    def test_pod_partners_active_with_adr(self):
+        for pid, adr in (("PARTNER-004", "ADR-024"), ("PARTNER-019", "ADR-025"),
+                         ("PARTNER-012", "ADR-026"), ("PARTNER-007", "ADR-027")):
             row = re.search(r"^\| %s \|.*$" % pid, self.registry, re.M).group(0)
-            self.assertNotRegex(row, r"\| Active \|", msg=pid)
+            self.assertRegex(row, r"\| Active \|", msg=pid)
+            self.assertIn(adr, row, msg=pid)
+
+    def test_supervisor_not_active(self):
+        # PARTNER-020 (Department Supervisor) has no activation ADR.
+        row = re.search(r"^\| PARTNER-020 \|.*$", self.registry, re.M).group(0)
+        self.assertNotRegex(row, r"\| Active \|")
 
 
 class GovernanceGateTests(unittest.TestCase):
@@ -142,15 +152,18 @@ class GovernanceGateTests(unittest.TestCase):
         self.assertEqual(gar.count("READY FOR FOUNDER ACTIVATION"), 4)
         self.assertIn("Guardian does not activate", gar)
 
-    def test_activation_adr_drafts_pending(self):
-        for adr in ("ADR-024_Activate_Research_Partner_DRAFT.md",
-                    "ADR-025_Activate_Client_Acquisition_Partner_DRAFT.md",
-                    "ADR-026_Activate_Reporting_Partner_DRAFT.md",
-                    "ADR-027_Activate_Office_Operations_Partner_DRAFT.md"):
+    def test_activation_adrs_approved_with_conditions(self):
+        for adr in ("ADR-024_Activate_Research_Partner.md",
+                    "ADR-025_Activate_Client_Acquisition_Partner.md",
+                    "ADR-026_Activate_Reporting_Partner.md",
+                    "ADR-027_Activate_Office_Operations_Partner.md"):
             text = open(p("01_Holding_Company", "01_Governance", "ADR", adr),
                         encoding="utf-8").read()
-            self.assertIn("DRAFT — awaiting Founder decision", text, msg=adr)
-            self.assertIn("| Founder decision | PENDING |", text, msg=adr)
+            self.assertIn("| Status | Approved |", text, msg=adr)
+            self.assertIn("| Founder decision | APPROVED |", text, msg=adr)
+            self.assertIn("Level 3 — Bounded Internal Operation", text, msg=adr)
+            self.assertIn("may not independently activate", text, msg=adr)
+            self.assertIn("No credential access", text, msg=adr)
 
 
 class NoAutomaticSendingTests(unittest.TestCase):
