@@ -49,6 +49,16 @@ Run from the repository root (or use `run_atlas.ps1` / `run_atlas.bat`, which re
 | `delivery-checklist [--client "Name"]` | Generates a client delivery checklist. |
 | `payment-report` | Reads `Client_Pipeline.csv` and reports paid/unpaid/link-sent status. Never connects to PayPal. |
 | `war-room` | Runs `brief` + `dashboard` + `payment-report` + `content-pack` together and writes `Atlas_War_Room_Report.md`. |
+| `revenue-sprint` | Generates the PRJ-009 revenue sprint status report (offers, publish status, leads, outreach, proposals, payments). |
+| `ai-agent-proposal [--client "Name"]` | Generates a proposal draft for the AI Agent Starter Pack ($450 USD). |
+| `ai-agent-delivery [--client "Name"]` | Generates the AI Agent Starter Pack delivery checklist. |
+| `first-5-outreach` | Generates the first-5 outreach execution pack from the top-scored real leads. Never invents leads. |
+| `task-queue` | Builds a prioritized task queue (pipeline > outreach > leads > content) from the public trackers only. Every line is tagged `[FACT]`, `[DRAFT]`, or `[INFERENCE]` with a Source note. Never invents a task. |
+| `lead-review-queue` | Builds a lead review queue. Uses the private lead tracker (`ALSAKKAF PRIVATE OPERATIONS`, outside the repo) if it exists, and writes that report only to the private output folder. Falls back to the public template-only tracker and `Atlas_Output/` if the private store isn't present. Console output is counts only, never a name. |
+| `comms-approval-queue` | Builds a CEO comms approval queue (every outreach item not yet approved and not yet sent). Same private/public fallback pattern as `lead-review-queue`. |
+| `ops-status` | Operations status rollup: re-runs `health-check`, lists active Partners from `atlas_config.json`, reports the dashboard's `lastUpdated` timestamp, and gives a plain PASS/FAIL. |
+| `media-store-task-report` | Public-repo-only checklist of standard store/media pages, based on searching for a NESTLYRA folder under `01_Holding_Company`. Reports honestly if none is found. |
+| `daily-cycle` | Runs the full daily operating cycle (`health-check` → `brief` → `dashboard` → `payment-report` → `content-pack` → `task-queue` → `lead-review-queue` → `comms-approval-queue` → `ops-status` → `media-store-task-report`) and writes one consolidated `Atlas_Daily_Operating_Cycle_{date}.md` linking every report by path. Does not replace `war-room`. |
 
 Examples:
 
@@ -79,13 +89,15 @@ py atlas.py proposal --client "Example Co"
 | `atlas_config.json` | Paths, active offer, payment link, and scan settings. Edit this, not the code, to change file locations. |
 | `run_atlas.ps1` / `run_atlas.bat` | Thin launchers that forward arguments to `atlas.py`. |
 | `test_atlas_runtime.py` | Automated test suite — run after any change to `atlas.py`. |
+| `test_prj_009_revenue_sprint.py` | PRJ-009 revenue sprint release test (offers, payment link discipline, delivery system, sprint files). |
+| `test_atlas_operational_readiness.py` | Operational readiness test suite for the 6 newer commands (`task-queue`, `lead-review-queue`, `comms-approval-queue`, `ops-status`, `media-store-task-report`, `daily-cycle`), including the private/public fallback logic and a private-data leak scan. |
 | `Atlas_Runtime_Test_Log.md` | Record of test runs and results. |
 
 ---
 
 # 6. How Output Is Organized
 
-All generated files go to `01_Holding_Company/08_Reports/Atlas_Output/` (see that folder's own `README.md` for the full breakdown by subfolder).
+All generated files go to `01_Holding_Company/08_Reports/Atlas_Output/` (see that folder's own `README.md` for the full breakdown by subfolder) — with one exception: `lead-review-queue` and `comms-approval-queue` write to the private, non-Git folder `ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/06_Founder_Briefings/` whenever the private lead/outreach trackers exist there, per the Private Operational Data Standard (PODS-001). This keeps real company and contact names out of the repository entirely. Console output for those two commands is always counts-only. `write_output_private()` hard-refuses to write anywhere inside the repository, regardless of configuration.
 
 ---
 
@@ -95,6 +107,7 @@ All generated files go to `01_Holding_Company/08_Reports/Atlas_Output/` (see tha
 - RTASK-001 — Atlas Revenue Task Routing v1
 - ARPROMPT-001 — Atlas Revenue Operator Prompt v1
 - PRJ-007 — Launch AOS Revenue Engine
+- PODS-001 — Private Operational Data Standard
 
 ---
 
@@ -103,3 +116,4 @@ All generated files go to `01_Holding_Company/08_Reports/Atlas_Output/` (see tha
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial version — 10 commands implemented and tested |
+| 1.2 | 2026-07-16 | Added 6 commands — `task-queue`, `lead-review-queue`, `comms-approval-queue`, `ops-status`, `media-store-task-report`, `daily-cycle` (14 → 20 total). Added private/public fallback pattern and `write_output_private()` hard guard for PODS-001 compliance. |

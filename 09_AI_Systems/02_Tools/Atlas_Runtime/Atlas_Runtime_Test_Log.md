@@ -13,9 +13,9 @@
 | Document ID | ARTEST-001 |
 | Owner | Abdulrahman Alsakkaf |
 | Status | Passed |
-| Version | 1.0 |
+| Version | 1.2 |
 | Created | 2026-07-13 |
-| Related Documents | ARUN-001, PRJ-007, ASAP-001 |
+| Related Documents | ARUN-001, PRJ-007, ASAP-001, PODS-001 |
 
 ---
 
@@ -84,8 +84,59 @@ Atlas Runtime v1 is ready for daily use.
 
 ---
 
-# 7. Revision History
+# 8. Test Run — 2026-07-16 (v1.2 Operational Readiness: 6 New Commands)
+
+## 8.1 Test Environment
+
+| Field | Entry |
+|-------|-------|
+| Date | 2026-07-16 |
+| Tested By | Claude, at Founder direction |
+| Environment | Local Windows session, Python 3 via the `py` launcher, standard library only, no network access |
+| Data Used | Public trackers hold only the example/placeholder rows. `lead-review-queue` and `comms-approval-queue` also exercised against the real private tracker data in `ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/` (outside the repo) to confirm the private-write path and the leak-scan both work correctly. |
+
+## 8.2 New Commands Tested
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `task-queue` | PASS | Correctly read the public trackers, tagged every line `[FACT]`/`[DRAFT]`/`[INFERENCE]` with a Source note, and honestly reported only the 2 real Content_Calendar.csv items as open (no pipeline/outreach/lead items, since those trackers hold only placeholder rows) |
+| `lead-review-queue` | PASS | With the private tracker present, correctly read 10 real leads and wrote the review queue to `ALSAKKAF PRIVATE OPERATIONS/.../06_Founder_Briefings/`, not the repo; console output was counts-only ("10 real lead(s) reviewed"), no company name printed to stdout |
+| `comms-approval-queue` | PASS | Correctly aggregated 5 outreach items awaiting CEO approval from the private tracker, wrote the queue privately, and noted the private draft-file count (12) without naming files |
+| `ops-status` | PASS | Correctly reused `cmd_health_check` (no duplicated logic), listed the 3 active Partners from `atlas_config.json`, reported the dashboard `lastUpdated` timestamp, and gave an honest PASS rollup |
+| `media-store-task-report` | PASS | Searched `01_Holding_Company/` for a NESTLYRA folder, found none, and honestly reported "No NESTLYRA folder was found" with every standard store page marked "status unknown" rather than guessing |
+| `daily-cycle` | PASS | Ran all 10 steps in order, did not abort on any step, and wrote one consolidated `Atlas_Daily_Operating_Cycle_{date}.md` linking every report by path (public and private) with a counts-only, name-free summary paragraph |
+
+## 8.3 Automated Test Suite (`test_atlas_operational_readiness.py`)
+
+46 checks run, 46 passed, 0 failed:
+
+- Command registration/parsing for all 6 new commands
+- End-to-end runs (exit 0) and expected output files for all 6 commands
+- Private-store fallback logic simulated in-process (private paths pointed at a non-existent location) — confirmed both `lead-review-queue` and `comms-approval-queue` correctly fall back to the public tracker and the public `Atlas_Output/` folder
+- `write_output_private()` hard-refuses to write inside the repository even if misconfigured, and does not create the file when it refuses
+- Private-data leak scan: read the 11 real company names from the private `Lead_Tracker.csv` (in memory only, never printed or written to any repo file) and confirmed none appear anywhere under the public `Atlas_Output/` folder or in `docs/atlas-dashboard-data.js`
+- Credential scan of every new `.md` report produced
+
+Result: **PASS** (46/46).
+
+Also re-ran the existing suites after these changes, unmodified:
+
+- `test_atlas_runtime.py` — 19/19 passed
+- `test_prj_009_revenue_sprint.py` — 50/50 passed
+
+## 8.4 Manual Verification
+
+Every file `daily-cycle` generated was opened and read directly (not just checked for existence): `Daily_Briefing_2026-07-16.md`, `Task_Queue_2026-07-16.md`, `Ops_Status_2026-07-16.md`, `Media_Store_Task_Report_2026-07-16.md`, `Atlas_Daily_Operating_Cycle_2026-07-16.md`, plus the two private reports. All content matched the real (or genuinely empty) tracker state — no fake leads, no fake revenue, no fake completed work, no invented tasks.
+
+## 8.5 Final Status — v1.2
+
+**PASS.** Atlas Runtime now has 20 commands. The 6 new commands correctly separate public and private data per PODS-001: private reports never land inside the git repository, console output from private-data commands never names a real company, and a hard-coded safety guard (`write_output_private`) backs up the configuration-level separation.
+
+---
+
+# 9. Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-13 | Initial test run — all 10 commands and the automated suite passed |
+| 1.2 | 2026-07-16 | Added test run for 6 new commands (`task-queue`, `lead-review-queue`, `comms-approval-queue`, `ops-status`, `media-store-task-report`, `daily-cycle`); new `test_atlas_operational_readiness.py` suite passed 46/46; existing suites re-confirmed at 19/19 and 50/50 |

@@ -8,6 +8,7 @@
 !01_Holding_Company/08_Reports/Atlas_Output/**/README.md
 !01_Holding_Company/08_Reports/Atlas_Output/**/.gitkeep*
 !01_Holding_Company/08_Reports/Atlas_Output/**/.gitkeep_readme.txt
+!01_Holding_Company/08_Reports/Atlas_Output/Atlas_Operational_Acceptance_Report.md
 
 # Python bytecode caches (created if a test imports atlas.py)
 __pycache__/

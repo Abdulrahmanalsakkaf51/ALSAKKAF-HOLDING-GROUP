@@ -1,0 +1,3 @@
+Message ID,Date Received,Channel,Sender Name,Company (if known),Subject / Summary,Classified Intent,Linked Lead ID,Status,Assigned Next Step,Date Closed
+EXAMPLE-001,2026-07-16,Email,[Example Only - Not Real],[Example Only - Not Real],Sample row - not a real message - illustrates column usage only,Pricing Question,EXAMPLE-001,Drafted,Atlas drafts reply - Founder must approve before send,
+EXAMPLE-002,2026-07-16,Contact Form,[Example Only - Not Real],[Example Only - Not Real],Sample row - not a real message - illustrates column usage only,Complaint,,In Founder Queue,Founder-authored reply required - see Escalation Matrix (COMMS-007),

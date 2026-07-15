@@ -23,6 +23,12 @@ Commands:
     ai-agent-proposal   Generate a proposal draft for the AI Agent Starter Pack ($450).
     ai-agent-delivery   Generate the AI Agent Starter Pack delivery checklist.
     first-5-outreach    Generate the first-5 outreach execution pack (drafts only).
+    task-queue           Build a prioritized task queue from the public trackers.
+    lead-review-queue    Build a lead review queue (private-store aware; never writes real names into the repo).
+    comms-approval-queue Build a CEO comms approval queue (private-store aware).
+    ops-status            Operations status rollup (health-check + partners + dashboard freshness).
+    media-store-task-report  Public-repo store/media content checklist.
+    daily-cycle           Run the full daily operating cycle (10 steps) and write one consolidated report.
 """
 
 import argparse
@@ -118,6 +124,32 @@ def write_output(path: Path, content: str):
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
     print(f"  [OK] Wrote {path.relative_to(REPO_ROOT)}")
+
+
+def is_within(path: Path, root: Path) -> bool:
+    """True if path resolves to somewhere inside root."""
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def write_output_private(path: Path, content: str):
+    """Write a report that must never live inside the git repository (PODS-001).
+
+    Refuses to write if the resolved path is anywhere inside REPO_ROOT - this is a
+    hard safety backstop, not just a config convention.
+    """
+    if is_within(path, REPO_ROOT):
+        raise RuntimeError(
+            f"Refusing to write private output inside the git repository: {path}. "
+            "Check paths.private_output_dir in atlas_config.json."
+        )
+    ensure_dir(path.parent)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"  [OK] Wrote private output (outside the repo): {path}")
 
 
 def doc_info_block(command: str) -> list:
@@ -1172,6 +1204,419 @@ def cmd_first_5_outreach(cfg, args):
     return 0
 
 
+def cmd_task_queue(cfg, args):
+    """Build a prioritized task queue from the public trackers only.
+
+    Every line is tagged [FACT] (read directly from a tracker cell), [DRAFT]
+    (an Atlas-authored suggestion), or [INFERENCE] (Atlas reasoning about
+    priority/urgency), each with a Source note. Atlas never invents a task.
+    """
+    print("Atlas Runtime - Building Task Queue")
+    m = compute_metrics(cfg)
+    raw = m["raw"]
+    date = today()
+
+    # (priority_rank, tag, text, source) - lower rank = higher priority.
+    items = []
+
+    for r in raw["pipeline"]:
+        cid = r.get("Client ID", "?")
+        source = f"Client_Pipeline.csv (Client ID: {cid})"
+        next_action = r.get("Next Action", "").strip()
+        if next_action:
+            items.append((1, "FACT", f"Pipeline: {next_action}", source))
+        else:
+            items.append((1, "INFERENCE",
+                           "Pipeline entry has no Next Action recorded - review status and set one.", source))
+
+    for r in raw["outreach"]:
+        oid = r.get("Outreach ID", "?")
+        source = f"Outreach_Tracker.csv (Outreach ID: {oid})"
+        approved = r.get("CEO Approved", "").strip().lower()
+        sent = r.get("Date Sent", "").strip()
+        if approved != "yes" and not sent:
+            items.append((2, "INFERENCE", "Outreach item is awaiting CEO approval before it can be sent.", source))
+        elif approved == "yes" and not sent:
+            items.append((2, "DRAFT", "Approved outreach message is ready to send manually - log Date Sent once sent.", source))
+
+    for r in raw["leads"]:
+        lid = r.get("Lead ID", "?")
+        source = f"Lead_Tracker.csv (Lead ID: {lid})"
+        next_action = r.get("Next Action", "").strip()
+        if next_action:
+            items.append((3, "FACT", f"Lead: {next_action}", source))
+        elif not r.get("Lead Score", "").strip() or r.get("Lead Score", "0").strip() == "0":
+            items.append((3, "INFERENCE", "Lead has no score yet - run 'atlas.py score-leads'.", source))
+
+    for r in raw["content"]:
+        status = r.get("Status", "").strip()
+        title = r.get("Topic/Title", "?")
+        source = f"Content_Calendar.csv ({r.get('Date', '?')} / {r.get('Platform', '?')})"
+        if status.lower() != "posted":
+            items.append((4, "DRAFT", f"Advance content item toward publish: \"{title}\" (status: {status or 'unset'})", source))
+
+    items.sort(key=lambda t: t[0])
+    items = items[:15]
+
+    lines = ["# ALSAKKAF HOLDING GROUP", "", "# Atlas Task Queue", ""]
+    lines.extend(doc_info_block("task-queue"))
+    lines.append(f"Generated: {now_iso()}")
+    lines.append("")
+    lines.append("Priority order: pipeline > outreach > leads > content. Capped at 15 items. "
+                 "Every line is tagged [FACT] (read directly from a tracker), [DRAFT] (an Atlas-authored "
+                 "suggestion), or [INFERENCE] (Atlas reasoning about priority/urgency), with a Source note. "
+                 "Atlas never invents a task.")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    if not items:
+        lines.append("## No Open Tasks Found")
+        lines.append("")
+        lines.append("All public trackers contain only placeholder/example rows, or every real row is "
+                     "already complete (Next Action blank with nothing outstanding, content items posted). "
+                     "Atlas does not invent tasks - this is an honest empty queue.")
+        lines.append("")
+    else:
+        lines.append("## Queue")
+        lines.append("")
+        for i, (_, tag, text, source) in enumerate(items, start=1):
+            lines.append(f"{i}. [{tag}] {text}")
+            lines.append(f"   Source: {source}")
+        lines.append("")
+
+    out_path = rp(cfg["paths"]["output_dir"]) / f"Task_Queue_{date}.md"
+    write_output(out_path, "\n".join(lines))
+    print(f"  Summary: {len(items)} task(s) queued from public trackers.")
+    return 0
+
+
+def cmd_lead_review_queue(cfg, args):
+    """Build a lead review queue. Uses the private lead tracker if it exists
+    (ALSAKKAF PRIVATE OPERATIONS, outside the repo) and writes that report to the
+    private output folder only. Falls back to the public (template-only) tracker
+    and the public Atlas_Output folder if the private store isn't present.
+    Console output is counts only - never a real company name.
+    """
+    print("Atlas Runtime - Building Lead Review Queue")
+    date = today()
+
+    private_path = rp(cfg["paths"]["private_lead_tracker"])
+    using_private = private_path.exists()
+    path = private_path if using_private else rp(cfg["paths"]["lead_tracker"])
+
+    rows = real_rows(read_csv_rows(path))
+
+    lines = ["# ALSAKKAF HOLDING GROUP", "", "# Atlas Lead Review Queue", ""]
+    lines.extend(doc_info_block("lead-review-queue"))
+    lines.append(f"Generated: {now_iso()}")
+    lines.append(f"Source: {'private lead tracker (ALSAKKAF PRIVATE OPERATIONS - PRJ-016)' if using_private else 'public lead tracker (template only)'}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    if not rows:
+        lines.append("No real leads found to review " +
+                     ("in the private lead tracker." if using_private else
+                      "(public tracker holds only placeholder/example rows - expected when run without the private store)."))
+        lines.append("")
+        lines.append("Atlas does not invent leads.")
+        lines.append("")
+    else:
+        lines.append("## Review Queue")
+        lines.append("")
+        lines.append("| Company | Score | Status | Suggested Next Action | CEO Approval Needed |")
+        lines.append("|---|---|---|---|---|")
+        for r in rows:
+            company = r.get("Company Name", "?")
+            score = r.get("Lead Score", "").strip() or "unscored"
+            status = r.get("Status", "").strip() or "New"
+            next_action = r.get("Next Action", "").strip() or "Atlas suggests: confirm contact details and set a next action."
+            approval = r.get("CEO Approval Needed", "").strip() or "Yes"
+            lines.append(f"| {company} | {score} | {status} | {next_action} | {approval} |")
+        lines.append("")
+        lines.append("**CEO Approval Required** on every row before any contact is made.")
+        lines.append("")
+
+    if using_private:
+        out_dir = rp(cfg["paths"]["private_output_dir"])
+        out_path = out_dir / f"Lead_Review_Queue_{date}.md"
+        write_output_private(out_path, "\n".join(lines))
+    else:
+        out_path = rp(cfg["paths"]["output_dir"]) / f"Lead_Review_Queue_{date}.md"
+        write_output(out_path, "\n".join(lines))
+
+    print(f"  Summary: {len(rows)} real lead(s) reviewed from the {'private' if using_private else 'public'} tracker.")
+    return 0
+
+
+def cmd_comms_approval_queue(cfg, args):
+    """Build a CEO comms approval queue: every outreach item that is not yet
+    CEO-approved and not yet sent. Private-store aware, same pattern as
+    lead-review-queue. Console output is counts only.
+    """
+    print("Atlas Runtime - Building Comms Approval Queue")
+    date = today()
+
+    private_path = rp(cfg["paths"]["private_outreach_tracker"])
+    using_private = private_path.exists()
+    path = private_path if using_private else rp(cfg["paths"]["outreach_tracker"])
+
+    rows = real_rows(read_csv_rows(path))
+    pending = [r for r in rows
+               if r.get("CEO Approved", "").strip().lower() != "yes" and not r.get("Date Sent", "").strip()]
+
+    draft_file_count = None
+    if using_private:
+        drafts_dir = rp(cfg["paths"]["private_outreach_drafts_dir"])
+        if drafts_dir.exists():
+            draft_file_count = len(list(drafts_dir.rglob("*.md")))
+
+    lines = ["# ALSAKKAF HOLDING GROUP", "", "# Atlas Comms Approval Queue", ""]
+    lines.extend(doc_info_block("comms-approval-queue"))
+    lines.append(f"Generated: {now_iso()}")
+    lines.append(f"Source: {'private outreach tracker (ALSAKKAF PRIVATE OPERATIONS - PRJ-016)' if using_private else 'public outreach tracker (template only)'}")
+    if draft_file_count is not None:
+        lines.append(f"Private outreach draft files found (03_Outreach_Drafts, count only): {draft_file_count}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    if not pending:
+        lines.append("No outreach items are awaiting CEO approval right now " +
+                     ("in the private outreach tracker." if using_private else
+                      "(public tracker holds only placeholder/example rows - expected when run without the private store)."))
+        lines.append("")
+    else:
+        lines.append("## Approval Queue")
+        lines.append("")
+        for r in pending:
+            oid = r.get("Outreach ID", "?")
+            lead_id = r.get("Lead ID", "?")
+            channel = r.get("Channel", "?")
+            msg_type = r.get("Message Type", "?")
+            template = r.get("Template Used", "?")
+            lines.append(f"- **CEO Approval Required** | Outreach ID: {oid} | Lead ID: {lead_id} | "
+                         f"Channel: {channel} | Type: {msg_type} | Template: {template}")
+        lines.append("")
+
+    if using_private:
+        out_dir = rp(cfg["paths"]["private_output_dir"])
+        out_path = out_dir / f"Comms_Approval_Queue_{date}.md"
+        write_output_private(out_path, "\n".join(lines))
+    else:
+        out_path = rp(cfg["paths"]["output_dir"]) / f"Comms_Approval_Queue_{date}.md"
+        write_output(out_path, "\n".join(lines))
+
+    print(f"  Summary: {len(pending)} item(s) awaiting CEO approval (of {len(rows)} real outreach record(s) reviewed).")
+    return 0
+
+
+def cmd_ops_status(cfg, args):
+    """Public-data operations status rollup. Reuses cmd_health_check rather than
+    duplicating its logic, then adds active-partner and dashboard-freshness checks.
+    """
+    print("Atlas Runtime - Operations Status Report")
+    print("=" * 60)
+    health_ok = cmd_health_check(cfg, args) == 0
+    print("=" * 60)
+
+    active_partners = cfg.get("active_partners", [])
+
+    dash_path = rp(cfg["paths"]["dashboard_data_js"])
+    last_updated = "Unknown - dashboard data file not found or lastUpdated field missing."
+    if dash_path.exists():
+        try:
+            text = dash_path.read_text(encoding="utf-8", errors="ignore")
+            m = re.search(r'"lastUpdated"\s*:\s*"([^"]*)"', text)
+            if m:
+                last_updated = m.group(1)
+        except Exception as exc:
+            last_updated = f"Unknown - could not read dashboard data file: {exc}"
+
+    date = today()
+    lines = ["# ALSAKKAF HOLDING GROUP", "", "# Atlas Operations Status Report", ""]
+    lines.extend(doc_info_block("ops-status"))
+    lines.append(f"Generated: {now_iso()}")
+    lines.append("")
+    lines.append("## Health Check Result")
+    lines.append("")
+    lines.append(f"- Result: {'PASS' if health_ok else 'FAIL'} (re-run `atlas.py health-check` directly for full line-by-line detail)")
+    lines.append("")
+    lines.append("## Active Partners (per atlas_config.json)")
+    lines.append("")
+    if active_partners:
+        for p in active_partners:
+            lines.append(f"- {p}")
+    else:
+        lines.append("- None marked active in atlas_config.json.")
+    lines.append("")
+    lines.append("## Dashboard Data Freshness")
+    lines.append("")
+    lines.append(f"- `docs/atlas-dashboard-data.js` lastUpdated: {last_updated}")
+    lines.append("")
+    lines.append("## Rollup")
+    lines.append("")
+    lines.append(f"**Overall status: {'PASS' if health_ok else 'FAIL'}**")
+    lines.append("")
+    if not health_ok:
+        lines.append("Action needed: run `atlas.py health-check` directly and resolve every [FAIL] line "
+                     "before relying on this report.")
+        lines.append("")
+
+    out_path = rp(cfg["paths"]["output_dir"]) / f"Ops_Status_{date}.md"
+    write_output(out_path, "\n".join(lines))
+    return 0
+
+
+def cmd_media_store_task_report(cfg, args):
+    """Public-repo-only checklist of standard store/media pages. Looks for a
+    NESTLYRA folder under 01_Holding_Company; does not read the private Media
+    Operations folder's real content (out of scope). Says so plainly if nothing
+    is found, rather than guessing.
+    """
+    print("Atlas Runtime - Media / Store Task Report")
+    date = today()
+
+    search_root = rp("01_Holding_Company")
+    nestlyra_dirs = []
+    if search_root.exists():
+        for p in search_root.rglob("*"):
+            if p.is_dir() and "nestlyra" in p.name.lower():
+                nestlyra_dirs.append(p)
+
+    standard_pages = [
+        "Homepage", "About", "FAQ", "Shipping Policy", "Returns",
+        "Privacy", "Terms", "Track Order", "Product Template",
+    ]
+
+    lines = ["# ALSAKKAF HOLDING GROUP", "", "# Atlas Media / Store Task Report", ""]
+    lines.extend(doc_info_block("media-store-task-report"))
+    lines.append(f"Generated: {now_iso()}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    if not nestlyra_dirs:
+        lines.append("## Result")
+        lines.append("")
+        lines.append("No NESTLYRA folder was found anywhere under `01_Holding_Company/`. There is no "
+                     "store content to check yet - Atlas is not guessing at a location that doesn't exist.")
+        lines.append("")
+        lines.append("## Standard Store Page Checklist (status unknown - no source folder found)")
+        lines.append("")
+        for page in standard_pages:
+            lines.append(f"- [ ] {page} - status unknown (no NESTLYRA folder present)")
+        lines.append("")
+        lines.append("Next Action: confirm with the Founder where NESTLYRA/store content should live, "
+                     "then re-run this command.")
+        lines.append("")
+    else:
+        lines.append("## NESTLYRA Folder(s) Found")
+        lines.append("")
+        for d in nestlyra_dirs:
+            lines.append(f"- {d.relative_to(REPO_ROOT)}")
+        lines.append("")
+        all_files = []
+        for d in nestlyra_dirs:
+            all_files.extend([p.name.lower() for p in d.rglob("*") if p.is_file()])
+        lines.append("## Standard Store Page Checklist")
+        lines.append("")
+        for page in standard_pages:
+            key = page.lower().replace(" ", "")
+            found = any(key in fn.replace(" ", "").replace("_", "").replace("-", "") for fn in all_files)
+            lines.append(f"- [{'x' if found else ' '}] {page} - {'found' if found else 'MISSING'}")
+        lines.append("")
+
+    out_path = rp(cfg["paths"]["output_dir"]) / f"Media_Store_Task_Report_{date}.md"
+    write_output(out_path, "\n".join(lines))
+    return 0
+
+
+def cmd_daily_cycle(cfg, args):
+    """Orchestrator: runs the full daily operating cycle in order and writes one
+    consolidated report linking every report generated this run. Supersedes
+    nothing - war-room remains available for backward compatibility.
+    """
+    print("Atlas Runtime - Daily Operating Cycle")
+    print("=" * 60)
+    date = today()
+
+    steps = [
+        ("health-check", cmd_health_check),
+        ("brief", cmd_brief),
+        ("dashboard", cmd_dashboard),
+        ("payment-report", cmd_payment_report),
+        ("content-pack", cmd_content_pack),
+        ("task-queue", cmd_task_queue),
+        ("lead-review-queue", cmd_lead_review_queue),
+        ("comms-approval-queue", cmd_comms_approval_queue),
+        ("ops-status", cmd_ops_status),
+        ("media-store-task-report", cmd_media_store_task_report),
+    ]
+
+    results = []
+    for name, fn in steps:
+        print(f"\n--- Step: {name} ---")
+        try:
+            rc = fn(cfg, args)
+        except Exception as exc:
+            print(f"[FAIL] '{name}' raised: {exc}")
+            rc = 1
+        results.append((name, rc))
+        # health-check is informational only - never abort the cycle on FAIL.
+
+    m = compute_metrics(cfg)
+    lead_private = rp(cfg["paths"]["private_lead_tracker"]).exists()
+    outreach_private = rp(cfg["paths"]["private_outreach_tracker"]).exists()
+
+    lines = ["# ALSAKKAF HOLDING GROUP", "", "# Atlas Daily Operating Cycle", ""]
+    lines.extend(doc_info_block("daily-cycle"))
+    lines.append(f"Generated: {now_iso()}")
+    lines.append("")
+    lines.append("## Step Results")
+    lines.append("")
+    for name, rc in results:
+        lines.append(f"- {name}: {'PASS' if rc == 0 else f'FAIL/WARN (exit {rc})'}")
+    lines.append("")
+    lines.append("## Reports Generated This Run (paths only)")
+    lines.append("")
+    lines.append(f"- Daily briefing: 01_Holding_Company/08_Reports/Atlas_Output/Daily_Briefing_{date}.md")
+    lines.append("- Dashboard data: docs/atlas-dashboard-data.js")
+    lines.append(f"- Payment report: 01_Holding_Company/08_Reports/Atlas_Output/Revenue_Reports/Payment_Report_{date}.md")
+    lines.append(f"- Content pack: 01_Holding_Company/08_Reports/Atlas_Output/Content_Packs/Content_Pack_{date}.md")
+    lines.append(f"- Task queue: 01_Holding_Company/08_Reports/Atlas_Output/Task_Queue_{date}.md")
+    if lead_private:
+        lines.append(f"- Lead review queue (PRIVATE - not in this repo): "
+                     f"ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/06_Founder_Briefings/Lead_Review_Queue_{date}.md")
+    else:
+        lines.append(f"- Lead review queue (public fallback): 01_Holding_Company/08_Reports/Atlas_Output/Lead_Review_Queue_{date}.md")
+    if outreach_private:
+        lines.append(f"- Comms approval queue (PRIVATE - not in this repo): "
+                     f"ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/06_Founder_Briefings/Comms_Approval_Queue_{date}.md")
+    else:
+        lines.append(f"- Comms approval queue (public fallback): 01_Holding_Company/08_Reports/Atlas_Output/Comms_Approval_Queue_{date}.md")
+    lines.append(f"- Ops status: 01_Holding_Company/08_Reports/Atlas_Output/Ops_Status_{date}.md")
+    lines.append(f"- Media/store task report: 01_Holding_Company/08_Reports/Atlas_Output/Media_Store_Task_Report_{date}.md")
+    lines.append("")
+    lines.append("## Summary")
+    lines.append("")
+    lines.append(
+        f"This cycle reviewed {m['leads_found']} real lead(s), {m['outreach_drafted']} real outreach record(s), "
+        f"{m['pipeline_active']} pipeline entry/entries, and {m['content_drafted']} content item(s) in the public "
+        "trackers (any private-store counts are reported only inside the private output files listed above and are "
+        "never named here). No outreach was sent, no content was published, and no money was spent or requested by "
+        "this run - Atlas only read, scored, and reported."
+    )
+    lines.append("")
+
+    out_path = rp(cfg["paths"]["output_dir"]) / f"Atlas_Daily_Operating_Cycle_{date}.md"
+    write_output(out_path, "\n".join(lines))
+    print("=" * 60)
+    print("DAILY CYCLE COMPLETE.")
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
@@ -1207,6 +1652,13 @@ def build_parser():
 
     sub.add_parser("first-5-outreach", help="Generate the first-5 outreach execution pack (drafts only).")
 
+    sub.add_parser("task-queue", help="Build a prioritized task queue from the public trackers.")
+    sub.add_parser("lead-review-queue", help="Build a lead review queue (private-store aware).")
+    sub.add_parser("comms-approval-queue", help="Build a CEO comms approval queue (private-store aware).")
+    sub.add_parser("ops-status", help="Operations status rollup (health-check + partners + dashboard freshness).")
+    sub.add_parser("media-store-task-report", help="Public-repo store/media content checklist.")
+    sub.add_parser("daily-cycle", help="Run the full daily operating cycle and write one consolidated report.")
+
     return parser
 
 
@@ -1225,6 +1677,12 @@ COMMANDS = {
     "ai-agent-proposal": cmd_ai_agent_proposal,
     "ai-agent-delivery": cmd_ai_agent_delivery,
     "first-5-outreach": cmd_first_5_outreach,
+    "task-queue": cmd_task_queue,
+    "lead-review-queue": cmd_lead_review_queue,
+    "comms-approval-queue": cmd_comms_approval_queue,
+    "ops-status": cmd_ops_status,
+    "media-store-task-report": cmd_media_store_task_report,
+    "daily-cycle": cmd_daily_cycle,
 }
 
 

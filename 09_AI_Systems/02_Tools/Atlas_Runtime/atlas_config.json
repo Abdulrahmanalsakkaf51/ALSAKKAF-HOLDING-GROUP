@@ -98,7 +98,11 @@
     "outreach_drafts_dir": "01_Holding_Company/08_Reports/Atlas_Output/Outreach_Drafts",
     "content_packs_dir": "01_Holding_Company/08_Reports/Atlas_Output/Content_Packs",
     "client_delivery_dir": "01_Holding_Company/08_Reports/Atlas_Output/Client_Delivery",
-    "revenue_reports_dir": "01_Holding_Company/08_Reports/Atlas_Output/Revenue_Reports"
+    "revenue_reports_dir": "01_Holding_Company/08_Reports/Atlas_Output/Revenue_Reports",
+    "private_lead_tracker": "../ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/01_Verified_Leads/Lead_Tracker.csv",
+    "private_outreach_tracker": "../ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/04_Outreach_Tracker/Outreach_Tracker.csv",
+    "private_outreach_drafts_dir": "../ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/03_Outreach_Drafts",
+    "private_output_dir": "../ALSAKKAF PRIVATE OPERATIONS/01_Revenue_Operations/PRJ-016/06_Founder_Briefings"
   },
   "health_check_required_paths": [
     "01_Holding_Company/04_Operations/03_Revenue_Operations/Lead_Tracker.csv",

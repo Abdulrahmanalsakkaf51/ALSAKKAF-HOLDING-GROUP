@@ -1,0 +1,3 @@
+Item ID,Item Type,Date Submitted,Lead / Company,Drafted Content Location,Risk Flags Raised,Decision,Decision Notes,Date Decided
+EXAMPLE-001,Reply,2026-07-16,[Example Only - Not Real],Sample path - not a real draft location - illustrates column usage only,None,Pending,,
+EXAMPLE-002,Outreach,2026-07-16,[Example Only - Not Real],Sample path - not a real draft location - illustrates column usage only,Mentions $399 price - confirm interest first,Pending,,
