@@ -53,11 +53,18 @@ Rejected MP4s are archived (SHA-256-verified, not deleted) at `ALSAKKAF MEDIA OP
 
 ---
 
-# 4. What Is In Progress Right Now
+# 4. Chatterbox Voice Audition — DONE, awaiting Founder listening approval
 
-**Chatterbox Multilingual voice install/audition.** Per the Founder's pre-authorization (MEDIA-017 Section 7), installed `chatterbox-tts` (official `resemble-ai/chatterbox`, MIT license, native Arabic+English) in an isolated venv: `ALSAKKAF MEDIA OPERATIONS\03_ATLAS_MEDIA_AUTOMATION\Voice_Engine_v2_Auditions\venv_chatterbox\`. **Important:** this installed CPU-only PyTorch (no CUDA) even though the machine has a 6GB GTX 1660 SUPER — `torch.cuda.is_available()` returned False. Audition generation (`gen_chatterbox_auditions.py`, 4 short clips: AR neutral, AR excited, EN neutral, EN confident) was running in the background (CPU inference, slower) when this session ended — check `ALSAKKAF MEDIA OPERATIONS\00_CONTROL\Founder_Voice_Assets\Abdulrahman\08_Voice_Engine_Auditions\Chatterbox_Multilingual_2026-07-15\` for output; if empty, the run needs to be started again or checked for errors.
+Per the Founder's pre-authorization (MEDIA-017 Section 7), installed `chatterbox-tts` (official `resemble-ai/chatterbox`, MIT license, native Arabic+English) in an isolated venv: `ALSAKKAF MEDIA OPERATIONS\03_ATLAS_MEDIA_AUTOMATION\Voice_Engine_v2_Auditions\venv_chatterbox\`.
 
-If you want GPU acceleration, reinstall torch with a CUDA index (`pip install torch --index-url https://download.pytorch.org/whl/cu121` or current equivalent) inside that same venv before regenerating.
+Hit and fixed a real bug along the way: `resemble-perth`'s watermarker failed to import (`pkg_resources` missing under setuptools 83) — fixed by pinning `setuptools<81` in that venv.
+
+**All 4 auditions generated and technically verified** (real duration, no clipping, normal speech silence ratios) at `ALSAKKAF MEDIA OPERATIONS\00_CONTROL\Founder_Voice_Assets\Abdulrahman\08_Voice_Engine_Auditions\Chatterbox_Multilingual_2026-07-15\`:
+- AR_neutral (6.2s), AR_excited_storytelling (7.2s), EN_neutral (7.4s), EN_confident_product_demo (4.7s) — all normalized to -16 LUFS
+- **One caveat to listen for:** the generator logged a repetition/long-tail warning on AR_excited_storytelling that forced an early stop — check that clip for a possible cutoff or repeated word before treating it as representative.
+- This ran on CPU only — `torch.cuda.is_available()` returned False even though the machine has a 6GB GTX 1660 SUPER (default pip install pulls CPU-only torch). Fine for short auditions; reinstall with a CUDA index before any larger-scale generation if speed matters.
+
+Next: Founder listens and picks a winner (or requests OpenVoice V2 installed for comparison) before any full narration is generated.
 
 Candidate research record (no other engines installed): `ALSAKKAF MEDIA OPERATIONS\00_CONTROL\Voice_Engine_Candidate_Comparison_2026-07-15.md`. Key finding: **OmniVoice (k2-fsa) is on hold** — its pretrained weights are CC-BY-NC (non-commercial), a real licensing blocker for these commercial channels. OpenVoice V2 has no native Arabic.
 
