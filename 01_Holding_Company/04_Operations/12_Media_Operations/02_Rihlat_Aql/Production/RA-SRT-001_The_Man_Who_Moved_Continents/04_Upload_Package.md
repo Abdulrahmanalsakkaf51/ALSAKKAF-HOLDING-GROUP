@@ -10,11 +10,11 @@
 |-------|-------|
 | Document ID | MEDIA-PKG-RA-SRT-001-D |
 | Document Type | Upload Package |
-| Status | Drafted — NOT APPROVED — nothing may be uploaded |
-| Version | 1.0 |
+| Status | REJECTED — MAJOR CREATIVE REBUILD REQUIRED (Founder review 2026-07-15; passed technical inspection, failed creative review — see MEDIA-017) |
+| Version | 1.1 |
 | Date | 2026-07-15 |
 | Owner | Abdulrahman Alsakkaf |
-| Related Documents | MEDIA-PKG-RA-SRT-001-A..C, MEDIA-010 |
+| Related Documents | MEDIA-PKG-RA-SRT-001-A..C, MEDIA-010, MEDIA-017 |
 
 ---
 
@@ -78,3 +78,4 @@ Same as parent (RA-VID-001 Section 4): stylized art only; disclosure set at gate
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-15 | Initial upload package |
+| 1.1 | 2026-07-15 | Status corrected to REJECTED per Founder creative review (MEDIA-017); archived to private 99_REJECTED_DRAFTS |
