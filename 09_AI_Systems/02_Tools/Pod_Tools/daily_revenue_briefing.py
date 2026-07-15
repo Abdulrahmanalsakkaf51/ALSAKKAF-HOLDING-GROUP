@@ -157,12 +157,29 @@ def _blockers(b):
     return blockers or ["None recorded"]
 
 
+def _open_adrs():
+    adr_dir = os.path.join(ROOT, "01_Holding_Company", "01_Governance", "ADR")
+    open_ids = []
+    for adr_id in ("024", "025", "026", "027"):
+        for name in os.listdir(adr_dir) if os.path.isdir(adr_dir) else []:
+            if name.startswith("ADR-%s_" % adr_id):
+                text = open(os.path.join(adr_dir, name), encoding="utf-8").read()
+                match = re.search(r"\|\s*Founder decision\s*\|\s*([A-Z]+)\s*\|", text)
+                if match and match.group(1) != "APPROVED":
+                    open_ids.append("ADR-%s" % adr_id)
+                break
+    return open_ids
+
+
 def _decisions(b):
     decisions = []
     if b["drafts_ready"]:
         decisions.append("Approve or edit %d outreach draft(s) (PAW-003)"
                          % b["drafts_ready"])
-    decisions.append("Partner activation decisions (ADR-024..027 drafts) if still open")
+    open_adrs = _open_adrs()
+    if open_adrs:
+        decisions.append("Partner activation decisions still open: %s"
+                         % ", ".join(open_adrs))
     return decisions
 
 

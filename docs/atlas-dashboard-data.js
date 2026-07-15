@@ -53,7 +53,7 @@ const atlasDashboardData = {
     "Fill first 25 leads in Lead_Tracker.csv.",
     "Approve outreach templates before drafting a batch."
   ],
-  "lastUpdated": "2026-07-14 01:44:33"
+  "lastUpdated": "2026-07-15 05:05:44"
 };
 
 function renderAtlasDashboard(data) {
