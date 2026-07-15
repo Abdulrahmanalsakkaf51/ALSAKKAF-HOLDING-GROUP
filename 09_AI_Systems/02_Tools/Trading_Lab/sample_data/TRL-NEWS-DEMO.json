@@ -1,0 +1,23 @@
+{
+  "pack_id": "TRL-NEWS-DEMO-001",
+  "as_of": "2026-07-15",
+  "note": "FICTIONAL EXAMPLE NEWS ITEMS - not real headlines, not real publications, not real events. For architecture demonstration only.",
+  "items": [
+    {
+      "headline": "[FICTIONAL] Demo Equity Group reports steady quarter, no major surprises",
+      "source": "[Fictional Wire Example]",
+      "url": "",
+      "published": "2026-07-10",
+      "reliability": "unverified",
+      "summary": "Fictional placeholder headline used only to exercise the News Analyst reliability-labeling pipeline. Not a real company or event."
+    },
+    {
+      "headline": "[FICTIONAL] Anonymous forum post claims Demo Equity Group insider buying",
+      "source": "[Fictional Forum Example]",
+      "url": "",
+      "published": "2026-07-12",
+      "reliability": "unverified",
+      "summary": "Fictional low-reliability rumor item, included to demonstrate that the News Analyst may downgrade but never upgrade a reliability label."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "decision_id": "TRL-DEC-DEMO-001",
+  "input_packs": [
+    "TRL-PACK-DEMO-001",
+    "TRL-NEWS-DEMO-001"
+  ],
+  "manager_proposal": {
+    "action": "hold",
+    "symbol": "DEMO-EQ-A",
+    "paper_size_pct": 0,
+    "rationale": "Demo backtest run only; one trade already closed in this pack. Fictional instrument, not a real recommendation.",
+    "invalidation_condition": "n/a - demo"
+  },
+  "bull_case_ref": "n/a - analyst chain not yet run; SMA-only demo",
+  "bear_case_ref": "n/a - analyst chain not yet run; SMA-only demo",
+  "unknowns": [
+    "Real market behavior is unknown - this pack is synthetic.",
+    "Analyst chain (News/Strategy/Bull/Bear/Manager) is designed in TRL-001 but not yet wired into this prototype."
+  ],
+  "human_decision": "PENDING",
+  "human_name": "Not yet reviewed by Founder",
+  "risk_policy_checks": {
+    "size_ok": true,
+    "concentration_ok": true,
+    "drawdown_halt": false,
+    "martingale_block": false
+  }
+}

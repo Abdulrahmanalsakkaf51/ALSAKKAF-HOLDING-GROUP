@@ -11,13 +11,13 @@
 | Field | Value |
 |-------|-------|
 | Document ID | TRL-001 |
-| Document Type | Architecture Design (research lab, design-only) |
-| Status | Draft — awaiting Founder review |
-| Version | 1.0 |
-| Date | 2026-07-14 |
+| Document Type | Architecture Design (research lab; Section 12 prototype implemented) |
+| Status | Draft — awaiting Founder review (paper-only prototype authorized) |
+| Version | 1.1 |
+| Date | 2026-07-15 |
 | Owner | Abdulrahman Alsakkaf |
 | Related Project | PRJ-017 |
-| Related Documents | STRAT-017, PRJ-011 (Playground demo) |
+| Related Documents | STRAT-017, PRJ-011 (Playground demo), 09_AI_Systems/02_Tools/Trading_Lab/ |
 
 ---
 
@@ -162,8 +162,22 @@ Any request to connect live data, brokerage APIs, or real funds is out of scope 
 
 ---
 
-# 11. Revision History
+# 12. Implementation Update — Paper-Only Backtest Prototype
+
+Founder authorized a paper-only prototype of the backtest interface (Section 9) on 2026-07-15. Implemented at `09_AI_Systems/02_Tools/Trading_Lab/` (`trading_lab.py`, `build_demo_pack.py`, `test_trading_lab.py`). Scope so far:
+
+- `run_backtest()` implements the Section 9 interface using declarative SMA-cross strategy rules (plain JSON integers — no code execution from strategy files).
+- All Section 5 risk-policy rules are enforced in code and unit-tested: 5% max paper position size, -15% drawdown halt, no leverage field anywhere, martingale (loss re-entry) block, max 3 open positions per asset class.
+- Market data used is 100% synthetic (fixed-seed generator, fictional symbol `DEMO-EQ-A`), clearly labeled `SYNTHETIC EXAMPLE DATA - NOT REAL MARKET DATA` — no live feed, no network access anywhere in the code.
+- Decision Log (Section 7) and Performance Report (Section 8) generators are implemented; the one demo decision log entry has `human_decision: "PENDING"` — nothing here is an accepted trade.
+- Not yet implemented: the News/Strategy/Bull/Bear/Manager analyst chain (Section 2) — the current prototype is the backtest/ledger layer only, driven directly by a strategy rule rather than analyst synthesis.
+- Still out of scope, unchanged from Section 1/10: no brokerage adapter, no credential field, no order type, no live trading, no real funds.
+
+---
+
+# 13. Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-07-14 | Initial design-only architecture |
+| 1.1 | 2026-07-15 | Added Section 12: Founder-authorized paper-only backtest/ledger prototype implemented and unit-tested; analyst chain still not implemented |
