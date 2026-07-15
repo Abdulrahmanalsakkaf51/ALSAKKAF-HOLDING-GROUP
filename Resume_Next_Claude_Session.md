@@ -21,11 +21,11 @@
 # 1. Verify Before Doing Anything
 
 ```
-git rev-parse --short HEAD        # expect b990605
+git rev-parse --short HEAD        # expect ed917c3
 git status --short                # expect clean
 ```
 
-If HEAD is not `b990605` or the tree is not clean, re-verify state before continuing.
+If HEAD is not `ed917c3` or the tree is not clean, re-verify state before continuing.
 
 ---
 
@@ -53,7 +53,23 @@ Rejected MP4s are archived (SHA-256-verified, not deleted) at `ALSAKKAF MEDIA OP
 
 ---
 
-# 4. Chatterbox Voice Audition — DONE, awaiting Founder listening approval
+# 4. Chatterbox Voice Audition — Founder Voice APPROVED FOR CONTROLLED PRODUCTION USE
+
+Update (2026-07-15, later same day): the Founder listened to and approved
+all four generic auditions below as the engine direction, then approved
+all four **Founder-voice-clone** auditions (Chatterbox's audio-prompt
+cloning workflow using Abdulrahman Alsakkaf's own private reference
+clips). Status recorded at
+`ALSAKKAF MEDIA OPERATIONS\00_CONTROL\Founder_Voice_Assets\Abdulrahman\Voice_Approval_Status.md`:
+**APPROVED FOR CONTROLLED PRODUCTION USE** for ALSAKKAF Systems narration,
+رحلة عقل narration, and Founder-approved internal demonstrations. 48kHz/
+24-bit production copies exist at
+`09_Founder_Clone_Auditions\Chatterbox_Founder_Clone_2026-07-15\*_48K.wav`.
+Two 20-30s premium proof segments were then built using this voice - see
+Section 5 below, which replaces the "not started" status this section
+previously carried.
+
+Original generic-audition record, preserved below for history:
 
 Per the Founder's pre-authorization (MEDIA-017 Section 7), installed `chatterbox-tts` (official `resemble-ai/chatterbox`, MIT license, native Arabic+English) in an isolated venv: `ALSAKKAF MEDIA OPERATIONS\03_ATLAS_MEDIA_AUTOMATION\Voice_Engine_v2_Auditions\venv_chatterbox\`.
 
@@ -70,11 +86,66 @@ Candidate research record (no other engines installed): `ALSAKKAF MEDIA OPERATIO
 
 ---
 
-# 5. What Is Not Started
+# 5. Proof Segments — BUILT, then REJECTED BY FOUNDER (creative grounds)
 
-- **Full editing pipeline rebuild** (MEDIA-017 Section 5): the card/slideshow renderer is retired for final output; no replacement (layers, masks, parallax, kinetic typography, etc.) has been built yet. This is the biggest remaining gap before either proof segment can be produced for real.
-- **Proof A (رحلة عقل) and Proof B (ALSAKKAF Systems), 20-30s each**: NOT rendered. See `ALSAKKAF MEDIA OPERATIONS\03_ATLAS_MEDIA_AUTOMATION\Proof_Segments_Feasibility_Assessment_2026-07-15.md` for exactly what's confirmed working (screen capture via ffmpeg gdigrab, window-scoped — **never use `-i desktop` full-screen capture, it recorded unrelated open windows/applications in a feasibility test and that file was deleted**) versus what still needs building (avatar design, animated diagrams, sound design, the layered editing step itself).
-  - Recommended Proof B source: the real Atlas Runtime CLI producing a real file, not the public Partner Playground (which is an intentional client-side simulation with "fictional data" by its own design — recording it would still be a simulated output, which conflicts with the Founder's "no fake output" requirement).
+**Update (2026-07-15, end of day): both proofs were rejected by the
+Founder on creative grounds.** Both MP4s are preserved (not deleted),
+renamed with a `REJECTED_` prefix, and marked
+`REJECTED — PIPELINE TEST ONLY — DO NOT PUBLISH` in their filenames, QC
+reports, production packages, and a `REJECTED_BY_FOUNDER_DO_NOT_PUBLISH.txt`
+marker (with SHA-256) in each output folder:
+
+- `Proof_Pipeline\Proof_A_Output\REJECTED_SDS_PROOF_A_Rihlat_Aql_1080x1920.mp4`
+- `Proof_Pipeline\Proof_B_Output\REJECTED_SYS_PROOF_B_ALSAKKAF_Systems_1920x1080.mp4`
+
+**Not rejected / still valid:** the approved scripts (MEDIA-001/MEDIA-002),
+Founder voice approval (still APPROVED FOR CONTROLLED PRODUCTION USE -
+see Section 4), the tested Arabic renderer, both narration WAVs, and the
+real Atlas workflow evidence (`Daily_Briefing_2026-07-15.md`). Only the
+proof videos' creative output was rejected - the pipeline itself proved
+technically sound (see each `Proof_*_Output\*_QC_Report.md`).
+
+**The Media Studio rebuild (a proper layered editor / illustration
+pipeline that could clear the creative bar) is explicitly NOT started.**
+Per the Founder's end-of-day instruction, do not start it without a new
+task. See Section 8 for the exact first task tomorrow.
+
+Original build record, preserved below for history:
+
+Update (2026-07-15): a real layered edit pipeline was built (procedural
+per-frame PIL rendering + ffmpeg encode/mux, not the retired card
+renderer) at `ALSAKKAF MEDIA OPERATIONS\03_ATLAS_MEDIA_AUTOMATION\Proof_Pipeline\`.
+Both proofs are built, technically QC'd (ffprobe, blackdetect, audio
+peak/clipping - all clean), and use the approved Founder-clone narration:
+
+- **Proof A (رحلة عقل)**, 1080x1920, 17.56s: `Proof_Pipeline\Proof_A_Output\SDS_PROOF_A_Rihlat_Aql_1080x1920.mp4`
+- **Proof B (ALSAKKAF Systems)**, 1920x1080, 26.52s: `Proof_Pipeline\Proof_B_Output\SYS_PROOF_B_ALSAKKAF_Systems_1920x1080.mp4`
+
+**Two real, honestly-documented gaps, not hidden:**
+1. No AI image-generation tool exists in this environment - visuals are
+   original procedural motion graphics (gradients, flat shapes, kinetic
+   type), not painterly/photorealistic illustration. This is the main
+   remaining gap before either proof reads as truly "premium illustrated."
+2. **Real window-scoped screen recording was attempted for Proof B and
+   technically failed** - `ffmpeg gdigrab` located the target window with
+   no error but returned a solid-black frame; this session has no actual
+   rendered desktop surface to capture pixels from (confirmed by direct
+   frame inspection, not assumed). See
+   `Proof_Pipeline\Proof_B_Output\Proof_B_Screen_Recording_Plan.md` for
+   the full finding and the one manual action that would resolve it (the
+   Founder recording their own screen running `atlas.py brief` and
+   handing over the clip).
+3. Also flagged: a `long_tail` early-EOS warning on Proof A's narration
+   and a more serious `token_repetition` warning on Proof B's narration -
+   both need a careful Founder listen before full production use (see
+   each proof's QC report).
+
+Full deliverables (Director's treatment, narration text, shot timeline,
+asset manifest, music/SFX register, SRT, EDL, thumbnail concept, creative
++ technical QC) are in each `Proof_*_Output\` folder as markdown files.
+No music/SFX bed exists yet in either proof (no licensed library
+available) - narration only.
+
 - Lane D remainder (TRL-001 analyst chain), Lane E remainder (needs Founder's PRJ-019 scope pick — see below), Sand Dunes rebuild under the new voice/editing standard.
 
 ---
@@ -96,9 +167,22 @@ If a later message corrected this to "construction/industrial HSE intelligence u
 
 ---
 
-# 8. Immediate Next Action
+# 8. Immediate Next Action (as of end of day 2026-07-15)
 
-Check the Chatterbox audition output folder (Section 4). If clips exist, normalize/compare and report to the Founder for a voice decision. If the folder is still empty, re-run `gen_chatterbox_auditions.py` (consider a shorter test line first to validate the pipeline before the full 4-clip run, given CPU inference speed is unproven on this machine).
+**Exact first task for tomorrow:** do NOT start the Media Studio rebuild
+or any new rendering without the Founder explicitly requesting it. Wait
+for direction on one of:
+(a) a decision on how to close the illustration gap (approved
+AI image-generation tool vs. commissioned/licensed illustration assets)
+before attempting a new creative pass, or
+(b) the Founder's own screen recording of `atlas.py brief` (see
+`Proof_Pipeline\Proof_B_Output\Proof_B_Screen_Recording_Plan.md` for the
+exact single action needed), or
+(c) a different priority entirely (PRJ-019 scope correction, Sand Dunes
+rebuild, Lane D/E work - see Sections 6 and 3).
+
+Do not re-attempt a third proof segment on the same rejected creative
+approach without new creative direction from the Founder.
 
 ---
 
@@ -108,3 +192,4 @@ Check the Chatterbox audition output folder (Section 4). If clips exist, normali
 |---------|------|---------|
 | 1.0 | 2026-07-15 | Initial handoff after Lanes A-C, D core engine, E feasibility study, F foundation |
 | 2.0 | 2026-07-15 | Full rewrite after Founder's media creative rejection (MEDIA-017), Sand Dunes canon correction, Arabic renderer fix, and in-progress voice engine rebuild |
+| 3.0 | 2026-07-15 | End-of-day checkpoint: Founder voice (Chatterbox clone) APPROVED FOR CONTROLLED PRODUCTION USE; two 20-30s proof segments built, technically QC'd, then REJECTED BY FOUNDER on creative grounds and marked/preserved; Media Studio rebuild explicitly not started |
