@@ -43,11 +43,38 @@ def generate_ohlcv(days=60, start_price=100.0, seed=17):
     return bars
 
 
+def build_pack():
+    """Return the complete fixed-metadata pack tracked in sample_data."""
+    return {
+        "pack_id": "TRL-PACK-DEMO-001",
+        "as_of": "2026-07-15",
+        "prepared_by": (
+            "human (Founder) - SYNTHETIC generator seed fixed for reproducibility"
+        ),
+        "note": (
+            "SYNTHETIC EXAMPLE DATA - NOT REAL MARKET DATA. Generated for "
+            "architecture demonstration only. No live feed. Fictional symbols."
+        ),
+        "instruments": [{
+            "symbol": "DEMO-EQ-A",
+            "asset_class": "equity",
+            "data_source": (
+                "SYNTHETIC - generated locally by build_demo_pack.py, not a "
+                "real data vendor"
+            ),
+            "data_quality_note": (
+                "Fully synthetic deterministic series. No gaps. Not "
+                "representative of any real security."
+            ),
+            "ohlcv": generate_ohlcv(),
+        }],
+    }
+
+
 if __name__ == "__main__":
-    with open(PACK_PATH, encoding="utf-8") as handle:
-        pack = json.load(handle)
-    pack["instruments"][0]["ohlcv"] = generate_ohlcv()
+    pack = build_pack()
     with open(PACK_PATH, "w", encoding="utf-8") as handle:
-        json.dump(pack, handle, indent=2)
+        json.dump(pack, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
     print("Wrote %d synthetic bars to %s" % (
         len(pack["instruments"][0]["ohlcv"]), PACK_PATH))
