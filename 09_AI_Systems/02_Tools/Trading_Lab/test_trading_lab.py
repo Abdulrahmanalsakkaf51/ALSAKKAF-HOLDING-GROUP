@@ -2,12 +2,19 @@
 """Behavior-level tests for the TRL Release 1 causal research kernel."""
 import ast
 import copy
+import contextlib
 import datetime
 import hashlib
+import importlib
 import importlib.util
+import io
 import json
 import math
 import os
+import runpy
+import subprocess
+import sys
+import types
 import unittest
 from unittest import mock
 
@@ -16,6 +23,84 @@ import trading_lab as tl
 
 
 BASE = os.path.dirname(os.path.abspath(__file__))
+REPOSITORY_ROOT = os.path.abspath(os.path.join(BASE, "..", "..", ".."))
+PACKAGE_MODULE_NAME = "09_AI_Systems.02_Tools.Trading_Lab.trading_lab"
+EXPECTED_FACADE_CALLABLES = (
+    "canonical_json", "canonical_sha256", "validate_market_pack",
+    "validate_strategy", "sma", "sma_cross_signals",
+    "check_entry_allowed", "run_backtest",
+    "performance_report_markdown", "decision_log_entry",
+    "_metadata", "_run_validated", "_engine_source_digest",
+)
+
+
+def independent_engine_bundle_digest(source_files):
+    digest = hashlib.sha256()
+    digest.update(b"TRL_ENGINE_SOURCE_BUNDLE_V1\n")
+    for relative_path in sorted(source_files):
+        path_bytes = relative_path.encode("utf-8", "strict")
+        source_text = source_files[relative_path].decode("utf-8", "strict")
+        normalized = source_text.replace("\r\n", "\n").replace("\r", "\n")
+        normalized_bytes = normalized.encode("utf-8", "strict")
+        digest.update(b"PATH\0")
+        digest.update(str(len(path_bytes)).encode("ascii"))
+        digest.update(b"\0")
+        digest.update(path_bytes)
+        digest.update(b"\nSIZE\0")
+        digest.update(str(len(normalized_bytes)).encode("ascii"))
+        digest.update(b"\0")
+        digest.update(normalized_bytes)
+        digest.update(b"\nEND\0")
+        digest.update(path_bytes)
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def without_provenance(report):
+    semantic = copy.deepcopy(report)
+    metadata = semantic["metadata"]
+    for field in ("run_id", "checkpoint_id", "engine_source_digest",
+                  "engine_source_manifest"):
+        metadata.pop(field, None)
+    metadata.pop("engine", None)
+    return semantic
+
+
+def repository_file_state():
+    """Return file metadata proving module execution creates no artifact."""
+    state = {}
+    for directory, directory_names, file_names in os.walk(REPOSITORY_ROOT):
+        directory_names[:] = sorted(
+            name for name in directory_names if name != ".git"
+        )
+        for name in sorted(file_names):
+            path = os.path.join(directory, name)
+            relative_path = os.path.relpath(path, REPOSITORY_ROOT)
+            details = os.stat(path)
+            state[relative_path] = (details.st_size, details.st_mtime_ns)
+    return state
+
+
+@contextlib.contextmanager
+def preserved_process_state():
+    """Restore process-global import and execution state exactly on exit."""
+    original_cwd = os.getcwd()
+    original_sys_path = list(sys.path)
+    original_sys_modules = dict(sys.modules)
+    original_sys_argv = sys.argv
+    original_sys_argv_values = list(sys.argv)
+    try:
+        yield
+    finally:
+        os.chdir(original_cwd)
+        sys.path[:] = original_sys_path
+        sys.argv = original_sys_argv
+        sys.argv[:] = original_sys_argv_values
+        for name in tuple(sys.modules):
+            if name not in original_sys_modules:
+                del sys.modules[name]
+        for name, module in original_sys_modules.items():
+            sys.modules[name] = module
 
 
 class UnsupportedValue:
@@ -1334,24 +1419,536 @@ class CanonicalHashSafetyTests(unittest.TestCase):
                             second["metadata"]["input_data_hash"])
 
 
+class FacadeImportCompatibilityTests(unittest.TestCase):
+    def demo_inputs(self, module):
+        path = os.path.join(BASE, "sample_data", "TRL-PACK-DEMO.json")
+        with open(path, encoding="utf-8") as handle:
+            market_pack = json.load(handle)
+        rule = {
+            "strategy_id": module.STRATEGY_ID,
+            "strategy_version": module.STRATEGY_VERSION,
+            "family": module.STRATEGY_FAMILY,
+            "symbol": "DEMO-EQ-A",
+            "fast": 5,
+            "slow": 20,
+            "paper_size_pct": 5.0,
+        }
+        return rule, market_pack
+
+    @contextlib.contextmanager
+    def outside_lab_import_context(self, cached_core=None):
+        with preserved_process_state():
+            original_cwd = os.getcwd()
+            base_identity = os.path.normcase(os.path.realpath(BASE))
+            sys.path[:] = [
+                entry for entry in sys.path
+                if os.path.normcase(os.path.realpath(
+                    entry if entry else original_cwd
+                )) != base_identity
+            ]
+            for name in tuple(sys.modules):
+                if (name == "trading_lab_core"
+                        or name.startswith("trading_lab_core.")):
+                    del sys.modules[name]
+            if cached_core is not None:
+                sys.modules["trading_lab_core"] = cached_core
+            os.chdir(REPOSITORY_ROOT)
+            self.assertTrue(all(
+                os.path.normcase(os.path.realpath(
+                    entry if entry else os.getcwd()
+                )) != base_identity
+                for entry in sys.path
+            ))
+            self.assertNotEqual(
+                os.path.normcase(os.path.realpath(os.getcwd())),
+                base_identity,
+            )
+            yield
+
+    @contextlib.contextmanager
+    def package_import_context(self):
+        with preserved_process_state():
+            sys.path.insert(0, REPOSITORY_ROOT)
+            yield importlib.import_module(PACKAGE_MODULE_NAME)
+
+    def assert_sibling_core_modules(self, module):
+        expected = os.path.normcase(os.path.realpath(
+            os.path.join(BASE, "trading_lab_core")
+        ))
+        for name in (
+            "_canonical", "_constants", "_execution", "_reporting",
+            "_risk", "_strategy", "_validation",
+        ):
+            imported = (module[name] if isinstance(module, dict)
+                        else getattr(module, name))
+            actual = os.path.normcase(os.path.realpath(
+                os.path.dirname(imported.__file__)
+            ))
+            self.assertEqual(actual, expected, name)
+
+    def test_absolute_file_spec_load_is_cwd_independent_and_restores_path(self):
+        facade_path = os.path.join(BASE, "trading_lab.py")
+        repository_before = repository_file_state()
+        with self.outside_lab_import_context():
+            path_before = list(sys.path)
+            self.assertNotIn("trading_lab_core", sys.modules)
+            spec = importlib.util.spec_from_file_location(
+                "trading_lab_file_compatibility", facade_path,
+            )
+            self.assertIsNotNone(spec)
+            self.assertIsNotNone(spec.loader)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            self.assertEqual(sys.path, path_before)
+            self.assertEqual(module.__package__, "")
+            for name in EXPECTED_FACADE_CALLABLES:
+                self.assertTrue(callable(getattr(module, name)), name)
+            self.assert_sibling_core_modules(module)
+
+            rule, market_pack = self.demo_inputs(module)
+            original_rule = copy.deepcopy(rule)
+            original_pack = copy.deepcopy(market_pack)
+            first = module.run_backtest(rule, market_pack)
+            repeated = module.run_backtest(
+                copy.deepcopy(rule), copy.deepcopy(market_pack),
+            )
+            top_rule, top_pack = self.demo_inputs(tl)
+            top_level = tl.run_backtest(top_rule, top_pack)
+            self.assertEqual(first, repeated)
+            self.assertEqual(rule, original_rule)
+            self.assertEqual(market_pack, original_pack)
+            self.assertEqual(
+                without_provenance(first), without_provenance(top_level),
+            )
+            self.assertEqual(
+                (first["outcome"], first["reason_code"]),
+                (module.OUTCOME_FILL, module.OPEN_TERMINAL_POSITION),
+            )
+        self.assertEqual(repository_file_state(), repository_before)
+
+    def test_synthetic_dotted_file_spec_uses_complete_sibling_facade(self):
+        facade_path = os.path.join(BASE, "trading_lab.py")
+        repository_before = repository_file_state()
+        cwd_before = os.getcwd()
+        path_before = list(sys.path)
+        modules_before = dict(sys.modules)
+        argv_before = sys.argv
+        argv_values_before = list(sys.argv)
+        with self.outside_lab_import_context():
+            execution_cwd = os.getcwd()
+            execution_path = list(sys.path)
+            execution_argv = sys.argv
+            execution_argv_values = list(sys.argv)
+            self.assertNotIn("plugins", sys.modules)
+            spec = importlib.util.spec_from_file_location(
+                "plugins.trading_lab", facade_path,
+            )
+            self.assertIsNotNone(spec)
+            self.assertIsNotNone(spec.loader)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            self.assertEqual(module.__package__, "plugins")
+            self.assertFalse(module._use_package_relative_imports)
+            self.assertEqual(os.getcwd(), execution_cwd)
+            self.assertEqual(sys.path, execution_path)
+            self.assertIs(sys.argv, execution_argv)
+            self.assertEqual(sys.argv, execution_argv_values)
+            for name in EXPECTED_FACADE_CALLABLES:
+                self.assertTrue(callable(getattr(module, name)), name)
+            self.assert_sibling_core_modules(module)
+
+            rule, market_pack = self.demo_inputs(module)
+            result = module.run_backtest(rule, market_pack)
+            top_rule, top_pack = self.demo_inputs(tl)
+            top_level = tl.run_backtest(top_rule, top_pack)
+            self.assertEqual(
+                without_provenance(result), without_provenance(top_level),
+            )
+            self.assertEqual(
+                (result["outcome"], result["reason_code"]),
+                (module.OUTCOME_FILL, module.OPEN_TERMINAL_POSITION),
+            )
+
+        self.assertEqual(os.getcwd(), cwd_before)
+        self.assertEqual(sys.path, path_before)
+        self.assertIs(sys.argv, argv_before)
+        self.assertEqual(sys.argv, argv_values_before)
+        self.assertEqual(set(sys.modules), set(modules_before))
+        for name, imported in modules_before.items():
+            self.assertIs(sys.modules[name], imported, name)
+        self.assertEqual(repository_file_state(), repository_before)
+
+    def test_synthetic_dotted_spec_does_not_use_unrelated_parent_core(self):
+        facade_path = os.path.join(BASE, "trading_lab.py")
+        unrelated_parent = types.ModuleType("plugins")
+        unrelated_parent.__path__ = [REPOSITORY_ROOT]
+        unrelated_core = types.ModuleType("plugins.trading_lab_core")
+        unrelated_core.__file__ = os.path.join(REPOSITORY_ROOT, ".gitignore")
+        unrelated_core.__path__ = []
+        with self.outside_lab_import_context():
+            sys.modules["plugins"] = unrelated_parent
+            sys.modules["plugins.trading_lab_core"] = unrelated_core
+            spec = importlib.util.spec_from_file_location(
+                "plugins.trading_lab", facade_path,
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            self.assertFalse(module._use_package_relative_imports)
+            self.assertIsNot(module._canonical, unrelated_core)
+            self.assert_sibling_core_modules(module)
+
+    def test_absolute_run_path_is_cwd_independent_and_restores_path(self):
+        facade_path = os.path.join(BASE, "trading_lab.py")
+        repository_before = repository_file_state()
+        with self.outside_lab_import_context():
+            path_before = list(sys.path)
+            self.assertNotIn("trading_lab_core", sys.modules)
+            namespace = runpy.run_path(facade_path)
+            self.assertEqual(sys.path, path_before)
+            for name in EXPECTED_FACADE_CALLABLES:
+                self.assertTrue(callable(namespace[name]), name)
+            self.assert_sibling_core_modules(namespace)
+        self.assertEqual(repository_file_state(), repository_before)
+
+    def test_file_loading_rejects_unrelated_cached_core_package(self):
+        facade_path = os.path.join(BASE, "trading_lab.py")
+        repository_before = repository_file_state()
+        unrelated = types.ModuleType("trading_lab_core")
+        unrelated.__file__ = os.path.join(REPOSITORY_ROOT, ".gitignore")
+        unrelated.__path__ = []
+        with self.outside_lab_import_context(cached_core=unrelated):
+            path_before = list(sys.path)
+            self.assertIs(sys.modules["trading_lab_core"], unrelated)
+            spec = importlib.util.spec_from_file_location(
+                "trading_lab_unrelated_core", facade_path,
+            )
+            module = importlib.util.module_from_spec(spec)
+            with self.assertRaisesRegex(
+                ImportError, "did not resolve from the facade sibling",
+            ):
+                spec.loader.exec_module(module)
+            self.assertEqual(sys.path, path_before)
+        self.assertEqual(repository_file_state(), repository_before)
+
+    def test_historical_top_level_import_remains_operational(self):
+        imported = importlib.import_module("trading_lab")
+        self.assertIs(imported, tl)
+        self.assertEqual(imported.__name__, "trading_lab")
+        self.assertEqual(imported.__package__, "")
+        for name in EXPECTED_FACADE_CALLABLES:
+            self.assertTrue(callable(getattr(imported, name)), name)
+
+    def test_repository_root_package_qualified_import_succeeds(self):
+        with self.package_import_context() as module:
+            self.assertEqual(module.__name__, PACKAGE_MODULE_NAME)
+            self.assertEqual(
+                module.__package__, "09_AI_Systems.02_Tools.Trading_Lab",
+            )
+
+    def test_package_qualified_module_exposes_public_facade_callables(self):
+        with self.package_import_context() as module:
+            for name in EXPECTED_FACADE_CALLABLES:
+                self.assertTrue(callable(getattr(module, name)), name)
+            self.assertEqual(module.run_backtest.__module__, PACKAGE_MODULE_NAME)
+            self.assertEqual(
+                module.sma_cross_signals.__module__, PACKAGE_MODULE_NAME,
+            )
+
+    def test_package_demo_preserves_semantics_hashes_and_inputs(self):
+        with self.package_import_context() as module:
+            rule, market_pack = self.demo_inputs(module)
+            original_rule = copy.deepcopy(rule)
+            original_pack = copy.deepcopy(market_pack)
+            first = module.run_backtest(rule, market_pack)
+            repeated = module.run_backtest(
+                copy.deepcopy(rule), copy.deepcopy(market_pack),
+            )
+            top_rule, top_pack = self.demo_inputs(tl)
+            top_level = tl.run_backtest(top_rule, top_pack)
+
+            self.assertEqual(first, repeated)
+            self.assertEqual(rule, original_rule)
+            self.assertEqual(market_pack, original_pack)
+            self.assertEqual(
+                without_provenance(first), without_provenance(top_level),
+            )
+            self.assertEqual(
+                first["metadata"]["input_data_hash"],
+                "6cdbca208cd1029b90e5ed3494ab05a3b7042d224ed01293373fc173a85aee56",
+            )
+            self.assertEqual(
+                first["metadata"]["configuration_hash"],
+                "3f4c513f275ca034af9fd2f4bbcb4ec382c361969d7706fbb6fb6d26fd26bbbd",
+            )
+            self.assertEqual(
+                first["metadata"]["strategy_definition_hash"],
+                "e27bd45914df7d9d7c807b73e012b51a45dc5c844f39e22132c48078070e3955",
+            )
+            semantic_digest = hashlib.sha256(
+                module.canonical_json(without_provenance(first)).encode("utf-8")
+            ).hexdigest()
+            self.assertEqual(
+                semantic_digest,
+                "6f66351873fb49dc11fcc7f3c0e3c84d0add65b4e0b315bf78da7008070d5331",
+            )
+            self.assertTrue(first["metadata"]["paper_research_only"])
+            self.assertIn("NO LIVE TRADING", first["disclaimer"])
+            self.assertEqual(
+                (first["outcome"], first["reason_code"]),
+                (module.OUTCOME_FILL, module.OPEN_TERMINAL_POSITION),
+            )
+
+    def test_package_module_execution_succeeds_without_artifacts(self):
+        before = repository_file_state()
+        environment = os.environ.copy()
+        environment["PYTHONDONTWRITEBYTECODE"] = "1"
+        completed = subprocess.run(
+            [sys.executable, "-B", "-m", PACKAGE_MODULE_NAME],
+            cwd=REPOSITORY_ROOT,
+            env=environment,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        after = repository_file_state()
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertEqual(completed.stdout, "")
+        self.assertEqual(completed.stderr, "")
+        self.assertEqual(after, before)
+
+
 class DeterminismReportingAndBoundaryTests(unittest.TestCase):
+    def engine_sources(self):
+        sources = {}
+        for relative_path in tl._engine_source_manifest():
+            absolute_path = os.path.join(
+                REPOSITORY_ROOT, *relative_path.split("/"),
+            )
+            with open(absolute_path, "rb") as source_handle:
+                sources[relative_path] = source_handle.read()
+        return sources
+
     def test_engine_source_digest_matches_independent_normalized_source(self):
         report = run([3, 2, 1, 4, 5])
         engine = report["metadata"]["engine"]
-        with open(tl.__file__, "rb") as source_handle:
-            source_text = source_handle.read().decode("utf-8", "strict")
-        normalized = source_text.replace("\r\n", "\n").replace("\r", "\n")
-        expected = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+        expected = independent_engine_bundle_digest(self.engine_sources())
         digest = engine["engine_source_digest"]
         self.assertRegex(digest, r"^[0-9a-f]{64}$")
         self.assertEqual(digest, expected)
         self.assertEqual(report["metadata"]["engine_source_digest"], expected)
+        self.assertEqual(engine["engine_source_manifest"],
+                         report["metadata"]["engine_source_manifest"])
         self.assertEqual(engine["digest_algorithm"], "SHA-256")
         self.assertEqual(engine["source_normalization"],
                          "UTF-8; CRLF_AND_CR_TO_LF")
         self.assertEqual(engine["checkpoint_id"], tl.CHECKPOINT_ID)
-        self.assertEqual(engine["committed_base_revision"], "bb3af4e")
+        self.assertEqual(engine["committed_base_revision"], "05f7ba9")
         self.assertNotIn("source_revision", engine)
+
+    def test_atomic_snapshot_enumerates_once_for_digest_and_manifest(self):
+        source_paths = [
+            ("engine/a.py", "memory-a"),
+            ("engine/b.py", "memory-b"),
+        ]
+        source_bytes = {
+            "memory-a": b"first\r\nline\r",
+            "memory-b": b"second\nline\n",
+        }
+
+        def in_memory_open(path, mode):
+            self.assertEqual(mode, "rb")
+            return io.BytesIO(source_bytes[path])
+
+        with mock.patch.object(
+            tl._canonical, "_engine_source_paths", return_value=source_paths,
+        ) as enumerate_paths, mock.patch(
+            "builtins.open", side_effect=in_memory_open,
+        ) as source_open:
+            digest, manifest = tl._engine_source_snapshot()
+
+        enumerate_paths.assert_called_once_with()
+        self.assertEqual(source_open.call_count, 2)
+        self.assertEqual(manifest, ["engine/a.py", "engine/b.py"])
+        self.assertEqual(
+            digest,
+            independent_engine_bundle_digest({
+                relative_path: source_bytes[absolute_path]
+                for relative_path, absolute_path in source_paths
+            }),
+        )
+
+    def test_in_memory_bundle_returns_expected_paired_provenance(self):
+        sources = {
+            "z/module.py": b"zeta\r\n",
+            "a/module.py": b"alpha\r",
+        }
+        digest, manifest = tl._engine_source_snapshot(sources)
+        self.assertEqual(manifest, sorted(sources))
+        self.assertEqual(digest, independent_engine_bundle_digest(sources))
+        self.assertEqual(tl._engine_source_bundle_digest(sources), digest)
+
+    def test_successive_runs_keep_each_captured_source_pair_atomic(self):
+        initial_sources = {"engine/a.py": b"alpha\n"}
+        changed_sources = {
+            "engine/a.py": b"alpha changed\n",
+            "engine/b.py": b"added\n",
+        }
+        snapshots = [
+            tl._canonical._engine_source_snapshot(initial_sources),
+            tl._canonical._engine_source_snapshot(changed_sources),
+        ]
+        with mock.patch.object(
+            tl, "_engine_source_snapshot", side_effect=snapshots,
+        ) as capture:
+            first = run([3, 2, 1, 4, 5])
+            second = run([3, 2, 1, 4, 5])
+
+        self.assertEqual(capture.call_count, 2)
+        self.assertEqual(
+            first["metadata"]["engine_source_digest"], snapshots[0][0],
+        )
+        self.assertEqual(
+            first["metadata"]["engine_source_manifest"], snapshots[0][1],
+        )
+        self.assertEqual(
+            second["metadata"]["engine_source_digest"], snapshots[1][0],
+        )
+        self.assertEqual(
+            second["metadata"]["engine_source_manifest"], snapshots[1][1],
+        )
+        self.assertNotEqual(snapshots[0], snapshots[1])
+
+    def test_enumeration_failure_blocks_without_second_enumeration(self):
+        with mock.patch.object(
+            tl._canonical,
+            "_engine_source_paths",
+            side_effect=tl.ReproducibilityError("simulated enumeration failure"),
+        ) as enumerate_paths:
+            report = run([3, 2, 1, 4, 5])
+
+        enumerate_paths.assert_called_once_with()
+        self.assertEqual(report["outcome"], tl.OUTCOME_BLOCKED)
+        self.assertEqual(
+            report["reason_code"], tl.BLOCKED_REPRODUCIBILITY_ERROR,
+        )
+        self.assertIsNone(report["metadata"]["engine_source_digest"])
+        self.assertIsNone(report["metadata"]["engine_source_manifest"])
+        self.assertIsNone(
+            report["metadata"]["engine"]["engine_source_manifest"],
+        )
+        self.assertEqual(
+            report["metadata"]["reproducibility_status"], "FAILED_CLOSED",
+        )
+
+    def test_source_read_failure_is_caught_without_reenumeration(self):
+        paths = [("engine/unreadable.py", "unreadable-source")]
+        with mock.patch.object(
+            tl._canonical, "_engine_source_paths", return_value=paths,
+        ) as enumerate_paths, mock.patch(
+            "builtins.open", side_effect=OSError("simulated read failure"),
+        ) as source_open:
+            report = run([3, 2, 1, 4, 5])
+
+        enumerate_paths.assert_called_once_with()
+        source_open.assert_called_once_with("unreadable-source", "rb")
+        self.assertEqual(report["outcome"], tl.OUTCOME_BLOCKED)
+        self.assertEqual(
+            report["reason_code"], tl.BLOCKED_REPRODUCIBILITY_ERROR,
+        )
+        self.assertIsNone(report["metadata"]["engine_source_digest"])
+        self.assertIsNone(report["metadata"]["engine_source_manifest"])
+
+    def test_metadata_never_reenumerates_after_run_snapshot(self):
+        original_paths = tl._canonical._engine_source_paths
+        invalid_pack = pack([3, 2, 1, 4, 5])
+        del invalid_pack["pack_id"]
+        for market_pack in (pack([3, 2, 1, 4, 5]), invalid_pack):
+            with self.subTest(valid=market_pack is not invalid_pack):
+                with mock.patch.object(
+                    tl._canonical, "_engine_source_paths", wraps=original_paths,
+                ) as enumerate_paths:
+                    tl.run_backtest(strategy(), market_pack)
+                enumerate_paths.assert_called_once_with()
+
+    def test_valid_and_invalid_results_receive_the_captured_source_pair(self):
+        captured = ("7" * 64, ["memory/captured.py"])
+        invalid_pack = pack([3, 2, 1, 4, 5])
+        del invalid_pack["pack_id"]
+        with mock.patch.object(
+            tl, "_engine_source_snapshot", return_value=captured,
+        ) as snapshot:
+            valid = tl.run_backtest(strategy(), pack([3, 2, 1, 4, 5]))
+            invalid = tl.run_backtest(strategy(), invalid_pack)
+
+        self.assertEqual(snapshot.call_count, 2)
+        for report in (valid, invalid):
+            self.assertEqual(
+                report["metadata"]["engine_source_digest"], captured[0],
+            )
+            self.assertEqual(
+                report["metadata"]["engine_source_manifest"], captured[1],
+            )
+            self.assertEqual(
+                report["metadata"]["engine"]["engine_source_manifest"],
+                captured[1],
+            )
+
+    def test_engine_manifest_is_complete_sorted_and_repository_relative(self):
+        manifest = tl._engine_source_manifest()
+        expected = [
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/__init__.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/canonical.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/constants.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/execution.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/reporting.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/risk.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/strategy.py",
+            "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/validation.py",
+        ]
+        self.assertEqual(manifest, sorted(manifest))
+        self.assertEqual(manifest, expected)
+        self.assertTrue(all("\\" not in path for path in manifest))
+
+    def test_each_engine_module_changes_bundle_digest_and_run_id(self):
+        sources = self.engine_sources()
+        baseline_digest = tl._engine_source_bundle_digest(sources)
+        baseline = run([3, 2, 1, 4, 5])
+        market_pack = pack([3, 2, 1, 4, 5])
+        rule = strategy()
+        policy, errors = tl._effective_policy(None, rule)
+        self.assertEqual(errors, [])
+        for relative_path in sorted(sources):
+            with self.subTest(relative_path=relative_path):
+                changed_sources = dict(sources)
+                changed_sources[relative_path] += b"\n# deterministic test mutation\n"
+                changed_digest = tl._engine_source_bundle_digest(changed_sources)
+                self.assertNotEqual(changed_digest, baseline_digest)
+                changed_metadata = tl._metadata(
+                    market_pack,
+                    rule,
+                    baseline["metadata"]["input_data_hash"],
+                    baseline["metadata"]["configuration_hash"],
+                    policy,
+                    engine_source_digest=changed_digest,
+                )
+                self.assertNotEqual(changed_metadata["run_id"],
+                                    baseline["metadata"]["run_id"])
+
+    def test_tests_and_samples_are_excluded_from_engine_digest(self):
+        manifest = tl._engine_source_manifest()
+        self.assertFalse(any("test" in path.lower() for path in manifest))
+        self.assertFalse(any("sample_data" in path for path in manifest))
+        self.assertNotIn(
+            "09_AI_Systems/02_Tools/Trading_Lab/build_demo_pack.py",
+            manifest,
+        )
+        self.assertEqual(tl._engine_source_digest(),
+                         tl._engine_source_bundle_digest(self.engine_sources()))
 
     def test_engine_source_digest_is_part_of_run_identity(self):
         market_pack = pack([3, 2, 1, 4, 5])
@@ -1383,6 +1980,34 @@ class DeterminismReportingAndBoundaryTests(unittest.TestCase):
         crlf_source = b"first line\r\nsecond line\r\n"
         self.assertEqual(tl._normalized_source_sha256(lf_source),
                          tl._normalized_source_sha256(crlf_source))
+        self.assertEqual(
+            tl._engine_source_bundle_digest({"module.py": lf_source}),
+            tl._engine_source_bundle_digest({"module.py": crlf_source}),
+        )
+
+    def test_only_provenance_changes_with_engine_bundle(self):
+        with mock.patch.object(tl, "_engine_source_digest",
+                               return_value="0" * 64):
+            first = run([3, 2, 1, 4, 5])
+        with mock.patch.object(tl, "_engine_source_digest",
+                               return_value="1" * 64):
+            second = run([3, 2, 1, 4, 5])
+        self.assertNotEqual(first["metadata"]["run_id"],
+                            second["metadata"]["run_id"])
+        self.assertNotEqual(first["metadata"]["engine_source_digest"],
+                            second["metadata"]["engine_source_digest"])
+        first_engine = first["metadata"]["engine"]
+        second_engine = second["metadata"]["engine"]
+        self.assertNotEqual(first_engine["engine_source_digest"],
+                            second_engine["engine_source_digest"])
+        first["metadata"]["run_id"] = second["metadata"]["run_id"]
+        first["metadata"]["engine_source_digest"] = (
+            second["metadata"]["engine_source_digest"]
+        )
+        first_engine["engine_source_digest"] = (
+            second_engine["engine_source_digest"]
+        )
+        self.assertEqual(first, second)
 
     def test_unavailable_engine_source_digest_fails_closed(self):
         original = tl._engine_source_digest
@@ -1407,6 +2032,37 @@ class DeterminismReportingAndBoundaryTests(unittest.TestCase):
         rule = strategy()
         self.assertEqual(tl.run_backtest(rule, market_pack),
                          tl.run_backtest(copy.deepcopy(rule), copy.deepcopy(market_pack)))
+
+    def test_compatibility_facade_retains_existing_callables(self):
+        for name in EXPECTED_FACADE_CALLABLES:
+            self.assertTrue(callable(getattr(tl, name)), name)
+        self.assertEqual(tl.run_backtest.__module__, "trading_lab")
+        self.assertEqual(tl.sma_cross_signals.__module__, "trading_lab")
+
+    def test_committed_demo_financial_semantics_and_hashes_are_unchanged(self):
+        path = os.path.join(BASE, "sample_data", "TRL-PACK-DEMO.json")
+        with open(path, encoding="utf-8") as handle:
+            market_pack = json.load(handle)
+        rule = strategy(symbol="DEMO-EQ-A", fast=5, slow=20)
+        report = tl.run_backtest(rule, market_pack)
+        self.assertEqual(report["metadata"]["input_data_hash"],
+                         "6cdbca208cd1029b90e5ed3494ab05a3b7042d224ed01293373fc173a85aee56")
+        self.assertEqual(report["metadata"]["configuration_hash"],
+                         "3f4c513f275ca034af9fd2f4bbcb4ec382c361969d7706fbb6fb6d26fd26bbbd")
+        self.assertEqual(report["metadata"]["strategy_definition_hash"],
+                         "e27bd45914df7d9d7c807b73e012b51a45dc5c844f39e22132c48078070e3955")
+        semantic_digest = hashlib.sha256(
+            tl.canonical_json(without_provenance(report)).encode("utf-8")
+        ).hexdigest()
+        self.assertEqual(semantic_digest,
+                         "6f66351873fb49dc11fcc7f3c0e3c84d0add65b4e0b315bf78da7008070d5331")
+        self.assertEqual((report["outcome"], report["reason_code"]),
+                         (tl.OUTCOME_FILL, tl.OPEN_TERMINAL_POSITION))
+        self.assertEqual(len(report["hypothetical_fills"]), 1)
+        self.assertEqual(len(report["trade_list"]), 0)
+        self.assertEqual(len(report["equity_curve"]), 60)
+        self.assertEqual(report["final_cash"], 94.9975)
+        self.assertEqual(report["final_equity"], 100.22673707083118)
 
     def test_inputs_remain_unmodified(self):
         market_pack = pack([3, 2, 1, 4, 5])
@@ -1557,6 +2213,19 @@ class DeterminismReportingAndBoundaryTests(unittest.TestCase):
                           "annualized return", "win rate", "Founder-approved"):
             self.assertNotIn(forbidden.lower(), markdown.lower())
 
+    def test_cli_and_reporting_boundary_remain_paper_only(self):
+        before = sorted(os.listdir(BASE))
+        output = io.StringIO()
+        with preserved_process_state():
+            sys.argv = [tl.__file__, "--demo"]
+            with contextlib.redirect_stdout(output):
+                runpy.run_path(tl.__file__, run_name="__main__")
+        cli_report = json.loads(output.getvalue())
+        self.assertTrue(cli_report["metadata"]["paper_research_only"])
+        self.assertIn("NO LIVE TRADING", cli_report["disclaimer"])
+        self.assertIn("paper-only", cli_report["performance_disclaimer"])
+        self.assertEqual(sorted(os.listdir(BASE)), before)
+
     def test_sample_generator_exactly_matches_tracked_json(self):
         path = os.path.join(BASE, "sample_data", "TRL-PACK-DEMO.json")
         with open(path, encoding="utf-8") as handle:
@@ -1571,8 +2240,11 @@ class DeterminismReportingAndBoundaryTests(unittest.TestCase):
         self.assertIn("FICTIONAL", news["note"])
 
     def test_no_network_ai_broker_credentials_or_external_order_dependency(self):
-        for name in ("trading_lab.py", "build_demo_pack.py"):
-            path = os.path.join(BASE, name)
+        paths = [
+            os.path.join(REPOSITORY_ROOT, *name.split("/"))
+            for name in tl._engine_source_manifest()
+        ] + [os.path.join(BASE, "build_demo_pack.py")]
+        for path in paths:
             with open(path, encoding="utf-8") as handle:
                 source = handle.read()
             tree = ast.parse(source)
@@ -1580,11 +2252,12 @@ class DeterminismReportingAndBoundaryTests(unittest.TestCase):
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     imported.update(alias.name.split(".")[0] for alias in node.names)
-                elif isinstance(node, ast.ImportFrom) and node.module:
+                elif (isinstance(node, ast.ImportFrom) and node.module
+                      and node.level == 0):
                     imported.add(node.module.split(".")[0])
             self.assertTrue(imported <= {
                 "copy", "datetime", "hashlib", "json", "math", "os", "random",
-                "re", "sys",
+                "re", "sys", "trading_lab_core",
             })
             lowered = source.lower()
             for forbidden in ("api_key", "broker_api", "place_order(",
@@ -1593,8 +2266,14 @@ class DeterminismReportingAndBoundaryTests(unittest.TestCase):
                 self.assertNotIn(forbidden, lowered)
 
     def test_source_open_calls_are_context_managed(self):
-        for name in ("trading_lab.py", "build_demo_pack.py", "test_trading_lab.py"):
-            path = os.path.join(BASE, name)
+        paths = [
+            os.path.join(REPOSITORY_ROOT, *name.split("/"))
+            for name in tl._engine_source_manifest()
+        ] + [
+            os.path.join(BASE, "build_demo_pack.py"),
+            os.path.join(BASE, "test_trading_lab.py"),
+        ]
+        for path in paths:
             with open(path, encoding="utf-8") as handle:
                 tree = ast.parse(handle.read())
             open_calls = [node for node in ast.walk(tree)
@@ -1611,7 +2290,7 @@ class DeterminismReportingAndBoundaryTests(unittest.TestCase):
                             and isinstance(candidate.func, ast.Name)
                             and candidate.func.id == "open"
                         )
-            self.assertEqual(len(open_calls), len(with_open_calls), name)
+            self.assertEqual(len(open_calls), len(with_open_calls), path)
 
     def test_decision_log_requires_human_value(self):
         with self.assertRaises(tl.RiskPolicyViolation):
