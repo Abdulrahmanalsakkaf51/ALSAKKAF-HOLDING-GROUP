@@ -7,6 +7,7 @@ from pathlib import Path
 
 from . import APPLICATION_NAME, APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MODE
 from .capabilities import capability_manifest
+from .strategy_registry import load_registry
 
 
 TRADING_LAB_DIRECTORY = Path(__file__).resolve().parent.parent
@@ -86,6 +87,11 @@ def version_document():
 
 def capabilities_document():
     return capability_manifest()
+
+
+def strategy_registry_document():
+    """Return the governed local registry without running financial evaluation."""
+    return load_registry(copy.deepcopy(DEMO_STRATEGY)).document()
 
 
 def market_data_document():

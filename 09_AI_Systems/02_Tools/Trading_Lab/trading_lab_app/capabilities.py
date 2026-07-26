@@ -1,4 +1,4 @@
-"""Closed capability manifest for the TRL-R2-001 application boundary."""
+"""Closed capability manifest including the TRL-R2-002 registry boundary."""
 
 from . import APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MODE
 
@@ -9,6 +9,11 @@ IMPLEMENTED = (
     "Interactive synthetic charts",
     "Deterministic report display and download",
     "Release 1 kernel integration",
+    "Local governed strategy registry",
+    "Local immutable strategy-definition vault",
+    "Deterministic registry identities",
+    "Separate non-executable research backlog",
+    "Registry dashboard and read-only API",
 )
 
 NOT_IMPLEMENTED = (
@@ -24,6 +29,15 @@ NOT_IMPLEMENTED = (
     "External orders",
     "Customer funds or custody",
     "Personalized investment advice",
+    "MT5 integration",
+    "News feeds",
+    "Strategy optimization",
+    "Strategy ranking",
+    "Regime selection",
+    "Order proposals",
+    "Cloud backend",
+    "Telemetry and analytics",
+    "Customer distribution approval",
 )
 
 
@@ -44,4 +58,19 @@ def capability_manifest():
         "credential_storage_capability": False,
         "telemetry": False,
         "atlas_runtime_dependency": False,
+        "strategy_registry_checkpoint": "TRL-R2-002",
+        "strategy_registry_capability": True,
+        "strategy_vault_capability": True,
+        "strategy_ranking_capability": False,
+        "strategy_optimization_capability": False,
+        "regime_selection_capability": False,
+        "live_market_data_capability": False,
+        "mt5_capability": False,
+        "news_feed_capability": False,
+        "order_proposal_capability": False,
+        "cloud_backend_capability": False,
+        "accounts_capability": False,
+        "subscriptions_capability": False,
+        "payments_capability": False,
+        "customer_distribution_approved": False,
     }

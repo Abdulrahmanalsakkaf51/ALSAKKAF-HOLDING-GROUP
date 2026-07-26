@@ -1,0 +1,59 @@
+{
+  "approval_status": "EXPERIMENTAL_RESEARCH_ONLY",
+  "description": "Uses completed-bar close prices to emit an entry only when the fast simple moving average transitions from at-or-below to above the slow average, and an exit only on the inverse transition. A hypothetical fill can occur only at the next validated bar open.",
+  "display_name": "SMA Close Crossing Long-Only Research Rule",
+  "family": "SMA_CROSS_LONG_ONLY",
+  "implementation_status": "IMPLEMENTED",
+  "kernel_strategy_definition_hash": "e27bd45914df7d9d7c807b73e012b51a45dc5c844f39e22132c48078070e3955",
+  "known_limitations": [
+    "Committed implementation accepts exactly one instrument per evaluation.",
+    "Long-only research rule with no short-selling behavior.",
+    "No claim of market validity, profitability, or future performance.",
+    "Validated here only against the committed daily synthetic equity fixture."
+  ],
+  "parameter_schema": {
+    "fast": {
+      "minimum": 1,
+      "relation": "LESS_THAN_SLOW",
+      "type": "INTEGER"
+    },
+    "paper_size_pct": {
+      "exclusive_minimum": 0.0,
+      "maximum": 5.0,
+      "type": "NUMBER"
+    },
+    "slow": {
+      "minimum": 2,
+      "type": "INTEGER"
+    }
+  },
+  "record_schema_version": "1.0.0",
+  "required_indicators": [
+    "SIMPLE_MOVING_AVERAGE"
+  ],
+  "required_market_fields": [
+    "close",
+    "high",
+    "low",
+    "open",
+    "volume"
+  ],
+  "research_eligibility": true,
+  "risk_characteristics": [
+    "Entry size is capped by the Release 1 five-percent system position maximum.",
+    "No leverage, shorting, or increase to a losing position is permitted.",
+    "Open terminal positions remain marked rather than being force-liquidated."
+  ],
+  "source_checkpoint": "TRL-R1-004",
+  "strategy_id": "SMA-001",
+  "strategy_version": "1.0.0",
+  "supported_instrument_types": [
+    "EQUITY"
+  ],
+  "supported_markets": [
+    "SYNTHETIC_EQUITY_RESEARCH"
+  ],
+  "supported_timeframes": [
+    "D1"
+  ]
+}

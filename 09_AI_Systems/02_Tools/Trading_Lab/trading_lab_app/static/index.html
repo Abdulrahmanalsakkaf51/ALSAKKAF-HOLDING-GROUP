@@ -28,6 +28,7 @@
       <a href="#equity">Equity &amp; drawdown</a>
       <a href="#signals">Research signals</a>
       <a href="#strategy">Strategy</a>
+      <a href="#strategy-vault">Strategy vault</a>
       <a href="#reports">Reports</a>
       <a href="#risk">Risk &amp; safety</a>
       <a href="#future-modes">Future modes</a>
@@ -37,7 +38,7 @@
     <main id="main-content" tabindex="-1">
       <section class="hero" aria-labelledby="dashboard-title">
         <div>
-          <p class="eyebrow">TRL-R2-001 · LOCAL APPLICATION FOUNDATION</p>
+          <p class="eyebrow">TRL-R2-002 · LOCAL GOVERNED STRATEGY REGISTRY AND VAULT</p>
           <h1 id="dashboard-title">Research clarity,<br><span>without execution risk.</span></h1>
           <p class="hero-copy">A deterministic view of the committed synthetic demonstration, powered locally by the stable Release 1 paper/research kernel.</p>
         </div>
@@ -118,6 +119,46 @@
           </div>
         </section>
 
+        <section id="strategy-vault" class="section" aria-labelledby="vault-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">GOVERNED LOCAL CATALOG</p><h2 id="vault-title">Strategy registry and vault</h2></div>
+            <span id="registry-health" class="badge badge-safe">CHECKING REGISTRY</span>
+          </div>
+          <div class="registry-metrics">
+            <article><span>Installed strategies</span><strong id="installed-strategy-count">—</strong></article>
+            <article><span>Research executable</span><strong id="eligible-strategy-count">—</strong></article>
+            <article class="wide"><span>Vault bundle identity</span><code id="vault-bundle-digest">—</code></article>
+          </div>
+          <div class="two-column vault-grid">
+            <article class="panel">
+              <span class="badge badge-neutral" id="vault-approval-status">EXPERIMENTAL RESEARCH ONLY</span>
+              <h3><span id="vault-strategy-id">SMA-001</span> <span id="vault-strategy-version">v—</span></h3>
+              <p id="vault-strategy-name">SMA Close Crossing Long-Only Research Rule</p>
+              <dl class="parameter-list">
+                <div><dt>Family</dt><dd id="vault-family">—</dd></div>
+                <div><dt>Markets</dt><dd id="vault-markets">—</dd></div>
+                <div><dt>Timeframes</dt><dd id="vault-timeframes">—</dd></div>
+                <div><dt>Indicators</dt><dd id="vault-indicators">—</dd></div>
+                <div><dt>Parameters</dt><dd id="vault-parameters">—</dd></div>
+              </dl>
+            </article>
+            <article class="panel warning-panel">
+              <h3>Governance boundary</h3>
+              <p>The Registry does not choose the best strategy. No strategy is approved for investment use. No live data, broker, or execution capability exists.</p>
+              <span>Release 1 kernel definition hash</span><code id="vault-kernel-hash">—</code>
+              <span>Registry record digest</span><code id="vault-record-digest">—</code>
+            </article>
+          </div>
+          <article class="panel limitation-panel"><h3>Known limitations</h3><ul id="vault-limitations" class="check-list"></ul></article>
+          <div class="section-heading backlog-heading">
+            <div><p class="eyebrow">SEPARATE NON-EXECUTABLE COLLECTION</p><h3>Research backlog</h3></div>
+            <span class="badge badge-warning">PLANNED — NOT IMPLEMENTED</span>
+          </div>
+          <div id="backlog-cards" class="backlog-grid" aria-describedby="backlog-boundary"></div>
+          <p id="backlog-boundary" class="disclosure">Backlog entries are research questions only. They are not installed executable strategies and can never pass current research execution eligibility.</p>
+          <details class="table-fallback"><summary>Accessible research-backlog table</summary><div class="table-scroll"><table><caption>Non-executable planned research families</caption><thead><tr><th scope="col">Backlog ID</th><th scope="col">Research family</th><th scope="col">Timeframes</th><th scope="col">Status</th><th scope="col">Execution eligible</th></tr></thead><tbody id="backlog-table"></tbody></table></div></details>
+        </section>
+
         <section id="reports" class="section" aria-labelledby="reports-title">
           <div class="section-heading"><div><p class="eyebrow">DETERMINISTIC EVIDENCE</p><h2 id="reports-title">Reports</h2></div><div class="actions"><button id="download-json" type="button">Download JSON</button><button id="download-markdown" type="button" class="secondary">Download Markdown</button></div></div>
           <div class="hash-grid"><div><span>Run ID</span><code id="run-id">—</code></div><div><span>Input hash</span><code id="input-hash">—</code></div><div><span>Configuration hash</span><code id="configuration-hash">—</code></div><div><span>Strategy hash</span><code id="report-strategy-hash">—</code></div><div class="wide"><span>Engine digest</span><code id="engine-digest">—</code></div></div>
@@ -150,7 +191,7 @@
 
         <section id="about" class="section" aria-labelledby="about-title">
           <div class="section-heading"><div><p class="eyebrow">RELEASE BOUNDARY</p><h2 id="about-title">About</h2></div></div>
-          <div class="about-grid"><div><span>Application</span><strong id="app-version">—</strong></div><div><span>Kernel</span><strong id="kernel-version">—</strong></div><div><span>Checkpoint</span><strong>TRL-R2-001</strong></div><div><span>Platform</span><strong>Windows-first · local-first</strong></div></div>
+          <div class="about-grid"><div><span>Application</span><strong id="app-version">—</strong></div><div><span>Kernel</span><strong id="kernel-version">—</strong></div><div><span>Checkpoint</span><strong>TRL-R2-002</strong></div><div><span>Platform</span><strong>Windows-first · local-first</strong></div></div>
           <p>Release 1 remains the independent stable engine. This application is a local presentation and service layer over its committed synthetic demonstration. macOS and Linux are architectural portability targets and are not claimed as tested.</p>
           <p>Atlas is only a future optional adapter: it is not installed, contacted, or required by this application.</p>
           <div class="legal-notice"><strong>PAPER/RESEARCH ONLY</strong><span>Architecture demonstration only — not financial advice — no live trading — no profit claims. Hypothetical synthetic results do not predict future returns or authorize a trade.</span></div>

@@ -6,14 +6,14 @@
 
 | Field | Value |
 |-------|-------|
-| Document ID | TRL-R2-001-QUICK-START-001 |
+| Document ID | TRL-R2-002-QUICK-START-002 |
 | Document Type | Local Application Operator Guide |
-| Status | ACTIVE FOR TRL-R2-001 SOURCE LAUNCH |
-| Version | 1.0 |
+| Status | ACTIVE FOR TRL-R2-002 SOURCE LAUNCH |
+| Version | 2.0 |
 | Date | 2026-07-26 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Project | PRJ-017 - ALSAKKAF Trading Research Lab |
-| Checkpoint | TRL-R2-001 - Portable Application Foundation |
+| Checkpoint | TRL-R2-002 - Local Governed Strategy Registry and Vault |
 
 These instructions are for Windows PowerShell. The source application is Windows-first and local-first. It uses only Python's standard library and the committed Release 1 kernel and synthetic demonstration pack.
 
@@ -75,12 +75,16 @@ The application prints its shutdown status and closes its local listening socket
 
 # 6. Run the Tests
 
-From the repository root, run the Release 1 tests, application tests and combined discovery tests:
+From the repository root, disable bytecode and run the Release 1, application, registry, and combined discovery tests:
 
 ```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+
 python -B -W error 09_AI_Systems\02_Tools\Trading_Lab\test_trading_lab.py
 
 python -B -W error 09_AI_Systems\02_Tools\Trading_Lab\test_trading_lab_app.py
+
+python -B -W error 09_AI_Systems\02_Tools\Trading_Lab\test_strategy_registry.py
 
 python -B -W error -m unittest discover -s 09_AI_Systems\02_Tools\Trading_Lab -p 'test*.py'
 ```
@@ -113,4 +117,20 @@ $trlCapabilities.not_implemented
 
 The four capability values for broker, external order, credential storage and telemetry must be `False`. The not-implemented list must include live data, broker connectivity, assisted execution, automated execution, external orders, customer funds and personalized investment advice.
 
-There is no broker endpoint, credential endpoint, order endpoint, hidden order control or live-trading mode in TRL-R2-001.
+There is no broker endpoint, credential endpoint, order endpoint, hidden order control or live-trading mode in TRL-R2-002.
+
+# 9. Inspect the Governed Strategy Registry
+
+While the application is running, inspect the deterministic read-only registry document:
+
+```powershell
+$trlRegistry = Invoke-RestMethod 'http://127.0.0.1:8765/api/strategy-registry'
+$trlRegistry.registry_health
+$trlRegistry.installed_executable_strategies
+$trlRegistry.research_backlog
+$trlRegistry.vault
+```
+
+Health must be `VALID / REGISTRY_VALID`. The executable collection must contain only SMA-001 version 1.0.0. The separate backlog entries must all be `PLANNED_NOT_IMPLEMENTED` with `execution_eligible` equal to `False`.
+
+The registry does not choose a best strategy. No strategy is approved for investment use, and this checkpoint has no live market data, MT5, news, broker, order proposal, or execution capability.

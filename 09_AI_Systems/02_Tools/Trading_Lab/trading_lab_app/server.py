@@ -24,6 +24,7 @@ API_ROUTES = {
     "/api/health": service.health_document,
     "/api/version": service.version_document,
     "/api/capabilities": service.capabilities_document,
+    "/api/strategy-registry": service.strategy_registry_document,
     "/api/demo/market-data": service.market_data_document,
     "/api/demo/result": service.demo_result,
     "/api/demo/report": service.report_document,

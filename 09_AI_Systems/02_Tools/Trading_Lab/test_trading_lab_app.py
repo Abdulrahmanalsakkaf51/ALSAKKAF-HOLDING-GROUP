@@ -174,6 +174,10 @@ class ServiceContractTests(unittest.TestCase):
             "Customer distribution", "Broker credentials", "Broker connectivity",
             "Assisted execution", "Automated execution", "External orders",
             "Customer funds or custody", "Personalized investment advice",
+            "MT5 integration", "News feeds", "Strategy optimization",
+            "Strategy ranking", "Regime selection", "Order proposals",
+            "Cloud backend", "Telemetry and analytics",
+            "Customer distribution approval",
         }
         self.assertEqual(set(manifest["not_implemented"]), expected)
 
@@ -284,6 +288,7 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
     def test_no_broker_credential_external_order_or_outbound_import_surface(self):
         self.assertEqual(set(server.API_ROUTES), {
             "/api/health", "/api/version", "/api/capabilities",
+            "/api/strategy-registry",
             "/api/demo/market-data", "/api/demo/result", "/api/demo/report",
         })
         for path in APP_DIRECTORY.glob("*.py"):

@@ -1,0 +1,104 @@
+{
+  "backlog_schema_version": "1.0.0",
+  "entries": [
+    {
+      "backlog_id": "BACKLOG-CANDLE-REJECTION",
+      "display_name": "Bullish and bearish candle-rejection research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["UNSPECIFIED"],
+      "principal_risks": ["Pattern definitions may be subjective and vulnerable to hindsight bias."],
+      "required_future_data": ["Governed historical OHLCV data with an explicit timeframe"],
+      "research_questions": ["Can rejection events be specified causally and tested without discretionary relabeling?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-FIBONACCI",
+      "display_name": "Fibonacci retracement and extension research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["UNSPECIFIED"],
+      "principal_risks": ["Anchor selection may introduce discretion, instability, and hindsight bias."],
+      "required_future_data": ["Governed historical OHLCV data with reproducible swing annotations"],
+      "research_questions": ["Can anchor selection and evaluation be made causal, deterministic, and auditable?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-H4-SWING",
+      "display_name": "H4 swing research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["H4"],
+      "principal_risks": ["Sparse observations and overnight gaps may distort historical conclusions."],
+      "required_future_data": ["Governed H4 OHLCV history with session and gap metadata"],
+      "research_questions": ["Which causal swing hypotheses merit formal specification and independent validation?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-MACRO-EVENT",
+      "display_name": "News-event and macro-release research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["EVENT_DRIVEN"],
+      "principal_risks": ["Timestamp revisions, publication latency, and surprise definitions can create look-ahead bias."],
+      "required_future_data": ["Governed point-in-time macro releases and publication timestamps", "Licensed point-in-time news metadata"],
+      "research_questions": ["Can event information be aligned using only what was available at each decision time?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-MICRO-TREND",
+      "display_name": "M1 and M5 scalping and short-horizon trend research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["M1", "M5"],
+      "principal_risks": ["Costs, spread, latency, and market microstructure can dominate short-horizon results."],
+      "required_future_data": ["Governed M1 and M5 market data with spread and quality metadata"],
+      "research_questions": ["Do any causal short-horizon hypotheses survive realistic costs and out-of-sample validation?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-POSITION-D1",
+      "display_name": "D1 position research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["D1"],
+      "principal_risks": ["Long holding periods expose research to gaps, regime shifts, and survivorship bias."],
+      "required_future_data": ["Governed daily OHLCV history with corporate-action and survivorship controls where relevant"],
+      "research_questions": ["Which long-horizon hypotheses remain stable across instruments, regimes, and held-out periods?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-REGIME-SELECTION",
+      "display_name": "Regime detection and strategy-selection research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["MULTI_TIMEFRAME"],
+      "principal_risks": ["Selection logic can amplify overfitting, data leakage, and false confidence."],
+      "required_future_data": ["Governed multi-regime histories and independently validated strategy evidence"],
+      "research_questions": ["Can regimes and selection decisions be defined causally without ranking by in-sample profitability?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-SESSION-OPEN",
+      "display_name": "Market-session opening research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["SESSION_OPEN"],
+      "principal_risks": ["Daylight-saving changes, auction mechanics, gaps, and liquidity variation may invalidate naive comparisons."],
+      "required_future_data": ["Governed exchange calendars, session metadata, and intraday market data"],
+      "research_questions": ["Can session boundaries and opening observations be normalized without look-ahead information?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    },
+    {
+      "backlog_id": "BACKLOG-SUPPORT-RESISTANCE",
+      "display_name": "Support and resistance rejection research",
+      "execution_eligible": false,
+      "intended_markets": ["UNSPECIFIED_FUTURE_MARKETS"],
+      "intended_timeframes": ["UNSPECIFIED"],
+      "principal_risks": ["Level construction may be discretionary, unstable, and prone to hindsight bias."],
+      "required_future_data": ["Governed historical OHLCV data with causal level-construction inputs"],
+      "research_questions": ["Can levels and rejection observations be defined before outcomes are known?"],
+      "status": "PLANNED_NOT_IMPLEMENTED"
+    }
+  ]
+}

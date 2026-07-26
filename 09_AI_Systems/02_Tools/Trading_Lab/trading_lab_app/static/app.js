@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -101,6 +101,43 @@ function renderStrategyAndReports(result, report, version) {
   setText("report-content", report.content); setText("json-content", JSON.stringify(result, null, 2)); setText("app-version", version.application_version); setText("kernel-version", `${version.kernel_name} ${version.kernel_version}`);
 }
 
+function renderRegistry(registry) {
+  const health = registry.registry_health;
+  setText("registry-health", `${health.status} · ${health.reason_code}`);
+  if (health.status !== "VALID") {
+    $("registry-health").classList.add("registry-failed");
+    setText("installed-strategy-count", "0"); setText("eligible-strategy-count", "0");
+    setText("vault-bundle-digest", "Unavailable — registry failed closed");
+    return;
+  }
+  setText("installed-strategy-count", registry.installed_strategy_count);
+  setText("eligible-strategy-count", registry.executable_research_strategy_count);
+  setText("vault-bundle-digest", registry.vault.bundle_digest);
+  const installed = registry.installed_executable_strategies[0];
+  if (installed) {
+    const record = installed.record;
+    setText("vault-approval-status", record.approval_status.replaceAll("_", " "));
+    setText("vault-strategy-id", record.strategy_id); setText("vault-strategy-version", `v${record.strategy_version}`);
+    setText("vault-strategy-name", record.display_name); setText("vault-family", record.family);
+    setText("vault-markets", record.supported_markets.join(", "));
+    setText("vault-timeframes", record.supported_timeframes.join(", "));
+    setText("vault-indicators", record.required_indicators.join(", "));
+    setText("vault-parameters", Object.keys(record.parameter_schema).join(", "));
+    setText("vault-kernel-hash", record.kernel_strategy_definition_hash);
+    setText("vault-record-digest", installed.registry_record_digest);
+    record.known_limitations.forEach((limitation) => { const li = document.createElement("li"); li.textContent = limitation; $("vault-limitations").appendChild(li); });
+  }
+  registry.research_backlog.entries.forEach((entry) => {
+    const article = document.createElement("article"); article.className = "backlog-card";
+    const label = document.createElement("span"); label.className = "mode-state blocked"; label.textContent = "PLANNED — NOT IMPLEMENTED";
+    const heading = document.createElement("h4"); heading.textContent = entry.display_name;
+    const identity = document.createElement("p"); identity.textContent = `${entry.backlog_id} · ${entry.intended_timeframes.join(", ")}`;
+    const question = document.createElement("p"); question.textContent = entry.research_questions.join(" ");
+    article.append(label, heading, identity, question); $("backlog-cards").appendChild(article);
+    const tr = document.createElement("tr"); cell(tr, entry.backlog_id); cell(tr, entry.display_name); cell(tr, entry.intended_timeframes.join(", ")); cell(tr, "PLANNED_NOT_IMPLEMENTED"); cell(tr, "False"); $("backlog-table").appendChild(tr);
+  });
+}
+
 function wireTabs() {
   [["report-tab", "report-panel", "json-tab", "json-panel"], ["json-tab", "json-panel", "report-tab", "report-panel"]].forEach(([tab, panel, otherTab, otherPanel]) => $(tab).addEventListener("click", () => { $(tab).setAttribute("aria-selected", "true"); $(otherTab).setAttribute("aria-selected", "false"); $(panel).hidden = false; $(otherPanel).hidden = true; }));
 }
@@ -108,7 +145,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version);
+  renderOverview(state.result, state.market); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -117,7 +154,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version")]);
+    [state.result, state.market, state.report, state.version, state.registry] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry")]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }
