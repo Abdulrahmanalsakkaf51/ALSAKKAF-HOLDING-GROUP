@@ -7,6 +7,7 @@ from pathlib import Path
 
 from . import APPLICATION_NAME, APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MODE
 from .capabilities import capability_manifest
+from .mt5_service import disabled_service
 from .strategy_registry import load_registry
 
 
@@ -61,7 +62,9 @@ def health_document():
         "checkpoint": CHECKPOINT_ID,
         "bind_host": "127.0.0.1",
         "paper_research_only": True,
-        "synthetic_data_only": True,
+        "synthetic_data_only": False,
+        "synthetic_mode_default": True,
+        "optional_local_mt5_read_only_data": True,
     }
 
 
@@ -87,6 +90,18 @@ def version_document():
 
 def capabilities_document():
     return capability_manifest()
+
+
+def market_connection_document(market_data_service=None):
+    """Return sanitized health for the narrow local read-only connector."""
+    active_service = market_data_service or disabled_service()
+    return active_service.connection_document()
+
+
+def market_snapshot_document(market_data_service=None):
+    """Return the latest strict snapshot without invoking financial evaluation."""
+    active_service = market_data_service or disabled_service()
+    return active_service.snapshot_document()
 
 
 def strategy_registry_document():

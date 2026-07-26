@@ -7,6 +7,7 @@ from urllib.parse import unquote, urlsplit
 
 from . import APPLICATION_NAME
 from . import service
+from .mt5_service import MarketDataService
 
 
 BIND_HOST = "127.0.0.1"
@@ -28,6 +29,11 @@ API_ROUTES = {
     "/api/demo/market-data": service.market_data_document,
     "/api/demo/result": service.demo_result,
     "/api/demo/report": service.report_document,
+}
+
+MARKET_API_ROUTES = {
+    "/api/market-connection": service.market_connection_document,
+    "/api/market-snapshot": service.market_snapshot_document,
 }
 
 SECURITY_HEADERS = {
@@ -76,15 +82,17 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 self.send_header(name, value)
         self.end_headers()
 
-    def _send_bytes(self, status, body, content_type, extra=None):
+    def _send_bytes(self, status, body, content_type, extra=None, include_body=True):
         self._write_headers(status, content_type, len(body), extra=extra)
-        self.wfile.write(body)
+        if include_body:
+            self.wfile.write(body)
 
-    def _send_json(self, status, value):
+    def _send_json(self, status, value, include_body=True):
         self._send_bytes(
             status,
             deterministic_json_bytes(value),
             "application/json; charset=utf-8",
+            include_body=include_body,
         )
 
     def _local_host_header(self):
@@ -92,43 +100,71 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         host_name = host.rsplit(":", 1)[0].lower()
         return host_name in {"127.0.0.1", "localhost"}
 
-    def do_GET(self):
+    def _handle_read(self, include_body):
         if not self._local_host_header():
-            self._send_json(421, {"error": "LOCAL_HOST_REQUIRED"})
+            self._send_json(421, {"error": "LOCAL_HOST_REQUIRED"}, include_body)
             return
         raw_path = urlsplit(self.path).path
         decoded_path = unquote(raw_path)
         if decoded_path != raw_path or ".." in decoded_path or "\\" in decoded_path:
-            self._send_json(400, {"error": "INVALID_PATH"})
+            self._send_json(400, {"error": "INVALID_PATH"}, include_body)
+            return
+        market_function = MARKET_API_ROUTES.get(decoded_path)
+        if market_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    market_function(self.server.market_data_service),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, ImportError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_DATA_UNAVAILABLE"},
+                    include_body,
+                )
             return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
-                self._send_json(200, api_function())
-            except (OSError, ValueError, TypeError, ImportError) as error:
-                self._send_json(500, {
-                    "error": "LOCAL_DEMO_UNAVAILABLE",
-                    "detail": str(error),
-                })
+                self._send_json(200, api_function(), include_body)
+            except (OSError, ValueError, TypeError, ImportError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_DEMO_UNAVAILABLE"},
+                    include_body,
+                )
             return
         static_route = STATIC_ROUTES.get(decoded_path)
         if static_route is not None:
             filename, content_type = static_route
             body = (STATIC_DIRECTORY / filename).read_bytes()
-            self._send_bytes(200, body, content_type)
+            self._send_bytes(200, body, content_type, include_body=include_body)
             return
-        self._send_json(404, {"error": "NOT_FOUND"})
+        self._send_json(404, {"error": "NOT_FOUND"}, include_body)
+
+    def do_GET(self):
+        self._handle_read(include_body=True)
+
+    def do_HEAD(self):
+        raw_path = urlsplit(self.path).path
+        decoded_path = unquote(raw_path)
+        if decoded_path in MARKET_API_ROUTES:
+            self._handle_read(include_body=False)
+            return
+        self._method_not_allowed()
 
     def _method_not_allowed(self):
         body = deterministic_json_bytes({"error": "METHOD_NOT_ALLOWED"})
+        decoded_path = unquote(urlsplit(self.path).path)
+        allowed_methods = "GET, HEAD" if decoded_path in MARKET_API_ROUTES else "GET"
         self._send_bytes(
             405,
             body,
             "application/json; charset=utf-8",
-            extra={"Allow": "GET"},
+            extra={"Allow": allowed_methods},
         )
 
-    do_HEAD = _method_not_allowed
     do_POST = _method_not_allowed
     do_PUT = _method_not_allowed
     do_PATCH = _method_not_allowed
@@ -148,8 +184,10 @@ class LocalApplicationServer(HTTPServer):
     allow_reuse_address = False
 
 
-def create_server(port=DEFAULT_PORT, handler_class=ApplicationHandler):
+def create_server(port=DEFAULT_PORT, handler_class=ApplicationHandler, market_data_service=None):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
         raise ValueError("port must be an integer from 0 through 65535")
-    return LocalApplicationServer((BIND_HOST, port), handler_class)
+    local_server = LocalApplicationServer((BIND_HOST, port), handler_class)
+    local_server.market_data_service = market_data_service or MarketDataService()
+    return local_server

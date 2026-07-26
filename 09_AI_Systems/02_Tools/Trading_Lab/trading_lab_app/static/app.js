@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -138,6 +138,46 @@ function renderRegistry(registry) {
   });
 }
 
+function renderMarketConnection(snapshot) {
+  const table = $("market-timeframe-table");
+  table.textContent = "";
+  if (!snapshot) {
+    setText("market-connection-status", "LOCAL MARKET API UNAVAILABLE");
+    setText("market-connection-summary", "The synthetic dashboard remains available. No live value is displayed.");
+    return;
+  }
+  setText("market-connection-status", `${snapshot.connection_status} · ${snapshot.reason_code}`);
+  setText("market-mode", snapshot.connector_mode);
+  setText("market-requested-symbol", snapshot.requested_symbol);
+  setText("market-resolved-symbol", snapshot.resolved_symbol);
+  setText("market-candidates", snapshot.candidate_symbols.length ? snapshot.candidate_symbols.join(", ") : "None");
+  setText("market-retrieval-time", snapshot.retrieval_timestamp_utc);
+  setText("market-freshness", `${snapshot.data_quality.freshness_status} · ${snapshot.data_quality.market_session_status}`);
+  setText("market-connection-summary", snapshot.data_quality.diagnostic);
+  const tick = snapshot.tick;
+  const specification = snapshot.symbol_specification;
+  setText("market-source-time", tick ? tick.source_timestamp_utc : null);
+  setText("market-bid", tick ? tick.bid : null);
+  setText("market-ask", tick ? tick.ask : null);
+  setText("market-spread", tick ? `${tick.spread_price} price · ${tick.spread_points ?? "unknown"} points` : null);
+  setText("market-digits-point", specification ? `${specification.digits} / ${specification.point}` : null);
+  setText("market-contract-size", specification ? specification.trade_contract_size : null);
+  setText("market-volume-limits", specification ? `${specification.volume_minimum} / ${specification.volume_maximum} / ${specification.volume_step}` : null);
+  setText("market-stop-levels", specification ? `${specification.stops_level} / ${specification.freeze_level}` : null);
+  setText("market-reported-spread", specification ? specification.broker_reported_spread_points : null);
+  ["M1", "M5", "H4", "D1"].forEach((timeframe) => {
+    const item = snapshot.timeframe_series[timeframe];
+    const tr = document.createElement("tr");
+    cell(tr, timeframe);
+    cell(tr, item ? item.status : "NOT REQUESTED");
+    cell(tr, item ? item.bar_count : "—");
+    cell(tr, item ? item.closed_bar_count : "—");
+    cell(tr, item ? item.forming_bar_count : "—");
+    cell(tr, item ? item.latest_source_timestamp_utc || "—" : "—");
+    table.appendChild(tr);
+  });
+}
+
 function wireTabs() {
   [["report-tab", "report-panel", "json-tab", "json-panel"], ["json-tab", "json-panel", "report-tab", "report-panel"]].forEach(([tab, panel, otherTab, otherPanel]) => $(tab).addEventListener("click", () => { $(tab).setAttribute("aria-selected", "true"); $(otherTab).setAttribute("aria-selected", "false"); $(panel).hidden = false; $(otherPanel).hidden = true; }));
 }
@@ -145,7 +185,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry);
+  renderOverview(state.result, state.market); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -154,7 +194,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry")]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null)]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }

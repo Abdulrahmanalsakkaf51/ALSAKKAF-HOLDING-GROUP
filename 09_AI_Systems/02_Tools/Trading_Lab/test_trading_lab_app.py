@@ -88,7 +88,7 @@ class ImportAndLaunchTests(unittest.TestCase):
                 timeout=20,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
-            self.assertEqual(completed.stdout.strip(), "2.0.0-r2.001")
+            self.assertEqual(completed.stdout.strip(), "2.0.0-r2.003")
 
     def test_no_browser_option_prevents_browser_open(self):
         fake_server = mock.Mock()
@@ -178,6 +178,8 @@ class ServiceContractTests(unittest.TestCase):
             "Strategy ranking", "Regime selection", "Order proposals",
             "Cloud backend", "Telemetry and analytics",
             "Customer distribution approval",
+            "Certified broker compatibility", "Live strategy signals",
+            "Strategy selection", "Regime detection", "Broker positions or balances",
         }
         self.assertEqual(set(manifest["not_implemented"]), expected)
 
@@ -208,6 +210,10 @@ class HttpBoundaryTests(unittest.TestCase):
                 status, _, body = local.request("GET", path)
                 self.assertEqual(status, 200)
                 json.loads(body.decode("utf-8"))
+            for path in ("/api/market-connection", "/api/market-snapshot"):
+                status, _, body = local.request("GET", path)
+                self.assertEqual(status, 200)
+                self.assertEqual(json.loads(body.decode("utf-8"))["connection_status"], "MT5_DISABLED")
 
     def test_static_allowlist_and_directory_traversal_rejection(self):
         with RunningServer() as local:
@@ -252,7 +258,7 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
 
     def test_dashboard_contains_every_required_section_and_safety_label(self):
         for section_id in (
-            "overview", "market-chart", "equity", "signals", "strategy",
+            "overview", "market-connection", "market-chart", "equity", "signals", "strategy",
             "reports", "risk", "future-modes", "about",
         ):
             self.assertIn('id="{}"'.format(section_id), self.html)
@@ -260,7 +266,7 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
             "ALSAKKAF Trading Research Lab", "PAPER/RESEARCH ONLY",
             "SYNTHETIC DATA", "RESEARCH SIGNAL — NOT A TRADE INSTRUCTION",
             "not Founder-approved for investment use", "No leverage", "No shorting",
-            "No increase to a losing position", "No broker or external-order capability",
+            "No increase to a losing position", "No broker account or external-order capability",
             "ASSISTED_EXECUTION_MODE", "DISABLED · UNAUTHORIZED",
             "AUTOMATED_EXECUTION_MODE", "PROHIBITED · UNAVAILABLE",
             "future optional adapter",
@@ -290,6 +296,9 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
             "/api/health", "/api/version", "/api/capabilities",
             "/api/strategy-registry",
             "/api/demo/market-data", "/api/demo/result", "/api/demo/report",
+        })
+        self.assertEqual(set(server.MARKET_API_ROUTES), {
+            "/api/market-connection", "/api/market-snapshot",
         })
         for path in APP_DIRECTORY.glob("*.py"):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
