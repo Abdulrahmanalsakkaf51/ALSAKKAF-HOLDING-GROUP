@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>ALSAKKAF Trading Research Lab</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to dashboard content</a>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <span><strong>ALSAKKAF</strong><small>Trading Research Lab</small></span>
+    </div>
+    <div class="top-status" aria-label="Application status">
+      <span class="pulse" aria-hidden="true"></span>
+      <span>LOCAL</span>
+      <span class="badge badge-warning">PAPER/RESEARCH ONLY</span>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <nav class="side-nav" aria-label="Dashboard sections">
+      <a href="#overview" aria-current="page">Overview</a>
+      <a href="#market-chart">Market chart</a>
+      <a href="#equity">Equity &amp; drawdown</a>
+      <a href="#signals">Research signals</a>
+      <a href="#strategy">Strategy</a>
+      <a href="#reports">Reports</a>
+      <a href="#risk">Risk &amp; safety</a>
+      <a href="#future-modes">Future modes</a>
+      <a href="#about">About</a>
+    </nav>
+
+    <main id="main-content" tabindex="-1">
+      <section class="hero" aria-labelledby="dashboard-title">
+        <div>
+          <p class="eyebrow">TRL-R2-001 · LOCAL APPLICATION FOUNDATION</p>
+          <h1 id="dashboard-title">Research clarity,<br><span>without execution risk.</span></h1>
+          <p class="hero-copy">A deterministic view of the committed synthetic demonstration, powered locally by the stable Release 1 paper/research kernel.</p>
+        </div>
+        <div class="boundary-card" aria-label="Operating boundary">
+          <span class="boundary-icon" aria-hidden="true">◎</span>
+          <div><strong>Closed local boundary</strong><span>127.0.0.1 · no cloud · no broker · no telemetry</span></div>
+        </div>
+      </section>
+
+      <div id="loading-state" class="state-panel" role="status" aria-live="polite">
+        <span class="loader" aria-hidden="true"></span>
+        Loading the committed synthetic research run…
+      </div>
+      <div id="error-state" class="state-panel error" role="alert" hidden>
+        <strong>Dashboard data unavailable.</strong>
+        <span id="error-message">The local demonstration could not be loaded.</span>
+        <button id="retry-button" type="button">Retry local load</button>
+      </div>
+
+      <div id="dashboard-content" hidden>
+        <section id="overview" class="section" aria-labelledby="overview-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">OPERATING SNAPSHOT</p><h2 id="overview-title">Overview</h2></div>
+            <div class="section-meta"><span class="badge badge-safe">SYNTHETIC DATA</span><span id="data-freshness">Static fixture</span></div>
+          </div>
+          <div class="metrics-grid">
+            <article class="metric-card featured"><span>Marked equity</span><strong id="final-equity">—</strong><small>paper units · marked to market</small></article>
+            <article class="metric-card"><span>Final paper cash</span><strong id="final-cash">—</strong><small>paper units</small></article>
+            <article class="metric-card"><span>Realized P&amp;L</span><strong id="realized-pnl">—</strong><small>hypothetical</small></article>
+            <article class="metric-card"><span>Unrealized P&amp;L</span><strong id="unrealized-pnl">—</strong><small>open-position mark</small></article>
+            <article class="metric-card"><span>Total costs</span><strong id="total-costs">—</strong><small>commission + slippage</small></article>
+            <article class="metric-card"><span>Maximum drawdown</span><strong id="max-drawdown">—</strong><small>marked-equity basis</small></article>
+          </div>
+          <div class="status-strip">
+            <div><span>Operating mode</span><strong>PAPER RESEARCH DEMONSTRATION</strong></div>
+            <div><span>Outcome</span><strong id="outcome">—</strong></div>
+            <div><span>Reason code</span><code id="reason-code">—</code></div>
+            <div><span>Position</span><strong id="position-status">—</strong></div>
+          </div>
+        </section>
+
+        <section id="market-chart" class="section" aria-labelledby="market-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">COMMITTED FIXTURE · DEMO-EQ-A</p><h2 id="market-title">Synthetic market chart</h2></div>
+            <div class="legend" aria-label="Chart legend"><span class="close-key">Close</span><span class="fast-key">Fast SMA</span><span class="slow-key">Slow SMA</span><span class="signal-key">Research event</span></div>
+          </div>
+          <div class="chart-card">
+            <canvas id="market-canvas" height="390" tabindex="0" role="img" aria-label="Synthetic close price with fast and slow moving averages and research event markers. Use left and right arrow keys to inspect points."></canvas>
+            <div id="market-tooltip" class="chart-tooltip" role="status" aria-live="polite">Focus the chart and use arrow keys to inspect values.</div>
+            <div class="watermark" aria-hidden="true">SYNTHETIC DATA</div>
+          </div>
+          <details class="table-fallback"><summary>Accessible market-data table</summary><div class="table-scroll"><table><caption>Synthetic price and SMA values</caption><thead><tr><th scope="col">Date</th><th scope="col">Close</th><th scope="col">Fast SMA</th><th scope="col">Slow SMA</th><th scope="col">Event</th></tr></thead><tbody id="market-table"></tbody></table></div></details>
+        </section>
+
+        <section id="equity" class="section" aria-labelledby="equity-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">MARKED ACCOUNTING</p><h2 id="equity-title">Equity and drawdown</h2></div>
+            <span class="limit-note">Risk halt reference <strong>−15.00%</strong></span>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-card small"><h3>Marked equity</h3><canvas id="equity-canvas" height="250" tabindex="0" role="img" aria-label="Marked paper-equity series. Use left and right arrow keys to inspect points."></canvas><div id="equity-tooltip" class="chart-tooltip" role="status" aria-live="polite"></div></article>
+            <article class="chart-card small"><h3>Drawdown</h3><canvas id="drawdown-canvas" height="250" tabindex="0" role="img" aria-label="Marked-equity drawdown with negative fifteen percent halt reference. Use left and right arrow keys to inspect points."></canvas><div id="drawdown-tooltip" class="chart-tooltip" role="status" aria-live="polite"></div></article>
+          </div>
+          <details class="table-fallback"><summary>Accessible equity and drawdown table</summary><div class="table-scroll"><table><caption>Per-bar marked accounting</caption><thead><tr><th scope="col">Date</th><th scope="col">Cash</th><th scope="col">Position value</th><th scope="col">Marked equity</th><th scope="col">Drawdown</th></tr></thead><tbody id="equity-table"></tbody></table></div></details>
+        </section>
+
+        <section id="signals" class="section" aria-labelledby="signals-title">
+          <div class="section-heading"><div><p class="eyebrow">EXPLAINABLE EVENTS</p><h2 id="signals-title">Research signals</h2></div><span class="badge badge-warning">RESEARCH SIGNAL — NOT A TRADE INSTRUCTION</span></div>
+          <div id="signal-list" class="signal-list"></div>
+          <p class="disclosure">General, synthetic research output only. It is not a personalized buy or sell recommendation and does not authorize a trade.</p>
+        </section>
+
+        <section id="strategy" class="section" aria-labelledby="strategy-title">
+          <div class="section-heading"><div><p class="eyebrow">DECLARATIVE RESEARCH RULE</p><h2 id="strategy-title">Strategy</h2></div><span class="badge badge-neutral">EXPERIMENTAL RESEARCH ONLY</span></div>
+          <div class="two-column">
+            <article class="panel"><h3>SMA-001 <span id="strategy-version">v—</span></h3><p>SMA Close Crossing Long-Only Research Rule</p><dl class="parameter-list"><div><dt>Fast period</dt><dd id="fast-period">—</dd></div><div><dt>Slow period</dt><dd id="slow-period">—</dd></div><div><dt>Paper size</dt><dd id="paper-size">—</dd></div><div><dt>Instrument</dt><dd id="strategy-symbol">—</dd></div></dl></article>
+            <article class="panel warning-panel"><h3>Approval boundary</h3><p>This experimental strategy is <strong>not Founder-approved for investment use</strong>. Its deterministic synthetic behavior is engineering evidence only, not evidence of profitability or market validity.</p><span>Strategy-definition hash</span><code id="strategy-hash">—</code></article>
+          </div>
+        </section>
+
+        <section id="reports" class="section" aria-labelledby="reports-title">
+          <div class="section-heading"><div><p class="eyebrow">DETERMINISTIC EVIDENCE</p><h2 id="reports-title">Reports</h2></div><div class="actions"><button id="download-json" type="button">Download JSON</button><button id="download-markdown" type="button" class="secondary">Download Markdown</button></div></div>
+          <div class="hash-grid"><div><span>Run ID</span><code id="run-id">—</code></div><div><span>Input hash</span><code id="input-hash">—</code></div><div><span>Configuration hash</span><code id="configuration-hash">—</code></div><div><span>Strategy hash</span><code id="report-strategy-hash">—</code></div><div class="wide"><span>Engine digest</span><code id="engine-digest">—</code></div></div>
+          <div class="report-tabs" role="tablist" aria-label="Report formats"><button id="report-tab" role="tab" aria-selected="true" aria-controls="report-panel">Paper report</button><button id="json-tab" role="tab" aria-selected="false" aria-controls="json-panel">Machine-readable result</button></div>
+          <div id="report-panel" role="tabpanel" aria-labelledby="report-tab"><pre id="report-content" class="report-view"></pre></div>
+          <div id="json-panel" role="tabpanel" aria-labelledby="json-tab" hidden><pre id="json-content" class="report-view"></pre></div>
+          <p class="download-note">Downloads are created in your browser. The local server does not write report files.</p>
+        </section>
+
+        <section id="risk" class="section" aria-labelledby="risk-title">
+          <div class="section-heading"><div><p class="eyebrow">SYSTEM-OWNED LIMITS</p><h2 id="risk-title">Risk and safety</h2></div><span class="badge badge-safe">FAIL-CLOSED FOUNDATION</span></div>
+          <div class="safety-grid">
+            <article><span>05%</span><strong>Position maximum</strong><p>Gross marked-equity allocation</p></article>
+            <article><span>−15%</span><strong>Drawdown halt</strong><p>Marked-equity threshold</p></article>
+            <article><span>1</span><strong>Maximum position</strong><p>Single-instrument boundary</p></article>
+            <article><span>0×</span><strong>No leverage</strong><p>No borrowed exposure</p></article>
+          </div>
+          <ul class="check-list"><li>No shorting</li><li>No increase to a losing position</li><li>No broker or external-order capability</li><li>No credentials, customer funds, custody, or telemetry</li></ul>
+        </section>
+
+        <section id="future-modes" class="section" aria-labelledby="modes-title">
+          <div class="section-heading"><div><p class="eyebrow">GOVERNED ROADMAP · NOT CURRENT CAPABILITY</p><h2 id="modes-title">Future modes</h2></div></div>
+          <div class="mode-grid">
+            <article><span class="mode-state planned">PLANNED</span><h3>INSIGHT_MODE</h3><p>Future read-only governed research experience. Not implemented.</p></article>
+            <article><span class="mode-state planned">PLANNED · R2-005</span><h3>PAPER_MODE</h3><p>Future forward paper simulation. Current historical replay is not this mode.</p></article>
+            <article class="disabled"><span class="mode-state blocked">DISABLED · UNAUTHORIZED</span><h3>ASSISTED_EXECUTION_MODE</h3><p>No proposal or submission route exists.</p></article>
+            <article class="disabled"><span class="mode-state blocked">PROHIBITED · UNAVAILABLE</span><h3>AUTOMATED_EXECUTION_MODE</h3><p>No activation control, endpoint, or order capability exists.</p></article>
+          </div>
+        </section>
+
+        <section id="about" class="section" aria-labelledby="about-title">
+          <div class="section-heading"><div><p class="eyebrow">RELEASE BOUNDARY</p><h2 id="about-title">About</h2></div></div>
+          <div class="about-grid"><div><span>Application</span><strong id="app-version">—</strong></div><div><span>Kernel</span><strong id="kernel-version">—</strong></div><div><span>Checkpoint</span><strong>TRL-R2-001</strong></div><div><span>Platform</span><strong>Windows-first · local-first</strong></div></div>
+          <p>Release 1 remains the independent stable engine. This application is a local presentation and service layer over its committed synthetic demonstration. macOS and Linux are architectural portability targets and are not claimed as tested.</p>
+          <p>Atlas is only a future optional adapter: it is not installed, contacted, or required by this application.</p>
+          <div class="legal-notice"><strong>PAPER/RESEARCH ONLY</strong><span>Architecture demonstration only — not financial advice — no live trading — no profit claims. Hypothetical synthetic results do not predict future returns or authorize a trade.</span></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <footer><span>ALSAKKAF Trading Research Lab</span><span>Local session · no telemetry</span></footer>
+  <script src="/app.js" defer></script>
+</body>
+</html>
