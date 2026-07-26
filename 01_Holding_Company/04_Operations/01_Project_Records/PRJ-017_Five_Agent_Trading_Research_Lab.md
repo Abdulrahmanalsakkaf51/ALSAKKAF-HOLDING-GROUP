@@ -1,8 +1,8 @@
 # ALSAKKAF HOLDING GROUP
 
-# PRJ-017 — Five-Agent Trading Research Lab
+# PRJ-017 - Five-Agent Trading Research Lab
 
-> "ARCHITECTURE DEMONSTRATION ONLY — NOT FINANCIAL ADVICE — NO LIVE TRADING — NO PROFIT CLAIMS"
+> "ARCHITECTURE DEMONSTRATION ONLY - NOT FINANCIAL ADVICE - NO LIVE TRADING - NO PROFIT CLAIMS"
 
 ---
 
@@ -12,164 +12,263 @@
 |-------|-------|
 | Document ID | PRJ-017 |
 | Document Type | Project Record |
-| Status | ACTIVE — DESIGN AND PROTOTYPE PHASE |
-| Active Checkpoint | TRL-R1-002 — Baseline Reconciliation and Release 1 Contract |
-| Version | 1.1 |
+| Status | IMPLEMENTED, EVIDENCE-VALIDATED AND FOUNDER-ACCEPTED AS A PAPER/RESEARCH BASELINE |
+| Completed Documentation Checkpoint | TRL-R1-005 — COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT |
+| Version | 1.4 |
 | Original Date | 2026-07-14 |
-| Last Reconciled | 2026-07-24 |
-| Owner | Abdulrahman Khalid Alsakkaf |
-| Approved By | Founder for explicitly authorized research and prototype checkpoints only; no strategy is Founder-approved |
-| Related System | AOS |
+| Last Reconciled | 2026-07-26 |
+| Owner | Abdulrahman Yaseen Alsakkaf |
+| Approved By | Abdulrahman Yaseen Alsakkaf, Founder, for the Release 1 technical paper/research baseline only; no strategy, distribution or execution capability is approved |
+| Related System | AOS; Atlas is an optional integration, not a dependency |
 | Related Projects | PRJ-011 (Playground trading demo), PRJ-016, STRAT-017 |
-| Related Documents | TRL-001; `09_AI_Systems/02_Tools/Trading_Lab/TRL_R1_RELEASE_CONTRACT.md` |
+| Related Documents | TRL-001; `09_AI_Systems/02_Tools/Trading_Lab/TRL_R1_RELEASE_CONTRACT.md`; `09_AI_Systems/02_Tools/Trading_Lab/TRL_PORTABLE_TRADING_PRODUCT_CHARTER.md` |
 
 ---
 
-# 1. Objective
+# 1. Objective and Current Direction
 
-Develop a controlled, paper-only trading research lab. The approved target architecture includes a deterministic research core, governed strategies, independent risk controls, a five-agent research workflow, realistic research testing, a paper simulator, auditable records, and Founder-facing reporting.
+PRJ-017 develops a controlled trading-intelligence product from a deterministic research foundation. Release 1 is implemented, evidence-validated and Founder-accepted as a causal, single-instrument, paper/research-only baseline. The current phase defines a local-first, standalone, portable product without implementing Release 2.
 
-PRJ-017 is not an investment product and is not production-ready. Its present implementation is a narrow deterministic demo backtest prototype, not the complete target architecture.
+The future product direction includes governed insights, deterministic paper trading and, only after separate technical, security, legal, regulatory and Founder approval gates, possible user-authorized assisted or automated execution. Atlas may be connected through an optional adapter; PRJ-017 must remain usable without Atlas.
 
----
+Implementation completion and technical evidence alone do not create Founder acceptance. Founder acceptance is recorded separately below and does not establish profitability, market realism, production readiness, regulatory approval, commercial approval, strategy approval or live-trading safety.
 
-# 2. Target Research Roles
+# 2. Current Authority Boundary
 
-These roles are approved architecture but are not implemented in the current prototype.
+## 2.1 Implemented and authorized in Release 1
 
-| Role | Target responsibility |
-|------|-----------------------|
-| Manager | Frames the research question, synthesizes analyst views, states unknowns, and logs the decision record |
-| News Analyst | Summarizes supplied news items with source-reliability labels |
-| Strategy Analyst | Maps scenarios and the assumptions each depends on |
-| Bull Analyst | Presents the strongest honest positive case |
-| Bear Analyst | Presents the strongest honest negative case, including risks the bull case underweights |
+- Local, deterministic, single-instrument research evaluation.
+- Strict validated synthetic or supplied OHLCV input.
+- One declarative long-only SMA crossing strategy family.
+- Causal next-bar hypothetical fills.
+- Deterministic costs, positions, accounting, profit and loss, drawdown and terminal handling.
+- Stable research outcomes, reason codes, hashes and source provenance.
+- Deterministic paper-only Markdown reporting.
 
----
+## 2.2 Planned or deferred
 
-# 3. Authorized Product Boundary
+- A portable application shell, operator interface and Windows package.
+- Governed Strategy Registry and Vault.
+- Market-data adapters and data-quality services.
+- Insights and explainability services.
+- Forward paper-trading simulation.
+- Independent Risk Guardian and persistent audit ledger.
+- Accounts, licensing and subscription services.
+- Broker-demo and assisted-execution evaluation.
+- Separately governed automated-execution evaluation.
+- Five-agent research workflow, local AI, Gemma and dashboards.
 
-## 3.1 Allowed
+These items are not implemented by TRL-R1-005. Roadmap inclusion is not implementation authorization.
 
-- Local research.
-- Deterministic backtesting development.
-- Synthetic and historical-data testing.
-- Paper/demo simulation.
-- Audited strategy analysis.
+## 2.3 Prohibited at the current checkpoint
 
-## 3.2 Prohibited
+- Live or external order submission, amendment, cancellation or routing.
+- Broker connections, broker credentials or customer credentials.
+- Custody, acceptance, storage, movement or control of customer funds.
+- Real-money trading, leverage, short selling or derivatives.
+- Autonomous execution or automatic paper-to-live promotion.
+- Customer distribution or commercial release.
+- Profit promises, guaranteed-performance language or claims of proven profitability.
+- Claims of market realism, regulatory approval, production readiness or universal PC compatibility.
 
-- Real-money trading or customer funds.
-- Live brokerage connections, external order placement, credentials, or network execution.
-- Profit promises or claims of proven profitability.
-- Autonomous execution.
-- Automatic paper-to-live promotion.
-- Unrestricted leverage, martingale, or any unbounded-loss strategy.
+No live trading is authorized. No customer distribution is authorized. No broker credentials or customer funds are supported. No strategy is Founder-approved for real trading.
 
-Any capability outside the allowed boundary requires a new, explicit Founder authorization. Documentation alone does not authorize implementation.
+# 3. Release 1 Closeout Status
 
----
+**IMPLEMENTED, EVIDENCE-VALIDATED AND FOUNDER-ACCEPTED AS A PAPER/RESEARCH BASELINE.**
 
-# 4. Reconciled Status as of 2026-07-24
+Implementation completion occurred through commits `05f7ba9` and `4b99789`. Technical evidence includes 132 passing direct tests, the same 132 tests passing through discovery and the deterministic synthetic rehearsal. Those commits and tests did not automatically create Founder acceptance.
 
-| Classification | Current status |
-|----------------|----------------|
-| Approved target architecture | Documented in TRL-001 and retained as the long-term direction. |
-| Implemented prototype | A local, deterministic historical demo backtest, synthetic input-pack generator, decision-log helper, and Markdown performance-report generator exist. There is no broker, credential, network, or live-order capability. |
-| Directly tested | Twelve narrow `unittest` tests pass. They exercise selected risk checks, decision-log values, demo labels, marketing-phrase exclusions, and absence of selected execution/credential strings. Five `ResourceWarning` events are emitted because tests leave file handles unclosed. |
-| Evidence limit | The tests establish only the behavior they directly assert. They do not establish research validity, profitability, production readiness, realistic execution, or complete enforcement of every architectural rule. |
-| Data and reports | Existing tracked data and generated reports are synthetic/demo-only and hypothetical. They do not represent actual trading. |
-| Project phase | ACTIVE — DESIGN AND PROTOTYPE PHASE. TRL-R1-002 is the active documentation checkpoint. |
+Founder acceptance occurred on 2026-07-26 and is limited to the completed technical paper/research baseline. The exact decision is:
 
-Current demo performance results are unsuitable for investment decisions, real-money trade decisions, or performance and profitability claims.
+> “I, Abdulrahman Yaseen Alsakkaf, formally accept PRJ-017 Release 1 as a completed technical paper/research baseline. This acceptance does not approve SMA-001 or any strategy for investment use, does not validate profitability, and does not authorize customer distribution, investment advice, broker connectivity, automated execution, live trading, customer funds, regulatory status, or Release 2 implementation.”
 
----
+**TRL-R1-005 — COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT.** Completed by the TRL-R1-005 documentation-only closeout commit; Git history is the authoritative commit reference.
 
-# 5. Known Prototype Defects and Limitations
+TRL-R1-005 authorizes only its own four-document closeout commit. It authorizes no code change, customer distribution, Release 2 implementation, broker connectivity, assisted execution, automated execution, live trading, investment advice, customer funds, payment handling, or regulatory claim.
 
-- The SMA implementation emits an `enter` or `exit` regime state after warm-up; it does not detect a genuine crossing event.
-- A signal calculated from bar `t` close fills at that same close, causing look-ahead/same-bar execution bias.
-- Open positions are not marked to market. Equity changes only on exit.
-- Drawdown is realized-only and can be materially understated.
-- Multiple instruments are processed by list index rather than aligned timestamps.
-- Transaction costs, commissions, spread, and slippage are absent.
-- Caller-supplied risk policy can raise nominal system limits, so the stated hard limits are not system-owned and non-overridable.
-- Explicit `NO TRADE` outcomes and stable blocked-reason codes are absent.
-- Terminal open-position handling is not explicit in the result contract.
-- There is no governed SMA-001 strategy record. FIB-001 is neither specified nor implemented. No strategy is Founder-approved.
+TRL-R1-004 remains the latest implemented runtime/kernel checkpoint. TRL-R1-005 is the completed documentation, Founder-acceptance, and Release 1 closeout checkpoint. TRL-R2-001 remains proposed, unimplemented, and unauthorized. TRL-R2-001 may begin only after separate explicit Founder authorization; closing TRL-R1-005 does not provide that authorization.
 
----
+| Classification | Closeout status |
+|----------------|-----------------|
+| Implemented | Validated causal single-instrument kernel and its compatibility facade, then behavior-preserving modularization. |
+| Tested | 132 direct tests and the same 132 tests through discovery passed on 2026-07-25 with `-W error`; zero Python warnings. |
+| Demonstrated | The committed synthetic pack and SMA-001 definition produced identical in-memory results across two independent deep-copy runs. |
+| Planned | Release 2 portable-product roadmap in the product charter. |
+| Deferred | Forward simulation, external data, broader strategies, portfolio support, user accounts, distribution and any execution evaluation. |
+| Prohibited | Live trading, external orders, credentials, customer funds, unauthorized distribution and unsupported claims. |
 
-# 6. Missing or Planned Components
+# 4. Authoritative Implementation History
 
-The following are target or planned components, not verified current capabilities:
+| Checkpoint | Status and evidence |
+|------------|---------------------|
+| TRL-R1-001 | Read-only baseline audit completed 2026-07-24. It recorded the original narrow prototype, 12 passing tests, five `ResourceWarning` events and material causal, accounting, cost and control limitations. |
+| TRL-R1-002 | Release 1 documentation contract. Commit `bb3af4e` - `Document PRJ-017 Release 1 contract`. |
+| TRL-R1-003 | Validated causal single-instrument research kernel. Commit `05f7ba9` - `Implement TRL-R1-003 causal research kernel`. |
+| TRL-R1-004 | Latest implemented runtime/kernel checkpoint: behavior-preserving modular kernel refactor. Commit `4b99789` - `Refactor TRL-R1 kernel into focused modules`. |
+| TRL-R1-005 | COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT. Completed by the TRL-R1-005 documentation-only closeout commit; Git history is the authoritative commit reference. |
 
-- Strategy Registry and TRL Strategy Vault.
-- Regime detection and FIB-001 specification or implementation.
-- Out-of-sample and walk-forward testing.
-- Realistic, recorded cost models.
-- Independent Risk Guardian.
-- Five-agent research workflow.
-- Market and news adapters.
-- Forward paper-trading simulator.
-- Platform-adapter boundary.
-- Founder dashboard.
-- Local AI and Gemma evaluation.
+These commits evidence scoped implementation history. They do not prove profitability, realistic market execution, production readiness, regulatory approval or live-trading safety.
 
-The existing historical backtest is not a forward paper simulator. The phrase “paper portfolio ledger” in earlier material described a target workflow and a limited historical accounting layer; it did not establish a completed forward simulator.
+# 5. Verified Release 1 Evidence
 
----
+## 5.1 Test evidence
 
-# 7. Project Tasks and Checkpoints
+On 2026-07-25 at committed HEAD `4b99789`, with `PYTHONDONTWRITEBYTECODE=1` and Python warnings treated as errors:
 
-| # | Task | Reconciled status |
-|---|------|-------------------|
-| 1 | Architecture and design document (TRL-001) | Approved target architecture documented; reconciled under TRL-R1-002 |
-| 2 | Input format schemas | Documented target; strict Release 1 validation not implemented |
-| 3 | Risk policy design | Documented target; current prototype does not make all maxima non-overridable |
-| 4 | Backtest interface and paper-trading workflow | Historical demo backtest partially implemented; forward paper workflow not implemented |
-| 5 | Decision log and performance report formats | Formats documented; limited generators implemented; outputs remain demo-only |
-| 6 | TRL-R1-001 read-only audit | Completed 2026-07-24 |
-| 7 | TRL-R1-002 baseline reconciliation and Release 1 contract | Active documentation checkpoint |
-| 8 | TRL-R1-003 validated causal single-instrument research kernel | Proposed next engineering checkpoint; not started and not authorized by this document |
+- Direct command: 132 tests passed.
+- Discovery command: 132 tests passed.
+- Python warnings: zero.
+- Test boundary: behavior-level engineering evidence for the committed kernel; not investment or performance evidence.
 
----
+## 5.2 Committed synthetic rehearsal
 
-# 8. Progress Log
+The committed `sample_data/TRL-PACK-DEMO.json` pack was evaluated twice in memory using independent deep copies, the specified SMA-001 version 1.0.0 parameters and the system-owned risk limits (`risk_policy=None`). The demo CLI, report saving, network and external orders were not used.
+
+| Evidence field | Final committed value |
+|----------------|-----------------------|
+| Run ID | `TRL-RUN-6922AEA31AE2630B4DA1` |
+| Input-data hash | `6cdbca208cd1029b90e5ed3494ab05a3b7042d224ed01293373fc173a85aee56` |
+| Configuration hash | `3f4c513f275ca034af9fd2f4bbcb4ec382c361969d7706fbb6fb6d26fd26bbbd` |
+| Strategy-definition hash | `e27bd45914df7d9d7c807b73e012b51a45dc5c844f39e22132c48078070e3955` |
+| Engine-source digest | `f9f555d37e0820c39eb2afe1156fca4912d255debc23c7ab27c6111c31da3952` |
+| Outcome / reason | `HYPOTHETICAL_FILL` / `OPEN_TERMINAL_POSITION` |
+| Decisions / fills / trades / accounting rows | 2 / 1 / 0 / 60 |
+| Final cash / marked equity | 94.9975 / 100.22673707083118 research units |
+| Realized / unrealized P&L | 0.0 / 0.2267370708311804 research units |
+| Commission / slippage | 0.0025 / 0.002498750624687196 research units |
+| Maximum drawdown | -0.03237704819428881% |
+| Terminal position | Open; marked to market and not liquidated |
+| Determinism | PASS - complete results were identical across the two independent deep-copy runs |
+| Accounting reconciliation | PASS - both runs reconciled cash, position value, equity and cumulative costs on every row and at final state |
+
+Engine-source manifest:
+
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/__init__.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/canonical.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/constants.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/execution.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/reporting.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/risk.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/strategy.py`
+- `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_core/validation.py`
+
+The result is synthetic and hypothetical. Its positive marked value is not evidence of profitability or future performance.
+
+# 6. Current Modular Implementation Map
+
+| Path | Implemented responsibility |
+|------|----------------------------|
+| `trading_lab.py` | Compatibility facade and paper-only CLI. |
+| `trading_lab_core/constants.py` | Release identity, constants, reason codes and system limits. |
+| `trading_lab_core/canonical.py` | Canonicalization, deterministic hashing, numeric safety and atomic source provenance. |
+| `trading_lab_core/validation.py` | Exact-type pack, instrument, OHLCV, timestamp, strategy and policy validation. |
+| `trading_lab_core/strategy.py` | Stable SMA calculations and genuine transition-only crossing signals. |
+| `trading_lab_core/risk.py` | System-owned limits, stricter policies and risk decisions. |
+| `trading_lab_core/execution.py` | Causal fills, costs, positions, accounting, P&L, drawdown and terminal handling. |
+| `trading_lab_core/reporting.py` | Deterministic paper-only Markdown reporting. |
+| `test_trading_lab.py` | 132 behavior-level tests. |
+
+No module listed in the Release 2 roadmap is represented here as implemented.
+
+# 7. Known Limitations
+
+- Release 1 supports exactly one instrument and one long-only SMA strategy family.
+- It replays historical arrays in one call; it is not a forward paper simulator.
+- The committed demonstration data is synthetic.
+- The fixed commission and slippage model is deliberately simplified and does not claim market realism.
+- Fractional units and 100 starting research units are deterministic research conventions, not brokerage behavior.
+- There is no Strategy Registry/Vault workflow, independent Risk Guardian service, persistent ledger, portfolio engine, market/news adapter, user interface, installer, authentication or subscription service.
+- There is no out-of-sample, walk-forward or live-market validation supporting strategy approval.
+- There is no broker adapter, credential store, external-order surface or live execution.
+- The five-agent workflow remains a target concept, not an implemented Release 1 capability.
+
+# 8. Target Research Roles
+
+The Manager, News Analyst, Strategy Analyst, Bull Analyst and Bear Analyst roles remain planned research architecture. They are not implemented in Release 1 and may not alter deterministic calculations, hard limits or audit records if later implemented.
+
+# 9. Historical Findings and Corrections
+
+Historical statements are retained here as dated evidence rather than silently erased.
+
+| Historical finding | Current reconciliation |
+|--------------------|------------------------|
+| On 2026-07-14 the project was design-only with no code. | Superseded on 2026-07-15 by the authorized prototype. |
+| TRL-R1-001 found regime-state signals rather than genuine crossings. | Corrected by TRL-R1-003 and covered by transition/equality/no-repeat tests. |
+| TRL-R1-001 found same-close fills and look-ahead/same-bar bias. | Corrected by TRL-R1-003 with close-`t` signals and next-valid-bar-open fills. |
+| TRL-R1-001 found no mark-to-market open-position accounting and realized-only drawdown. | Corrected by TRL-R1-003 with per-bar marked equity and drawdown. |
+| TRL-R1-001 found multi-instrument list-index processing. | Superseded by strict rejection of multi-instrument packs; portfolio alignment remains deferred. |
+| TRL-R1-001 found no commission or slippage. | Corrected by the fixed deterministic Release 1 model; realism remains explicitly unclaimed. |
+| TRL-R1-001 found caller-weakenable nominal limits. | Corrected by system-owned maxima and rejection of weaker overrides. |
+| TRL-R1-001 found absent explicit outcomes, stable reason codes and terminal handling. | Corrected by TRL-R1-003 and directly tested. |
+| TRL-R1-001 recorded 12 tests and five `ResourceWarning` events. | Superseded by 132 direct and 132 discovery tests passing with warnings treated as errors and zero warnings. |
+| Earlier wording suggested a completed paper portfolio ledger. | Still qualified: Release 1 has historical per-bar accounting, not a forward paper simulator. |
+
+# 10. Portable Product Direction
+
+The controlled product direction is a local-first, standalone trading-intelligence platform that runs independently on a supported personal computer. Its deterministic core remains separate from the user interface. Windows is the first implementation target; macOS and Linux support may be claimed only after separate packaging and testing. "Works on every PC" remains an aspiration, not a current claim.
+
+Default local storage may be used initially. Cloud identity and subscription services are deferred. Atlas remains an optional adapter and must not become a runtime, identity, data, audit or distribution dependency.
+
+# 11. Proposed Roadmap
+
+Release 2 is proposed but not implemented: TRL-R2-001 Portable Application Foundation; TRL-R2-002 Governed Strategy Registry and Vault; TRL-R2-003 Market-Data and Data-Quality Layer; TRL-R2-004 Insights and Explainability Engine; TRL-R2-005 Forward Paper-Trading Simulator; TRL-R2-006 Independent Risk Guardian and Persistent Audit Ledger; TRL-R2-007 Local Operator Dashboard; and TRL-R2-008 Windows Packaging and Closed Paper Alpha.
+
+Later proposals are TRL-R3 Accounts, Licensing and Subscription Services; TRL-R4 Broker-Demo and Assisted-Execution Evaluation; and TRL-R5 separately governed automated-execution evaluation. Roadmap inclusion is not implementation authorization.
+
+The next proposed checkpoint is **TRL-R2-001 — PORTABLE APPLICATION FOUNDATION**. TRL-R2-001 remains proposed, unimplemented, and unauthorized. It may begin only after separate explicit Founder authorization; roadmap inclusion, Founder acceptance of Release 1, and closing TRL-R1-005 do not provide that authorization.
+
+# 12. Project Tasks and Checkpoints
+
+| Task | Current state |
+|------|---------------|
+| TRL-R1-001 baseline audit | Completed; historical findings retained. |
+| TRL-R1-002 Release 1 contract | Completed and committed at `bb3af4e`. |
+| TRL-R1-003 causal kernel | Completed and committed at `05f7ba9`. |
+| TRL-R1-004 modular refactor | Latest implemented runtime/kernel checkpoint; completed and committed at `4b99789`. |
+| TRL-R1-005 Release 1 closeout and product charter | COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT; Git history is the authoritative closeout-commit reference. |
+| TRL-R2-001 through TRL-R2-008 | Proposed; not implemented or authorized by this record. |
+| TRL-R3 through TRL-R5 | Deferred proposals requiring separate governance. |
+
+# 13. Progress Log
 
 | Date | Update |
 |------|--------|
-| 2026-07-14 | Project created with design-only scope under PRJ-016 mission Part 9. TRL-001 written. At that date there was no code, data connection, or execution capability. |
-| 2026-07-15 | Founder authorized a paper-only prototype. A deterministic synthetic-data historical backtest and limited reporting helpers were added. This superseded the earlier “design phase only” and “no code” status statements without changing the prohibition on live trading. |
-| 2026-07-24 | TRL-R1-001 read-only audit completed. It verified the prototype and twelve passing narrow tests, identified five unclosed-file `ResourceWarning` events, and established the defects, missing components, and evidence limits recorded above. The audited worktree was clean after the audit. |
-| 2026-07-24 | TRL-R1-002 opened as the active documentation checkpoint to reconcile the baseline and define the Release 1 contract. Corrected implementation work is explicitly deferred. |
+| 2026-07-14 | Project and design architecture created; no code existed at that date. |
+| 2026-07-15 | Founder-authorized paper-only prototype added, superseding the design-only status without changing the live-trading prohibition. |
+| 2026-07-24 | TRL-R1-001 audited the baseline; TRL-R1-002 established the controlled Release 1 contract. |
+| 2026-07-25 | TRL-R1-003 implementation and TRL-R1-004 modularization were verified at `4b99789`; TRL-R1-005 recorded Release 1 closeout evidence and portable-product direction. |
+| 2026-07-26 | Abdulrahman Yaseen Alsakkaf explicitly accepted Release 1 as a completed technical paper/research baseline; the acceptance granted no strategy, distribution, execution or Release 2 authority. |
 
----
+# 14. Deferred Governance Reconciliation
 
-# 9. Historical Corrections
+Reconciliation entries in `Project_Register.md` and `Knowledge_Register.md` remain intentionally deferred because the separate main working directory previously contained unrelated changes. TRL-R1-005 does not authorize changes to those registers or that working directory.
 
-- “Active — design phase only” and “No code” were accurate on 2026-07-14 but became obsolete after the 2026-07-15 prototype authorization and implementation.
-- “All Section 5 risk-policy rules are enforced in code and unit-tested” is superseded. The tests cover selected narrow cases, and caller-controlled policy can weaken nominal hard limits.
-- References to a completed “paper portfolio ledger” are qualified as a limited historical backtest/accounting layer. No forward paper simulator exists.
-- Any wording implying a complete prototype, validated strategy, research validity, profitability, or production readiness is superseded by the reconciled status and evidence limits in this record.
+# 15. Release 1 Generated-Report Wording and Future Disclosures
 
----
+The authoritative implemented and tested Release 1 generated-report wording is:
 
-# 10. Deferred Governance Reconciliation
+- Primary disclaimer: **ARCHITECTURE DEMONSTRATION ONLY - NOT FINANCIAL ADVICE - NO LIVE TRADING - NO PROFIT CLAIMS**
+- Performance disclaimer: **Hypothetical research results from paper-only processing; they do not represent actual trading, predict future returns, or authorize a trade.**
+- Generated Markdown label: **PAPER/RESEARCH ONLY**
 
-Reconciliation entries in `Project_Register.md` and `Knowledge_Register.md` are intentionally deferred because those registers contain unrelated changes in a separate dirty main working directory. They are not authorized for modification in TRL-R1-002.
+These strings define the current internal/generated output contract. They do not approve Release 1 output for public or customer distribution.
 
----
+**PLANNED - NOT IMPLEMENTED:** Future customer-facing product wording may add disclosures appropriate to a separately authorized product and jurisdiction, but it must not be treated as current generated-report wording. Jurisdiction-specific disclosures may be added only after legal and regulatory review. Synthetic or historical results must not be presented as actual, realistic, approved or proven performance. "At your own risk" wording does not eliminate operator, developer, platform or regulatory responsibility.
 
-# 11. Public Wording Rule
+# 16. Documentation Review Resolution
 
-Any public reference must carry: **ARCHITECTURE DEMONSTRATION ONLY — NOT FINANCIAL ADVICE — NO LIVE TRADING — NO PROFIT CLAIMS.** It must not present synthetic results as actual or proven performance.
+- P2 Founder-acceptance finding: Resolved by the explicit 2026-07-26 Founder decision.
+- P2 disclaimer-alignment finding: Resolved by retaining the implemented Release 1 strings as the current output contract and marking future customer wording as planned.
+- P2 TRL-R1-005 lifecycle finding: Resolved by making this documentation-only closeout commit the checkpoint’s completion event while preserving all no-code, no-distribution, no-execution, and no-Release-2 boundaries.
 
----
-
-# 12. Revision History
+# 17. Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | 2026-07-14 | Initial design-only project record |
-| 1.1 | 2026-07-24 | Reconciled the approved target, verified prototype, tested behavior, defects, planned components, prohibited capabilities, and checkpoint status after TRL-R1-001 |
+| 1.0 | 2026-07-14 | Initial design-only project record. |
+| 1.1 | 2026-07-24 | Reconciled the TRL-R1-001 audited prototype baseline and opened TRL-R1-002. |
+| 1.2 | 2026-07-25 | Recorded Release 1 implementation completion and technical evidence, reconciled superseded findings, and established the portable-product definition phase under TRL-R1-005; Founder acceptance was not yet recorded. |
+| 1.3 | 2026-07-26 | Recorded explicit Founder acceptance, corrected the Owner's legal name, aligned the generated-report wording contract and closed the two P2 documentation findings. |
+| 1.4 | 2026-07-26 | Made the TRL-R1-005 documentation-only closeout commit the checkpoint completion event and preserved the separate Release 2 authorization boundary. |

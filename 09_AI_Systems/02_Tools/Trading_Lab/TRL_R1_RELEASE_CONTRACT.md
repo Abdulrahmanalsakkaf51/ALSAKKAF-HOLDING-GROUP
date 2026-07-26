@@ -1,8 +1,8 @@
 # ALSAKKAF HOLDING GROUP
 
-# TRL-R1-CONTRACT-001 — Trading Research Lab Release 1 Contract
+# TRL-R1-CONTRACT-001 - Trading Research Lab Release 1 Contract
 
-> "ARCHITECTURE DEMONSTRATION ONLY — NOT FINANCIAL ADVICE — NO LIVE TRADING — NO PROFIT CLAIMS"
+> "ARCHITECTURE DEMONSTRATION ONLY - NOT FINANCIAL ADVICE - NO LIVE TRADING - NO PROFIT CLAIMS"
 
 ---
 
@@ -12,451 +12,288 @@
 |-------|-------|
 | Document ID | TRL-R1-CONTRACT-001 |
 | Title | Trading Research Lab Release 1 Contract |
-| Status | CONTROLLED CONTRACT — RELEASE 1 NOT YET IMPLEMENTED |
-| Version | 1.0 |
-| Date | 2026-07-24 |
-| Owner | Abdulrahman Khalid Alsakkaf |
+| Status | IMPLEMENTED, EVIDENCE-VALIDATED AND FOUNDER-ACCEPTED AS A PAPER/RESEARCH BASELINE |
+| Version | 1.3 |
+| Original Date | 2026-07-24 |
+| Last Validated | 2026-07-26 |
+| Owner | Abdulrahman Yaseen Alsakkaf |
 | Reviewer | ChatGPT acting as Founder/CTO strategic partner |
-| Founder Authority | Abdulrahman Khalid Alsakkaf is final authority; this contract authorizes documentation only under TRL-R1-002 |
-| Project | PRJ-017 — ALSAKKAF Trading Research Lab |
-| Active Checkpoint | TRL-R1-002 — Baseline Reconciliation and Release 1 Contract |
-| Proposed Engineering Checkpoint | TRL-R1-003 — Validated Causal Single-Instrument Research Kernel |
+| Founder Authority | Abdulrahman Yaseen Alsakkaf accepted the Release 1 technical paper/research baseline only; no strategy, distribution or execution capability is approved |
+| Project | PRJ-017 - ALSAKKAF Trading Research Lab |
+| Completed Documentation Checkpoint | TRL-R1-005 — COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT |
 
 ---
 
 # 1. Document ID and Title
 
-**TRL-R1-CONTRACT-001 — Trading Research Lab Release 1 Contract**
-
----
+**TRL-R1-CONTRACT-001 - Trading Research Lab Release 1 Contract**
 
 # 2. Status
 
-**CONTROLLED CONTRACT — RELEASE 1 NOT YET IMPLEMENTED.** TRL-R1-002 authorizes this documentation only. Contract changes require documented review; implementation may not silently diverge from the approved contract.
+**IMPLEMENTED, EVIDENCE-VALIDATED AND FOUNDER-ACCEPTED AS A PAPER/RESEARCH BASELINE.**
 
----
+Release 1 meets this contract's scoped engineering definition at committed HEAD `4b99789`. Contract control continues after implementation: later documentation or software may not silently weaken this boundary or reinterpret technical completion as authority for live use.
 
-# 3. Owner
+# 3. Owner and Authority
 
-Abdulrahman Khalid Alsakkaf.
+Abdulrahman Yaseen Alsakkaf is Owner, Founder and final authority. Implementation completion occurred through commits `05f7ba9` and `4b99789`. Technical evidence includes 132 passing direct tests, the same 132 tests passing through discovery and the deterministic synthetic rehearsal. Those commits and tests did not automatically create Founder acceptance.
 
----
+Founder acceptance occurred on 2026-07-26 and is limited to the completed technical paper/research baseline. The exact decision is:
 
-# 4. Reviewer
+> “I, Abdulrahman Yaseen Alsakkaf, formally accept PRJ-017 Release 1 as a completed technical paper/research baseline. This acceptance does not approve SMA-001 or any strategy for investment use, does not validate profitability, and does not authorize customer distribution, investment advice, broker connectivity, automated execution, live trading, customer funds, regulatory status, or Release 2 implementation.”
 
-ChatGPT acting as Founder/CTO strategic partner.
+**TRL-R1-005 — COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT.** Completed by the TRL-R1-005 documentation-only closeout commit; Git history is the authoritative commit reference.
 
----
+TRL-R1-005 authorizes only its own four-document closeout commit. It authorizes no code change, customer distribution, Release 2 implementation, broker connectivity, assisted execution, automated execution, live trading, investment advice, customer funds, payment handling, or regulatory claim.
 
-# 5. Founder Authority
+TRL-R1-004 remains the latest implemented runtime/kernel checkpoint. TRL-R1-005 is the completed documentation, Founder-acceptance, and Release 1 closeout checkpoint. TRL-R2-001 remains proposed, unimplemented, and unauthorized. TRL-R2-001 may begin only after separate explicit Founder authorization; closing TRL-R1-005 does not provide that authorization.
 
-Abdulrahman Khalid Alsakkaf is Founder and final authority. This contract approves no strategy and does not authorize engineering, trading, or any broader checkpoint.
+# 4. Historical Purpose Retained
 
----
+This contract was created under TRL-R1-002 to convert the deficiencies found by the TRL-R1-001 read-only audit into a narrow, testable requirement for a causal, deterministic, single-instrument research kernel. That purpose remains controlling.
 
-# 6. Purpose
+The contract separates engineering conformance from research, investment, legal and commercial conclusions. It never authorizes live data, brokerage access, credential use, customer funds, order placement or real-money use.
 
-This contract defines the narrow, testable boundary for Release 1 of the Trading Research Lab. It reconciles the verified demo baseline with the requirements for a causal, deterministic, single-instrument research kernel.
+# 5. Authoritative Checkpoint and Commit History
 
-This document does not authorize implementation, live data, brokerage access, order placement, or real-money use. Engineering may begin only through a separately authorized checkpoint.
+| Checkpoint | Status | Commit evidence |
+|------------|--------|-----------------|
+| TRL-R1-001 | Completed read-only baseline audit | Historical audit; no implementation commit |
+| TRL-R1-002 | Completed Release 1 documentation contract | `bb3af4e` - `Document PRJ-017 Release 1 contract` |
+| TRL-R1-003 | Completed validated causal single-instrument research kernel | `05f7ba9` - `Implement TRL-R1-003 causal research kernel` |
+| TRL-R1-004 | Latest implemented runtime/kernel checkpoint: completed behavior-preserving modular kernel refactor | `4b99789` - `Refactor TRL-R1 kernel into focused modules` |
+| TRL-R1-005 | COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT | Completed by the TRL-R1-005 documentation-only closeout commit; Git history is the authoritative commit reference. |
 
----
+The commits establish implementation lineage, not profitability, market realism, production readiness, regulatory approval or live-trading safety.
 
-# 7. Verified Baseline as of 2026-07-24
+# 6. Historical Baseline and Superseded Findings
 
-TRL-R1-001 verified that:
+TRL-R1-001 recorded 12 narrow passing tests, five unclosed-file `ResourceWarning` events, regime-state signals, same-close fills, no marked open-position accounting, realized-only drawdown, absent costs, caller-weakenable nominal limits, incomplete outcomes/reason codes and implicit terminal handling.
 
-- A deterministic local demo prototype exists.
-- Twelve narrow `unittest` tests pass.
-- Five `ResourceWarning` events occur from unclosed test file handles.
-- The tests do not establish research validity, profitability, production readiness, or complete architectural compliance.
-- Current SMA output identifies a regime, not a genuine crossing event.
-- Signals use close `t` and fill at that same close, creating same-bar/look-ahead execution bias.
-- Open-position profit and loss is not marked to market; drawdown is realized-only and may be materially understated.
-- Multi-instrument data is aligned by list index rather than timestamp.
-- Transaction costs, commission, spread, and slippage are absent.
-- Caller-controlled risk policy can weaken nominal hard limits.
-- Explicit `NO TRADE` outcomes and stable reason codes are absent.
-- There is no governed SMA-001 strategy record. FIB-001 is not specified or implemented.
-- Strategy Registry, TRL Strategy Vault, independent Risk Guardian, market/news adapters, forward paper simulator, Founder dashboard, local AI, and Gemma evaluation are absent.
-- The five-agent research workflow is documented only.
-- No broker, credential, network, external-order, or live-trading capability exists.
-- Existing tracked data and reports are synthetic/demo-only and hypothetical.
-- The audited worktree was clean after the audit.
+TRL-R1-003 corrected those scoped kernel findings with direct tests. TRL-R1-004 separated the kernel into focused modules while preserving behavior. The following findings were not "erased": multi-instrument portfolios, realistic market costs, forward simulation, governed strategy workflows, independent Risk Guardian, adapters, user interface, packaging and live execution remain limited, deferred or prohibited.
 
-Current demo results cannot support investment decisions, real-money trades, performance claims, or profitability claims.
+# 7. Release 1 Objectives and Inclusions
 
----
+Release 1 implements:
 
-# 8. Release 1 Objectives
+- Strict exact-type validation of one instrument and one ordered OHLCV series.
+- One declarative, versioned, long-only SMA crossing research family.
+- Genuine entry and exit transitions without repeated signals in one regime.
+- Signal calculation through close `t` and hypothetical execution at next validated bar open.
+- Cash, position, realized P&L, unrealized P&L and marked equity on every validated bar.
+- Explicit open-terminal-position handling without an invented final liquidation.
+- Fixed deterministic commission and adverse slippage assumptions.
+- System-owned position-size and drawdown safety limits that callers may only tighten.
+- Explicit `NO_TRADE`, `BLOCKED`, `HALT`, `NO_FILL` and hypothetical-fill outcomes with stable reason codes.
+- Deterministic canonicalization, hashes, engine-source provenance and run identity.
+- Deterministic paper-only Markdown reporting.
+- 132 behavior-level tests.
 
-Release 1 will provide a research kernel that is:
+# 8. Release 1 Exclusions and Remaining Limitations
 
-- Strictly single-instrument.
-- Deterministic and reproducible.
-- Causal from data through signal and hypothetical fill.
-- Correctly marked to market on every validated bar.
-- Explicit about transaction costs, terminal positions, blocked actions, and `NO TRADE` outcomes.
-- Protected by system-owned hard-risk maxima that callers, strategies, managers, and AI components cannot weaken.
-- Supported by tests that directly demonstrate each contracted behavior.
+- Release 1 is single-instrument, long-only and unlevered.
+- It supports only the declared SMA research family; FIB-001 is not specified or implemented.
+- It is a historical in-memory replay, not a persistent forward paper simulator.
+- Its tracked demonstration data is synthetic.
+- Its fixed commission and slippage model is simplified and deterministic, not market-realistic.
+- It does not implement multi-asset portfolios, Strategy Vault automation, five-agent orchestration, market/news adapters, local AI/Gemma, a dashboard, packaging, accounts or subscriptions.
+- It has no broker/platform adapter, credential store, network dependency, external-order path or live-trading capability.
+- It provides no strategy approval, investment advice, research-validity conclusion or profitability evidence.
 
-Release 1 is an engineering-quality research baseline, not evidence that a strategy is valid or profitable.
+# 9. Deterministic-Core Rule
 
----
+All numerical and state-changing Release 1 behavior is deterministic code. Given identical validated input, engine source, strategy definition, starting state, system limits, execution assumptions and cost constants, the kernel returns identical canonical results.
 
-# 9. Release 1 Inclusions
+The deterministic core owns validation, stable SMA calculations, crossing events, signal scheduling, hypothetical fills, position sizing, cash, costs, accounting, marked equity, drawdown, hard-risk decisions, outcomes, reason codes and provenance. No AI, Manager, data pack or strategy file may execute code or overwrite these calculations or their audit record.
 
-- Strict validation of one instrument and one ordered OHLCV series.
-- A declarative, versioned, long-only SMA research rule.
-- Genuine SMA entry and exit crossing events.
-- Signal calculation after close `t` using information available through `t` only.
-- Explicit hypothetical execution at the next validated bar open.
-- Cash, position, realized profit and loss, unrealized profit and loss, and mark-to-market equity on every bar.
-- Explicit handling of an open terminal position.
-- Fixed deterministic Release 1 commission and slippage assumptions.
-- System-owned position-size and drawdown safety maxima.
-- Explicit `NO TRADE`, blocked, halt, and no-fill reason codes.
-- Reproducibility and audit metadata.
-- Expanded unit and integration tests using synthetic fixtures.
+# 10. Input-Data Contract
 
----
+Release 1 accepts exactly one instrument with a non-empty pack identifier, symbol, supported asset class, declared source, data-quality note and non-empty OHLCV series. Each bar requires an exact built-in structure, parseable timestamp, finite numeric OHLCV values, positive prices, non-negative volume, valid high/low relationships and strictly increasing unique timestamps.
 
-# 10. Release 1 Exclusions
+Invalid structure or content is rejected before evaluation with a stable reason code. The kernel does not silently sort, deduplicate, repair, forward-fill or infer input. Multiple instruments are rejected; timestamp-aligned portfolios remain deferred.
 
-- FIB-001.
-- Multi-asset or multi-instrument portfolios.
-- Strategy Vault automation.
-- Automated Strategy Registry workflows beyond the minimum immutable strategy identity recorded in results.
-- Five-agent research workflow.
-- News or market adapters.
-- Local AI or Gemma.
-- Founder or operational dashboards.
-- Broker or platform adapters.
-- Credentials, networks, external orders, live data, or live trading.
-- Real-money trading, customer funds, leverage, short selling, derivatives, and automatic paper-to-live promotion.
-- Claims of strategy approval, research validity, production readiness, or proven profitability.
+# 11. Causal Signal-and-Execution Contract
 
-These exclusions may remain in the approved long-term architecture, but they are outside Release 1 and TRL-R1-003.
+For integer periods `1 <= fast < slow`:
 
----
+- Entry occurs only when the prior completed relationship is `fast_SMA <= slow_SMA` and the current completed relationship is `fast_SMA > slow_SMA`.
+- Exit occurs only when the prior completed relationship is `fast_SMA >= slow_SMA` and the current completed relationship is `fast_SMA < slow_SMA`.
+- Continuing regimes do not create repeated crossing events.
+- Insufficient history yields an explicit no-trade result.
 
-# 11. Deterministic-Core Rule
+The signal at bar `t` may use data only through its close. It cannot fill at that known close. A hypothetical action becomes eligible at next chronological validated bar `t+1`; the reference is its open and fixed adverse slippage is applied. If no next bar exists, there is no fill. The next-bar open cannot influence the signal at `t`.
 
-All numerical and state-changing behavior must be implemented in deterministic code. Given identical validated input bytes, engine version, strategy identity, parameters, starting state, risk constants, execution assumptions, and cost constants, the kernel must return identical canonical results.
+# 12. Position, Accounting and Terminal Contract
 
-The deterministic core owns:
+Release 1 starts with 100.0 research units, is long-only and permits at most one open position. Fractional units are a deterministic research convention. Entry cash decreases by filled notional plus commission; exit cash increases by proceeds minus commission.
 
-- Validation.
-- SMA calculation and crossing-event detection.
-- Signal scheduling and hypothetical fills.
-- Position sizing, cash, costs, and accounting.
-- Mark-to-market equity and drawdown.
-- Hard-risk enforcement.
-- Outcome and reason-code assignment.
-- Result metadata and hashes.
+Every accounting row records cash, units, position value, realized/unrealized P&L, cumulative costs, total marked equity, high-water mark and drawdown. Total equity equals cash plus position value; drawdown uses marked equity.
 
-No AI or Manager component may alter these calculations or overwrite their audit record. Release 1 will not execute code supplied inside a strategy or data file.
+An open position at the final validated bar remains open, is marked to the final close and is reported with `OPEN_TERMINAL_POSITION`. The engine does not invent a final fill. This is terminal research accounting, not an external position or real liquidation instruction.
 
----
-
-# 12. Input-Data Contract
-
-Release 1 accepts exactly one instrument. The input must contain:
-
-- A non-empty pack identifier.
-- One non-empty symbol and one declared asset class.
-- A non-empty OHLCV series.
-- For every bar: a parseable timestamp, finite numeric `open`, `high`, `low`, and `close`, plus finite non-negative `volume`.
-- Strictly increasing, unique timestamps.
-- Positive prices.
-- `high >= max(open, close)` and `low <= min(open, close)`.
-- `high >= low`.
-- A data-source identifier and a data-quality note, even for synthetic data.
-
-The whole run must be rejected before strategy evaluation if the pack contains zero or multiple instruments, missing fields, booleans in numeric fields, non-finite values, duplicate or unordered timestamps, invalid price relationships, or unsupported types. Rejection must return a stable blocked reason code and must not silently repair, sort, deduplicate, forward-fill, or infer values.
-
-Release 1 has no multi-instrument alignment behavior. Timestamp alignment is deferred until a separately governed multi-asset release.
-
----
-
-# 13. Causal Signal-and-Execution Contract
-
-For configured integer periods where `1 <= fast < slow`:
-
-- An entry event occurs only when the prior completed bar has `fast_SMA <= slow_SMA` and bar `t` has `fast_SMA > slow_SMA`.
-- An exit event occurs only when the prior completed bar has `fast_SMA >= slow_SMA` and bar `t` has `fast_SMA < slow_SMA`.
-- A continuing above/below regime is not a new crossing event.
-- Insufficient history produces `NO TRADE`, not an inferred signal.
-
-The causal sequence is fixed:
-
-1. Bar `t` closes and becomes available.
-2. The signal is calculated from validated data at or before `t`.
-3. A signal calculated with bar `t` information cannot fill at bar `t`’s already-known close.
-4. The hypothetical order becomes eligible at the next chronological validated bar, `t+1`.
-5. The unadjusted Release 1 reference price is the `open` of bar `t+1`.
-6. The deterministic adverse slippage rule in Section 15 produces the hypothetical fill price.
-7. Bar `t+1` data, including its open, may determine the fill but may not influence the signal at `t`.
-8. If `t+1` does not exist or is invalid, no fill occurs and the result records `NO_FILL_END_OF_DATA` or the applicable validation code.
-
-Every result must record `signal_information_cutoff=BAR_CLOSE_T`, `execution_bar=NEXT_VALIDATED_BAR`, `reference_price=NEXT_BAR_OPEN`, and the applied cost/slippage assumptions.
-
----
-
-# 14. Position, Cash, and Mark-to-Market Accounting Contract
-
-Release 1 is long-only, unlevered, and permits at most one open position in its single instrument.
-
-- Starting cash is a positive configured research value and must be recorded. The default demonstration base is `100.0` units, not real currency.
-- The entry target gross notional equals the lower of the strategy-requested allocation and the 5% system maximum, multiplied by mark-to-market equity at signal close `t`.
-- Fractional units are permitted for deterministic research accounting.
-- At entry, cash decreases by filled notional plus commission.
-- At exit, cash increases by filled proceeds minus commission.
-- Realized and unrealized profit and loss must be reported separately.
-- On every validated bar, position value equals open units multiplied by that bar’s close; total equity equals cash plus position value.
-- High-water mark and drawdown must use total mark-to-market equity, not realized cash alone.
-- Cash, units, position value, realized profit and loss, unrealized profit and loss, costs, total equity, high-water mark, and drawdown must reconcile for every bar.
-
-Terminal-position policy is fixed for Release 1: an open position remains open and is marked to the final validated close. The engine must not invent a forced final fill. The result must report the position, unrealized profit and loss, and `terminal_position_policy=MARK_TO_MARKET_OPEN`. An exit signal on the final bar cannot fill and must record `NO_FILL_END_OF_DATA`.
-
----
-
-# 15. Transaction-Cost Contract
-
-Release 1 uses a deliberately simple, fixed, deterministic research cost model:
+# 13. Transaction-Cost Contract
 
 | Component | Release 1 assumption |
 |-----------|----------------------|
-| Commission | 5 basis points of filled notional on every entry and exit |
-| Slippage | 5 basis points adverse to the position on every fill |
+| Commission | 5 basis points of filled notional on entry and exit |
+| Slippage | 5 basis points adverse on each hypothetical fill |
 | Buy fill | Next-bar open multiplied by `1.0005` |
 | Sell fill | Next-bar open multiplied by `0.9995` |
-| Separate spread charge | 0 basis points; the fixed adverse slippage adjustment is the Release 1 execution-price allowance |
-| Minimum fee | None |
-| Taxes, financing, borrow, and venue fees | 0 in Release 1; unsupported and explicitly recorded |
+| Separate spread | Zero; adverse slippage is the execution-price allowance |
+| Minimum fee, taxes, financing, borrow and venue fees | Zero/unsupported and explicitly bounded to Release 1 |
 
-Commission is an explicit cash cost and must not be hidden inside price. All constants and actual applied amounts must appear in result metadata and accounting rows.
+Commission is an explicit cash cost. The model is a deterministic engineering baseline. It is not a claim about an actual instrument, venue, broker, liquidity, latency, spread, market impact or market condition.
 
-This simplified model is a deterministic engineering baseline, not a claim that it represents any real instrument, venue, broker, or market condition. More realistic instrument-specific cost models remain planned beyond Release 1.
+# 14. Hard-Risk-Control Contract
 
----
+Release 1 system limits are a maximum gross position allocation of 5% of marked equity, one open position, no leverage, no increase to a losing position and a -15% marked-equity drawdown halt. A strategy or caller may request a stricter policy but may not raise or weaken the system boundary.
 
-# 16. Hard-Risk-Control Contract
+Invalid override attempts are blocked and audited. Drawdown halts block new entries; causally eligible risk-reducing exits remain permitted. Release 1 authorizes no automatic liquidation or real-world action. A future independent Risk Guardian may veto but may never weaken these foundations.
 
-Release 1 system hard maxima are:
+# 15. Outcome and Reason-Code Contract
 
-- Maximum gross position allocation: 5% of current mark-to-market equity.
-- Maximum open positions: one, because Release 1 is single-instrument.
-- Leverage: none.
-- Increase to a losing open position: prohibited.
-- Drawdown halt: -15% from the mark-to-market high-water mark.
+The kernel provides explicit outcome classes for scheduled signals, hypothetical fills, no-trade cases, blocks, halts and no-fill cases. Stable reasons include invalid input, invalid strategy parameters, position limit, drawdown halt, override attempts, increase-to-loser, insufficient history, no crossing, already positioned, no open position, end of data and terminal position.
 
-Ownership rules are mandatory:
+Human-readable explanations supplement rather than replace stable codes. Empty trades alone never communicate the whole result.
 
-- Strategy input may request a lower position or drawdown limit.
-- Strategy input may never raise a system maximum or weaken a system halt.
-- Public caller arguments may not override hard maxima with weaker values.
-- Tests must exercise hard limits through controlled fixtures or internal test seams that cannot exist as a public weakening path.
-- Manager and AI components may not override hard limits.
-- A future Risk Guardian may veto an action but may not weaken a control.
-- Any invalid attempt to raise or bypass a limit must be rejected and audited.
+# 16. Reproducibility and Audit Contract
 
-When the mark-to-market drawdown halt is reached, new entries are blocked. Risk-reducing exits remain eligible under the causal next-bar rule. Release 1 does not authorize automatic liquidation or live action.
+Each result records project/release/checkpoint identity, engine name/version/source digest and manifest, strategy identity/version/parameters/hash, input pack/hash, configuration hash, validation, starting state, execution/cost/terminal assumptions, effective risk limits, stable run ID and ordered events, decisions, fills, trades and accounting rows.
 
----
+Canonical results do not depend on dictionary order, locale, wall-clock time, network state or randomness. Deterministic replay is an engineering property; it does not predict real-market outcomes.
 
-# 17. NO TRADE and Blocked-Reason Contract
+# 17. Strategy Identity and Approval Boundary
 
-Every evaluated bar/run must produce an explicit research outcome rather than relying on an empty trade list. Allowed outcome classes are:
+Release 1 evaluates a declarative SMA-001 identity/version and records its canonical definition. Any changed signal, parameter, fill, cost, accounting or risk rule must remain attributable to a changed definition/version.
 
-- `SIGNAL_SCHEDULED`
-- `HYPOTHETICAL_FILL`
-- `NO_TRADE`
-- `BLOCKED`
-- `HALT`
-- `NO_FILL`
+No strategy is Founder-approved for real trading. Technical completion does not constitute strategy approval, investment advice, regulatory approval, commercial-release approval or authorization for assisted or automated execution.
 
-Release 1 must define a stable, documented enumeration including at least:
+# 18. Final Validation Evidence
 
-- `NO_TRADE_INSUFFICIENT_HISTORY`
-- `NO_TRADE_NO_CROSS`
-- `NO_TRADE_ALREADY_POSITIONED`
-- `NO_TRADE_NO_OPEN_POSITION`
-- `BLOCKED_INVALID_INPUT`
-- `BLOCKED_INVALID_STRATEGY_PARAMETERS`
-- `BLOCKED_POSITION_LIMIT`
-- `BLOCKED_DRAWDOWN_HALT`
-- `BLOCKED_RISK_OVERRIDE_ATTEMPT`
-- `BLOCKED_INCREASE_TO_LOSER`
-- `NO_FILL_END_OF_DATA`
+Evidence was collected on 2026-07-25 at committed HEAD `4b99789` with `PYTHONDONTWRITEBYTECODE=1` and warnings treated as errors.
 
-Each record must include outcome class, reason code, timestamp, strategy identity, and relevant non-sensitive context. Human-readable text may supplement but must not replace the stable code.
+## 18.1 Test evidence reference E1
 
----
+```text
+python -B -W error 09_AI_Systems/02_Tools/Trading_Lab/test_trading_lab.py
+Ran 132 tests
+OK
 
-# 18. Reproducibility and Audit-Metadata Contract
+python -B -W error -m unittest discover -s 09_AI_Systems/02_Tools/Trading_Lab -p 'test*.py'
+Ran 132 tests
+OK
+```
 
-Every result must record at least:
+Warnings: zero. Tests are behavior-level engineering evidence, not research validity or performance evidence.
 
-- Unique run identifier.
-- Project, release, and checkpoint identifiers.
-- Engine name, semantic version, and source revision identifier.
-- Strategy identifier, version, parameters, and canonical strategy-definition hash.
-- Input pack identifier and canonical input-data hash.
-- Validation outcome and reason codes.
-- Starting cash and accounting currency/unit label.
-- Signal timing, next-bar reference-price, slippage, commission, and terminal-position assumptions.
-- System hard limits and any stricter strategy requests.
-- Run start/end timestamps and deterministic timezone convention.
-- Output schema version.
-- Ordered outcome events, hypothetical fills, accounting rows, and their stable identifiers.
+## 18.2 Synthetic rehearsal evidence reference E2
 
-Hashes must be computed from documented canonical serialization. Generated wall-clock timestamps may identify the run but must not change deterministic financial outputs. Results must not depend on dictionary iteration order, locale, current date, network state, or unseeded randomness.
+The committed `TRL-PACK-DEMO.json` pack and the specified SMA-001 version 1.0.0 strategy (`fast=5`, `slow=20`, `paper_size_pct=5.0`, `symbol=DEMO-EQ-A`) were run twice in memory from independent deep copies with `risk_policy=None`. No `--demo` invocation or saved report was used.
 
----
+| Field | Value |
+|-------|-------|
+| Run ID | `TRL-RUN-6922AEA31AE2630B4DA1` |
+| Input-data hash | `6cdbca208cd1029b90e5ed3494ab05a3b7042d224ed01293373fc173a85aee56` |
+| Configuration hash | `3f4c513f275ca034af9fd2f4bbcb4ec382c361969d7706fbb6fb6d26fd26bbbd` |
+| Strategy-definition hash | `e27bd45914df7d9d7c807b73e012b51a45dc5c844f39e22132c48078070e3955` |
+| Engine-source digest | `f9f555d37e0820c39eb2afe1156fca4912d255debc23c7ab27c6111c31da3952` |
+| Outcome / reason | `HYPOTHETICAL_FILL` / `OPEN_TERMINAL_POSITION` |
+| Decisions / fills / trades / accounting rows | 2 / 1 / 0 / 60 |
+| Final cash / marked equity | 94.9975 / 100.22673707083118 research units |
+| Realized / unrealized P&L | 0.0 / 0.2267370708311804 research units |
+| Commission / slippage | 0.0025 / 0.002498750624687196 research units |
+| Maximum drawdown | -0.03237704819428881% |
+| Terminal status | Open; marked to market and not liquidated |
+| Determinism | PASS - both complete results identical |
+| Accounting reconciliation | PASS - every row and both final states reconciled |
 
-# 19. Strategy Identity and Versioning Requirements
+The engine-source manifest is `trading_lab.py` plus `trading_lab_core/__init__.py`, `canonical.py`, `constants.py`, `execution.py`, `reporting.py`, `risk.py`, `strategy.py` and `validation.py`, each at its repository-relative Trading Lab path.
 
-Release 1 may evaluate only a declarative strategy definition with an immutable identity and version in the result. The minimum record includes:
+## 18.3 Boundary inspection reference E3
 
-- Strategy identifier and human-readable name.
-- Semantic version.
-- Lifecycle status such as `EXPERIMENTAL_RESEARCH_ONLY`.
-- Exact fast and slow SMA periods.
-- Requested position allocation.
-- Entry, exit, timing, cost, risk, and terminal-position rules by reference.
-- Canonical definition hash.
-- Author and review metadata.
-- Explicit statement that Founder approval and profitability validation are absent unless separately evidenced.
+The 132-test suite includes direct checks that the CLI/reporting boundary remains paper-only, modules use only the local standard library, and execution has no network, AI, broker, credential or external-order dependency. This is a scoped negative-surface check, not a security certification.
 
-No governed SMA-001 record exists at the verified baseline. If TRL-R1-003 creates an SMA-001 research record, its status must be experimental and not Founder-approved. FIB-001 is outside Release 1 and TRL-R1-003.
+# 19. Release 1 Conformance Matrix
 
-A changed parameter, signal rule, fill rule, cost rule, accounting rule, or risk rule requires a new strategy or contract version; prior results must remain attributable to their original version.
+| Contract requirement | Implemented | Tested | Evidence reference | Remaining limitation |
+|----------------------|-------------|--------|--------------------|----------------------|
+| Exact single-instrument input validation | Yes | Yes | E1: input-validation classes | Multi-instrument portfolios are rejected, not supported. |
+| Genuine transition-only SMA crossings | Yes | Yes | E1: SMA signal tests | Only SMA long-only research family. |
+| Causal close-`t` signal and next-open fill | Yes | Yes | E1: causal timing and future-prefix tests | Historical bar model is simplified. |
+| No fill at end of data | Yes | Yes | E1: final-bar no-fill test | No forward pending-order service. |
+| Per-bar cash and marked accounting | Yes | Yes | E1 and E2 reconciliation | Research units and fractional units are not broker semantics. |
+| Realized and unrealized P&L | Yes | Yes | E1 and E2 | Synthetic demonstration does not validate performance. |
+| Marked drawdown and halt | Yes | Yes | E1: drawdown/risk tests | One position; no portfolio risk. |
+| Explicit terminal open position | Yes | Yes | E1 and E2 | No forced liquidation or external close. |
+| Deterministic commission and slippage | Yes | Yes | E1 and E2 | Fixed model is not market-realistic. |
+| System-owned hard limits; stricter caller policies only | Yes | Yes | E1: risk outcome tests | No independent Risk Guardian service. |
+| Block increase to losing position | Yes | Yes | E1: martingale/increase test | Long-only, single-position boundary. |
+| Explicit outcomes and stable reasons | Yes | Yes | E1 and E2 | Human/product explainability layer is planned. |
+| Canonical hashes and deterministic replay | Yes | Yes | E1 and E2 | Determinism does not predict market results. |
+| Atomic engine-source digest and manifest | Yes | Yes | E1 and E2 | Provenance covers the Release 1 engine bundle, not future apps/services. |
+| Paper-only reporting and CLI | Yes | Yes | E1/E3 | No forward paper application or dashboard. |
+| No broker, credential, network or external-order surface | Yes, absent by design | Yes | E1/E3 | Negative evidence is not a security certification. |
+| Inputs remain unmodified and no artifact is required | Yes | Yes | E1 and E2 | Saved reports remain optional paper-only outputs outside this rehearsal. |
+| Complete Release 1 suite passes without warnings | Yes | Yes | E1 | Test passage is not production, legal or strategy approval. |
 
----
+# 20. Paper-Only Operating Boundary
 
-# 20. Testing and Evidence Gates
+Every order, fill, position, cash balance, P&L value and equity value is hypothetical research data. Release 1 has no authority or interface to hold or move money; connect to a broker, venue, platform or data vendor; store or use credentials; place, route, amend or cancel an external order; promote paper configuration to live use; or act autonomously on a market.
 
-Release 1 cannot be marked done until tests directly demonstrate:
+No customer funds authority exists. No broker or credential authority exists. No customer distribution or payment authority exists. Any future capability requires a separately scoped and approved checkpoint.
 
-- Acceptance of valid single-instrument data and rejection of every contracted invalid-data class.
-- Strictly ordered unique timestamps and OHLC relationship checks.
-- Genuine upward and downward crossing events, including equality boundaries.
-- No repeated event during a continuing regime.
-- No use of future data in signal calculation.
-- Signal at close `t` and hypothetical fill at the next bar open, including gaps.
-- No fill when no next bar exists.
-- Deterministic commission and adverse slippage on entry and exit.
-- Per-bar cash, units, realized/unrealized profit and loss, total equity, high-water mark, and drawdown reconciliation.
-- Mark-to-market drawdown halt while a position remains open.
-- Explicit terminal open-position handling.
-- Strategy requests below system maxima and rejection of attempts to raise/bypass maxima.
-- Stable `NO TRADE`, blocked, halt, and no-fill reason codes.
-- Identical canonical results and hashes for repeated identical runs.
-- No broker, credential, network, external-order, or live-execution surface.
+# 21. Performance and Marketing Boundary
 
-The complete unchanged and expanded test suites must pass with bytecode disabled. Tests must close their file handles; Release 1 validation must have no unexpected warnings. Test names, counts, commands, output, and limitations must be recorded. Passing tests are engineering evidence only and do not prove research validity or profitability.
+Tracked and rehearsed results are synthetic and hypothetical. They are not actual trading, evidence of future returns, an investment recommendation or proof of profitability. No output may promise or guarantee performance or present a deterministic demonstration as realistic market execution.
 
----
+A disclaimer cannot cure a misleading claim, chart, comparison or omission. "At your own risk" language cannot eliminate operator, developer, platform or regulatory responsibility.
 
-# 21. Paper-Only Operating Boundary
+The authoritative implemented and tested Release 1 generated-report wording is:
 
-All orders, fills, positions, cash, profit and loss, and equity are hypothetical research records. Release 1 has no authority or interface to:
+- Primary disclaimer: **ARCHITECTURE DEMONSTRATION ONLY - NOT FINANCIAL ADVICE - NO LIVE TRADING - NO PROFIT CLAIMS**
+- Performance disclaimer: **Hypothetical research results from paper-only processing; they do not represent actual trading, predict future returns, or authorize a trade.**
+- Generated Markdown label: **PAPER/RESEARCH ONLY**
 
-- Hold or move money.
-- Connect to a broker, venue, data vendor, or platform.
-- Store or use credentials.
-- Place, route, amend, or cancel an external order.
-- Promote a paper configuration to live use.
-- Act autonomously on a market.
+These strings are the current internal/generated output contract. Current Release 1 output is not approved for public or customer distribution.
 
-Any future forward paper simulator remains paper-only and requires separate authorization. Any live capability requires a new Founder-governed project decision.
+**PLANNED - NOT IMPLEMENTED:** Future customer-facing product disclosures are distinct from the current generated-report wording. Future packaging may add jurisdiction-specific disclosures only after legal and regulatory review. "At your own risk" wording must not be described as eliminating operator, developer, platform or regulatory responsibility.
 
----
+# 22. Definition of Release 1 Done
 
-# 22. Performance-Claim Prohibition
+Release 1 is technically done because the included behaviors are committed, the exclusions remain absent, the contract behaviors have direct tests, both required 132-test invocations pass without warnings, the committed rehearsal is deterministic and accounting-reconciled, and source provenance identifies the committed engine bundle.
 
-Current tracked demo results:
+Founder acceptance was separately created by the explicit 2026-07-26 decision above, not by implementation commits, tests or rehearsal evidence. It accepts only the technical paper/research baseline.
 
-- Are synthetic and hypothetical.
-- Do not represent actual trading.
-- Are not evidence of future returns.
-- Must not be used to decide a real-money trade.
-- Must not be presented as proven performance.
+Technical completion alone does not constitute:
 
-Release 1 results remain hypothetical even if historical market data is later supplied. No result may be described as validated, profitable, production-ready, investable, or Founder-approved without separate, explicit evidence and authority. Required disclaimers do not cure a misleading headline, chart, comparison, or omission.
+- Founder approval of a strategy.
+- Investment advice or research-validity approval.
+- Regulatory or legal approval.
+- Commercial-release or customer-distribution approval.
+- Production or operational readiness.
+- Authorization for broker access, assisted execution or automated execution.
 
----
+# 23. Post-Release Roadmap Boundary
 
-# 23. Checkpoint Sequence
+The separate portable-product charter proposes TRL-R2-001 through TRL-R2-008, TRL-R3, TRL-R4 and TRL-R5. No roadmap item is implemented or authorized by this contract. Release 1 remains the paper/research foundation until a separately approved checkpoint changes an expressly identified boundary.
 
-| Checkpoint | Status | Boundary |
-|------------|--------|----------|
-| TRL-R1-001 — Trading Foundation Audit | Completed 2026-07-24 | Read-only audit of code, tests, data, reports, and documentation; no implementation change |
-| TRL-R1-002 — Baseline Reconciliation and Release 1 Contract | Active documentation checkpoint | Reconcile project/architecture records and create this contract; no code change |
-| TRL-R1-003 — Validated Causal Single-Instrument Research Kernel | Proposed next engineering checkpoint | Implement only the narrow scope in Section 23.1 after explicit authorization |
-| Later checkpoints | Unscheduled and unauthorized | Require separate scope, evidence, review, and Founder authorization |
+The next proposed checkpoint is **TRL-R2-001 — PORTABLE APPLICATION FOUNDATION**. TRL-R2-001 remains proposed, unimplemented, and unauthorized. It may begin only after separate explicit Founder authorization; roadmap inclusion, Founder acceptance of Release 1, and closing TRL-R1-005 do not provide that authorization.
 
-No checkpoint automatically authorizes the next one.
+# 24. Deferred Governance Reconciliation
 
-## 23.1 Proposed TRL-R1-003 Scope
+Reconciliation of `Project_Register.md` and `Knowledge_Register.md` remains intentionally deferred because the separate main working directory previously contained unrelated changes. This checkpoint does not authorize editing, resetting, cleaning, stashing, merging, rebasing or otherwise disturbing those registers or that working directory.
 
-**TRL-R1-003 — Validated Causal Single-Instrument Research Kernel** is proposed, not started, and not authorized by this contract to begin.
+# 25. Documentation Review Resolution
 
-Its future scope includes only:
-
-- Strict single-instrument input validation.
-- Deterministic genuine SMA crossing events.
-- Signal at close `t`.
-- Explicit next-bar execution.
-- Per-bar mark-to-market equity.
-- Explicit terminal-position handling.
-- Fixed deterministic transaction-cost assumptions.
-- System-owned non-overridable safety maxima.
-- Explicit `NO TRADE` and blocked reason codes.
-- Reproducibility metadata.
-- Expanded tests.
-
-TRL-R1-003 explicitly excludes:
-
-- FIB-001.
-- Multi-asset portfolios.
-- Strategy Vault automation.
-- Five-agent workflow.
-- Local AI.
-- Gemma.
-- Dashboards.
-- Broker or platform adapters.
-- Live trading.
-
----
-
-# 24. Definition of Release 1 Done
-
-Release 1 is done only when all of the following are true:
-
-- Every inclusion in Section 9 is implemented within the authorized code boundary.
-- Every exclusion in Section 10 remains absent.
-- Contracts in Sections 11 through 19 are implemented and mutually consistent.
-- All evidence gates in Section 20 have direct tests and recorded passing results with no unexpected warnings.
-- Complete diff review finds no unauthorized capability or unrelated change.
-- Synthetic fixtures and reports are clearly labeled hypothetical.
-- Documentation describes implemented behavior accurately and retains known limitations.
-- An audit can reproduce the same canonical result from the recorded inputs and metadata.
-- Founder acceptance is recorded for the Release 1 checkpoint. Technical completion alone does not imply strategy approval, investment approval, or live-trading authority.
-
----
-
-# 25. Deferred Governance Reconciliation
-
-Reconciliation of `01_Holding_Company/04_Operations/Project_Register.md` and `01_Holding_Company/01_Governance/Knowledge_Register.md` is explicitly deferred. Those registers contain unrelated changes in a separate dirty main working directory and are outside TRL-R1-002 authorization.
-
-This deferral must remain visible until a clean, separately authorized reconciliation is performed. It does not permit this checkpoint to edit, reset, clean, stash, merge, rebase, or otherwise disturb either register or the separate working directory.
-
----
+- P2 Founder-acceptance finding: Resolved by the explicit 2026-07-26 Founder decision.
+- P2 disclaimer-alignment finding: Resolved by retaining the implemented Release 1 strings as the current output contract and marking future customer wording as planned.
+- P2 TRL-R1-005 lifecycle finding: Resolved by making this documentation-only closeout commit the checkpoint’s completion event while preserving all no-code, no-distribution, no-execution, and no-Release-2 boundaries.
 
 ## Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | 2026-07-24 | Initial Release 1 contract created under TRL-R1-002 from the verified TRL-R1-001 baseline |
+| 1.0 | 2026-07-24 | Initial Release 1 contract created under TRL-R1-002 from the TRL-R1-001 audited baseline. |
+| 1.1 | 2026-07-25 | Recorded TRL-R1-003 implementation, TRL-R1-004 modularization, final test/rehearsal evidence, conformance matrix, retained limitations and paper-only technical closeout under TRL-R1-005. |
+| 1.2 | 2026-07-26 | Recorded explicit Founder acceptance, corrected the Owner's legal name, aligned current generated wording with planned future disclosures and closed the two P2 documentation findings. |
+| 1.3 | 2026-07-26 | Made the TRL-R1-005 documentation-only closeout commit the checkpoint completion event and preserved the separate Release 2 authorization boundary. |

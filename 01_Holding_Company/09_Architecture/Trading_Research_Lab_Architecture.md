@@ -1,8 +1,8 @@
 # ALSAKKAF HOLDING GROUP
 
-# Five-Agent Trading Research Lab — Architecture v1
+# Trading Research Lab - Architecture
 
-> "ARCHITECTURE DEMONSTRATION ONLY — NOT FINANCIAL ADVICE — NO LIVE TRADING — NO PROFIT CLAIMS"
+> "ARCHITECTURE DEMONSTRATION ONLY - NOT FINANCIAL ADVICE - NO LIVE TRADING - NO PROFIT CLAIMS"
 
 ---
 
@@ -11,320 +11,248 @@
 | Field | Value |
 |-------|-------|
 | Document ID | TRL-001 |
-| Document Type | Target Architecture and Verified Baseline |
-| Status | ACTIVE — DESIGN AND PROTOTYPE PHASE |
-| Version | 1.2 |
+| Document Type | Current and Target Product Architecture |
+| Status | IMPLEMENTED, EVIDENCE-VALIDATED AND FOUNDER-ACCEPTED AS A PAPER/RESEARCH BASELINE |
+| Completed Documentation Checkpoint | TRL-R1-005 — COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT |
+| Version | 1.5 |
 | Original Date | 2026-07-14 |
-| Last Reconciled | 2026-07-24 |
-| Owner | Abdulrahman Khalid Alsakkaf |
-| Founder Authority | Approved long-term research architecture; implementation requires an explicitly authorized checkpoint |
+| Last Reconciled | 2026-07-26 |
+| Owner | Abdulrahman Yaseen Alsakkaf |
+| Founder Authority | Abdulrahman Yaseen Alsakkaf accepted the Release 1 technical paper/research baseline only; future implementation requires a separately authorized checkpoint |
 | Related Project | PRJ-017 |
-| Related Documents | STRAT-017; PRJ-011; `09_AI_Systems/02_Tools/Trading_Lab/TRL_R1_RELEASE_CONTRACT.md` |
+| Related Documents | `09_AI_Systems/02_Tools/Trading_Lab/TRL_R1_RELEASE_CONTRACT.md`; `09_AI_Systems/02_Tools/Trading_Lab/TRL_PORTABLE_TRADING_PRODUCT_CHARTER.md` |
 
 ---
 
-# 1. Purpose and Boundaries
+# 1. Product Vision
 
-This document defines the approved target architecture for a controlled trading research lab and records the verified implementation baseline. The lab exists to support disciplined, auditable research. It is not an investment product, a profitability claim, or an authorization to trade.
+PRJ-017 is intended to become a local-first, standalone trading-intelligence platform. It should operate independently on a supported personal computer, provide governed strategies and explainable market insights, conduct deterministic paper trading and, only after separately approved gates, evaluate user-authorized broker execution.
 
-The project permits local research, deterministic backtesting development, synthetic and historical-data testing, paper/demo simulation, and audited strategy analysis. It prohibits real-money trading, live brokerage connections, external order placement, customer funds, profit promises, claims of proven profitability, autonomous execution, and automatic paper-to-live promotion.
+The product is not an assurance of performance, investment advice, a broker, a custodian or an authorization to trade. Atlas is optional. Release 1 is complete only within its paper/research boundary. Release 2 is proposed and not implemented.
 
-The target architecture, verified prototype, tested behavior, missing components, and Release 1 boundary are distinct. A documented component is not an implemented component, and an implemented component is not validated merely because narrow tests pass.
+# 2. Currently Implemented Release 1
 
----
+Release 1 is a deterministic, causal, single-instrument historical research kernel committed through:
 
-# 2. Target Architecture
+- `bb3af4e` - TRL-R1-002 Release 1 documentation contract.
+- `05f7ba9` - TRL-R1-003 validated causal single-instrument research kernel.
+- `4b99789` - TRL-R1-004 behavior-preserving modular kernel refactor.
+
+At `4b99789`, 132 direct tests and 132 discovery tests pass with Python warnings treated as errors and zero warnings. A two-run independent deep-copy rehearsal of the committed synthetic pack is deterministic and accounting-reconciled. The rehearsal records run `TRL-RUN-6922AEA31AE2630B4DA1` and engine-source digest `f9f555d37e0820c39eb2afe1156fca4912d255debc23c7ab27c6111c31da3952`.
+
+Implemented Release 1 behavior includes strict exact-type validation, genuine SMA crossing events, close-`t` signal timing, next-valid-bar-open hypothetical fills, fixed costs, system-owned risk limits, per-bar marked accounting, terminal open-position handling, stable outcomes/reason codes and reproducibility metadata.
+
+This is behavior-level engineering evidence on synthetic data. It does not prove strategy validity, profitability, market realism, production readiness, regulatory approval or live-trading safety.
+
+## 2.1 Release 1 Governance and Founder Acceptance
+
+Implementation completion occurred through commits `05f7ba9` and `4b99789`. Technical evidence includes 132 passing direct tests, the same 132 tests passing through discovery and the deterministic synthetic rehearsal. Those commits and tests did not automatically create Founder acceptance.
+
+Founder acceptance occurred on 2026-07-26 and is limited to the completed technical paper/research baseline. The exact decision is:
+
+> “I, Abdulrahman Yaseen Alsakkaf, formally accept PRJ-017 Release 1 as a completed technical paper/research baseline. This acceptance does not approve SMA-001 or any strategy for investment use, does not validate profitability, and does not authorize customer distribution, investment advice, broker connectivity, automated execution, live trading, customer funds, regulatory status, or Release 2 implementation.”
+
+Release 1 status is **IMPLEMENTED, EVIDENCE-VALIDATED AND FOUNDER-ACCEPTED AS A PAPER/RESEARCH BASELINE**. **TRL-R1-005 — COMPLETED DOCUMENTATION-ONLY RELEASE 1 CLOSEOUT.** Completed by the TRL-R1-005 documentation-only closeout commit; Git history is the authoritative commit reference.
+
+TRL-R1-005 authorizes only its own four-document closeout commit. It authorizes no code change, customer distribution, Release 2 implementation, broker connectivity, assisted execution, automated execution, live trading, investment advice, customer funds, payment handling, or regulatory claim.
+
+TRL-R1-004 remains the latest implemented runtime/kernel checkpoint. TRL-R1-005 is the completed documentation, Founder-acceptance, and Release 1 closeout checkpoint. TRL-R2-001 remains proposed, unimplemented, and unauthorized. TRL-R2-001 may begin only after separate explicit Founder authorization; closing TRL-R1-005 does not provide that authorization.
+
+# 3. Current Module Map
+
+| Path | Implemented responsibility |
+|------|----------------------------|
+| `trading_lab.py` | Compatibility facade and paper-only CLI. |
+| `trading_lab_core/constants.py` | Release identity, constants, reason codes and system limits. |
+| `trading_lab_core/canonical.py` | Canonicalization, deterministic hashing, numeric safety and atomic source provenance. |
+| `trading_lab_core/validation.py` | Exact-type pack, instrument, OHLCV, timestamp, strategy and policy validation. |
+| `trading_lab_core/strategy.py` | Stable SMA calculations and genuine transition-only crossing signals. |
+| `trading_lab_core/risk.py` | System-owned limits, stricter policies and risk decisions. |
+| `trading_lab_core/execution.py` | Causal fills, costs, positions, accounting, P&L, drawdown and terminal handling. |
+| `trading_lab_core/reporting.py` | Deterministic paper-only Markdown reporting. |
+| `test_trading_lab.py` | 132 behavior-level tests. |
+
+No user interface, installer, persistent database, cloud service, market-data adapter, Strategy Vault, independent Risk Guardian, broker adapter or live execution module is currently implemented.
+
+# 4. Target Portable-Product Architecture
+
+The planned structure separates governed capabilities:
 
 ```text
-Governed Input Pack
-  ├── validated market data
-  └── validated news items
-          ↓
-Deterministic Research Core
-  ├── Strategy Registry / TRL Strategy Vault
-  ├── genuine event signals and regime detection
-  ├── causal execution model and realistic recorded costs
-  ├── mark-to-market accounting
-  └── OOS and walk-forward evaluation
-          ↓
-Five-Agent Research Team
-  ├── News Analyst
-  ├── Strategy Analyst
-  ├── Bull Analyst
-  ├── Bear Analyst
-  └── Manager
-          ↓
-Independent Risk Guardian ── may veto; may never weaken controls
-          ↓
-Explicit TRADE / NO TRADE research outcome
-          ↓
-Forward Paper Simulator through a platform-adapter boundary
-          ↓
-Immutable audit trail and Founder dashboard
+Local Operator Interface
+        v
+Capability Gate and Mode Controller
+        v
+Governed Strategy Registry and Vault
+        v
+Market Data and Data-Quality Boundary
+        v
+Insights / Forward Paper Simulator
+        v
+Independent Risk Guardian
+        v
+Portfolio and Persistent Audit Ledger
+        v
+Optional adapters: Atlas | cloud identity | broker demo/execution
 ```
 
-The deterministic core owns numerical calculations, rule evaluation, accounting, cost application, and reproducibility metadata. AI components may analyze supplied artifacts and explain results, but they may not silently alter deterministic outputs, system hard limits, or audit records.
+The deterministic core must remain separable from the interface and adapters. Planned layers are architectural targets, not statements of current implementation.
 
-The platform-adapter boundary is a planned abstraction for approved paper environments. It does not authorize a broker adapter, credentials, external orders, or live trading.
+# 5. Operating Modes and Capability Gates
 
----
+| Mode | Target capability | Current gate |
+|------|-------------------|--------------|
+| `INSIGHT_MODE` | Strategies, signals, explanations, risk context and research; no order submission. | Planned for Release 2; must distinguish general research from personalized advice and make no profit claims. |
+| `PAPER_MODE` | Forward simulated execution without a broker or external order; intended default mode using deterministic risk and accounting foundations. | Planned for Release 2; current Release 1 is historical replay, not forward simulation. |
+| `ASSISTED_EXECUTION_MODE` | Prepare a proposed order and require explicit user review and confirmation for each submission. | Disabled until broker-demo, security, legal, regulatory, jurisdiction and Founder gates pass. |
+| `AUTOMATED_EXECUTION_MODE` | User-opted execution through the user's own broker account under hard limits, monitoring, emergency stop and audit. | Disabled and prohibited until separately authorized after all required gates. |
 
-# 3. Target Market-Data Input Contract
+Mode selection must never bypass capability gates. "At your own risk" language cannot remove operator, developer, platform or regulatory responsibility, including applicable security, legal, product and consumer-protection obligations.
 
-```json
-{
-  "pack_id": "TRL-PACK-0001",
-  "as_of": "2026-07-14",
-  "prepared_by": "human",
-  "instruments": [
-    {
-      "symbol": "EXAMPLE",
-      "asset_class": "equity | fx | commodity | index",
-      "ohlcv": [
-        {
-          "date": "2026-07-11",
-          "open": 0,
-          "high": 0,
-          "low": 0,
-          "close": 0,
-          "volume": 0
-        }
-      ],
-      "data_source": "human-recorded source identifier",
-      "data_quality_note": "gaps, adjustments, and known issues"
-    }
-  ]
-}
-```
+# 6. Standalone/Atlas Boundary
 
-Target rules require schema validation, timestamp ordering and uniqueness, OHLCV validity, declared provenance, data-quality caveats, and rejection of ambiguous or invalid data. No future bar may influence a signal. Release 1 is intentionally single-instrument; multi-instrument work must later align data by timestamp, never by list index.
+PRJ-017 must install, start, evaluate supported local data, operate in authorized modes and preserve its local audit evidence without Atlas. Atlas may later provide an optional, versioned connector for approved context or workflow integration.
 
-No market adapter is implemented in the verified baseline. Existing tracked input data is synthetic demo data.
+Atlas must not become a required runtime, identity provider, strategy authority, risk authority, data source, ledger, credential store, update channel or execution dependency. Connector failure must leave the standalone product safe and usable within its authorized local boundary.
 
----
+# 7. Local and Future Cloud Boundaries
 
-# 4. Target News-Input Contract
+Initial product operation and default storage may be local. Local data must have documented locations, retention behavior, export, backup, deletion and uninstall handling. Sensitive data must not be silently uploaded.
 
-```json
-{
-  "pack_id": "TRL-NEWS-0001",
-  "as_of": "2026-07-14",
-  "items": [
-    {
-      "headline": "…",
-      "source": "publication name",
-      "source_reference": "human-supplied reference",
-      "published": "2026-07-13",
-      "reliability": "official | reputable | low | unverified",
-      "summary": "2-3 sentence human or analyst summary"
-    }
-  ]
-}
-```
+Future cloud identity, subscription, synchronization or update services belong to later releases. Each needs explicit consent, minimization, encryption, availability, privacy, deletion and incident-response controls. A cloud outage must not enable a more permissive trading mode.
 
-The target News Analyst may downgrade but never upgrade a supplied reliability label. No news adapter or News Analyst is implemented in the verified baseline.
+# 8. Market-Data Boundary
 
----
+Release 1 consumes a supplied, validated, single-instrument OHLCV pack; it has no market-data adapter. The committed demonstration pack is synthetic.
 
-# 5. Target Risk Policy and Control Ownership
+Future adapters must be isolated behind stable interfaces and must record provider, license, instrument identity, timestamp/timezone, adjustments, freshness, gaps and quality flags. Invalid, stale, incomplete, out-of-order or ambiguously licensed data must fail closed. Data permission for internal research does not automatically permit redistribution or customer use.
 
-| Rule | Target boundary |
-|------|-----------------|
-| Real-money execution | PROHIBITED; no live execution interface is authorized |
-| Paper position size | System maximum 5% of paper equity per instrument |
-| Paper drawdown halt | System halt threshold at -15% from mark-to-market high-water mark |
-| Leverage | None; research positions are unlevered |
-| Averaging into losers | PROHIBITED; a losing position may not be increased |
-| Position concentration | Target maximum 3 open paper positions per asset class; Release 1 is stricter because it is single-instrument |
-| Unknowns | Every Manager synthesis must contain a non-empty “What we do not know” section |
-| Claims | No output may contain profit projections, promises, or claims of proven performance |
+# 9. Strategy Lifecycle
 
-System hard limits are owned by the deterministic system, outside strategy control. Strategy input may request a lower limit but may never raise a system maximum. Manager and AI components may not override hard limits. A future independent Risk Guardian may veto an otherwise allowed action but may not weaken, bypass, or raise a control.
+The target lifecycle is: proposed, specified, reviewed, tested, experimental paper-only, approved for a named mode and version, suspended, retired. Every strategy record must include immutable identity/version, parameters, rule references, evidence, data scope, limitations, ownership, review history and allowed modes.
 
-The current prototype does not satisfy this ownership contract because caller-supplied risk policy can raise nominal maxima. Tests that override limits demonstrate a test path; they do not prove that production-style hard limits are non-overridable.
+Changing a signal, parameter, fill, cost, accounting or risk rule requires a new attributable version. No strategy is currently Founder-approved for real trading. SMA-001 in Release 1 is an experimental research definition, not an investable recommendation. FIB-001 remains unspecified and unimplemented.
 
----
+# 10. Risk Guardian Target
 
-# 6. Target Forward Paper-Simulation Workflow
+The planned independent Risk Guardian is a separate decision boundary that may veto but never weaken system controls. It will evaluate mode, user authority, strategy status, position/concentration limits, loss and drawdown limits, data quality, market/session state, adapter health and emergency-stop state.
 
-1. A governed input pack is validated and accepted or rejected with explicit reason codes.
-2. The deterministic core evaluates a versioned strategy without future information.
-3. The analyst chain reviews supplied artifacts; each output is independently recorded.
-4. The Manager produces a synthesis and either a paper-action proposal or an explicit `NO TRADE` outcome.
-5. The independent Risk Guardian may veto but cannot weaken system controls.
-6. A human records `ACCEPT` or `REJECT` for any paper action.
-7. An accepted paper action becomes eligible only under the recorded causal execution rule.
-8. A forward paper simulator updates cash, positions, mark-to-market equity, and the audit trail as new data arrives.
-9. The Founder dashboard presents results and limitations without profitability claims.
+Its rules and decisions must be versioned and audited. Failure, timeout, uncertainty or unavailable state must fail closed. Release 1 contains deterministic risk functions and system-owned limits; it does not contain the future independent Risk Guardian service.
 
-The existing implementation replays historical arrays in one call. It is a historical demo backtest, not this forward paper simulator. The existing “paper portfolio ledger” wording referred to a target workflow and a limited historical accounting layer, not an implemented forward simulator.
+# 11. Forward Paper-Simulation Target
 
----
+The target simulator processes new, validated data over time, schedules causal paper actions, applies the same deterministic risk/accounting foundations, and persists cash, positions, fills, costs, marked equity, drawdown and explicit no-action outcomes. It sends no broker or external order.
 
-# 7. Target Decision Record
+Release 1 replays a historical array in one in-memory evaluation. It is not a forward simulator, persistent paper account or claim of market-realistic execution.
 
-```json
-{
-  "decision_id": "TRL-DEC-0001",
-  "date": "2026-07-14",
-  "input_packs": ["TRL-PACK-0001", "TRL-NEWS-0001"],
-  "strategy_id": "governed identifier",
-  "strategy_version": "governed version",
-  "manager_outcome": {
-    "outcome": "PAPER_ACTION | NO_TRADE",
-    "action": "open | close | hold | null",
-    "symbol": "EXAMPLE",
-    "paper_size_pct": 0,
-    "reason_codes": ["stable reason code"],
-    "rationale": "…",
-    "invalidation_condition": "…"
-  },
-  "bull_case_ref": "artifact path",
-  "bear_case_ref": "artifact path",
-  "unknowns": ["…"],
-  "human_decision": "ACCEPT | REJECT | NOT_APPLICABLE",
-  "risk_policy_checks": {
-    "size_ok": true,
-    "drawdown_halt": false,
-    "risk_guardian_veto": false
-  }
-}
-```
+# 12. Audit and Reproducibility
 
-The current helper can construct a limited decision-log dictionary but does not implement this governed workflow, explicit `NO TRADE` contract, analyst chain, or independent Risk Guardian.
+Release 1 records canonical input, configuration and strategy hashes; run identity; engine digest and manifest; assumptions; ordered decisions, fills, trades and accounting rows; outcomes and reason codes. Source provenance is captured atomically across the facade and core modules.
 
----
+The target persistent ledger must be append-oriented, tamper-evident, exportable and attributable to product, engine, strategy, data, policy, mode, user and adapter versions. Secrets must never appear in audit records. Determinism requires identical validated inputs and versioned configuration to yield identical canonical results; it does not imply real-market repeatability.
 
-# 8. Target Research Report
+# 13. Packaging and Distribution
 
-The target report includes:
+Windows is the first supported implementation target. A distributable build requires a versioned installer/package, integrity verification, dependency inventory, release notes, supported upgrade/rollback behavior, clear uninstall and data-removal instructions and a tested recovery path.
 
-- Input, engine, strategy, execution, cost, terminal-position, and risk-policy identities.
-- Per-bar cash, position value, total mark-to-market equity, and high-water mark.
-- Open positions and closed hypothetical trades.
-- Explicit `NO TRADE`, blocked, and halt events with stable reason codes.
-- In-sample, out-of-sample, and walk-forward evidence when those gates are implemented.
-- Data-quality limitations, assumption violations, and unresolved unknowns.
-- Analyst calibration notes and an immutable audit reference.
-- A fixed paper-only, hypothetical-results disclaimer.
+macOS and Linux may be claimed only after separate packaging and testing. "Works on every PC" is an aspiration, not a current claim. No customer distribution is currently authorized.
 
-Forbidden report content includes annualized projections presented as expectations, win-rate marketing, comparisons implying parity with real funds, profit promises, and any claim that synthetic results prove future performance.
+# 14. Authentication/Subscription Target
+
+Local paper-only alpha may begin without cloud accounts if its authorization and data boundary are explicit. Accounts, licensing and subscriptions are proposed for TRL-R3, not Release 2 implementation by default.
+
+Future identity must support secure authentication, session management, recovery, revocation, least privilege and jurisdiction controls. Entitlement must never silently promote a user into an execution mode. Subscription status must not compromise safe exit, audit export or local data removal.
+
+# 15. Broker-Adapter Boundary
+
+No broker adapter exists or is authorized. A future adapter must be isolated from strategies and the interface by typed proposal, risk, user-confirmation and audit boundaries. It must map instrument and order semantics explicitly, use idempotency, reconcile broker state and handle rejects, partial fills, cancellation, timeouts and uncertain outcomes safely.
+
+TRL-R4 may evaluate broker-demo and assisted execution only after separate authorization. TRL-R5 may evaluate automation only under a separate governance decision. A roadmap entry is not permission to connect a broker.
+
+# 16. Security and Credential Boundary
+
+Release 1 stores or uses no broker, market or customer credential. Future secrets must use an approved operating-system or managed secret store, encryption in transit and at rest, least privilege, rotation and revocation. Secrets must not appear in source, configuration exports, logs, reports, crash data, support bundles or Atlas messages.
+
+Execution-capable components require signed/updateable packages, dependency review, threat modeling, audit protection, safe defaults, rate limits, secure recovery and incident response. Missing or compromised credential state must fail closed.
+
+# 17. Regulatory and Commercial Gates
+
+Before any personalized insight, paid distribution, broker connection, assisted submission or automated execution, the product needs documented legal and regulatory review for each jurisdiction and user class. Review must address investment-advice characterization, licensing/registration, marketing, disclosures, privacy, record retention, market-data rights, consumer protection, taxation and incident obligations.
+
+Technical completion does not equal regulatory or commercial approval. Disclaimers, user consent and "at your own risk" language do not eliminate operator, developer, platform or regulatory responsibility. The product will not accept custody of customer funds.
+
+## 17.1 Release 1 Generated Wording and Future Disclosures
+
+The authoritative implemented and tested Release 1 generated-report wording is:
+
+- Primary disclaimer: **ARCHITECTURE DEMONSTRATION ONLY - NOT FINANCIAL ADVICE - NO LIVE TRADING - NO PROFIT CLAIMS**
+- Performance disclaimer: **Hypothetical research results from paper-only processing; they do not represent actual trading, predict future returns, or authorize a trade.**
+- Generated Markdown label: **PAPER/RESEARCH ONLY**
+
+These strings are the current internal/generated output contract. Current Release 1 output is not approved for public or customer distribution.
+
+**PLANNED - NOT IMPLEMENTED:** Future customer-facing product disclosures are a separate product-layer requirement and must not be substituted for the current generated strings. Future packaging may add jurisdiction-specific disclosures only after legal and regulatory review.
+
+# 18. Release Roadmap
+
+The governed proposal is:
+
+- TRL-R2-001 - Portable Application Foundation.
+- TRL-R2-002 - Governed Strategy Registry and Vault.
+- TRL-R2-003 - Market-Data and Data-Quality Layer.
+- TRL-R2-004 - Insights and Explainability Engine.
+- TRL-R2-005 - Forward Paper-Trading Simulator.
+- TRL-R2-006 - Independent Risk Guardian and Persistent Audit Ledger.
+- TRL-R2-007 - Local Operator Dashboard.
+- TRL-R2-008 - Windows Packaging and Closed Paper Alpha.
+- TRL-R3 - Accounts, Licensing and Subscription Services.
+- TRL-R4 - Broker-Demo and Assisted-Execution Evaluation.
+- TRL-R5 - Separately governed automated-execution evaluation.
+
+Release 2 is proposed but not implemented. Every checkpoint requires explicit scope, authorization, evidence and closeout. Inclusion in this roadmap is not implementation authorization.
+
+The next proposed checkpoint is **TRL-R2-001 — PORTABLE APPLICATION FOUNDATION**. TRL-R2-001 remains proposed, unimplemented, and unauthorized. It may begin only after separate explicit Founder authorization; roadmap inclusion, Founder acceptance of Release 1, and closing TRL-R1-005 do not provide that authorization.
+
+# 19. Explicit Exclusions
+
+Current authority excludes live data connections, broker/platform adapters, credentials, external orders, live trading, customer funds, custody, customer distribution, payments, subscriptions, personalized investment advice, leverage, short selling, derivatives, multi-asset portfolios, automatic paper-to-live promotion and performance guarantees.
+
+Release 1 also excludes forward paper simulation, persistent portfolio state, a Strategy Vault workflow, independent Risk Guardian service, market/news adapters, five-agent orchestration, local AI/Gemma, dashboard and packaging. Planned status must not be read as implemented, tested or demonstrated status.
+
+# 20. Definition of Operational Readiness
+
+Operational readiness is not reached. It requires, for the exact supported release and mode:
+
+- Approved scope, architecture, threat model and dependency inventory.
+- Complete functional, deterministic, failure, recovery, security, privacy and platform test evidence.
+- Licensed data and documented data-quality controls.
+- Versioned packaging, installation, upgrade, rollback, uninstall and data-removal procedures.
+- Monitoring, emergency stop, incident response, support and audit export.
+- Approved strategy and risk records for the named mode.
+- Legal, regulatory, jurisdiction, marketing and commercial approvals where applicable.
+- Founder approval recorded separately for product distribution and every execution-capable mode.
+
+Passing Release 1 tests meets the Release 1 engineering contract only. It does not make PRJ-017 operationally ready, commercially releasable or safe for live trading.
 
 ---
 
-# 9. Target Deterministic Backtest Contract
+## Historical Reconciliation
 
-The target interface accepts validated data, a governed declarative strategy version, and a system-owned risk configuration. It returns a reproducible research result containing an equity curve, drawdown, hypothetical fills, positions, costs, `NO TRADE` or blocked outcomes, assumption violations, and complete audit metadata.
+TRL-R1-001's 2026-07-24 findings - 12 narrow tests, five warnings, regime signals, same-close fills, missing marked accounting/costs/reason codes and caller-weakenable limits - remain historical evidence. TRL-R1-003 corrected those scoped kernel defects; TRL-R1-004 modularized the behavior without changing it. Multi-instrument portfolios, realistic costs, forward simulation and broader product architecture remain limited, deferred or prohibited as stated above.
 
-The target engine must provide:
+## Documentation Review Resolution
 
-- Strict input validation before evaluation.
-- Genuine event detection rather than a continuing regime label.
-- A causal signal-and-fill sequence.
-- Deterministic next-bar execution with the exact assumed price recorded in every result.
-- Per-bar cash and mark-to-market accounting.
-- Explicit terminal-position handling.
-- Deterministic transaction costs, commission, spread, and slippage assumptions.
-- System-owned, non-overridable hard-risk maxima.
-- Reproducibility identifiers and stable reason codes.
-- Out-of-sample and walk-forward evaluation before any research-validity consideration.
+- P2 Founder-acceptance finding: Resolved by the explicit 2026-07-26 Founder decision.
+- P2 disclaimer-alignment finding: Resolved by retaining the implemented Release 1 strings as the current output contract and marking future customer wording as planned.
+- P2 TRL-R1-005 lifecycle finding: Resolved by making this documentation-only closeout commit the checkpoint’s completion event while preserving all no-code, no-distribution, no-execution, and no-Release-2 boundaries.
 
-No executable code may be loaded from strategy files. No future information may influence a signal.
-
----
-
-# 10. Strategy Governance and Research Components
-
-The approved long-term architecture includes:
-
-- A Strategy Registry containing identity, version, parameters, status, evidence, limitations, and approval history.
-- A TRL Strategy Vault for governed strategy artifacts; automation is planned, not implemented.
-- Regime detection that is distinct from strategy event generation.
-- SMA-001 only after a governed record is created. No such record currently exists, and SMA logic in the demo is not Founder-approved.
-- FIB-001 only after separate specification, review, and authorization. It is not specified or implemented.
-- Out-of-sample and walk-forward testing.
-- Realistic cost-model evolution beyond the fixed Release 1 baseline.
-- An independent Risk Guardian and auditable veto records.
-
-No strategy is currently approved for real-money use or proven profitable.
-
----
-
-# 11. Verified Implemented Baseline — TRL-R1-001
-
-The read-only audit completed on 2026-07-24 verified the following baseline:
-
-- A local deterministic demo prototype exists at `09_AI_Systems/02_Tools/Trading_Lab/`.
-- It includes a historical backtest function, SMA calculations, selected risk checks, a decision-log helper, a Markdown performance-report generator, and a fixed-seed synthetic pack generator.
-- Twelve narrow `unittest` tests pass.
-- Five `ResourceWarning` events occur because test code opens files without closing them.
-- Tracked demo market/news inputs and generated reports are synthetic, fictional, and hypothetical.
-- There is no broker, credential, network, external-order, or live-trading capability.
-- The five-agent workflow is documented only.
-
-Direct tests do not establish strategy validity, profitability, realistic execution, correct portfolio accounting, complete architecture enforcement, or production readiness. Current demo results must not support an investment decision or performance claim.
-
----
-
-# 12. Verified Defects and Missing Components
-
-## 12.1 Known defects in the current prototype
-
-- SMA output describes the current fast-above-slow regime; it is not a genuine crossover event.
-- Bar `t` close information produces a signal and a fill at the same already-known close.
-- Open-position profit and loss is not marked to market.
-- Drawdown is computed from realized equity only and can be materially understated.
-- Multiple instrument series are aligned by list index rather than timestamp.
-- Transaction costs, commissions, spread, and slippage are absent.
-- Caller-controlled risk policy can weaken nominal hard limits.
-- Explicit `NO TRADE` results and stable blocked-reason codes are absent.
-- Terminal open-position handling is not explicit.
-
-## 12.2 Missing or planned components
-
-- Governed SMA-001 record and any FIB-001 specification or implementation.
-- Strategy Registry and TRL Strategy Vault.
-- Regime-detection subsystem.
-- Out-of-sample and walk-forward test harnesses.
-- Independent Risk Guardian.
-- Five-agent research workflow.
-- Market and news adapters.
-- Forward paper simulator.
-- Platform adapters.
-- Immutable audit-trail service and Founder dashboard.
-- Local AI and Gemma evaluation.
-
----
-
-# 13. Release 1 Boundary
-
-Release 1 is a validated, causal, deterministic, single-instrument research kernel. Its detailed acceptance contract is `TRL_R1_RELEASE_CONTRACT.md`.
-
-The causal timing rule is mandatory:
-
-1. Bar `t` is validated and closes.
-2. A genuine strategy event may be calculated using information available through the close of bar `t` only.
-3. That event cannot fill at bar `t`’s already-known closing price.
-4. A resulting order becomes eligible at the next chronological validated bar, `t+1`.
-5. Release 1 assumes a fill based on the `t+1` open, adjusted by the recorded deterministic cost/slippage model.
-6. If no valid next bar exists, no fill occurs and the result records the applicable reason code.
-
-Every result must record the next-bar price assumption. No future bar, including the `t+1` open, may influence the signal calculated at `t`.
-
-Release 1 excludes multi-asset portfolios, FIB-001, Strategy Vault automation, the five-agent workflow, local AI, Gemma, dashboards, broker/platform adapters, and live trading. Those exclusions do not remove them from the approved long-term architecture.
-
----
-
-# 14. Escalation and Review
-
-Any request to connect live data, brokerage services, external order systems, credentials, or real funds is outside PRJ-017’s current authority and must be escalated to the Founder as a separately governed decision. This document never authorizes implementation by itself.
-
----
-
-# 15. Revision History
+## Revision History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | 2026-07-14 | Initial design-only architecture |
-| 1.1 | 2026-07-15 | Recorded the Founder-authorized paper-only historical prototype and the still-unimplemented analyst chain |
-| 1.2 | 2026-07-24 | Reconciled target architecture, verified baseline, defects, missing components, control ownership, causal timing, Release 1 boundary, and continuous section numbering after TRL-R1-001 |
+| 1.0 | 2026-07-14 | Initial design-only architecture. |
+| 1.1 | 2026-07-15 | Recorded the Founder-authorized paper-only historical prototype and unimplemented analyst chain. |
+| 1.2 | 2026-07-24 | Reconciled the TRL-R1-001 baseline and defined the Release 1 target boundary. |
+| 1.3 | 2026-07-25 | Recorded Release 1 implementation completion and technical evidence, current modules, portable target architecture, capability gates, standalone/Atlas boundary and governed roadmap; Founder acceptance was not yet recorded. |
+| 1.4 | 2026-07-26 | Recorded explicit Founder acceptance, corrected the Owner's legal name, aligned current generated wording with planned future disclosures and closed the two P2 documentation findings. |
+| 1.5 | 2026-07-26 | Made the TRL-R1-005 documentation-only closeout commit the checkpoint completion event and preserved the separate Release 2 authorization boundary. |
