@@ -7,7 +7,7 @@
 | Document ID | TRL-R2-003-MT5-CONTRACT-001 |
 | Document Type | Governed Application Contract |
 | Status | Implemented for source validation |
-| Version | 1.1 |
+| Version | 1.2 |
 | Date | 2026-07-27 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Project | PRJ-017 - ALSAKKAF Trading Research Lab |
@@ -171,7 +171,13 @@ Provider exception text is never returned. Only a fixed diagnostic and integer e
 
 `test_mt5_connector.py` uses an injected data-source fake and controlled clocks. It covers default disablement, missing dependency, initialization failure and timeout, exact method and constant access, forbidden nonuse, shutdown, sanitized exceptions, source nonmutation, thread serialization, exact-first and bounded candidate resolution, clock-skew tolerance, completion-time boundary crossing, provider-specific and invalid timeframe identifiers, tick/specification/spread validation, namedtuple symbol/tick shapes, structured-array-like bars, numeric scalar subclasses, zero optional FX fields, unknown commission, bar counts and states, invalid/empty/partial bars, freshness and staleness, deterministic schema, APIs, HTTP methods, traversal, dashboard language, capabilities, Release 1 parity, registry/vault parity, and artifact absence.
 
-Automated validation neither imports the real optional package nor connects to a real terminal, broker, live feed, news service, or network. Compatibility with an installed official package and real terminal remains unverified until a separately authorized manual rehearsal; no broker is certified by these tests.
+Automated validation neither imports the real optional package nor connects to a real terminal, broker, live feed, news service, or network. Automated evidence remains separate from the narrow manual external-terminal evidence recorded below; no broker is certified by either evidence class.
+
+## Manual Demo-Terminal Rehearsal Evidence
+
+`TRL-R2-003-REHEARSAL-01` is recorded in [TRL_R2_003_DEMO_REHEARSAL_EVIDENCE.md](TRL_R2_003_DEMO_REHEARSAL_EVIDENCE.md). It passed as narrow manual compatibility evidence for implementation commit `35ef0a6`, one operator-owned 4T Limited MT5 demo terminal, one Windows environment, and exact symbol `XAUUSD`.
+
+This manual evidence is not part of the offline automated test evidence and does not describe 4T Limited as certified or generally supported. It does not establish production readiness, live-account compatibility, customer distribution readiness, strategy validity, investment suitability, profitability, or execution approval. Every credential, account-data, position, history, order, execution, privacy, and local-only prohibition in this contract remains unchanged.
 
 ## Release 1 and TRL-R2-002 Compatibility
 

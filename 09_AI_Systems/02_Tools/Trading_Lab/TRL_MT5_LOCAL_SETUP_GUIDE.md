@@ -7,7 +7,7 @@
 | Document ID | TRL-R2-003-MT5-SETUP-001 |
 | Document Type | Local Operator Setup Guide |
 | Status | Active for separately authorized manual rehearsal |
-| Version | 1.1 |
+| Version | 1.2 |
 | Date | 2026-07-27 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Project | PRJ-017 - ALSAKKAF Trading Research Lab |
@@ -31,7 +31,13 @@ For a later separately authorized manual integration rehearsal:
 
 Broker feeds, symbol names, suffixes, specifications, market sessions, timestamps, tick availability, and spreads differ. A synthetic connector test is not broker certification.
 
-Offline tests model official-package object shapes, but compatibility with an installed official package and real terminal remains unverified until the separately authorized manual rehearsal.
+Offline tests model official-package object shapes but do not themselves verify an installed official package or real terminal. Separately governed manual evidence is recorded below.
+
+## Recorded Rehearsal
+
+The narrow manual evidence for implementation commit `35ef0a6` is recorded in [TRL_R2_003_DEMO_REHEARSAL_EVIDENCE.md](TRL_R2_003_DEMO_REHEARSAL_EVIDENCE.md). One operator-owned 4T Limited demo terminal and exact symbol `XAUUSD` completed one successful read-only rehearsal under the recorded conditions.
+
+Do not infer support for another broker, terminal, symbol, account type, computer, or operating system. Any future compatibility statement requires its own separately authorized, independent demo-only validation. Credentials must remain inside the user's MT5 terminal, and the Trading Lab remains read-only with no order capability.
 
 ## Start Ordinary Synthetic Mode
 
