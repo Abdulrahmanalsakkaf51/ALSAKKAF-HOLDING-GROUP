@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -178,6 +178,89 @@ function renderMarketConnection(snapshot) {
   });
 }
 
+function externalSourceLink(url, title) {
+  const link = document.createElement("a");
+  link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer";
+  link.textContent = title;
+  return link;
+}
+
+function officialItemReference(record, label) {
+  const container = document.createElement("span");
+  if (record.source_url_availability_status === "GOVERNED_ITEM_LINK_AVAILABLE") {
+    container.appendChild(externalSourceLink(record.source_url, label));
+    return container;
+  }
+  const reason = record.source_url_reason_code || "SOURCE_ITEM_LINK_NOT_PROVIDED";
+  container.className = "official-link-unavailable";
+  container.textContent = `${label} — Official item link unavailable (${record.source_url_availability_status || "SOURCE_ENDPOINT_FALLBACK"}; ${reason})`;
+  return container;
+}
+
+function operationalFreshnessLabel(record) {
+  const confirmed = record.last_successfully_observed_timestamp_utc || "SOURCE_NOT_PROVIDED";
+  if (record.operational_freshness_status === "NEWS_RECORD_STALE") {
+    return `STALE — SOURCE UNAVAILABLE · ${record.latest_source_failure_reason || "NEWS_SOURCE_SCHEMA_INVALID"} · Last confirmed ${confirmed}`;
+  }
+  return `CURRENT · Last confirmed ${confirmed}`;
+}
+
+function clearRows(id) { $(id).textContent = ""; }
+function unavailable(value) { return value == null ? "Unavailable — SOURCE_NOT_PROVIDED" : String(value); }
+
+function renderOfficialNews(bundle) {
+  ["news-loading-state", "news-disabled-state", "news-empty-state", "news-partial-state", "news-error-state", "news-persistence-state"].forEach((id) => { $(id).hidden = true; });
+  clearRows("news-source-table"); clearRows("news-item-table"); clearRows("economic-event-table"); $("news-item-cards").textContent = "";
+  if (!bundle || bundle.error) {
+    setText("news-overall-status", "ERROR"); setText("news-reason-code", bundle ? bundle.error : "LOCAL_NEWS_API_UNAVAILABLE"); $("news-error-state").hidden = false; return;
+  }
+  const { health, sources, items, events } = bundle;
+  setText("news-overall-status", health.status); setText("news-reason-code", health.reason_code);
+  setText("news-cache-persistence", health.cache_persistence_status);
+  setText("news-last-success", health.last_successful_retrieval_utc); setText("news-next-refresh", health.next_permitted_refresh_utc);
+  if (!health.enabled) $("news-disabled-state").hidden = false;
+  else if (health.status === "NEWS_PARTIAL") $("news-partial-state").hidden = false;
+  else if (["NEWS_ALL_SOURCES_FAILED", "NEWS_CACHE_INVALID", "NEWS_CACHE_WRITE_FAILED", "NEWS_PROVIDER_CHANGED"].includes(health.status)) $("news-error-state").hidden = false;
+  else if (!items.items.length && !events.events.length) $("news-empty-state").hidden = false;
+  if (health.cache_persistence_status === "NEWS_CACHE_WRITE_FAILED") {
+    const warning = $("news-persistence-state");
+    warning.textContent = health.cache_persistence_diagnostic || "Local cache persistence failed. Current in-memory news updates were not persisted and may be lost after restart.";
+    warning.hidden = false;
+  }
+  sources.sources.forEach((source) => {
+    const tr = document.createElement("tr");
+    cell(tr, source.source_id); cell(tr, source.publisher); cell(tr, source.country_or_region); cell(tr, source.currency_tags.join(", ")); cell(tr, source.health.status); cell(tr, source.health.last_success_timestamp_utc || "—");
+    $("news-source-table").appendChild(tr);
+  });
+  items.items.forEach((item) => {
+    const freshness = operationalFreshnessLabel(item);
+    const card = document.createElement("article"); card.className = "news-card";
+    if (item.operational_freshness_status === "NEWS_RECORD_STALE") card.classList.add("record-stale");
+    const freshnessBadge = document.createElement("p"); freshnessBadge.className = item.operational_freshness_status === "NEWS_RECORD_STALE" ? "freshness-label freshness-stale" : "freshness-label freshness-fresh"; freshnessBadge.textContent = freshness; card.appendChild(freshnessBadge);
+    card.appendChild(officialItemReference(item, item.title));
+    const metadata = document.createElement("p"); metadata.textContent = `${item.publisher} · ${item.published_timestamp_utc || "Time not supplied"} · ${item.country_or_region} · ${item.currency_tags.join(", ")} · ${freshness}`; card.appendChild(metadata); $("news-item-cards").appendChild(card);
+    const tr = document.createElement("tr"); cell(tr, item.published_timestamp_utc || "SOURCE_NOT_PROVIDED"); cell(tr, item.publisher);
+    const titleCell = document.createElement("td"); titleCell.appendChild(officialItemReference(item, item.title)); tr.appendChild(titleCell);
+    cell(tr, item.country_or_region); cell(tr, item.currency_tags.join(", ")); cell(tr, freshness); $("news-item-table").appendChild(tr);
+  });
+  events.events.forEach((event) => {
+    const tr = document.createElement("tr");
+    const utcLabel = event.scheduled_time_precision === "DATE_ONLY" ? `${event.scheduled_timestamp_utc} (DATE ONLY)` : event.scheduled_timestamp_utc;
+    const localLabel = event.scheduled_time_precision === "DATE_ONLY" ? "Date only — local release time not provided" : new Date(event.scheduled_timestamp_utc).toLocaleString();
+    cell(tr, utcLabel); cell(tr, localLabel);
+    const eventCell = document.createElement("td"); eventCell.appendChild(officialItemReference(event, event.event_name)); tr.appendChild(eventCell);
+    cell(tr, event.event_series_id);
+    cell(tr, unavailable(event.actual)); cell(tr, unavailable(event.forecast)); cell(tr, unavailable(event.previous)); cell(tr, unavailable(event.importance)); cell(tr, operationalFreshnessLabel(event)); $("economic-event-table").appendChild(tr);
+  });
+}
+
+async function loadOfficialNews() {
+  try {
+    const [health, sources, items, events] = await Promise.all([getJson("/api/news-health"), getJson("/api/news-sources"), getJson("/api/news-items"), getJson("/api/economic-events")]);
+    return { health, sources, items, events };
+  } catch (error) { return { error: error.message }; }
+}
+
 function wireTabs() {
   [["report-tab", "report-panel", "json-tab", "json-panel"], ["json-tab", "json-panel", "report-tab", "report-panel"]].forEach(([tab, panel, otherTab, otherPanel]) => $(tab).addEventListener("click", () => { $(tab).setAttribute("aria-selected", "true"); $(otherTab).setAttribute("aria-selected", "false"); $(panel).hidden = false; $(otherPanel).hidden = true; }));
 }
@@ -185,7 +268,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket);
+  renderOverview(state.result, state.market); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -194,7 +277,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null)]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }

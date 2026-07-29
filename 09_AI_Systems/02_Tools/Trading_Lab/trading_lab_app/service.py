@@ -8,6 +8,7 @@ from pathlib import Path
 from . import APPLICATION_NAME, APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MODE
 from .capabilities import capability_manifest
 from .mt5_service import disabled_service
+from .news_service import disabled_service as disabled_news_service
 from .strategy_registry import load_registry
 
 
@@ -65,6 +66,9 @@ def health_document():
         "synthetic_data_only": False,
         "synthetic_mode_default": True,
         "optional_local_mt5_read_only_data": True,
+        "mt5_enabled_by_default": False,
+        "optional_exact_official_news_metadata": True,
+        "official_news_enabled_by_default": False,
     }
 
 
@@ -102,6 +106,26 @@ def market_snapshot_document(market_data_service=None):
     """Return the latest strict snapshot without invoking financial evaluation."""
     active_service = market_data_service or disabled_service()
     return active_service.snapshot_document()
+
+
+def news_health_document(news_service=None):
+    active_service = news_service or disabled_news_service()
+    return active_service.health_document()
+
+
+def news_sources_document(news_service=None):
+    active_service = news_service or disabled_news_service()
+    return active_service.sources_document()
+
+
+def news_items_document(news_service=None):
+    active_service = news_service or disabled_news_service()
+    return active_service.news_items_document()
+
+
+def economic_events_document(news_service=None):
+    active_service = news_service or disabled_news_service()
+    return active_service.economic_events_document()
 
 
 def strategy_registry_document():

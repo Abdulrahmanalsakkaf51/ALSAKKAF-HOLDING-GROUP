@@ -1,6 +1,7 @@
 """Closed capability manifest including narrow TRL-R2-003 MT5 read-only data."""
 
 from . import APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MODE
+from .news_service import STABLE_HEALTH_CODES
 
 
 IMPLEMENTED = (
@@ -20,6 +21,14 @@ IMPLEMENTED = (
     "MT5 connection and data-health reporting",
     "M1, M5, H4 and D1 read-only support",
     "Local MT5 dashboard/API presentation",
+    "Optional explicit official-news enablement",
+    "Exact governed no-key source allowlist",
+    "Safe RSS/Atom and BEA schedule parsing",
+    "Deterministic official-news item and event identities",
+    "Bounded local official-news cache",
+    "Official source health and freshness",
+    "Localhost official-news and economic-event APIs",
+    "Accessible official-news dashboard presentation",
 )
 
 NOT_IMPLEMENTED = (
@@ -49,6 +58,21 @@ NOT_IMPLEMENTED = (
     "Strategy selection",
     "Regime detection",
     "Broker positions or balances",
+    "Commercial news",
+    "Full-text aggregation",
+    "General web search",
+    "Social-media collection",
+    "Broker news",
+    "Sentiment analysis",
+    "AI summarization",
+    "Market-impact ranking",
+    "Event-to-price joining",
+    "Signals and recommendations",
+    "Position sizing",
+    "Stop-loss/take-profit calculation",
+    "Paper or live execution",
+    "Cloud synchronization",
+    "Payments, subscriptions and telemetry",
 )
 
 
@@ -60,9 +84,14 @@ def capability_manifest():
         "operating_mode": OPERATING_MODE,
         "paper_research_only": True,
         "data_boundary": (
-            "COMMITTED_SYNTHETIC_DEFAULT; OPTIONAL_OPERATOR_ENABLED_LOCAL_MT5_READ_ONLY"
+            "COMMITTED_SYNTHETIC_DEFAULT; "
+            "OPTIONAL_OPERATOR_ENABLED_LOCAL_MT5_READ_ONLY; "
+            "OPTIONAL_OPERATOR_ENABLED_EXACT_OFFICIAL_NEWS_METADATA"
         ),
-        "network_boundary": "INBOUND_HTTP_ON_127.0.0.1_ONLY; NO_OUTBOUND_NETWORK",
+        "network_boundary": (
+            "INBOUND_HTTP_ON_127.0.0.1_ONLY; OUTBOUND_HTTPS_DISABLED_BY_DEFAULT; "
+            "EXPLICIT_EXACT_OFFICIAL_ENDPOINTS_ONLY"
+        ),
         "implemented": list(IMPLEMENTED),
         "not_implemented": list(NOT_IMPLEMENTED),
         "execution_capability": False,
@@ -89,8 +118,21 @@ def capability_manifest():
         "local_mt5_symbol_specification_capability": True,
         "local_mt5_data_health_capability": True,
         "local_mt5_supported_timeframes": ["M1", "M5", "H4", "D1"],
+        "local_mt5_enabled_by_default": False,
         "local_mt5_order_capability": False,
         "news_feed_capability": False,
+        "legacy_news_feed_capability_meaning": (
+            "No broad, commercial, full-text, broker, social, search, or arbitrary news feed"
+        ),
+        "official_news_metadata_capability": True,
+        "official_economic_schedule_capability": True,
+        "official_news_enabled_by_default": False,
+        "official_news_no_key_capability": True,
+        "official_news_full_text_capability": False,
+        "official_news_sentiment_capability": False,
+        "official_news_market_impact_capability": False,
+        "official_news_event_price_join_capability": False,
+        "official_news_stable_health_reason_codes": list(STABLE_HEALTH_CODES),
         "order_proposal_capability": False,
         "cloud_backend_capability": False,
         "accounts_capability": False,

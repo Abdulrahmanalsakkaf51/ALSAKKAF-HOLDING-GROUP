@@ -38,6 +38,7 @@ EXPECTED_MANIFEST = [
 ]
 
 sys.path.insert(0, str(BASE))
+import trading_lab_app  # noqa: E402
 from trading_lab_app import app, capabilities, server, service  # noqa: E402
 
 
@@ -88,18 +89,104 @@ class ImportAndLaunchTests(unittest.TestCase):
                 timeout=20,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
-            self.assertEqual(completed.stdout.strip(), "2.0.0-r2.003")
+            self.assertEqual(completed.stdout.strip(), "2.0.0-r2.004")
 
     def test_no_browser_option_prevents_browser_open(self):
         fake_server = mock.Mock()
         fake_server.server_address = ("127.0.0.1", 8765)
         fake_server.serve_forever.side_effect = KeyboardInterrupt
+        fake_news = mock.Mock()
+        fake_server.official_news_service = fake_news
         with mock.patch("trading_lab_app.app.create_server", return_value=fake_server), mock.patch(
             "trading_lab_app.app.webbrowser.open"
         ) as browser:
             self.assertEqual(app.run_server(open_browser=False), 0)
         browser.assert_not_called()
+        fake_news.shutdown.assert_called_once_with()
         fake_server.server_close.assert_called_once_with()
+
+    def test_news_shutdown_precedes_close_and_stopped_message(self):
+        events = []
+        fake_news = mock.Mock()
+        fake_news.configuration.enabled = False
+        fake_news.shutdown.side_effect = lambda: events.append("news-shutdown")
+        fake_server = mock.Mock()
+        fake_server.server_address = ("127.0.0.1", 8765)
+        fake_server.official_news_service = fake_news
+        fake_server.serve_forever.side_effect = KeyboardInterrupt
+        fake_server.server_close.side_effect = lambda: events.append("server-close")
+
+        def capture_print(*values, **_options):
+            if values and values[0] == "Local dashboard stopped.":
+                events.append("stopped-message")
+
+        with mock.patch(
+            "trading_lab_app.app.create_server", return_value=fake_server,
+        ), mock.patch("builtins.print", side_effect=capture_print):
+            self.assertEqual(
+                app.run_server(
+                    open_browser=False, official_news_service=fake_news,
+                ),
+                0,
+            )
+        self.assertEqual(
+            events, ["news-shutdown", "server-close", "stopped-message"],
+        )
+
+    def test_server_close_is_guaranteed_when_news_shutdown_raises(self):
+        fake_news = mock.Mock()
+        fake_news.configuration.enabled = False
+        fake_news.shutdown.side_effect = RuntimeError("controlled shutdown failure")
+        fake_server = mock.Mock()
+        fake_server.server_address = ("127.0.0.1", 8765)
+        fake_server.official_news_service = fake_news
+        fake_server.serve_forever.side_effect = KeyboardInterrupt
+        printed = []
+        with mock.patch(
+            "trading_lab_app.app.create_server", return_value=fake_server,
+        ), mock.patch(
+            "builtins.print", side_effect=lambda *values, **_options: printed.append(values),
+        ), self.assertRaisesRegex(RuntimeError, "controlled shutdown failure"):
+            app.run_server(
+                open_browser=False, official_news_service=fake_news,
+            )
+        fake_server.server_close.assert_called_once_with()
+        self.assertFalse(any(
+            values and values[0] == "Local dashboard stopped."
+            for values in printed
+        ))
+
+    def test_stopped_message_waits_for_completed_news_shutdown(self):
+        events = []
+        fake_news = mock.Mock()
+        fake_news.configuration.enabled = False
+        shutdown_results = iter((False, True))
+
+        def shutdown():
+            result = next(shutdown_results)
+            events.append("shutdown-{}".format(result))
+            return result
+
+        fake_news.shutdown.side_effect = shutdown
+        fake_server = mock.Mock()
+        fake_server.server_address = ("127.0.0.1", 8765)
+        fake_server.official_news_service = fake_news
+        fake_server.serve_forever.side_effect = KeyboardInterrupt
+        fake_server.server_close.side_effect = lambda: events.append("server-close")
+
+        def capture_print(*values, **_options):
+            if values and values[0] == "Local dashboard stopped.":
+                events.append("stopped-message")
+
+        with mock.patch(
+            "trading_lab_app.app.create_server", return_value=fake_server,
+        ), mock.patch("builtins.print", side_effect=capture_print):
+            self.assertEqual(app.run_server(
+                open_browser=False, official_news_service=fake_news,
+            ), 0)
+        self.assertEqual(events, [
+            "shutdown-False", "shutdown-True", "server-close", "stopped-message",
+        ])
 
     def test_unavailable_port_fails_without_fallback(self):
         first = server.create_server(0)
@@ -168,6 +255,10 @@ class ServiceContractTests(unittest.TestCase):
         self.assertFalse(manifest["external_order_capability"])
         self.assertFalse(manifest["credential_storage_capability"])
         self.assertFalse(manifest["telemetry"])
+        self.assertIn(
+            "NEWS_SOURCE_INTERNAL_ERROR",
+            manifest["official_news_stable_health_reason_codes"],
+        )
         expected = {
             "External/live market data", "Forward paper portfolio service",
             "Accounts and authentication", "Subscriptions and payments",
@@ -180,8 +271,55 @@ class ServiceContractTests(unittest.TestCase):
             "Customer distribution approval",
             "Certified broker compatibility", "Live strategy signals",
             "Strategy selection", "Regime detection", "Broker positions or balances",
+            "Commercial news", "Full-text aggregation", "General web search",
+            "Social-media collection", "Broker news", "Sentiment analysis",
+            "AI summarization", "Market-impact ranking", "Event-to-price joining",
+            "Signals and recommendations", "Position sizing",
+            "Stop-loss/take-profit calculation", "Paper or live execution",
+            "Cloud synchronization", "Payments, subscriptions and telemetry",
         }
         self.assertEqual(set(manifest["not_implemented"]), expected)
+
+    def test_operating_mode_and_three_part_data_boundary_are_consistent(self):
+        expected_mode = (
+            "LOCAL_RESEARCH_WITH_OPTIONAL_MT5_READ_ONLY_AND_OFFICIAL_NEWS_METADATA"
+        )
+        version = service.version_document()
+        manifest = capabilities.capability_manifest()
+        health = service.health_document()
+        self.assertEqual(trading_lab_app.OPERATING_MODE, expected_mode)
+        self.assertEqual(version["operating_mode"], expected_mode)
+        self.assertEqual(manifest["operating_mode"], expected_mode)
+        self.assertIn("MT5_READ_ONLY", expected_mode)
+        self.assertIn("OFFICIAL_NEWS_METADATA", expected_mode)
+        with RunningServer() as local:
+            status, _headers, body = local.request("GET", "/api/version")
+            self.assertEqual(status, 200)
+            api_version = json.loads(body.decode("utf-8"))
+            status, _headers, body = local.request("GET", "/api/capabilities")
+            self.assertEqual(status, 200)
+            api_manifest = json.loads(body.decode("utf-8"))
+        self.assertEqual(api_version["operating_mode"], expected_mode)
+        self.assertEqual(api_manifest["operating_mode"], expected_mode)
+        for boundary in (
+            "COMMITTED_SYNTHETIC_DEFAULT",
+            "OPTIONAL_OPERATOR_ENABLED_LOCAL_MT5_READ_ONLY",
+            "OPTIONAL_OPERATOR_ENABLED_EXACT_OFFICIAL_NEWS_METADATA",
+        ):
+            self.assertIn(boundary, manifest["data_boundary"])
+        self.assertFalse(manifest["local_mt5_enabled_by_default"])
+        self.assertFalse(manifest["official_news_enabled_by_default"])
+        self.assertFalse(health["mt5_enabled_by_default"])
+        self.assertFalse(health["official_news_enabled_by_default"])
+        self.assertTrue(health["optional_local_mt5_read_only_data"])
+        self.assertTrue(health["optional_exact_official_news_metadata"])
+        for closed in (
+            "execution_capability", "credential_storage_capability",
+            "accounts_capability", "broker_capability",
+            "local_mt5_order_capability", "external_order_capability",
+            "news_feed_capability",
+        ):
+            self.assertFalse(manifest[closed])
 
 
 class HttpBoundaryTests(unittest.TestCase):
@@ -258,7 +396,7 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
 
     def test_dashboard_contains_every_required_section_and_safety_label(self):
         for section_id in (
-            "overview", "market-connection", "market-chart", "equity", "signals", "strategy",
+            "overview", "market-connection", "official-news", "market-chart", "equity", "signals", "strategy",
             "reports", "risk", "future-modes", "about",
         ):
             self.assertIn('id="{}"'.format(section_id), self.html)
@@ -282,14 +420,22 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
         self.assertIn('prefers-reduced-motion: reduce', (STATIC_DIRECTORY / "styles.css").read_text(encoding="utf-8"))
         self.assertNotIn("<script>", self.html)
 
-    def test_assets_are_local_and_no_analytics_or_external_urls_exist(self):
+    def test_browser_assets_are_local_and_registry_is_exact(self):
+        browser_assets = "\n".join(
+            path.read_text(encoding="utf-8") for path in STATIC_DIRECTORY.iterdir() if path.is_file()
+        ).lower()
+        self.assertNotIn("https://", browser_assets)
+        self.assertNotIn("http://0.0.0.0", browser_assets)
         combined = "\n".join(
             path.read_text(encoding="utf-8") for path in APP_DIRECTORY.rglob("*") if path.is_file()
         ).lower()
-        self.assertNotIn("https://", combined)
-        self.assertNotIn("http://0.0.0.0", combined)
         for term in ("google-analytics", "segment.io", "mixpanel", "stripe", "apikey", "api_key"):
-            self.assertNotIn(term, combined)
+            if term == "api_key":
+                self.assertNotIn('"api_key":', combined)
+            else:
+                self.assertNotIn(term, combined)
+        registry = json.loads((APP_DIRECTORY / "official_news_sources.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(registry["sources"]), 6)
 
     def test_no_broker_credential_external_order_or_outbound_import_surface(self):
         self.assertEqual(set(server.API_ROUTES), {
@@ -299,6 +445,10 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
         })
         self.assertEqual(set(server.MARKET_API_ROUTES), {
             "/api/market-connection", "/api/market-snapshot",
+        })
+        self.assertEqual(set(server.NEWS_API_ROUTES), {
+            "/api/news-health", "/api/news-sources", "/api/news-items",
+            "/api/economic-events",
         })
         for path in APP_DIRECTORY.glob("*.py"):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))

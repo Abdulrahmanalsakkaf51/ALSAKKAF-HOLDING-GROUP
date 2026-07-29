@@ -25,6 +25,7 @@
     <nav class="side-nav" aria-label="Dashboard sections">
       <a href="#overview" aria-current="page">Overview</a>
       <a href="#market-connection">Market connection</a>
+      <a href="#official-news">Official news &amp; events</a>
       <a href="#market-chart">Market chart</a>
       <a href="#equity">Equity &amp; drawdown</a>
       <a href="#signals">Research signals</a>
@@ -39,7 +40,7 @@
     <main id="main-content" tabindex="-1">
       <section class="hero" aria-labelledby="dashboard-title">
         <div>
-          <p class="eyebrow">TRL-R2-003 · OPTIONAL LOCAL MT5 READ-ONLY MARKET DATA</p>
+          <p class="eyebrow">TRL-R2-004 · OPTIONAL LOCAL OFFICIAL-SOURCE INFORMATION</p>
           <h1 id="dashboard-title">Research clarity,<br><span>without execution risk.</span></h1>
           <p class="hero-copy">A deterministic view of the committed synthetic demonstration, powered locally by the stable Release 1 paper/research kernel.</p>
         </div>
@@ -123,6 +124,42 @@
           <div class="table-scroll"><table><caption>M1, M5, H4 and D1 broker bar availability</caption><thead><tr><th scope="col">Timeframe</th><th scope="col">Status</th><th scope="col">Bars</th><th scope="col">Closed</th><th scope="col">Forming</th><th scope="col">Latest source time</th></tr></thead><tbody id="market-timeframe-table"></tbody></table></div>
           <p class="disclosure"><strong>CLOSED</strong> bars belong to completed broker intervals. Only the newest bar may be <strong>FORMING</strong>, and only while its timeframe interval is still open. No missing bar is invented.</p>
           <div class="legal-notice"><strong>DATA ONLY</strong><span>No strategy is being applied to local MT5 data. No order capability exists.</span></div>
+        </section>
+
+        <section id="official-news" class="section" aria-labelledby="official-news-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">EXPLICITLY ENABLED SERVER-SIDE LOCAL RETRIEVAL</p><h2 id="official-news-title">Official news and events</h2></div>
+            <span id="news-overall-status" class="badge badge-neutral" aria-live="polite">LOADING</span>
+          </div>
+          <div class="news-boundary" role="note">
+            <strong>OFFICIAL-SOURCE INFORMATION ONLY</strong>
+            <span>NO STRATEGY IS BEING SELECTED</span>
+            <span>NO BULLISH OR BEARISH INTERPRETATION</span>
+            <span>NO TRADE INSTRUCTION</span>
+            <span>NO MT5 OR ORDER ACTION</span>
+            <span>SOURCE TERMS AND AVAILABILITY CAN CHANGE</span>
+          </div>
+          <div id="news-loading-state" class="state-panel" role="status" aria-live="polite"><span class="loader" aria-hidden="true"></span>Loading local official-news status…</div>
+          <div id="news-disabled-state" class="state-panel" role="status" hidden>Official-news collection is disabled. No publisher source, cache, DNS, or HTTP request was initialized.</div>
+          <div id="news-empty-state" class="state-panel" role="status" hidden>Official-news collection is enabled, but no validated metadata is available.</div>
+          <div id="news-partial-state" class="state-panel error" role="alert" hidden>Some official sources are unavailable. Valid sources remain isolated and visible; failures are not market events.</div>
+          <div id="news-error-state" class="state-panel error" role="alert" hidden>Official-source metadata is unavailable or invalid. No source content was trusted.</div>
+          <div id="news-persistence-state" class="state-panel persistence-warning" role="alert" aria-live="assertive" hidden>Local cache persistence failed. Current in-memory news updates were not persisted and may be lost after restart.</div>
+          <div class="status-strip news-status-strip">
+            <div><span>Last successful retrieval UTC</span><strong id="news-last-success">—</strong></div>
+            <div><span>Next permitted refresh UTC</span><strong id="news-next-refresh">—</strong></div>
+            <div><span>Collection state</span><code id="news-reason-code">NEWS_DISABLED</code></div>
+            <div><span>Cache persistence</span><code id="news-cache-persistence">NEWS_DISABLED</code></div>
+            <div><span>Retention</span><strong>TITLE + LINK METADATA ONLY</strong></div>
+          </div>
+          <h3 class="news-subheading">Governed official publishers</h3>
+          <div class="table-scroll"><table><caption>Per-source health and attribution</caption><thead><tr><th scope="col">Source</th><th scope="col">Publisher</th><th scope="col">Region</th><th scope="col">Currency</th><th scope="col">Health</th><th scope="col">Last success UTC</th></tr></thead><tbody id="news-source-table"></tbody></table></div>
+          <h3 class="news-subheading">Latest official release metadata</h3>
+          <div id="news-item-cards" class="news-card-grid" aria-live="polite"></div>
+          <details class="table-fallback" open><summary>Accessible official-news table</summary><div class="table-scroll"><table><caption>Official publisher title and link metadata; no article body retained</caption><thead><tr><th scope="col">Published UTC</th><th scope="col">Publisher</th><th scope="col">Title</th><th scope="col">Region</th><th scope="col">Currency</th><th scope="col">Freshness</th></tr></thead><tbody id="news-item-table"></tbody></table></div></details>
+          <h3 class="news-subheading">Upcoming BEA economic releases</h3>
+          <div class="table-scroll"><table><caption>BEA scheduled occurrences grouped by deterministic series identity; unavailable values and source freshness are explicit</caption><thead><tr><th scope="col">Scheduled UTC</th><th scope="col">Local time</th><th scope="col">Event occurrence</th><th scope="col">Series ID</th><th scope="col">Actual</th><th scope="col">Forecast</th><th scope="col">Previous</th><th scope="col">Importance</th><th scope="col">Freshness</th></tr></thead><tbody id="economic-event-table"></tbody></table></div>
+          <p class="disclosure">The browser communicates only with localhost. Publisher retrieval, when explicitly enabled, is performed by the local server through the exact governed allowlist using this PC and internet connection. Missing actual, forecast, previous, and importance values remain null with SOURCE_NOT_PROVIDED.</p>
         </section>
 
         <section id="market-chart" class="section" aria-labelledby="market-title">
@@ -236,8 +273,8 @@
 
         <section id="about" class="section" aria-labelledby="about-title">
           <div class="section-heading"><div><p class="eyebrow">RELEASE BOUNDARY</p><h2 id="about-title">About</h2></div></div>
-          <div class="about-grid"><div><span>Application</span><strong id="app-version">—</strong></div><div><span>Kernel</span><strong id="kernel-version">—</strong></div><div><span>Checkpoint</span><strong>TRL-R2-003</strong></div><div><span>Platform</span><strong>Windows-first · local-first</strong></div></div>
-          <p>Release 1 remains the independent stable engine. This application is a local presentation and service layer over its committed synthetic demonstration, plus a separate optional local MT5 read-only data surface that never invokes the engine. macOS and Linux are architectural portability targets and are not claimed as tested.</p>
+          <div class="about-grid"><div><span>Application</span><strong id="app-version">—</strong></div><div><span>Kernel</span><strong id="kernel-version">—</strong></div><div><span>Checkpoint</span><strong>TRL-R2-004</strong></div><div><span>Platform</span><strong>Windows-first · local-first</strong></div></div>
+          <p>Release 1 remains the independent stable engine. This application adds a separate optional official-source metadata collector and preserves the optional local MT5 read-only surface. Neither invokes the other or joins data to the engine. macOS and Linux are architectural portability targets and are not claimed as tested.</p>
           <p>Atlas is only a future optional adapter: it is not installed, contacted, or required by this application.</p>
           <div class="legal-notice"><strong>PAPER/RESEARCH ONLY</strong><span>Architecture demonstration only — not financial advice — no live trading — no profit claims. Hypothetical synthetic results do not predict future returns or authorize a trade.</span></div>
         </section>
