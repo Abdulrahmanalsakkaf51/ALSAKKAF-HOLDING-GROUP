@@ -88,3 +88,138 @@ No raw publisher body, credential, MT5, broker, account, position, order, strate
 The second controlled rehearsal is recorded above. Another live rehearsal remains pending and may be separately authorized only after LIVE-FIX-05 independent review and commit. LIVE-FIX-05 implementation and automated validation authorize no external access or rehearsal.
 
 TRL-R2-005 remains unauthorized and has not begun.
+
+## Final Controlled Live Rehearsal Result
+
+This section is a separate final-rehearsal observation. It preserves both historical rehearsal sections above unchanged. The authorized baseline was commit `a0c7a4a` on branch `codex/TRL-R2-004-live-compatibility`. All mandatory local prechecks passed before the application was started: the exact worktree, branch, commit, clean index and worktree, absence of untracked files and mode changes, free port 8765, absence of a Trading Lab Python process, six complete compiled source identities and unchanged endpoints, disabled-by-default official news, disabled MT5, literal `127.0.0.1` binding, and a unique nonexistent operating-system-temporary cache target were confirmed.
+
+The production application was started with official news explicitly enabled, MT5 disabled, no browser, the committed 900-second refresh interval, and the isolated production-derived cache location. The normal localhost health path triggered one eligible refresh. The orchestration command was then terminated by its command-runner timeout after 1.681 seconds, before the final health document and sanitized source outcomes were captured. No second eligible refresh, retry, extra probe, direct publisher request, browser operation, DNS diagnostic, MT5 operation, or other external operation was initiated. Because the in-memory `network_request_count` was lost, exactly six requests and zero retries are **not confirmed** and must not be inferred from cache persistence.
+
+| Field | Final rehearsal observation |
+|---|---|
+| Baseline commit | `a0c7a4a` |
+| Branch | `codex/TRL-R2-004-live-compatibility` |
+| UTC rehearsal/cache timestamp | `2026-07-30T20:52:43.90341Z` |
+| Exact application duration | Not recoverable; the orchestration command was terminated after 1.681 seconds |
+| Overall status / reason code | Not captured |
+| Final refreshing state | Not captured |
+| Network request count | Not captured; exactly six cannot be confirmed |
+| Retry count | Not captured; zero cannot be confirmed |
+| Cache persistence status / reason | Health fields not captured; a deterministic valid empty cache file was present |
+| Cache freshness | Not captured |
+| Cache schema and records | `TRL-OFFICIAL-NEWS-CACHE-1.0`; 0 records |
+| News collection schema / status / items | Not captured / not captured / 0 retained in cache |
+| Economic-event collection schema / status / events | Not captured / not captured / 0 retained in cache |
+
+The exact per-source production health outcomes were not captured. The deterministic cache retained zero records for every governed source:
+
+| Source | Production status | Production reason | Retained records |
+|---|---|---|---:|
+| FED_MONETARY_POLICY_RSS | Not captured | Not captured | 0 |
+| BLS_LATEST_RELEASES_RSS | Not captured | Not captured | 0 |
+| BEA_NEWS_RELEASE_RSS | Not captured | Not captured | 0 |
+| BEA_RELEASE_DATES_JSON | Not captured | Not captured | 0 |
+| ECB_PRESS_RELEASE_RSS | Not captured | Not captured | 0 |
+| ECB_STATISTICAL_RELEASE_RSS | Not captured | Not captured | 0 |
+
+The committed production cache validator accepted the serialized empty cache. Reload preserved its record count, record order, IDs, fingerprints, revisions, and schemas, and deterministic reserialization was byte-identical. Because it contained no records, the event ordering, equivalent-timestamp deduplication, unique-event-ID, and `file_last_updated` checks were vacuously true only; they do not establish live publisher compatibility. `file_last_updated` produced zero retained events. There were no retained URLs to assess. There was no retained BLS record, so the required metadata-only BLS observation and forbidden-field retention check could not be established.
+
+The application process tree was terminated by the command runner rather than completing the controlled application shutdown path; no `Local dashboard stopped.` confirmation was captured. This fails the clean controlled shutdown criterion. Final local inspection found no listener on port 8765 and no Python process. The one cache file and its exact empty temporary hierarchy were removed, no temporary sibling existed, no relevant operating-system-temp artifact remained, and no repository artifact was generated. Before this evidence append, the Git worktree and index were clean. After the append, the intended final inventory is this evidence document as the only worktree modification with an empty index.
+
+The final success criteria **failed** because the exact request count, retry count, final overall health, six source statuses, collection documents, BLS metadata-only record, URL-governance result, and clean application shutdown were not captured or established. This is a bounded compatibility observation only. It is not publisher certification, profitability evidence, financial advice, trading authorization, or production execution approval.
+
+**R2-004 FINAL LIVE REHEARSAL FAILED**
+
+## Final Manual Replacement Rehearsal at a0c7a4a
+
+This section records the final manual replacement rehearsal. All preceding historical rehearsal sections, including the first historical observation, the second controlled observation at `4c15810`, and the aborted command-runner rehearsal, are preserved unchanged.
+
+### Baseline
+
+- Branch: `codex/TRL-R2-004-live-compatibility`
+- Commit: `a0c7a4a`
+- Rehearsal start: `2026-07-30T22:39:53.8241088Z`
+- Rehearsal completion: `2026-07-30T22:39:56.8571406Z`
+- Duration: `3.0330318` seconds
+- Production localhost application
+- Official news enabled
+- MT5 disabled
+- Isolated OS-temporary cache
+- Exactly six requests
+- Zero retries
+
+### Overall result
+
+- Status: `NEWS_PARTIAL`
+- Final reason: `NEWS_RATE_LIMITED_LOCALLY`
+- Refreshing: `false`
+- Cache persistence: `NEWS_VALID`
+- Cache freshness: `NEWS_VALID`
+- Cache records: `182`
+- News items: `46`
+- Economic events: `136`
+
+### Source outcomes
+
+1. `BEA_NEWS_RELEASE_RSS`
+   - `NEWS_SOURCE_HTTP_ERROR`
+   - 0 retained records
+   - No successful timestamp
+
+2. `BEA_RELEASE_DATES_JSON`
+   - `NEWS_VALID`
+   - 136 economic events
+
+3. `BLS_LATEST_RELEASES_RSS`
+   - `NEWS_VALID`
+   - 1 metadata-only news item
+
+4. `ECB_PRESS_RELEASE_RSS`
+   - `NEWS_VALID`
+   - 15 news items
+
+5. `ECB_STATISTICAL_RELEASE_RSS`
+   - `NEWS_VALID`
+   - 15 news items
+
+6. `FED_MONETARY_POLICY_RSS`
+   - `NEWS_VALID`
+   - 15 news items
+
+### Verified properties
+
+- Exactly six source results captured.
+- Exactly six network requests.
+- Zero retries.
+- Five sources valid.
+- BEA release-date events valid.
+- BLS metadata-only retention passed.
+- Economic events were chronologically ordered.
+- `file_last_updated` produced no event.
+- Governed URL validation passed.
+- Cache persistence succeeded.
+- No full publisher content was retained.
+- No MT5 or trading operation occurred.
+
+### Shutdown and cleanup
+
+- Application reported “Shutdown requested.”
+- Application reported “Local dashboard stopped.”
+- Port 8765 listeners: 0.
+- Relevant Python/Trading Lab processes: 0.
+- Isolated temporary directory remained: false.
+- Repository artifacts: 0.
+- Final Git scope contained only this evidence-document modification.
+- Index remained empty.
+
+### Required interpretation
+
+The all-six-source success criterion failed. This rehearsal must not be labelled fully passed. Hostname serialization did not resolve BEA RSS compatibility. The low-level BEA RSS failure cause remains unproven. No additional live probe or retry was performed. Five governed sources operated successfully. The application behaved correctly in degraded `NEWS_PARTIAL` mode. The valid BEA JSON calendar still supplied 136 economic events. This is evidence of bounded interoperability, not publisher certification. It is not profitability evidence, financial advice, trading authorization or live-execution approval.
+
+### Closure decision
+
+TRL-R2-004 is accepted and closed with a known `BEA_NEWS_RELEASE_RSS` compatibility limitation.
+
+The limitation is deferred to a future separately governed maintenance checkpoint. It will not block the forward paper-trading and Signal Desk roadmap.
+
+No schema, source identity, endpoint, health code or production behavior was changed to implement this closure decision.
