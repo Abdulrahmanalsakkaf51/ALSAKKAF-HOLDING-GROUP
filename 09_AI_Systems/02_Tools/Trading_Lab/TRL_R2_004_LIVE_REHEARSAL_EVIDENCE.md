@@ -8,8 +8,8 @@
 |---|---|
 | Document ID | TRL-R2-004-LIVE-REHEARSAL-EVIDENCE-001 |
 | Document Type | Controlled Rehearsal and Offline Compatibility Evidence |
-| Status | LIVE-FIX-01 IMPLEMENTED; FOLLOW-UP LIVE REHEARSAL NOT PERFORMED |
-| Version | 1.0 |
+| Status | SECOND CONTROLLED REHEARSAL RECORDED; LIVE-FIX-05 UNCOMMITTED |
+| Version | 1.1 |
 | Date | 2026-07-30 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Baseline commit | `a2f3cf9` |
@@ -64,8 +64,27 @@ The fixtures were constructed synthetic metadata. They contained no copied publi
 
 Complete local validation ran `python -B -W error -m unittest test_news_events.py test_trading_lab_app.py`. Result: **120 tests passed in 38.565 seconds**. Bytecode generation was disabled, warnings were treated as errors, and no production cache or external transport was used.
 
+## Second Controlled Rehearsal Result
+
+This section is a separate historical observation and does not alter the first committed rehearsal above. The application at commit `4c15810` performed exactly six governed source requests at retrieval timestamp `2026-07-30T01:32:35.629179Z`, with no retry. It returned overall `NEWS_PARTIAL`; subsequent health access reported `NEWS_RATE_LIMITED_LOCALLY`. Cache persistence remained `NEWS_VALID`, and the combined cache contained 182 records.
+
+| Source | Governed result | Records |
+|---|---|---:|
+| BEA_NEWS_RELEASE_RSS | `NEWS_SOURCE_HTTP_ERROR` | 0 |
+| BEA_RELEASE_DATES_JSON | `NEWS_VALID` | 136 economic events |
+| BLS_LATEST_RELEASES_RSS | `NEWS_VALID` | 1 metadata-only news item |
+| ECB_PRESS_RELEASE_RSS | `NEWS_VALID` | 15 news items |
+| ECB_STATISTICAL_RELEASE_RSS | `NEWS_VALID` | 15 news items |
+| FED_MONETARY_POLICY_RSS | `NEWS_VALID` | 15 news items |
+
+The API collections contained 46 news records and 136 economic events. BEA events were chronologically ordered, and `file_last_updated` did not become an event. The BLS record retained zero description, summary, content, creator, body, or image fields. API reads did not trigger another retrieval: the final request count remained exactly six.
+
+The application stopped through Ctrl+C. Port 8765 had no listener afterward, and Git remained clean on `4c15810`. This was a controlled partial result, not a complete six-source pass. Live evidence did not prove the low-level BEA RSS cause. Subsequent offline diagnosis confirmed uncontrolled same-host concurrency as an architectural susceptibility and evidence-compatible explanation, not proof of publisher policy.
+
+No raw publisher body, credential, MT5, broker, account, position, order, strategy, signal, or cloud data was retained. This evidence is not publisher certification, production authorization, trading advice, or profitability evidence.
+
 ## Follow-Up Rehearsal State
 
-The separately operated controlled follow-up rehearsal was not performed during LIVE-FIX-01 implementation or automated validation. It remains limited to the same six governed endpoints and must follow the stop conditions in `TRL_OFFICIAL_NEWS_SETUP_GUIDE.md`. No additional rehearsal is authorized by LIVE-FIX-01.
+The second controlled rehearsal is recorded above. Another live rehearsal remains pending and may be separately authorized only after LIVE-FIX-05 independent review and commit. LIVE-FIX-05 implementation and automated validation authorize no external access or rehearsal.
 
 TRL-R2-005 remains unauthorized and has not begun.

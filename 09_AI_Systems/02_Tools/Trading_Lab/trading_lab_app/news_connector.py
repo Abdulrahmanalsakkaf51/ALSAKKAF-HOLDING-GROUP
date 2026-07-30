@@ -34,7 +34,7 @@ _IPC_FAILURE = b"E"
 _IPC_VERSION = 1
 _CHILD_FAILURE_CODES = frozenset((
     "NEWS_PROVIDER_CHANGED", "NEWS_SOURCE_TIMEOUT", "NEWS_SOURCE_HTTP_ERROR",
-    "NEWS_SOURCE_TOO_LARGE",
+    "NEWS_SOURCE_INTERNAL_ERROR", "NEWS_SOURCE_TOO_LARGE",
 ))
 
 
@@ -44,12 +44,36 @@ class RetrievalError(OSError):
         self.reason_code = reason_code
 
 
+class _HttpsCleanupFailure(Exception):
+    """Private sentinel for ordinary child-local HTTPS cleanup failure."""
+
+
 @dataclass(frozen=True)
 class TransportResponse:
     status: int
     headers: dict
     body: bytes
     endpoint: str
+
+
+def _close_https_resources(response, connection):
+    """Attempt both closes and convert only ordinary failures to a sentinel."""
+    response_close_failed = False
+    connection_close_failed = False
+    try:
+        if response is not None:
+            try:
+                response.close()
+            except Exception:
+                response_close_failed = True
+    finally:
+        if connection is not None:
+            try:
+                connection.close()
+            except Exception:
+                connection_close_failed = True
+    if response_close_failed or connection_close_failed:
+        raise _HttpsCleanupFailure()
 
 
 def _direct_https_get(source):
@@ -90,35 +114,58 @@ def _direct_https_get(source):
             if total > MAX_RESPONSE_BYTES:
                 raise RetrievalError("NEWS_SOURCE_TOO_LARGE")
             chunks.append(chunk)
-        headers = {name.lower(): value.strip() for name, value in response.getheaders()}
-        return TransportResponse(
+        headers = {
+            name.lower(): value.strip() for name, value in response.getheaders()
+        }
+        result = TransportResponse(
             response.status, headers, b"".join(chunks), endpoint,
         )
     except (TimeoutError, socket.timeout) as error:
+        try:
+            _close_https_resources(response, connection)
+        except _HttpsCleanupFailure:
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from None
         raise RetrievalError("NEWS_SOURCE_TIMEOUT") from error
     except RetrievalError:
+        try:
+            _close_https_resources(response, connection)
+        except _HttpsCleanupFailure:
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from None
         raise
     except (OSError, http.client.HTTPException) as error:
-        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
-    finally:
-        if response is not None:
-            try:
-                response.close()
-            except Exception:
-                pass
         try:
-            connection.close()
-        except Exception:
+            _close_https_resources(response, connection)
+        except _HttpsCleanupFailure:
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from None
+        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+    except Exception:
+        try:
+            _close_https_resources(response, connection)
+        except _HttpsCleanupFailure:
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from None
+        raise
+    except BaseException:
+        try:
+            _close_https_resources(response, connection)
+        except _HttpsCleanupFailure:
             pass
+        raise
+    try:
+        _close_https_resources(response, connection)
+    except _HttpsCleanupFailure:
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from None
+    return result
 
 
 def _encode_child_success(response):
     if (
         type(response) is not TransportResponse
+        or type(response.status) is not int
+        or not 100 <= response.status <= 599
         or type(response.body) is not bytes
         or len(response.body) > MAX_RESPONSE_BYTES
     ):
-        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
     metadata = json.dumps(
         {
             "endpoint": response.endpoint,
@@ -132,7 +179,7 @@ def _encode_child_success(response):
         separators=(",", ":"),
     ).encode("utf-8")
     if len(metadata) > MAX_IPC_METADATA_BYTES:
-        raise RetrievalError("NEWS_SOURCE_TOO_LARGE")
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
     return _IPC_SUCCESS + struct.pack("!I", len(metadata)) + metadata + response.body
 
 
@@ -140,7 +187,7 @@ def _encode_child_failure(reason_code):
     selected = (
         reason_code
         if reason_code in _CHILD_FAILURE_CODES
-        else "NEWS_SOURCE_HTTP_ERROR"
+        else "NEWS_SOURCE_INTERNAL_ERROR"
     )
     return _IPC_FAILURE + selected.encode("ascii")
 
@@ -152,8 +199,8 @@ def source_child_main(source, send_connection):
             payload = _encode_child_success(_direct_https_get(source))
         except RetrievalError as error:
             payload = _encode_child_failure(error.reason_code)
-        except BaseException:
-            payload = _encode_child_failure("NEWS_SOURCE_HTTP_ERROR")
+        except Exception:
+            payload = _encode_child_failure("NEWS_SOURCE_INTERNAL_ERROR")
         try:
             send_connection.send_bytes(payload)
         except (OSError, TypeError, ValueError, OverflowError):
@@ -167,28 +214,28 @@ def source_child_main(source, send_connection):
 
 def _decode_child_payload(payload, source):
     if type(payload) is not bytes or not payload:
-        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
     if payload[:1] == _IPC_FAILURE:
         try:
             reason_code = payload[1:].decode("ascii", errors="strict")
         except UnicodeError as error:
-            raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
         if reason_code not in _CHILD_FAILURE_CODES:
-            raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
         raise RetrievalError(reason_code)
     if payload[:1] != _IPC_SUCCESS or len(payload) < 5:
-        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
     metadata_length = struct.unpack("!I", payload[1:5])[0]
     if metadata_length > MAX_IPC_METADATA_BYTES or 5 + metadata_length > len(payload):
-        raise RetrievalError("NEWS_SOURCE_TOO_LARGE")
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
     metadata_bytes = payload[5:5 + metadata_length]
     body = payload[5 + metadata_length:]
     if len(body) > MAX_RESPONSE_BYTES:
-        raise RetrievalError("NEWS_SOURCE_TOO_LARGE")
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
     try:
         metadata = json.loads(metadata_bytes.decode("utf-8", errors="strict"))
     except (UnicodeError, json.JSONDecodeError, RecursionError) as error:
-        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
     if (
         type(metadata) is not dict
         or set(metadata) != {"endpoint", "headers", "status", "version"}
@@ -196,10 +243,11 @@ def _decode_child_payload(payload, source):
         or type(metadata["endpoint"]) is not str
         or metadata["endpoint"] != source["exact_endpoint"]
         or type(metadata["status"]) is not int
+        or not 100 <= metadata["status"] <= 599
         or type(metadata["headers"]) is not dict
         or any(type(key) is not str or type(value) is not str for key, value in metadata["headers"].items())
     ):
-        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
     return TransportResponse(
         metadata["status"], dict(metadata["headers"]), body, metadata["endpoint"],
     )
@@ -458,7 +506,7 @@ class DirectHttpsTransport:
                         process.close()
                     except Exception:
                         pass
-                raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+                raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
 
         try:
             try:
@@ -467,7 +515,7 @@ class DirectHttpsTransport:
                 record.start_complete.set()
                 self._finalize_child(record)
                 if isinstance(error, Exception):
-                    raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+                    raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
                 raise
             with record.lock:
                 record.started = True
@@ -490,18 +538,18 @@ class DirectHttpsTransport:
                         timeout=min(0.05, remaining),
                     )
                 except Exception as error:
-                    raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+                    raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
                 if not ready:
                     continue
                 if receive_connection in ready:
                     try:
                         payload = receive_connection.recv_bytes(MAX_IPC_MESSAGE_BYTES)
                     except EOFError as error:
-                        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+                        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
                     except OSError as error:
-                        raise RetrievalError("NEWS_SOURCE_TOO_LARGE") from error
+                        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
                     except Exception as error:
-                        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR") from error
+                        raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
                 elif process.sentinel in ready:
                     try:
                         if receive_connection.poll(0):
@@ -509,7 +557,7 @@ class DirectHttpsTransport:
                             continue
                     except Exception:
                         pass
-                    raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+                    raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
             remaining = max(0.0, deadline - self._retrieval_now())
             exitcode, cleanup_failed = self._finalize_child(
                 record, graceful_timeout=remaining,
@@ -517,7 +565,7 @@ class DirectHttpsTransport:
             if self._child_is_cancelled(record):
                 raise RetrievalError("NEWS_SOURCE_TIMEOUT")
             if cleanup_failed or exitcode != 0:
-                raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+                raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
             return _decode_child_payload(payload, source)
         except BaseException:
             self._cancel_child(record)
@@ -531,35 +579,95 @@ class DirectHttpsTransport:
 class OfficialNewsConnector:
     def __init__(self, transport=None):
         self._transport = transport or DirectHttpsTransport()
-        self._locks = {}
-        self._locks_guard = threading.Lock()
+        self._hostname_locks = {}
+        self._hostname_waiters = {}
+        self._hostname_locks_guard = threading.Lock()
+        self._closed = False
 
-    def _source_lock(self, source_id):
-        with self._locks_guard:
-            return self._locks.setdefault(source_id, threading.Lock())
+    def _hostname_lock(self, hostname):
+        """Return bounded connector-owned admission after source validation."""
+        with self._hostname_locks_guard:
+            if self._closed:
+                raise RetrievalError("NEWS_SOURCE_TIMEOUT")
+            lock = self._hostname_locks.get(hostname)
+            if lock is None:
+                lock = threading.Lock()
+                self._hostname_locks[hostname] = lock
+                self._hostname_waiters[hostname] = 0
+            return lock
+
+    def _acquire_hostname(self, hostname):
+        lock = self._hostname_lock(hostname)
+        if lock.acquire(blocking=False):
+            return lock
+        with self._hostname_locks_guard:
+            self._hostname_waiters[hostname] += 1
+        try:
+            lock.acquire()
+        finally:
+            with self._hostname_locks_guard:
+                self._hostname_waiters[hostname] -= 1
+        return lock
+
+    def hostname_state_count(self):
+        with self._hostname_locks_guard:
+            return len(self._hostname_locks)
+
+    def hostname_waiter_count(self):
+        with self._hostname_locks_guard:
+            return sum(self._hostname_waiters.values())
+
+    def held_hostname_lock_count(self):
+        with self._hostname_locks_guard:
+            locks = tuple(self._hostname_locks.values())
+        return sum(lock.locked() for lock in locks)
 
     def close(self):
+        with self._hostname_locks_guard:
+            if self._closed:
+                return
+            self._closed = True
         closer = getattr(self._transport, "close", None)
         if closer is not None:
             closer()
 
     def retrieve(self, source, retrieved_timestamp_utc):
         try:
-            news_sources.validated_endpoint_parts(source)
+            hostname, _path = news_sources.validated_endpoint_parts(source)
         except news_sources.SourceRegistryError as error:
             raise RetrievalError("NEWS_PROVIDER_CHANGED") from error
         if not news_sources.endpoint_is_allowlisted(source, source["exact_endpoint"]):
             raise RetrievalError("NEWS_PROVIDER_CHANGED")
-        with self._source_lock(source["source_id"]):
+        hostname_lock = self._acquire_hostname(hostname)
+        try:
+            with self._hostname_locks_guard:
+                if self._closed:
+                    raise RetrievalError("NEWS_SOURCE_TIMEOUT")
             response = self._transport.get(source)
+        finally:
+            hostname_lock.release()
+        if type(response) is not TransportResponse:
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
+        if (
+            type(response.endpoint) is not str
+            or type(response.status) is not int
+            or not 100 <= response.status <= 599
+            or type(response.headers) is not dict
+            or any(
+                type(key) is not str or type(value) is not str
+                for key, value in response.headers.items()
+            )
+            or type(response.body) is not bytes
+        ):
+            raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR")
         if response.endpoint != source["exact_endpoint"]:
             raise RetrievalError("NEWS_SOURCE_REDIRECT_BLOCKED")
-        if type(response.status) is not int or not 200 <= response.status <= 299:
-            if type(response.status) is int and 300 <= response.status <= 399:
+        if not 200 <= response.status <= 299:
+            if 300 <= response.status <= 399:
                 raise RetrievalError("NEWS_SOURCE_REDIRECT_BLOCKED")
             raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
         body = response.body
-        if type(body) is not bytes or len(body) > MAX_RESPONSE_BYTES:
+        if len(body) > MAX_RESPONSE_BYTES:
             raise RetrievalError("NEWS_SOURCE_TOO_LARGE")
         headers = {str(key).lower(): str(value).strip() for key, value in response.headers.items()}
         if headers.get("content-encoding", "identity").lower() not in {"", "identity"}:

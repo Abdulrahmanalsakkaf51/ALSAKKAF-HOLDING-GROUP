@@ -2,6 +2,8 @@
 """Offline acceptance tests for TRL-R2-004 official news and events."""
 
 import copy
+from contextlib import ExitStack
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 import http.client
 import json
@@ -28,13 +30,17 @@ from trading_lab_app.news_connector import (  # noqa: E402
     ABSOLUTE_REQUEST_DEADLINE_SECONDS, MAX_IPC_MESSAGE_BYTES,
     READ_TIMEOUT_SECONDS,
     DirectHttpsTransport, OfficialNewsConnector, RetrievalError,
-    TransportResponse, _direct_https_get, _encode_child_success,
+    TransportResponse, _decode_child_payload, _direct_https_get,
+    _encode_child_success,
     source_child_main,
 )
 from trading_lab_app.news_service import (  # noqa: E402
     NEWS_REFRESH_WORKERS, STABLE_HEALTH_CODES, OfficialNewsConfiguration,
     OfficialNewsService,
 )
+
+
+NEWS_REFRESH_HOST_GROUPS = 4
 
 
 RSS_BODY = b"""<?xml version="1.0" encoding="UTF-8"?>
@@ -161,14 +167,24 @@ class ConcurrentGateTransport(FakeTransport):
         self._activity_lock = threading.Lock()
         self.active = 0
         self.maximum_active = 0
+        self.active_by_hostname = {}
+        self.maximum_by_hostname = {}
 
     def get(self, source):
+        hostname = source["exact_hostname"]
         with self._activity_lock:
             self.active += 1
             self.maximum_active = max(self.maximum_active, self.active)
+            self.active_by_hostname[hostname] = (
+                self.active_by_hostname.get(hostname, 0) + 1
+            )
+            self.maximum_by_hostname[hostname] = max(
+                self.maximum_by_hostname.get(hostname, 0),
+                self.active_by_hostname[hostname],
+            )
             if self.active > 1:
                 self.more_than_one_active.set()
-            if self.active == NEWS_REFRESH_WORKERS:
+            if self.active == NEWS_REFRESH_HOST_GROUPS:
                 self.all_workers_active.set()
         try:
             if not self.release.wait(timeout=10):
@@ -177,25 +193,36 @@ class ConcurrentGateTransport(FakeTransport):
         finally:
             with self._activity_lock:
                 self.active -= 1
+                self.active_by_hostname[hostname] -= 1
 
 
 class CompletionOrderTransport(FakeTransport):
     def __init__(self, responses, source_order):
         super().__init__(responses)
-        self._source_order = list(source_order)
+        self._hostname_order = []
+        self._remaining_by_hostname = {}
+        for source in source_order:
+            hostname = source["exact_hostname"]
+            if hostname not in self._remaining_by_hostname:
+                self._hostname_order.append(hostname)
+                self._remaining_by_hostname[hostname] = 0
+            self._remaining_by_hostname[hostname] += 1
         self._next = 0
         self._condition = threading.Condition()
 
     def get(self, source):
         deadline = time.monotonic() + 10
         with self._condition:
-            while self._source_order[self._next] != source["source_id"]:
+            hostname = source["exact_hostname"]
+            while self._hostname_order[self._next] != hostname:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise RetrievalError("NEWS_SOURCE_TIMEOUT")
                 self._condition.wait(remaining)
-            self._next += 1
-            self._condition.notify_all()
+            self._remaining_by_hostname[hostname] -= 1
+            if self._remaining_by_hostname[hostname] == 0:
+                self._next += 1
+                self._condition.notify_all()
         return super().get(source)
 
 
@@ -256,6 +283,11 @@ def successful_source_child(source, send_connection):
         send_connection.send_bytes(payload)
     finally:
         send_connection.close()
+
+
+def usable_payload_then_crash_source_child(source, send_connection):
+    successful_source_child(source, send_connection)
+    raise RuntimeError("controlled local child failure after IPC")
 
 
 def crashing_source_child(_source, _send_connection):
@@ -846,6 +878,9 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
         self.assertEqual(transport.calls, [])
         self.assertEqual(cache.write_count, 0)
         self.assertEqual(service.health_document()["network_request_count"], 0)
+        self.assertIsNone(service._registry)
+        self.assertIsNone(service._connector)
+        self.assertIsNone(service._cache)
 
     def test_disabled_nonfinite_cache_recovery_does_not_load_or_network(self):
         for constant in ("NaN", "Infinity", "-Infinity"):
@@ -905,6 +940,76 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
         altered["exact_endpoint"] = "http://www.federalreserve.gov/feeds/press_monetary.xml"
         with self.assertRaisesRegex(RetrievalError, "NEWS_PROVIDER_CHANGED"):
             OfficialNewsConnector(FakeTransport()).retrieve(altered, "2026-07-27T12:00:00Z")
+
+    def test_invalid_source_and_local_response_shape_fail_before_provider_claim(self):
+        source = news_sources.load_source_registry()["sources"][0]
+        transport = mock.Mock()
+        connector = OfficialNewsConnector(transport)
+        altered = copy.deepcopy(source)
+        altered["exact_hostname"] = "example.invalid"
+        with self.assertRaisesRegex(RetrievalError, "NEWS_PROVIDER_CHANGED"):
+            connector.retrieve(altered, "2026-07-27T12:00:00Z")
+        self.assertEqual(connector.hostname_state_count(), 0)
+        self.assertEqual(connector.hostname_waiter_count(), 0)
+        transport.get.assert_not_called()
+
+        invalid_values = (
+            object(),
+            TransportResponse(
+                "200", {"content-type": "application/rss+xml"},
+                RSS_BODY, source["exact_endpoint"],
+            ),
+            TransportResponse(
+                200, None, RSS_BODY, source["exact_endpoint"],
+            ),
+            TransportResponse(
+                200, {"content-type": "application/rss+xml"},
+                "not bytes", source["exact_endpoint"],
+            ),
+        )
+        for value in invalid_values:
+            with self.subTest(value_type=type(value).__name__):
+                shaped_transport = FakeTransport({source["exact_endpoint"]: value})
+                shaped_connector = OfficialNewsConnector(shaped_transport)
+                with self.assertRaisesRegex(
+                    RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"
+                ):
+                    shaped_connector.retrieve(
+                        source, "2026-07-27T12:00:00Z",
+                    )
+                shaped_connector.close()
+
+    def test_unexpected_child_and_unsupported_ipc_code_are_internal(self):
+        source = news_sources.load_source_registry()["sources"][0]
+
+        class CaptureConnection:
+            def __init__(self):
+                self.payload = None
+                self.closed = False
+
+            def send_bytes(self, payload):
+                self.payload = payload
+
+            def close(self):
+                self.closed = True
+
+        connection = CaptureConnection()
+        with mock.patch(
+            "trading_lab_app.news_connector._direct_https_get",
+            side_effect=RuntimeError("controlled private child detail"),
+        ):
+            source_child_main(source, connection)
+        self.assertTrue(connection.closed)
+        with self.assertRaisesRegex(
+            RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"
+        ) as unexpected:
+            _decode_child_payload(connection.payload, source)
+        self.assertNotIn("controlled private child detail", str(unexpected.exception))
+
+        with self.assertRaisesRegex(
+            RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"
+        ):
+            _decode_child_payload(b"ENEWS_SOURCE_UNKNOWN_FAILURE", source)
 
     def test_redirect_timeout_and_http_errors_have_stable_codes(self):
         source = news_sources.load_source_registry()["sources"][0]
@@ -966,6 +1071,8 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
                 self.headers = dict(headers)
                 if self.mode == "connection":
                     raise socket.timeout("controlled connection inactivity")
+                if self.mode == "http_error":
+                    raise OSError("controlled transport detail")
 
             def getresponse(self):
                 if self.mode in {"status", "headers"}:
@@ -994,6 +1101,281 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
                         READ_TIMEOUT_SECONDS,
                     )
 
+        with mock.patch(
+            "trading_lab_app.news_connector.http.client.HTTPSConnection",
+            InactivityConnection,
+        ):
+            InactivityConnection.mode = "http_error"
+            with self.assertRaisesRegex(
+                RetrievalError, "NEWS_SOURCE_HTTP_ERROR"
+            ) as raised:
+                _direct_https_get(source)
+            self.assertNotIn("controlled transport detail", str(raised.exception))
+
+    def test_https_cleanup_attempts_both_once_and_reports_internal(self):
+        source = news_sources.load_source_registry()["sources"][0]
+
+        class ControlledResponse:
+            status = 200
+
+            def __init__(self, fail_close=False, control_error=None, order=None):
+                self.fail_close = fail_close
+                self.control_error = control_error
+                self.order = order if order is not None else []
+                self.close_count = 0
+                self._chunks = [RSS_BODY, b""]
+
+            def read(self, _size):
+                return self._chunks.pop(0)
+
+            def getheaders(self):
+                return [("Content-Type", "application/rss+xml")]
+
+            def close(self):
+                self.close_count += 1
+                self.order.append("response")
+                if self.control_error is not None:
+                    raise self.control_error
+                if self.fail_close:
+                    raise OSError("controlled private response cleanup detail")
+
+        class ControlledConnection:
+            def __init__(
+                self, response, fail_close=False, control_error=None,
+                request_error=None, order=None,
+            ):
+                self.sock = None
+                self.response = response
+                self.fail_close = fail_close
+                self.control_error = control_error
+                self.request_error = request_error
+                self.order = order if order is not None else []
+                self.close_count = 0
+
+            def request(self, _method, _path, headers):
+                self.headers = dict(headers)
+                if self.request_error is not None:
+                    raise self.request_error
+
+            def getresponse(self):
+                return self.response
+
+            def close(self):
+                self.close_count += 1
+                self.order.append("connection")
+                if self.control_error is not None:
+                    raise self.control_error
+                if self.fail_close:
+                    raise OSError("controlled private connection cleanup detail")
+
+        def execute(response_failure=False, connection_failure=False):
+            order = []
+            controlled_response = ControlledResponse(
+                fail_close=response_failure, order=order,
+            )
+            controlled_connection = ControlledConnection(
+                controlled_response,
+                fail_close=connection_failure,
+                order=order,
+            )
+            with mock.patch(
+                "trading_lab_app.news_connector.http.client.HTTPSConnection",
+                return_value=controlled_connection,
+            ):
+                if response_failure or connection_failure:
+                    with self.assertRaisesRegex(
+                        RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"
+                    ) as raised:
+                        _direct_https_get(source)
+                    result = raised.exception
+                else:
+                    result = _direct_https_get(source)
+            self.assertEqual(controlled_response.close_count, 1)
+            self.assertEqual(controlled_connection.close_count, 1)
+            self.assertEqual(order, ["response", "connection"])
+            return result, controlled_response, controlled_connection
+
+        successful, _successful_response, _successful_connection = execute()
+        self.assertEqual(successful.status, 200)
+        items, events = OfficialNewsConnector(FakeTransport({
+            source["exact_endpoint"]: successful,
+        })).retrieve(source, "2026-07-27T12:00:00Z")
+        self.assertEqual(len(items), 1)
+        self.assertEqual(events, [])
+
+        for response_failure, connection_failure in (
+            (True, False), (False, True), (True, True),
+        ):
+            with self.subTest(
+                response_failure=response_failure,
+                connection_failure=connection_failure,
+            ):
+                failure, _controlled_response, _controlled_connection = execute(
+                    response_failure, connection_failure,
+                )
+                self.assertEqual(
+                    failure.reason_code, "NEWS_SOURCE_INTERNAL_ERROR",
+                )
+                self.assertEqual(str(failure), "NEWS_SOURCE_INTERNAL_ERROR")
+                self.assertNotIn("private", str(failure))
+
+        process_control_order = []
+        process_control_response = ControlledResponse(
+            control_error=KeyboardInterrupt(), order=process_control_order,
+        )
+        process_control_connection = ControlledConnection(
+            process_control_response, order=process_control_order,
+        )
+        with mock.patch(
+            "trading_lab_app.news_connector.http.client.HTTPSConnection",
+            return_value=process_control_connection,
+        ), self.assertRaises(KeyboardInterrupt):
+            _direct_https_get(source)
+        self.assertEqual(process_control_order, ["response", "connection"])
+        self.assertEqual(process_control_response.close_count, 1)
+        self.assertEqual(process_control_connection.close_count, 1)
+
+        system_exit_order = []
+        system_exit_response = ControlledResponse(order=system_exit_order)
+        system_exit_connection = ControlledConnection(
+            system_exit_response,
+            control_error=SystemExit(7),
+            order=system_exit_order,
+        )
+        with mock.patch(
+            "trading_lab_app.news_connector.http.client.HTTPSConnection",
+            return_value=system_exit_connection,
+        ), self.assertRaises(SystemExit) as system_exit:
+            _direct_https_get(source)
+        self.assertEqual(system_exit.exception.code, 7)
+        self.assertEqual(system_exit_order, ["response", "connection"])
+
+        interrupted_request_order = []
+        interrupted_request_connection = ControlledConnection(
+            ControlledResponse(order=interrupted_request_order),
+            fail_close=True,
+            request_error=KeyboardInterrupt(),
+            order=interrupted_request_order,
+        )
+        with mock.patch(
+            "trading_lab_app.news_connector.http.client.HTTPSConnection",
+            return_value=interrupted_request_connection,
+        ), self.assertRaises(KeyboardInterrupt):
+            _direct_https_get(source)
+        self.assertEqual(interrupted_request_order, ["connection"])
+        self.assertEqual(interrupted_request_connection.close_count, 1)
+
+        child_connections = []
+
+        def cleanup_failing_connection(*_args, **_kwargs):
+            order = []
+            controlled_response = ControlledResponse(
+                fail_close=True, order=order,
+            )
+            controlled_connection = ControlledConnection(
+                controlled_response, order=order,
+            )
+            child_connections.append((
+                controlled_response, controlled_connection, order,
+            ))
+            return controlled_connection
+
+        context = FakeProcessContext()
+        transport = DirectHttpsTransport(
+            process_context=context,
+            child_target=source_child_main,
+            wait_function=fake_process_wait,
+        )
+        connector = OfficialNewsConnector(transport)
+        with mock.patch(
+            "trading_lab_app.news_connector.http.client.HTTPSConnection",
+            side_effect=cleanup_failing_connection,
+        ), self.assertRaisesRegex(
+            RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR",
+        ) as child_failure:
+            connector.retrieve(source, "2026-07-27T12:00:00Z")
+        connector.close()
+        connector.close()
+        self.assertEqual(str(child_failure.exception), "NEWS_SOURCE_INTERNAL_ERROR")
+        self.assertEqual(len(child_connections), 1)
+        child_response, child_connection, child_order = child_connections[0]
+        self.assertEqual(child_response.close_count, 1)
+        self.assertEqual(child_connection.close_count, 1)
+        self.assertEqual(child_order, ["response", "connection"])
+        self.assertEqual(context.active_count(), 0)
+        self.assertEqual(context.open_process_handle_count(), 0)
+        self.assertEqual(transport.child_record_count(), 0)
+        self.assertEqual(transport.active_process_handle_count(), 0)
+        self.assertEqual(transport.active_ipc_handle_count(), 0)
+
+    def test_http_status_domain_precedes_family_classification(self):
+        source = news_sources.load_source_registry()["sources"][0]
+        cases = (
+            (-1, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (0, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (99, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (100, "NEWS_SOURCE_HTTP_ERROR"),
+            (199, "NEWS_SOURCE_HTTP_ERROR"),
+            (200, None),
+            (299, None),
+            (300, "NEWS_SOURCE_REDIRECT_BLOCKED"),
+            (399, "NEWS_SOURCE_REDIRECT_BLOCKED"),
+            (400, "NEWS_SOURCE_HTTP_ERROR"),
+            (599, "NEWS_SOURCE_HTTP_ERROR"),
+            (600, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (999, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (1000, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (True, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (200.0, "NEWS_SOURCE_INTERNAL_ERROR"),
+            ("200", "NEWS_SOURCE_INTERNAL_ERROR"),
+            (None, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (object(), "NEWS_SOURCE_INTERNAL_ERROR"),
+        )
+        for status, expected in cases:
+            with self.subTest(status_type=type(status).__name__, status=status):
+                connector = OfficialNewsConnector(FakeTransport({
+                    source["exact_endpoint"]: response(source, status=status),
+                }))
+                if expected is None:
+                    items, events = connector.retrieve(
+                        source, "2026-07-27T12:00:00Z",
+                    )
+                    self.assertEqual(len(items), 1)
+                    self.assertEqual(events, [])
+                else:
+                    with self.assertRaisesRegex(
+                        RetrievalError, expected,
+                    ) as raised:
+                        connector.retrieve(
+                            source, "2026-07-27T12:00:00Z",
+                        )
+                    self.assertEqual(raised.exception.reason_code, expected)
+                    self.assertEqual(str(raised.exception), expected)
+                connector.close()
+
+        class CaptureConnection:
+            def __init__(self):
+                self.payload = None
+                self.closed = False
+
+            def send_bytes(self, payload):
+                self.payload = payload
+
+            def close(self):
+                self.closed = True
+
+        capture = CaptureConnection()
+        with mock.patch(
+            "trading_lab_app.news_connector._direct_https_get",
+            return_value=response(source, status=600),
+        ):
+            source_child_main(source, capture)
+        self.assertTrue(capture.closed)
+        with self.assertRaisesRegex(
+            RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR",
+        ):
+            _decode_child_payload(capture.payload, source)
+
     def test_spawn_child_deadline_crash_ipc_bounds_and_handle_cleanup(self):
         source = news_sources.load_source_registry()["sources"][0]
         self.assertEqual(
@@ -1015,9 +1397,14 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
                 "NEWS_SOURCE_TIMEOUT",
             ),
             ("body_trickle", body_trickle_source_child, "NEWS_SOURCE_TIMEOUT"),
-            ("child_crash", crashing_source_child, "NEWS_SOURCE_HTTP_ERROR"),
-            ("malformed_ipc", malformed_source_child, "NEWS_SOURCE_HTTP_ERROR"),
-            ("oversized_ipc", oversized_source_child, "NEWS_SOURCE_TOO_LARGE"),
+            ("child_crash", crashing_source_child, "NEWS_SOURCE_INTERNAL_ERROR"),
+            (
+                "nonzero_after_usable_payload",
+                usable_payload_then_crash_source_child,
+                "NEWS_SOURCE_INTERNAL_ERROR",
+            ),
+            ("malformed_ipc", malformed_source_child, "NEWS_SOURCE_INTERNAL_ERROR"),
+            ("oversized_ipc", oversized_source_child, "NEWS_SOURCE_INTERNAL_ERROR"),
         )
         for label, target, expected in cases:
             with self.subTest(phase=label), mock.patch(
@@ -1049,13 +1436,84 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
             child_target=successful_source_child,
             wait_function=fake_process_wait,
         )
-        with self.assertRaisesRegex(RetrievalError, "NEWS_SOURCE_HTTP_ERROR"):
+        with self.assertRaisesRegex(RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"):
             serialization_transport.get(source)
         self.assertEqual(serialization_context.active_count(), 0)
         self.assertEqual(serialization_context.open_process_handle_count(), 0)
         self.assertEqual(serialization_transport.active_process_handle_count(), 0)
         self.assertEqual(serialization_transport.active_ipc_handle_count(), 0)
         serialization_transport.close()
+
+        class PipeFailureContext(FakeProcessContext):
+            def Pipe(self, duplex=False):
+                raise OSError("controlled local pipe detail")
+
+        pipe_context = PipeFailureContext()
+        pipe_transport = DirectHttpsTransport(
+            process_context=pipe_context,
+            child_target=successful_source_child,
+            wait_function=fake_process_wait,
+        )
+        with self.assertRaisesRegex(
+            RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"
+        ) as pipe_error:
+            pipe_transport.get(source)
+        self.assertNotIn("controlled local pipe detail", str(pipe_error.exception))
+        self.assertEqual(pipe_context.start_count, 0)
+        self.assertEqual(pipe_transport.child_record_count(), 0)
+        pipe_transport.close()
+
+        wait_context = FakeProcessContext()
+
+        def failing_parent_wait(_objects, timeout):
+            raise OSError("controlled local wait detail")
+
+        wait_transport = DirectHttpsTransport(
+            process_context=wait_context,
+            child_target=blocked_source_child,
+            wait_function=failing_parent_wait,
+        )
+        with self.assertRaisesRegex(
+            RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"
+        ) as wait_error:
+            wait_transport.get(source)
+        self.assertNotIn("controlled local wait detail", str(wait_error.exception))
+        self.assertEqual(wait_context.active_count(), 0)
+        self.assertEqual(wait_context.open_process_handle_count(), 0)
+        self.assertEqual(wait_transport.child_record_count(), 0)
+        wait_transport.close()
+
+        cleanup_context = FakeProcessContext()
+        original_process_factory = cleanup_context.Process
+
+        def cleanup_failing_process(*args, **kwargs):
+            process = original_process_factory(*args, **kwargs)
+            original_close = process.close
+
+            def fail_after_close():
+                original_close()
+                raise OSError("controlled local process cleanup detail")
+
+            process.close = fail_after_close
+            return process
+
+        cleanup_context.Process = cleanup_failing_process
+        cleanup_transport = DirectHttpsTransport(
+            process_context=cleanup_context,
+            child_target=successful_source_child,
+            wait_function=fake_process_wait,
+        )
+        with self.assertRaisesRegex(
+            RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"
+        ) as cleanup_error:
+            cleanup_transport.get(source)
+        self.assertNotIn(
+            "controlled local process cleanup detail", str(cleanup_error.exception),
+        )
+        self.assertEqual(cleanup_context.active_count(), 0)
+        self.assertEqual(cleanup_context.open_process_handle_count(), 0)
+        self.assertEqual(cleanup_transport.child_record_count(), 0)
+        cleanup_transport.close()
 
         context = FakeProcessContext()
         transport = DirectHttpsTransport(
@@ -1113,6 +1571,86 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
             thread.name == "trl-news-source-deadline" and thread.is_alive()
             for thread in threading.enumerate()
         ))
+
+    def test_hostname_wait_precedes_child_and_preserves_each_source_deadline(self):
+        registry = news_sources.load_source_registry()
+        bea_rss = next(
+            source for source in registry["sources"]
+            if source["source_id"] == "BEA_NEWS_RELEASE_RSS"
+        )
+        bea_json = next(
+            source for source in registry["sources"]
+            if source["source_id"] == "BEA_RELEASE_DATES_JSON"
+        )
+        context = FakeProcessContext()
+        transport = DirectHttpsTransport(
+            process_context=context,
+            child_target=blocked_source_child,
+            wait_function=fake_process_wait,
+        )
+        connector = OfficialNewsConnector(transport)
+        outcomes = {}
+
+        def retrieve(label, source):
+            try:
+                connector.retrieve(source, "2026-07-27T12:00:00Z")
+            except RetrievalError as error:
+                outcomes[label] = error.reason_code
+
+        with mock.patch(
+            "trading_lab_app.news_connector.ABSOLUTE_REQUEST_DEADLINE_SECONDS",
+            0.12,
+        ):
+            first = threading.Thread(
+                target=retrieve, args=("first", bea_rss),
+                name="test-bea-deadline-first",
+            )
+            first.start()
+            deadline = time.monotonic() + 2
+            while context.start_count != 1 and time.monotonic() < deadline:
+                threading.Event().wait(0.005)
+            self.assertEqual(context.start_count, 1)
+
+            second = threading.Thread(
+                target=retrieve, args=("second", bea_json),
+                name="test-bea-deadline-second",
+            )
+            second.start()
+            deadline = time.monotonic() + 2
+            while (
+                connector.hostname_waiter_count() != 1
+                and time.monotonic() < deadline
+            ):
+                threading.Event().wait(0.005)
+            self.assertEqual(connector.hostname_waiter_count(), 1)
+            self.assertEqual(context.start_count, 1)
+            self.assertTrue(second.is_alive())
+
+            deadline = time.monotonic() + 2
+            while context.start_count != 2 and time.monotonic() < deadline:
+                threading.Event().wait(0.005)
+            self.assertEqual(context.start_count, 2)
+            self.assertTrue(second.is_alive())
+            first.join(2)
+            second.join(2)
+
+        self.assertFalse(first.is_alive())
+        self.assertFalse(second.is_alive())
+        self.assertEqual(outcomes, {
+            "first": "NEWS_SOURCE_TIMEOUT",
+            "second": "NEWS_SOURCE_TIMEOUT",
+        })
+        self.assertEqual(context.start_count, 2)
+        self.assertEqual(context.join_count, 2)
+        self.assertEqual(context.process_close_count, 2)
+        self.assertEqual(context.active_count(), 0)
+        self.assertEqual(context.open_process_handle_count(), 0)
+        self.assertEqual(transport.child_record_count(), 0)
+        self.assertEqual(transport.active_ipc_handle_count(), 0)
+        self.assertEqual(connector.hostname_waiter_count(), 0)
+        self.assertEqual(connector.held_hostname_lock_count(), 0)
+        connector.close()
+        connector.close()
 
     def test_starting_record_is_cancellable_without_global_registry_lock(self):
         source = news_sources.load_source_registry()["sources"][0]
@@ -1357,7 +1895,7 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
                 raise RuntimeError("controlled post-start clock failure")
 
         context = FakeProcessContext()
-        clock = GateFailingMonotonic(NEWS_REFRESH_WORKERS)
+        clock = GateFailingMonotonic(NEWS_REFRESH_HOST_GROUPS)
         transport = DirectHttpsTransport(
             process_context=context,
             child_target=blocked_source_child,
@@ -1383,7 +1921,7 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
         first = service.health_document()
         self.assertEqual(first["status"], "NEWS_REFRESHING")
         self.assertTrue(clock.all_entered.wait(3))
-        self.assertEqual(context.start_count, NEWS_REFRESH_WORKERS)
+        self.assertEqual(context.start_count, NEWS_REFRESH_HOST_GROUPS)
 
         shutdown_results = []
         shutdown = threading.Thread(
@@ -1400,7 +1938,7 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
                     break
             time.sleep(0.005)
         with transport._children_lock:
-            self.assertEqual(len(transport._children), NEWS_REFRESH_WORKERS)
+            self.assertEqual(len(transport._children), NEWS_REFRESH_HOST_GROUPS)
             self.assertTrue(all(
                 record.cancelled for record in transport._children
             ))
@@ -1413,13 +1951,13 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
         self.assertTrue(service.shutdown())
         self.assertTrue(service.shutdown())
         self.assertEqual(context.active_count(), 0)
-        self.assertEqual(context.join_count, NEWS_REFRESH_WORKERS)
-        self.assertEqual(context.process_close_count, NEWS_REFRESH_WORKERS)
+        self.assertEqual(context.join_count, NEWS_REFRESH_HOST_GROUPS)
+        self.assertEqual(context.process_close_count, NEWS_REFRESH_HOST_GROUPS)
         self.assertEqual(context.open_process_handle_count(), 0)
         self.assertEqual(transport.child_record_count(), 0)
         self.assertEqual(transport.active_process_handle_count(), 0)
         self.assertEqual(transport.active_ipc_handle_count(), 0)
-        self.assertEqual(len(records), NEWS_REFRESH_WORKERS)
+        self.assertEqual(len(records), NEWS_REFRESH_HOST_GROUPS)
         self.assertTrue(all(
             record.finalizer_count == 1
             and record.state == record.FINALIZED
@@ -1529,7 +2067,7 @@ class RegistryAndNetworkBoundaryTests(unittest.TestCase):
             child_target=successful_source_child,
             wait_function=fake_process_wait,
         )
-        with self.assertRaisesRegex(RetrievalError, "NEWS_SOURCE_HTTP_ERROR"):
+        with self.assertRaisesRegex(RetrievalError, "NEWS_SOURCE_INTERNAL_ERROR"):
             failed_transport.get(source)
         failed_transport.close()
         self.assertEqual(failed_context.join_count, 0)
@@ -4325,19 +4863,57 @@ class IdentityCacheAndServiceTests(unittest.TestCase):
 
         thread = threading.Thread(target=refresh, name="test-news-refresh")
         thread.start()
-        self.assertTrue(gated.more_than_one_active.wait(timeout=3))
-        self.assertTrue(gated.all_workers_active.wait(timeout=3))
-        self.assertLessEqual(gated.maximum_active, NEWS_REFRESH_WORKERS)
-        gated.release.set()
+        try:
+            self.assertTrue(gated.more_than_one_active.wait(timeout=3))
+            self.assertTrue(gated.all_workers_active.wait(timeout=3))
+            deadline = time.monotonic() + 2
+            while (
+                service._connector.hostname_waiter_count() != 2
+                and time.monotonic() < deadline
+            ):
+                threading.Event().wait(0.005)
+            self.assertLessEqual(gated.maximum_active, NEWS_REFRESH_HOST_GROUPS)
+            self.assertEqual(service._connector.hostname_waiter_count(), 2)
+        finally:
+            gated.release.set()
         thread.join(timeout=5)
         self.assertFalse(thread.is_alive())
         self.assertEqual(result["health"]["network_request_count"], 6)
         self.assertGreater(gated.maximum_active, 1)
-        self.assertEqual(gated.maximum_active, NEWS_REFRESH_WORKERS)
+        self.assertEqual(gated.maximum_active, NEWS_REFRESH_HOST_GROUPS)
+        self.assertEqual(
+            gated.maximum_by_hostname,
+            {
+                "apps.bea.gov": 1,
+                "www.bls.gov": 1,
+                "www.ecb.europa.eu": 1,
+                "www.federalreserve.gov": 1,
+            },
+        )
+        self.assertEqual(service._connector.hostname_waiter_count(), 0)
+        self.assertEqual(service._connector.held_hostname_lock_count(), 0)
+        self.assertEqual(
+            service._connector.hostname_state_count(), NEWS_REFRESH_HOST_GROUPS,
+        )
 
-        source_ids = [source["source_id"] for source in registry["sources"]]
+        source_groups = []
+        for source in registry["sources"]:
+            if (
+                not source_groups
+                or source_groups[-1][0]["exact_hostname"]
+                != source["exact_hostname"]
+            ):
+                source_groups.append([])
+            source_groups[-1].append(source)
         documents = []
-        for order in (source_ids, list(reversed(source_ids))):
+        for order in (
+            [source for group in source_groups for source in group],
+            [
+                source
+                for group in reversed(source_groups)
+                for source in group
+            ],
+        ):
             ordered = CompletionOrderTransport(responses, order)
             ordered_service = enabled_service(ordered)
             ordered_service.health_document()
@@ -4346,6 +4922,207 @@ class IdentityCacheAndServiceTests(unittest.TestCase):
                 "events": ordered_service.economic_events_document(),
             }))
         self.assertEqual(documents[0], documents[1])
+
+    def test_one_slot_bea_failure_without_admission_and_success_with_admission(self):
+        registry = news_sources.load_source_registry()
+        sources = registry["sources"]
+        responses = {
+            source["exact_endpoint"]: response(source) for source in sources
+        }
+
+        class OldOneSlotBeaProvider(FakeTransport):
+            def __init__(self):
+                super().__init__(responses)
+                self._lock = threading.Lock()
+                self._active = 0
+                self.json_active = threading.Event()
+                self.rss_rejected = threading.Event()
+
+            def get(self, source):
+                source_id = source["source_id"]
+                if source_id == "BEA_RELEASE_DATES_JSON":
+                    with self._lock:
+                        self.calls.append(source["exact_endpoint"])
+                        self._active += 1
+                        self.assert_one_active = self._active == 1
+                    self.json_active.set()
+                    try:
+                        if not self.rss_rejected.wait(3):
+                            raise AssertionError("BEA RSS did not overlap JSON")
+                        return copy.deepcopy(responses[source["exact_endpoint"]])
+                    finally:
+                        with self._lock:
+                            self._active -= 1
+                if source_id == "BEA_NEWS_RELEASE_RSS":
+                    if not self.json_active.wait(3):
+                        raise AssertionError("BEA JSON did not enter first")
+                    with self._lock:
+                        self.calls.append(source["exact_endpoint"])
+                        self.assert_json_still_active = self._active == 1
+                    self.rss_rejected.set()
+                    raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+                return super().get(source)
+
+        old_provider = OldOneSlotBeaProvider()
+        with ThreadPoolExecutor(max_workers=NEWS_REFRESH_WORKERS) as executor:
+            futures = {
+                executor.submit(old_provider.get, source): source["source_id"]
+                for source in sources
+            }
+            old_outcomes = {}
+            for future, source_id in futures.items():
+                try:
+                    future.result()
+                except RetrievalError as error:
+                    old_outcomes[source_id] = error.reason_code
+                else:
+                    old_outcomes[source_id] = "NEWS_VALID"
+        self.assertTrue(old_provider.assert_one_active)
+        self.assertTrue(old_provider.assert_json_still_active)
+        self.assertEqual(len(old_provider.calls), NEWS_REFRESH_WORKERS)
+        self.assertEqual(
+            old_outcomes["BEA_NEWS_RELEASE_RSS"], "NEWS_SOURCE_HTTP_ERROR",
+        )
+        self.assertEqual(old_outcomes["BEA_RELEASE_DATES_JSON"], "NEWS_VALID")
+
+        class StrictOneSlotProvider(FakeTransport):
+            def __init__(self):
+                super().__init__(responses)
+                self._lock = threading.Lock()
+                self._active = {}
+                self.maximum = {}
+                self.violations = []
+                self.other_host_entered = threading.Event()
+
+            def get(self, source):
+                hostname = source["exact_hostname"]
+                with self._lock:
+                    active = self._active.get(hostname, 0)
+                    if active:
+                        self.violations.append(source["source_id"])
+                        raise RetrievalError("NEWS_SOURCE_HTTP_ERROR")
+                    self._active[hostname] = 1
+                    self.maximum[hostname] = max(
+                        self.maximum.get(hostname, 0), 1,
+                    )
+                if hostname != "apps.bea.gov":
+                    self.other_host_entered.set()
+                try:
+                    if hostname == "apps.bea.gov" and not self.other_host_entered.wait(3):
+                        raise RetrievalError("NEWS_SOURCE_TIMEOUT")
+                    return super().get(source)
+                finally:
+                    with self._lock:
+                        self._active[hostname] = 0
+
+        serialized_provider = StrictOneSlotProvider()
+        service = enabled_service(serialized_provider)
+        health = service.health_document()
+        source_health = {
+            item["source_id"]: item["status"]
+            for item in health["source_health"]
+        }
+        self.assertEqual(health["network_request_count"], NEWS_REFRESH_WORKERS)
+        self.assertEqual(len(serialized_provider.calls), NEWS_REFRESH_WORKERS)
+        self.assertEqual(serialized_provider.violations, [])
+        self.assertEqual(serialized_provider.maximum["apps.bea.gov"], 1)
+        self.assertEqual(source_health["BEA_NEWS_RELEASE_RSS"], "NEWS_VALID")
+        self.assertEqual(source_health["BEA_RELEASE_DATES_JSON"], "NEWS_VALID")
+        self.assertTrue(all(value == "NEWS_VALID" for value in source_health.values()))
+        self.assertTrue(service.shutdown())
+
+    def test_cleanup_internal_failure_withholds_payload_and_keeps_cache_stale(self):
+        registry, trusted_news, _trusted_event = governed_cache_fixtures()
+        failed_source = next(
+            source for source in registry["sources"]
+            if source["source_id"] == trusted_news["source_id"]
+        )
+        withheld_title = "Withheld cleanup-failed publisher payload"
+        withheld_body = RSS_BODY.replace(
+            b"Official &amp; governed release",
+            withheld_title.encode("ascii"),
+        )
+        withheld_response = response(failed_source, body=withheld_body)
+        private_detail = "controlled private cleanup path C:\\secret\\socket"
+
+        def cleanup_failure(_source):
+            self.assertEqual(withheld_response.status, 200)
+            try:
+                raise OSError(private_detail)
+            except OSError as error:
+                raise RetrievalError("NEWS_SOURCE_INTERNAL_ERROR") from error
+
+        responses = {
+            source["exact_endpoint"]: response(source)
+            for source in registry["sources"]
+        }
+        responses[failed_source["exact_endpoint"]] = cleanup_failure
+        transport = FakeTransport(responses)
+        storage = news_cache.InMemoryCacheStorage(
+            cached_document(cached_wrapper(trusted_news, "news")),
+        )
+        service = enabled_service(transport, cache=storage)
+
+        health = service.health_document()
+        news_document = service.news_items_document()
+        events_document = service.economic_events_document()
+        sources_document = service.sources_document()
+        failed_health = next(
+            item for item in health["source_health"]
+            if item["source_id"] == failed_source["source_id"]
+        )
+        retained = next(
+            item for item in news_document["items"]
+            if item["news_id"] == trusted_news["news_id"]
+        )
+        independent = [
+            item for item in health["source_health"]
+            if item["source_id"] != failed_source["source_id"]
+        ]
+        exposed = json.dumps(
+            {
+                "health": health,
+                "news": news_document,
+                "events": events_document,
+                "sources": sources_document,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        persisted = json.dumps(
+            storage.value, ensure_ascii=False, sort_keys=True,
+        )
+
+        self.assertEqual(health["status"], "NEWS_PARTIAL")
+        self.assertEqual(health["network_request_count"], NEWS_REFRESH_WORKERS)
+        self.assertEqual(len(transport.calls), NEWS_REFRESH_WORKERS)
+        self.assertEqual(len(set(transport.calls)), NEWS_REFRESH_WORKERS)
+        self.assertEqual(
+            failed_health["reason_code"], "NEWS_SOURCE_INTERNAL_ERROR",
+        )
+        self.assertEqual(failed_health["retrieved_entry_count"], 0)
+        self.assertTrue(all(
+            item["reason_code"] == "NEWS_VALID" for item in independent
+        ))
+        self.assertEqual(
+            retained["operational_freshness_status"], "NEWS_RECORD_STALE",
+        )
+        self.assertEqual(
+            retained["latest_source_failure_reason"],
+            "NEWS_SOURCE_INTERNAL_ERROR",
+        )
+        self.assertEqual(retained["title"], trusted_news["title"])
+        self.assertNotIn(withheld_title, exposed)
+        self.assertNotIn(withheld_title, persisted)
+        self.assertNotIn(private_detail, exposed)
+        self.assertNotIn("secret", exposed)
+        self.assertNotIn("OSError", exposed)
+        self.assertEqual(storage.write_attempt_count, 1)
+        self.assertEqual(storage.write_count, 1)
+        self.assertEqual(service._connector.hostname_waiter_count(), 0)
+        self.assertEqual(service._connector.held_hostname_lock_count(), 0)
+        self.assertTrue(service.shutdown())
+        self.assertTrue(service.shutdown())
 
     def test_cache_retention_corruption_and_write_failure(self):
         source = news_sources.load_source_registry()["sources"][0]
@@ -4647,7 +5424,7 @@ class ApiCliAndDashboardTests(unittest.TestCase):
                 httpd, "GET", "/api/news-health"
             )
             wait_until = time.monotonic() + 2
-            while context.start_count != NEWS_REFRESH_WORKERS and time.monotonic() < wait_until:
+            while context.start_count != NEWS_REFRESH_HOST_GROUPS and time.monotonic() < wait_until:
                 threading.Event().wait(0.01)
             health_status, _, _ = self.request(httpd, "GET", "/api/health")
             health = json.loads(news_body)
@@ -4655,8 +5432,9 @@ class ApiCliAndDashboardTests(unittest.TestCase):
             self.assertEqual(health_status, 200)
             self.assertEqual(health["status"], "NEWS_REFRESHING")
             self.assertTrue(health["refreshing"])
-            self.assertEqual(context.start_count, NEWS_REFRESH_WORKERS)
-            self.assertEqual(context.active_count(), NEWS_REFRESH_WORKERS)
+            self.assertEqual(context.start_count, NEWS_REFRESH_HOST_GROUPS)
+            self.assertEqual(context.active_count(), NEWS_REFRESH_HOST_GROUPS)
+            self.assertEqual(service._connector.hostname_waiter_count(), 2)
 
             refresh_lock_released = threading.Event()
 
@@ -4679,8 +5457,12 @@ class ApiCliAndDashboardTests(unittest.TestCase):
             self.assertEqual(transport.active_child_count(), 0)
             self.assertEqual(transport.active_process_handle_count(), 0)
             self.assertEqual(transport.active_ipc_handle_count(), 0)
+            self.assertEqual(context.start_count, NEWS_REFRESH_HOST_GROUPS)
+            self.assertEqual(service._connector.hostname_waiter_count(), 0)
+            self.assertEqual(service._connector.held_hostname_lock_count(), 0)
             self.assertIsNone(service._refresh_owner)
             self.assertFalse(service._refreshing)
+            self.assertTrue(service.shutdown())
             deadline = time.monotonic() + 1
             while httpd.active_request_count() and time.monotonic() < deadline:
                 time.sleep(0.01)
@@ -4720,10 +5502,10 @@ class ApiCliAndDashboardTests(unittest.TestCase):
         )
         news_service.health_document()
         deadline = time.monotonic() + 2
-        while context.start_count != NEWS_REFRESH_WORKERS and time.monotonic() < deadline:
+        while context.start_count != NEWS_REFRESH_HOST_GROUPS and time.monotonic() < deadline:
             time.sleep(0.01)
-        self.assertEqual(context.start_count, NEWS_REFRESH_WORKERS)
-        self.assertEqual(context.active_count(), NEWS_REFRESH_WORKERS)
+        self.assertEqual(context.start_count, NEWS_REFRESH_HOST_GROUPS)
+        self.assertEqual(context.active_count(), NEWS_REFRESH_HOST_GROUPS)
 
         events = []
         actual_shutdown = news_service.shutdown
@@ -4759,8 +5541,8 @@ class ApiCliAndDashboardTests(unittest.TestCase):
         )
         self.assertEqual(context.active_count(), 0)
         self.assertEqual(context.open_process_handle_count(), 0)
-        self.assertEqual(context.join_count, NEWS_REFRESH_WORKERS)
-        self.assertEqual(context.process_close_count, NEWS_REFRESH_WORKERS)
+        self.assertEqual(context.join_count, NEWS_REFRESH_HOST_GROUPS)
+        self.assertEqual(context.process_close_count, NEWS_REFRESH_HOST_GROUPS)
         self.assertEqual(transport.child_record_count(), 0)
         self.assertEqual(transport.active_process_handle_count(), 0)
         self.assertEqual(transport.active_ipc_handle_count(), 0)
@@ -5004,183 +5786,110 @@ class ApiCliAndDashboardTests(unittest.TestCase):
         self.assertFalse(trickle_thread.is_alive())
 
     def test_overflow_is_rejected_without_queued_handler_or_second_deadline(self):
-        httpd = server.create_server(0)
-        httpd.client_request_read_timeout_seconds = 0.25
-        httpd.client_request_header_deadline_seconds = 0.8
-        server_thread = threading.Thread(
-            target=httpd.serve_forever, name="test-overflow-admission-server"
-        )
-        all_clients = []
-        trickle_threads = []
-        active_max = 0
+        owned_sockets = []
+        acquired_permits = []
+        released_permits = 0
+        recovered_permits = []
+        rejection_durations = []
 
-        def saturate(label, overflow_attempts):
-            nonlocal active_max
-            clients = []
-            stop = threading.Event()
-            for _index in range(server.MAX_HTTP_REQUEST_WORKERS):
-                client = socket.create_connection(httpd.server_address, timeout=2)
-                client.settimeout(2)
-                client.sendall(b"G")
-                clients.append(client)
-                all_clients.append(client)
-
-            def trickle():
-                while not stop.wait(0.04):
-                    for client in clients:
-                        try:
-                            client.sendall(b"x")
-                        except OSError:
-                            pass
-
-            trickle_thread = threading.Thread(
-                target=trickle, name="test-overflow-trickle-{}".format(label)
-            )
-            trickle_threads.append(trickle_thread)
-            trickle_thread.start()
-            wait_until = time.monotonic() + 2
-            while time.monotonic() < wait_until:
-                active = httpd.active_request_count()
-                active_max = max(active_max, active)
-                if (
-                    active == server.MAX_HTTP_REQUEST_WORKERS
-                    and httpd.active_header_deadline_count()
-                    == server.MAX_HTTP_REQUEST_WORKERS
-                ):
-                    break
-                threading.Event().wait(0.01)
-            self.assertEqual(
-                httpd.active_request_count(), server.MAX_HTTP_REQUEST_WORKERS
-            )
-            self.assertEqual(
-                httpd.active_header_deadline_count(),
-                server.MAX_HTTP_REQUEST_WORKERS,
-            )
-
-            rejections_before = httpd.overflow_rejection_count()
-            overflow = socket.create_connection(httpd.server_address, timeout=2)
-            overflow.settimeout(1)
-            all_clients.append(overflow)
-            rejected_started = time.monotonic()
+        with ExitStack() as resources:
+            httpd = server.create_server(0)
+            resources.callback(httpd.server_close)
             try:
-                overflow.sendall(b"G")
-                rejected_payload = overflow.recv(64)
-            except OSError:
-                rejected_payload = b""
-            rejected_duration = time.monotonic() - rejected_started
-            self.assertEqual(rejected_payload, b"")
-            self.assertLess(rejected_duration, 0.6)
+                for _ in range(server.MAX_HTTP_REQUEST_WORKERS):
+                    acquired = httpd._request_slots.acquire(blocking=False)
+                    self.assertTrue(acquired)
+                    acquired_permits.append(acquired)
 
-            for _attempt in range(overflow_attempts - 1):
-                extra = socket.create_connection(httpd.server_address, timeout=2)
-                extra.settimeout(1)
-                all_clients.append(extra)
-                try:
-                    extra.sendall(b"G")
-                    extra.recv(1)
-                except OSError:
-                    pass
-            wait_until = time.monotonic() + 2
-            while (
-                httpd.overflow_rejection_count()
-                < rejections_before + overflow_attempts
-                and time.monotonic() < wait_until
-            ):
-                threading.Event().wait(0.01)
-            self.assertEqual(
-                httpd.overflow_rejection_count(),
-                rejections_before + overflow_attempts,
-            )
-            self.assertEqual(httpd.queued_accepted_connection_count(), 0)
-            self.assertEqual(
-                httpd.active_request_count(), server.MAX_HTTP_REQUEST_WORKERS
-            )
-            self.assertEqual(
-                httpd.active_header_deadline_count(),
-                server.MAX_HTTP_REQUEST_WORKERS,
-            )
-            return clients, stop, trickle_thread
-
-        def reconcile_slots():
-            acquired = []
-            try:
-                for _index in range(server.MAX_HTTP_REQUEST_WORKERS):
-                    self.assertTrue(httpd._request_slots.acquire(blocking=False))
-                    acquired.append(True)
-                self.assertFalse(httpd._request_slots.acquire(blocking=False))
-            finally:
-                for _item in acquired:
-                    httpd._request_slots.release()
-
-        server_thread.start()
-        try:
-            first_clients, first_stop, first_trickle = saturate("first", 9)
-            wait_until = time.monotonic() + 2
-            while (
-                (
-                    httpd.active_request_count()
-                    or httpd.active_header_deadline_count()
+                self.assertEqual(
+                    len(acquired_permits), server.MAX_HTTP_REQUEST_WORKERS
                 )
-                and time.monotonic() < wait_until
-            ):
-                active_max = max(active_max, httpd.active_request_count())
-                threading.Event().wait(0.01)
-            first_stop.set()
-            first_trickle.join(timeout=1)
-            for client in first_clients:
-                client.close()
+                seventeenth_permit = httpd._request_slots.acquire(blocking=False)
+                try:
+                    self.assertFalse(seventeenth_permit)
+                finally:
+                    if seventeenth_permit:
+                        httpd._request_slots.release()
+
+                self.assertEqual(httpd.active_request_count(), 0)
+                self.assertEqual(httpd.active_header_deadline_count(), 0)
+                self.assertEqual(httpd.deadline_record_count(), 0)
+                self.assertEqual(httpd.queued_accepted_connection_count(), 0)
+                self.assertEqual(len(httpd._ownership.records), 0)
+                self.assertEqual(tuple(httpd._threads), ())
+
+                for attempt in range(14):
+                    request, client = socket.socketpair()
+                    resources.callback(request.close)
+                    resources.callback(client.close)
+                    owned_sockets.extend((request, client))
+                    client.settimeout(1)
+
+                    started = time.monotonic()
+                    httpd.process_request(
+                        request, ("127.0.0.1", 40000 + attempt)
+                    )
+                    rejection_durations.append(time.monotonic() - started)
+
+                    self.assertEqual(request.fileno(), -1)
+                    self.assertEqual(client.recv(1), b"")
+                    self.assertEqual(httpd.active_request_count(), 0)
+                    self.assertEqual(httpd.active_header_deadline_count(), 0)
+                    self.assertEqual(httpd.deadline_record_count(), 0)
+                    self.assertEqual(httpd.queued_accepted_connection_count(), 0)
+                    self.assertEqual(len(httpd._ownership.records), 0)
+                    self.assertEqual(tuple(httpd._threads), ())
+                    self.assertEqual(
+                        httpd.overflow_rejection_count(), attempt + 1
+                    )
+
+                    unmatched_release = httpd._request_slots.acquire(
+                        blocking=False
+                    )
+                    try:
+                        self.assertFalse(unmatched_release)
+                    finally:
+                        if unmatched_release:
+                            httpd._request_slots.release()
+
+                self.assertEqual(httpd.overflow_rejection_count(), 14)
+                self.assertEqual(len(rejection_durations), 14)
+                self.assertLess(max(rejection_durations), 0.5)
+                self.assertEqual(
+                    len(acquired_permits), server.MAX_HTTP_REQUEST_WORKERS
+                )
+            finally:
+                while acquired_permits:
+                    httpd._request_slots.release()
+                    acquired_permits.pop()
+                    released_permits += 1
+
+            self.assertEqual(released_permits, server.MAX_HTTP_REQUEST_WORKERS)
+            try:
+                for _ in range(server.MAX_HTTP_REQUEST_WORKERS):
+                    recovered = httpd._request_slots.acquire(blocking=False)
+                    self.assertTrue(recovered)
+                    recovered_permits.append(recovered)
+                extra_permit = httpd._request_slots.acquire(blocking=False)
+                try:
+                    self.assertFalse(extra_permit)
+                finally:
+                    if extra_permit:
+                        httpd._request_slots.release()
+            finally:
+                while recovered_permits:
+                    httpd._request_slots.release()
+                    recovered_permits.pop()
+
             self.assertEqual(httpd.active_request_count(), 0)
             self.assertEqual(httpd.active_header_deadline_count(), 0)
+            self.assertEqual(httpd.deadline_record_count(), 0)
             self.assertEqual(httpd.queued_accepted_connection_count(), 0)
-            threading.Event().wait(0.1)
-            self.assertEqual(httpd.active_request_count(), 0)
-            self.assertEqual(httpd.active_header_deadline_count(), 0)
-            reconcile_slots()
+            self.assertEqual(len(httpd._ownership.records), 0)
+            self.assertEqual(tuple(httpd._threads), ())
 
-            status, _, body = self.request(httpd, "GET", "/api/health")
-            self.assertEqual(status, 200)
-            self.assertEqual(json.loads(body)["status"], "ok")
-
-            _clients, second_stop, second_trickle = saturate("shutdown", 5)
-            shutdown_started = time.monotonic()
-            httpd.shutdown()
-            httpd.server_close()
-            shutdown_duration = time.monotonic() - shutdown_started
-            second_stop.set()
-            second_trickle.join(timeout=1)
-            server_thread.join(timeout=2)
-
-            self.assertEqual(active_max, server.MAX_HTTP_REQUEST_WORKERS)
-            self.assertLess(
-                shutdown_duration,
-                httpd.client_request_header_deadline_seconds + 1.0,
-            )
-            self.assertEqual(httpd.active_request_count(), 0)
-            self.assertEqual(httpd.active_header_deadline_count(), 0)
-            self.assertEqual(httpd.queued_accepted_connection_count(), 0)
-            self.assertFalse(server_thread.is_alive())
-            self.assertFalse(any(thread.is_alive() for thread in trickle_threads))
-            self.assertFalse(any(
-                thread.is_alive() for thread in list(getattr(httpd, "_threads", ()))
-            ))
-            self.assertFalse(any(
-                thread.name == "trl-http-header-deadline" and thread.is_alive()
-                for thread in threading.enumerate()
-            ))
-            self.assertEqual(httpd.socket.fileno(), -1)
-            reconcile_slots()
-        finally:
-            for client in all_clients:
-                client.close()
-            for thread in trickle_threads:
-                if thread.is_alive():
-                    thread.join(timeout=1)
-            if server_thread.is_alive():
-                httpd.shutdown()
-            httpd.server_close()
-            server_thread.join(timeout=2)
-
-        self.assertTrue(all(client.fileno() == -1 for client in all_clients))
+        self.assertEqual(httpd.socket.fileno(), -1)
+        self.assertTrue(all(sock.fileno() == -1 for sock in owned_sockets))
 
     def test_handler_thread_start_failure_is_unregistered_and_server_recovers(self):
         httpd = server.create_server(0)

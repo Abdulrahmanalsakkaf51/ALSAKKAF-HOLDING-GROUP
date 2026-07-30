@@ -182,3 +182,11 @@ $trlRegistry.vault
 Health must be `VALID / REGISTRY_VALID`. The executable collection must contain only SMA-001 version 1.0.0. The separate backlog entries must all be `PLANNED_NOT_IMPLEMENTED` with `execution_eligible` equal to `False`.
 
 The registry does not choose a best strategy. No strategy is approved for investment use. The optional local MT5 connector is a separate data-only surface and never invokes the registry or Release 1 evaluation. Broad, commercial, full-text, broker-provided, and registry-owned news capabilities remain unavailable. Order proposals and execution also remain unavailable.
+
+# 14. LIVE-FIX-05 Official-News Host Admission
+
+Official-news source identity is fully validated before the connector derives the exact endpoint hostname. The connector admits one active operation per exact governed hostname: BEA's two sources serialize with one another, ECB's two sources serialize with one another, and the FED, BLS, BEA, and ECB hostname groups remain concurrent. There is no retry, global six-source serialization, connection reuse, or response sharing; an eligible refresh still records exactly six governed attempts and applies results in registry order.
+
+Hostname waiting occurs before child and pipe creation and before the source's fixed post-start 20-second deadline. Each admitted source keeps the complete deadline, so a two-source hostname may take approximately two successive publisher deadlines plus synchronous process-start and finalization time. Shutdown cancels active child work and releases waiting sources through the existing controlled timeout result without permitting a waiter to start child or network work. Synchronous Windows `Process.start()` remains non-preemptible.
+
+Non-timeout DNS/connect/TLS/socket/HTTP failures and genuine non-2xx status remain `NEWS_SOURCE_HTTP_ERROR`. Provably local process, pipe, wait, crash, IPC, serialization, invalid-result, abnormal-exit, and cleanup/finalization failures use the existing sanitized `NEWS_SOURCE_INTERNAL_ERROR`. No exception details are exposed, and no schema, stable-code, endpoint, registry, digest, source, cache, or content identity changes. This is not evidence of a publisher connection-limit policy and is not publisher certification.
