@@ -2,6 +2,7 @@
 
 import json
 import re
+import unicodedata
 import xml.etree.ElementTree as element_tree
 
 from . import news_data
@@ -14,6 +15,7 @@ MAX_XML_DEPTH = 24
 MAX_JSON_DEPTH = 16
 MAX_JSON_COLLECTION = 2000
 MAX_STRING_LENGTH = 4096
+MAX_NONRETAINED_DESCRIPTION_LENGTH = 64 * 1024
 _UNSAFE_XML = re.compile(br"<!\s*(?:DOCTYPE|ENTITY)\b", re.IGNORECASE)
 def safe_title(value):
     return news_data.canonical_title(value)
@@ -150,9 +152,15 @@ def _validate_xml_tree(root):
             raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
         if len(element.attrib) > 20:
             raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
-        for value in (element.text, element.tail):
-            if value is not None and len(value) > MAX_STRING_LENGTH:
-                raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+        text_limit = (
+            MAX_NONRETAINED_DESCRIPTION_LENGTH
+            if _local_name(element.tag) == "description"
+            else MAX_STRING_LENGTH
+        )
+        if element.text is not None and len(element.text) > text_limit:
+            raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+        if element.tail is not None and len(element.tail) > MAX_STRING_LENGTH:
+            raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
         stack.extend((child, depth + 1) for child in element)
 
 
@@ -238,6 +246,80 @@ def _release_rows(document):
     raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
 
 
+def _bounded_publisher_metadata_timestamp(value):
+    if (
+        type(value) is not str
+        or not value
+        or len(value) > 100
+        or value != value.strip()
+        or any(ord(character) < 32 or ord(character) == 127 for character in value)
+    ):
+        raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+
+
+def _strict_product_name(value):
+    if (
+        type(value) is not str
+        or not value
+        or len(value) > news_data.MAX_TITLE_INPUT_LENGTH
+        or any(unicodedata.category(character) in {"Cc", "Cf"} for character in value)
+    ):
+        raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+    try:
+        value.encode("utf-8", errors="strict")
+    except UnicodeError as error:
+        raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID") from error
+    canonical = safe_title(value)
+    if canonical != value:
+        raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+    return canonical
+
+
+def _product_release_events(document, source, retrieved_timestamp_utc):
+    if type(document) is not dict or "file_last_updated" not in document:
+        raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+    _bounded_publisher_metadata_timestamp(document["file_last_updated"])
+    products = [
+        (name, value) for name, value in document.items()
+        if name != "file_last_updated"
+    ]
+    if len(products) > MAX_ENTRIES:
+        raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+    result = []
+    raw_release_date_count = 0
+    unique_occurrence_count = 0
+    for name, value in products:
+        if type(value) is not dict or set(value) != {"release_dates"}:
+            raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+        release_dates = value["release_dates"]
+        if type(release_dates) is not list:
+            raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+        product_name = _strict_product_name(name)
+        if len(release_dates) > MAX_ENTRIES - raw_release_date_count:
+            raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+        raw_release_date_count += len(release_dates)
+        normalized_dates = set()
+        for scheduled in release_dates:
+            normalized_dates.add(news_data.parse_rfc3339_timestamp(scheduled))
+        if len(normalized_dates) > MAX_ENTRIES - unique_occurrence_count:
+            raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+        unique_occurrence_count += len(normalized_dates)
+        for strict_scheduled in sorted(
+            normalized_dates, key=news_data.chronological_timestamp_key,
+        ):
+            result.append(news_data.economic_event(
+                source, product_name, strict_scheduled, None,
+                retrieved_timestamp_utc, None,
+            ))
+    return sorted(result, key=lambda event: (
+        news_data.chronological_timestamp_key(
+            event["scheduled_timestamp_utc"]
+        ),
+        event["event_series_id"],
+        event["event_id"],
+    ))
+
+
 def _pick(row, names, required=False):
     matches = [row[name] for name in names if name in row]
     if len(matches) > 1:
@@ -266,6 +348,10 @@ def parse_bea_release_dates(body, source, retrieved_timestamp_utc):
         _validate_json(document)
     except RecursionError as error:
         raise news_data.NewsValidationError("NEWS_SOURCE_PARSE_ERROR") from error
+    if type(document) is dict and "file_last_updated" in document:
+        return _product_release_events(
+            document, source, retrieved_timestamp_utc,
+        )
     rows = _release_rows(document)
     if type(rows) is not list or len(rows) > MAX_ENTRIES:
         raise news_data.NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")

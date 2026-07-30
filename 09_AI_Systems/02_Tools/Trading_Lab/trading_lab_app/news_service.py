@@ -702,7 +702,9 @@ class OfficialNewsService:
     def economic_events_document(self):
         records = self._records("event")
         records.sort(key=lambda item: (
-            item["scheduled_timestamp_utc"],
+            news_data.chronological_timestamp_key(
+                item["scheduled_timestamp_utc"]
+            ),
             item["event_series_id"],
             item["event_id"],
         ))

@@ -9,8 +9,8 @@
 | Document ID | TRL-R2-004-NEWS-SOURCE-GOVERNANCE-001 |
 | Document Type | Source Governance Register |
 | Status | ACTIVE FOR TRL-R2-004 SOURCE VALIDATION |
-| Version | 1.0 |
-| Review Date | 2026-07-27 |
+| Version | 1.1 |
+| Review Date | 2026-07-30 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Checkpoint | TRL-R2-004 - Local Governed Official News and Economic-Event Collection |
 
@@ -36,6 +36,22 @@ All sources carry `OFFICIAL_PUBLISHER`, `NO_API_KEY_REQUIRED`, `LOCAL_RETRIEVAL_
 Exact retrieval endpoints are the HTTPS scheme plus the listed hostname and nonempty path, with no userinfo, credentials, explicit port, query, or fragment. The committed immutable registry remains `TRL-OFFICIAL-NEWS-SOURCES-1.1`. Runtime validation compares every complete source record with a compiled canonical SHA-256 identity. Transport derives hostname and path only from the validated endpoint; separately declared fields must match and are never trusted as destinations. Any source, field, scheme, hostname, path, item-link policy, key requirement, or registry-version mismatch is `NEWS_PROVIDER_CHANGED` before transport or DNS. No provider is certified by ALSAKKAF.
 
 Item/article links are governed independently from query-free retrieval endpoints. Permitted hosts are: Federal Reserve `www.federalreserve.gov`; BLS `www.bls.gov`; both BEA sources `www.bea.gov`; and both ECB sources `www.ecb.europa.eu`. BEA retrieval stays on exact `apps.bea.gov` endpoints, which does not authorize that host for item links. Item links require HTTPS without userinfo, credentials, explicit ports, fragments, malformed escapes, or ungoverned hosts. Raw path and query text and their strict-UTF-8 percent-decoded forms must contain no backslash, NUL, CR, LF, C0, DEL, C1, or Unicode control/format character. A query is accepted only within 1,024 UTF-8 bytes and 32 ampersand-delimited parameters; its original escaped order and text are retained and hashed into identity. Cache validation reapplies the same policy. Invalid paths or queries use explicit endpoint fallback. The dashboard anchors only `GOVERNED_ITEM_LINK_AVAILABLE` and uses the complete validated URL.
+
+## LIVE-FIX-01 Compatibility Governance
+
+The exact six retrieval endpoints, formats, source registry records and digests, and item-link host allowlists remain unchanged. The 2026-07-30 compatibility authorization adds no source and grants no arbitrary URL, webpage scraping, article-body retention, redistribution, credential, paid service, cloud relay, telemetry, strategy, signal, recommendation, broker, order, or TRL-R2-005 capability.
+
+`BLS_LATEST_RELEASES_RSS` remains title/link/time metadata only. Its observed 4,589-character description is structurally acceptable within a new 64 KiB non-retained field bound and the existing 1 MiB response bound, but descriptions are never copied into records, cache, APIs, or evidence. `BEA_NEWS_RELEASE_RSS` additionally accepts only uppercase `EDT` and `EST` named offsets; its other observed direct publisher fields remain discarded. `BEA_RELEASE_DATES_JSON` additionally accepts product-name keys mapped to exact `release_dates` arrays. Every mapped value is strict RFC3339, the combined expansion is limited to 200 events, and `file_last_updated` is bounded but not retained.
+
+All compatibility validation is offline with sanitized fixtures, injected transports, fake clocks, and in-memory storage. LIVE-FIX-01 performs no publisher, DNS, internet, external API, broker, or MT5 access. The one authorized follow-up rehearsal remains a separate later operation against only the same six endpoints; no additional rehearsal is authorized.
+
+## LIVE-FIX-02 BEA Mapping Governance
+
+Every non-reserved BEA product key must already equal the output of the shared governed canonicalizer. Keys are rejected, never repaired, if validation would trim or collapse whitespace, decode or remove markup, normalize text, or otherwise change the supplied identity; Unicode control and format characters are also forbidden. This prevents distinct publisher keys from collapsing into one series identity while retaining already canonical safe ordinary Unicode and Arabic names.
+
+Three independent limits apply without truncation: at most 200 non-reserved product records, including empty schedule records; at most 200 raw schedule entries, including duplicates and counted before deduplication; and at most 200 constructed occurrences. Each raw value first passes strict RFC3339 validation and UTC normalization. Exact and UTC-equivalent instants are then deduplicated deterministically within the same exact product only and sorted before construction. `file_last_updated` is excluded from product and event counts. The downstream complete-batch duplicate-identity guard remains unchanged and fail closed.
+
+These local offline compatibility corrections do not certify a publisher or authorize production use, a strategy, signal, recommendation, trading advice, profitability claim, broker operation, order, execution, or TRL-R2-005.
 
 ## Metadata, Schemas, and Redistribution Controls
 
@@ -65,6 +81,6 @@ Processing is local. ALSAKKAF receives no telemetry or customer data. Explicit r
 
 ## Manual Rehearsal and Proposed Next Checkpoint
 
-A live official-source rehearsal requires separate Founder authorization. After authorization, review current terms, stop MT5, run only the documented explicit news command, verify exact destinations and four localhost APIs, capture sanitized metadata-only evidence, confirm throttle/cache behavior, and stop. Abort on redirect, provider change, paid/key requirement, unexpected destination, terms concern, or any need to scrape a webpage.
+LIVE-FIX-01 performs no live rehearsal. The one Founder-authorized follow-up is a later, separately operated controlled rehearsal against only these same six endpoints. Recheck current terms, stop MT5, use only the documented explicit news command, verify exact destinations and four localhost APIs, capture sanitized metadata-only evidence, confirm throttle/cache behavior, and stop. Abort on redirect, provider change, paid/key requirement, unexpected destination, terms concern, or any need to scrape a webpage. No additional rehearsal is authorized.
 
 The proposed next checkpoint is **TRL-R2-005 - LOCAL FORWARD PAPER PORTFOLIO AND EVENT TIMELINE**. It may consume validated snapshots only after separate authorization and explicit causal-time rules, and must not provide live trading or broker orders. TRL-R2-005 remains unauthorized and has not begun.

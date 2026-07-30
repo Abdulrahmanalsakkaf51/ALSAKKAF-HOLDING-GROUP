@@ -74,7 +74,7 @@ _RFC3339_TIMESTAMP = re.compile(
 _RFC2822_TIMESTAMP = re.compile(
     r"^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{1,2} "
     r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) "
-    r"\d{4} \d{2}:\d{2}:\d{2} (?:GMT|UTC|[+-]\d{4})$"
+    r"\d{4} \d{2}:\d{2}:\d{2} (?:GMT|UTC|EDT|EST|[+-]\d{4})$"
 )
 _DATE_ONLY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _TITLE_TAG_COMPONENTS = re.compile(r"[.:]")
@@ -474,27 +474,45 @@ def utc_timestamp(value):
     return text + "Z"
 
 
+def _parse_rfc3339_datetime(value):
+    if type(value) is not str or not value or len(value) > 100:
+        raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+    if _RFC3339_TIMESTAMP.fullmatch(value) is None:
+        raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
+    try:
+        if value.endswith("Z"):
+            parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+        else:
+            parsed = datetime.fromisoformat(value)
+    except ValueError as error:
+        raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID") from error
+    return parsed.astimezone(timezone.utc)
+
+
+def parse_rfc3339_timestamp(value):
+    """Parse and normalize only the strict RFC3339 schedule grammar."""
+    return utc_timestamp(_parse_rfc3339_datetime(value))
+
+
+def chronological_timestamp_key(value):
+    """Return an instant-comparable key for a strict RFC3339 timestamp."""
+    return _parse_rfc3339_datetime(value)
+
+
 def parse_source_timestamp(value):
     if type(value) is not str or not value or len(value) > 100:
         raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
     if _RFC3339_TIMESTAMP.fullmatch(value):
-        try:
-            if value.endswith("Z"):
-                parsed = datetime.fromisoformat(value[:-1] + "+00:00")
-            else:
-                parsed = datetime.fromisoformat(value)
-        except ValueError as error:
-            raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID") from error
-    elif _RFC2822_TIMESTAMP.fullmatch(value):
+        return parse_rfc3339_timestamp(value)
+    if _RFC2822_TIMESTAMP.fullmatch(value):
         try:
             parsed = parsedate_to_datetime(value)
         except (TypeError, ValueError, OverflowError) as error:
             raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID") from error
         if parsed.tzinfo is None:
             raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
-    else:
-        raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
-    return utc_timestamp(parsed)
+        return utc_timestamp(parsed)
+    raise NewsValidationError("NEWS_SOURCE_SCHEMA_INVALID")
 
 
 def parse_schedule_timestamp(value):

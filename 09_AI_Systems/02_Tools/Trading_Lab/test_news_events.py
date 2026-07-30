@@ -1605,6 +1605,14 @@ class ParserSecurityTests(unittest.TestCase):
         registry = news_sources.load_source_registry()
         cls.rss_source = registry["sources"][0]
         cls.bea_source = next(item for item in registry["sources"] if item["source_id"] == "BEA_RELEASE_DATES_JSON")
+        cls.bea_rss_source = next(
+            item for item in registry["sources"]
+            if item["source_id"] == "BEA_NEWS_RELEASE_RSS"
+        )
+        cls.bls_source = next(
+            item for item in registry["sources"]
+            if item["source_id"] == "BLS_LATEST_RELEASES_RSS"
+        )
         cls.atom_source = next(
             item for item in registry["sources"]
             if item["source_id"] == "ECB_PRESS_RELEASE_RSS"
@@ -1657,6 +1665,79 @@ class ParserSecurityTests(unittest.TestCase):
         self.assertIsNone(missing["published_timestamp_utc"])
         with self.assertRaisesRegex(news_data.NewsValidationError, "NEWS_SOURCE_SCHEMA_INVALID"):
             self.parse_xml(b"<rss><channel><item><title>x</title><pubDate>not-a-date</pubDate></item></channel></rss>")
+
+    def test_bls_long_description_is_bounded_discarded_metadata(self):
+        description_marker = "SYNTHETIC-NONRETAINED-DESCRIPTION-"
+        description = description_marker + "x" * (4589 - len(description_marker))
+        body = (
+            '<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">'
+            "<channel><item><title>Major indicators synthetic metadata</title>"
+            "<link>https://www.bls.gov/bls/</link>"
+            "<pubDate>Wed, 29 Jul 2026 10:01:38 -0400</pubDate>"
+            "<dc:creator>U.S. Bureau of Labor Statistics</dc:creator>"
+            "<description>" + description + "</description>"
+            "</item></channel></rss>"
+        ).encode("utf-8")
+        records = news_parser.parse_xml_news(
+            body, self.bls_source, "2026-07-30T08:00:00Z"
+        )
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["source_id"], "BLS_LATEST_RELEASES_RSS")
+        self.assertEqual(records[0]["source_url"], "https://www.bls.gov/bls/")
+        self.assertEqual(
+            records[0]["published_timestamp_utc"], "2026-07-29T14:01:38Z"
+        )
+        self.assertNotIn(description_marker, json.dumps(records))
+        oversized = body.replace(
+            description.encode("utf-8"),
+            b"x" * (news_parser.MAX_NONRETAINED_DESCRIPTION_LENGTH + 1),
+        )
+        with self.assertRaisesRegex(
+            news_data.NewsValidationError, "NEWS_SOURCE_SCHEMA_INVALID"
+        ):
+            news_parser.parse_xml_news(
+                oversized, self.bls_source, "2026-07-30T08:00:00Z"
+            )
+
+    def test_bea_rss_named_eastern_dates_and_direct_metadata_fields(self):
+        rows = []
+        for index in range(46):
+            rows.append(
+                "<item><dbid>{0}</dbid><title>Synthetic BEA release {0}</title>"
+                "<link>https://www.bea.gov/news/synthetic-{0}</link>"
+                "<guid>synthetic-{0}</guid><description>Not retained {0}</description>"
+                "<data>Not retained</data><nextreleasedate>Not retained</nextreleasedate>"
+                "<unitsofmeasure>Not retained</unitsofmeasure>"
+                "<changeunit>Not retained</changeunit>"
+                "<linkhistoric>Not retained</linkhistoric>"
+                "<linkarchive>Not retained</linkarchive><pdf>Not retained</pdf>"
+                "<pubDate>Wed, 29 Jul 2026 10:01:38 EDT</pubDate></item>".format(index)
+            )
+        body = ("<rss><channel>" + "".join(rows) + "</channel></rss>").encode(
+            "utf-8"
+        )
+        records = news_parser.parse_xml_news(
+            body, self.bea_rss_source, "2026-07-30T08:00:00Z"
+        )
+        self.assertEqual(len(records), 46)
+        self.assertEqual(records[0]["published_timestamp_utc"], "2026-07-29T14:01:38Z")
+        self.assertEqual(
+            news_data.parse_source_timestamp(
+                "Wed, 29 Jul 2026 10:01:38 EST"
+            ),
+            "2026-07-29T15:01:38Z",
+        )
+        encoded = json.dumps(records)
+        for discarded in (
+            "Not retained", "nextreleasedate", "unitsofmeasure", "linkarchive"
+        ):
+            self.assertNotIn(discarded, encoded)
+        with self.assertRaisesRegex(
+            news_data.NewsValidationError, "NEWS_SOURCE_SCHEMA_INVALID"
+        ):
+            news_data.parse_source_timestamp(
+                "Wed, 29 Jul 2026 10:01:38 PDT"
+            )
 
     def test_atom_publication_time_precedes_update_independent_of_child_order(self):
         published = "2026-07-27T09:00:00Z"
@@ -1847,6 +1928,568 @@ class ParserSecurityTests(unittest.TestCase):
         for field in ("actual", "forecast", "previous", "importance"):
             self.assertIsNone(event[field])
             self.assertEqual(event["missing_value_reasons"][field], "SOURCE_NOT_PROVIDED")
+
+    def test_bea_product_release_mapping_expands_strict_rfc3339_occurrences(self):
+        body = json.dumps({
+            "Gross Domestic Product": {
+                "release_dates": [
+                    "2026-07-30T08:30:00-04:00",
+                    "2026-08-27T08:30:00-04:00",
+                ],
+            },
+            "Personal Income and Outlays": {
+                "release_dates": ["2026-07-31T08:30:00-04:00"],
+            },
+            "file_last_updated": "2026-07-29T16:45:00Z",
+        }, separators=(",", ":")).encode("utf-8")
+        events = news_parser.parse_bea_release_dates(
+            body, self.bea_source, "2026-07-30T08:00:00Z"
+        )
+        self.assertEqual(
+            [event["event_name"] for event in events],
+            [
+                "Gross Domestic Product",
+                "Personal Income and Outlays",
+                "Gross Domestic Product",
+            ],
+        )
+        self.assertEqual(
+            [event["scheduled_timestamp_utc"] for event in events],
+            [
+                "2026-07-30T12:30:00Z",
+                "2026-07-31T12:30:00Z",
+                "2026-08-27T12:30:00Z",
+            ],
+        )
+        for event in events:
+            self.assertEqual(event["scheduled_time_precision"], "TIMESTAMP")
+            self.assertEqual(event["data_quality_status"], "SOURCE_TIMESTAMP_VALID")
+            self.assertEqual(
+                event["source_url_availability_status"],
+                "SOURCE_ENDPOINT_FALLBACK",
+            )
+        self.assertNotIn("file_last_updated", json.dumps(events))
+
+    def test_bea_product_mapping_deduplicates_equivalent_dates_per_product(self):
+        equivalent_dates = [
+            "2026-08-01T12:00:00Z",
+            "2026-08-01T16:00:00+04:00",
+            "2026-08-01T12:00:00Z",
+        ]
+
+        def parse(dates, retrieved="2026-07-30T08:00:00Z"):
+            return news_parser.parse_bea_release_dates(
+                json.dumps({
+                    "Gross Domestic Product": {"release_dates": dates},
+                    "file_last_updated": "2026-07-29T16:45:00Z",
+                }, separators=(",", ":")).encode("utf-8"),
+                self.bea_source,
+                retrieved,
+            )
+
+        first = parse(equivalent_dates)
+        reordered = parse(
+            list(reversed(equivalent_dates)), "2026-07-30T09:00:00Z"
+        )
+        self.assertEqual(len(first), 1)
+        self.assertEqual(len(reordered), 1)
+        self.assertEqual(first[0]["scheduled_timestamp_utc"], "2026-08-01T12:00:00Z")
+        self.assertEqual(first[0]["event_series_id"], reordered[0]["event_series_id"])
+        self.assertEqual(first[0]["event_id"], reordered[0]["event_id"])
+        self.assertEqual(
+            news_data.observation_fingerprint(first[0]),
+            news_data.observation_fingerprint(reordered[0]),
+        )
+        self.assertEqual(first[0]["revision_number"], reordered[0]["revision_number"])
+
+        different_products = news_parser.parse_bea_release_dates(
+            json.dumps({
+                "Gross Domestic Product": {
+                    "release_dates": [equivalent_dates[0]],
+                },
+                "Personal Income and Outlays": {
+                    "release_dates": [equivalent_dates[1]],
+                },
+                "file_last_updated": "2026-07-29T16:45:00Z",
+            }, separators=(",", ":")).encode("utf-8"),
+            self.bea_source,
+            "2026-07-30T08:00:00Z",
+        )
+        self.assertEqual(len(different_products), 2)
+        self.assertEqual(len({event["event_id"] for event in different_products}), 2)
+        self.assertEqual(
+            len({event["event_series_id"] for event in different_products}), 2
+        )
+
+        different_dates = parse([
+            "2026-08-02T12:00:00Z",
+            "2026-08-01T12:00:00Z",
+        ])
+        self.assertEqual(
+            [event["scheduled_timestamp_utc"] for event in different_dates],
+            ["2026-08-01T12:00:00Z", "2026-08-02T12:00:00Z"],
+        )
+        self.assertEqual(len({event["event_id"] for event in different_dates}), 2)
+        self.assertEqual(
+            len({event["event_series_id"] for event in different_dates}), 1
+        )
+
+    def test_bea_product_mapping_has_canonical_global_output_order(self):
+        retrieved = "2026-07-30T08:00:00Z"
+        metadata = "2026-07-29T16:45:00Z"
+        first_document = {
+            "Alpha Product": {"release_dates": [
+                "2026-08-03T12:00:00Z",
+                "2026-08-01T12:00:00Z",
+                "2026-08-01T16:00:00+04:00",
+            ]},
+            "Beta Product": {"release_dates": [
+                "2026-08-02T12:00:00Z",
+                "2026-08-01T12:00:00Z",
+            ]},
+            "file_last_updated": metadata,
+        }
+        reversed_document = {
+            "Beta Product": {
+                "release_dates": list(reversed(
+                    first_document["Beta Product"]["release_dates"]
+                )),
+            },
+            "Alpha Product": {
+                "release_dates": list(reversed(
+                    first_document["Alpha Product"]["release_dates"]
+                )),
+            },
+            "file_last_updated": metadata,
+        }
+        original_first = copy.deepcopy(first_document)
+        original_reversed = copy.deepcopy(reversed_document)
+
+        def parse(document):
+            return news_parser.parse_bea_release_dates(
+                json.dumps(
+                    document, separators=(",", ":"),
+                ).encode("utf-8"),
+                self.bea_source,
+                retrieved,
+            )
+
+        first = parse(first_document)
+        reversed_result = parse(reversed_document)
+        repeated = parse(copy.deepcopy(first_document))
+        decoded_result = news_parser._product_release_events(
+            first_document, self.bea_source, retrieved,
+        )
+
+        self.assertEqual(first, reversed_result)
+        self.assertEqual(
+            news_cache.deterministic_bytes(first),
+            news_cache.deterministic_bytes(reversed_result),
+        )
+        self.assertEqual(first, repeated)
+        self.assertEqual(first, decoded_result)
+        self.assertEqual(first_document, original_first)
+        self.assertEqual(reversed_document, original_reversed)
+        self.assertEqual(len(first), 4)
+        self.assertEqual(
+            [
+                (
+                    news_data.chronological_timestamp_key(
+                        event["scheduled_timestamp_utc"]
+                    ),
+                    event["event_series_id"],
+                    event["event_id"],
+                )
+                for event in first
+            ],
+            sorted(
+                (
+                    news_data.chronological_timestamp_key(
+                        event["scheduled_timestamp_utc"]
+                    ),
+                    event["event_series_id"],
+                    event["event_id"],
+                )
+                for event in first
+            ),
+        )
+        self.assertLess(
+            next(index for index, event in enumerate(first) if (
+                event["event_name"] == "Beta Product"
+                and event["scheduled_timestamp_utc"] == "2026-08-02T12:00:00Z"
+            )),
+            next(index for index, event in enumerate(first) if (
+                event["event_name"] == "Alpha Product"
+                and event["scheduled_timestamp_utc"] == "2026-08-03T12:00:00Z"
+            )),
+        )
+        same_time = [
+            event for event in first
+            if event["scheduled_timestamp_utc"] == "2026-08-01T12:00:00Z"
+        ]
+        self.assertEqual(
+            [(event["event_series_id"], event["event_id"]) for event in same_time],
+            sorted(
+                (event["event_series_id"], event["event_id"])
+                for event in same_time
+            ),
+        )
+        self.assertEqual(
+            len([
+                event for event in first
+                if event["event_name"] == "Alpha Product"
+                and event["scheduled_timestamp_utc"] == "2026-08-01T12:00:00Z"
+            ]),
+            1,
+        )
+
+        expected = sorted([
+            news_data.economic_event(
+                self.bea_source, "Alpha Product", "2026-08-01T12:00:00Z",
+                None, retrieved, None,
+            ),
+            news_data.economic_event(
+                self.bea_source, "Alpha Product", "2026-08-03T12:00:00Z",
+                None, retrieved, None,
+            ),
+            news_data.economic_event(
+                self.bea_source, "Beta Product", "2026-08-01T12:00:00Z",
+                None, retrieved, None,
+            ),
+            news_data.economic_event(
+                self.bea_source, "Beta Product", "2026-08-02T12:00:00Z",
+                None, retrieved, None,
+            ),
+        ], key=lambda event: (
+            news_data.chronological_timestamp_key(
+                event["scheduled_timestamp_utc"]
+            ),
+            event["event_series_id"],
+            event["event_id"],
+        ))
+        self.assertEqual(first, expected)
+        self.assertEqual(
+            [(event["event_id"], event["event_series_id"],
+              news_data.observation_fingerprint(event), event["revision_number"])
+             for event in first],
+            [(event["event_id"], event["event_series_id"],
+              news_data.observation_fingerprint(event), event["revision_number"])
+             for event in expected],
+        )
+
+    def test_bea_fractional_instants_have_true_chronological_global_order(self):
+        retrieved = "2026-07-30T08:00:00Z"
+        document = {
+            "Alpha Product": {"release_dates": [
+                "2026-08-01T12:00:00.1Z",
+                "2026-08-01T16:00:00.100000+04:00",
+                "2026-08-01T12:00:00Z",
+                "2026-08-01T16:00:00+04:00",
+                "2026-08-01T12:00:00.001Z",
+                "2026-08-01T07:00:00.001-05:00",
+                "2026-08-01T12:00:00.01Z",
+                "2026-08-01T16:00:00.010+04:00",
+                "2026-08-01T11:59:59.999999Z",
+                "2026-08-01T12:00:01Z",
+                "2026-08-01T12:00:01.000001Z",
+            ]},
+            "Beta Product": {"release_dates": [
+                "2026-08-01T12:00:00.000001Z",
+                "2026-08-01T12:00:00Z",
+            ]},
+            "file_last_updated": "2026-07-29T16:45:00Z",
+        }
+        reversed_document = {
+            "Beta Product": {"release_dates": list(reversed(
+                document["Beta Product"]["release_dates"]
+            ))},
+            "Alpha Product": {"release_dates": list(reversed(
+                document["Alpha Product"]["release_dates"]
+            ))},
+            "file_last_updated": document["file_last_updated"],
+        }
+        original = copy.deepcopy(document)
+        original_reversed = copy.deepcopy(reversed_document)
+
+        def parse(value):
+            return news_parser.parse_bea_release_dates(
+                json.dumps(value, separators=(",", ":")).encode("utf-8"),
+                self.bea_source,
+                retrieved,
+            )
+
+        first = parse(document)
+        reversed_result = parse(reversed_document)
+        repeated = parse(copy.deepcopy(document))
+        expected_timestamps = [
+            "2026-08-01T11:59:59.999999Z",
+            "2026-08-01T12:00:00Z",
+            "2026-08-01T12:00:00Z",
+            "2026-08-01T12:00:00.000001Z",
+            "2026-08-01T12:00:00.001Z",
+            "2026-08-01T12:00:00.01Z",
+            "2026-08-01T12:00:00.1Z",
+            "2026-08-01T12:00:01Z",
+            "2026-08-01T12:00:01.000001Z",
+        ]
+
+        self.assertEqual(
+            [event["scheduled_timestamp_utc"] for event in first],
+            expected_timestamps,
+        )
+        self.assertEqual(first, reversed_result)
+        self.assertEqual(first, repeated)
+        self.assertEqual(
+            news_cache.deterministic_bytes(first),
+            news_cache.deterministic_bytes(reversed_result),
+        )
+        self.assertEqual(document, original)
+        self.assertEqual(reversed_document, original_reversed)
+        same_time = [
+            event for event in first
+            if event["scheduled_timestamp_utc"] == "2026-08-01T12:00:00Z"
+        ]
+        self.assertEqual(
+            [(event["event_series_id"], event["event_id"]) for event in same_time],
+            sorted(
+                (event["event_series_id"], event["event_id"])
+                for event in same_time
+            ),
+        )
+        self.assertTrue(all(
+            event["schema_version"] == news_data.ECONOMIC_EVENT_SCHEMA
+            and event["revision_number"] == 1
+            and event["actual"] is None
+            and event["forecast"] is None
+            and event["previous"] is None
+            and event["importance"] is None
+            for event in first
+        ))
+        self.assertEqual(
+            [
+                (
+                    event["event_id"], event["event_series_id"],
+                    news_data.observation_fingerprint(event),
+                    event["revision_number"],
+                )
+                for event in first
+            ],
+            [
+                (
+                    event["event_id"], event["event_series_id"],
+                    news_data.observation_fingerprint(event),
+                    event["revision_number"],
+                )
+                for event in reversed_result
+            ],
+        )
+
+    def test_bea_product_mapping_uses_event_id_as_final_tiebreaker(self):
+        document = {
+            "Product B": {"release_dates": ["2026-08-01T12:00:00Z"]},
+            "Product A": {"release_dates": ["2026-08-01T12:00:00Z"]},
+            "file_last_updated": "2026-07-29T16:45:00Z",
+        }
+        original = copy.deepcopy(document)
+
+        def constructed_event(_source, name, *_values):
+            return {
+                "scheduled_timestamp_utc": "2026-08-01T12:00:00Z",
+                "event_series_id": "EVENT-SERIES-SAME",
+                "event_id": "EVENT-A" if name == "Product A" else "EVENT-B",
+            }
+
+        with mock.patch.object(
+            news_data, "economic_event", side_effect=constructed_event,
+        ):
+            events = news_parser._product_release_events(
+                document, self.bea_source, "2026-07-30T08:00:00Z",
+            )
+        self.assertEqual(
+            [event["event_id"] for event in events], ["EVENT-A", "EVENT-B"]
+        )
+        self.assertEqual(document, original)
+
+    def test_bea_product_names_must_already_be_exactly_canonical(self):
+        valid_timestamp = "2026-08-01T12:00:00Z"
+        invalid_names = (
+            "GDP\nRelease",
+            "GDP\tRelease",
+            "GDP\rRelease",
+            "GDP<script>secret</script>Release",
+            "GDP<style>secret</style>Release",
+            "GDP<iframe>secret</iframe>Release",
+            "GDP<object>secret</object>Release",
+            "GDP<embed>secret</embed>Release",
+            "GDP<svg>secret</svg>Release",
+            "GDP<math>secret</math>Release",
+            "GDP<img src=x>Release",
+            "GDP<template>secret</template>Release",
+            "GDP<noscript>secret</noscript>Release",
+            "GDP<form>secret</form>Release",
+            "GDP<area>Release",
+            "GDP<base>Release",
+            "GDP<br>Release",
+            "GDP<col>Release",
+            "GDP<hr>Release",
+            "GDP<input>Release",
+            "GDP<link>Release",
+            "GDP<meta>Release",
+            "GDP<param>Release",
+            "GDP<source>Release",
+            "GDP<track>Release",
+            "GDP<wbr>Release",
+            "GDP&lt;script&gt;secret&lt;/script&gt;Release",
+            "GDP&amp;lt;script&amp;gt;secret&amp;lt;/script&amp;gt;Release",
+            "GDP\x00Release",
+            "GDP\x01Release",
+            "GDP\x7fRelease",
+            "GDP\x85Release",
+            "GDP\u202eRelease",
+            "GDP\u200dRelease",
+            " GDP Release",
+            "GDP Release ",
+            "GDP  Release",
+            "",
+            "x" * (news_data.MAX_TEXT_LENGTH + 1),
+            "x" * (news_data.MAX_TITLE_INPUT_LENGTH + 1),
+        )
+        for product_name in invalid_names:
+            with self.subTest(product_name=repr(product_name)), self.assertRaisesRegex(
+                news_data.NewsValidationError, "NEWS_SOURCE_SCHEMA_INVALID"
+            ):
+                news_parser.parse_bea_release_dates(
+                    json.dumps({
+                        product_name: {"release_dates": [valid_timestamp]},
+                        "file_last_updated": "2026-07-29T16:45:00Z",
+                    }, separators=(",", ":")).encode("utf-8"),
+                    self.bea_source,
+                    "2026-07-30T08:00:00Z",
+                )
+
+        accepted_names = (
+            "Gross Domestic Product",
+            "الناتج المحلي الإجمالي",
+        )
+        for product_name in accepted_names:
+            with self.subTest(product_name=product_name):
+                events = news_parser.parse_bea_release_dates(
+                    json.dumps({
+                        product_name: {"release_dates": [valid_timestamp]},
+                        "file_last_updated": "2026-07-29T16:45:00Z",
+                    }, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
+                    self.bea_source,
+                    "2026-07-30T08:00:00Z",
+                )
+                self.assertEqual([event["event_name"] for event in events], [product_name])
+
+    def test_bea_product_and_raw_date_bounds_count_before_deduplication(self):
+        metadata = "2026-07-29T16:45:00Z"
+        empty_200 = {
+            "Product {:03d}".format(index): {"release_dates": []}
+            for index in range(200)
+        }
+        empty_200["file_last_updated"] = metadata
+        self.assertEqual(
+            news_parser.parse_bea_release_dates(
+                json.dumps(empty_200, separators=(",", ":")).encode("utf-8"),
+                self.bea_source,
+                "2026-07-30T08:00:00Z",
+            ),
+            [],
+        )
+
+        empty_201 = {
+            "Product {:03d}".format(index): {"release_dates": []}
+            for index in range(201)
+        }
+        empty_201["file_last_updated"] = metadata
+        with self.assertRaisesRegex(
+            news_data.NewsValidationError, "NEWS_SOURCE_SCHEMA_INVALID"
+        ):
+            news_parser.parse_bea_release_dates(
+                json.dumps(empty_201, separators=(",", ":")).encode("utf-8"),
+                self.bea_source,
+                "2026-07-30T08:00:00Z",
+            )
+
+        raw_200 = [
+            news_data.utc_timestamp(
+                datetime(2026, 8, 1, tzinfo=timezone.utc) + timedelta(hours=index)
+            )
+            for index in range(200)
+        ]
+        accepted = news_parser.parse_bea_release_dates(
+            json.dumps({
+                "Bounded Product": {"release_dates": raw_200},
+                "file_last_updated": metadata,
+            }, separators=(",", ":")).encode("utf-8"),
+            self.bea_source,
+            "2026-07-30T08:00:00Z",
+        )
+        self.assertEqual(len(accepted), 200)
+
+        for dates in (raw_200 + ["2026-09-01T00:00:00Z"], [raw_200[0]] * 201):
+            with self.subTest(unique=len(set(dates))), self.assertRaisesRegex(
+                news_data.NewsValidationError, "NEWS_SOURCE_SCHEMA_INVALID"
+            ):
+                news_parser.parse_bea_release_dates(
+                    json.dumps({
+                        "Oversized Product": {"release_dates": dates},
+                        "file_last_updated": metadata,
+                    }, separators=(",", ":")).encode("utf-8"),
+                    self.bea_source,
+                    "2026-07-30T08:00:00Z",
+                )
+
+        self.assertEqual(
+            news_parser.parse_bea_release_dates(
+                json.dumps({
+                    "file_last_updated": metadata,
+                }, separators=(",", ":")).encode("utf-8"),
+                self.bea_source,
+                "2026-07-30T08:00:00Z",
+            ),
+            [],
+        )
+
+    def test_bea_product_release_mapping_rejects_unbounded_or_variant_shapes(self):
+        valid_timestamp = "2026-07-30T08:30:00-04:00"
+        cases = (
+            {"GDP": {"release_dates": [valid_timestamp]}},
+            {"GDP": {"release_dates": valid_timestamp}, "file_last_updated": "x"},
+            {"GDP": {"release_dates": ["2026-07-30"]}, "file_last_updated": "x"},
+            {
+                "GDP": {"release_dates": ["Wed, 29 Jul 2026 10:01:38 EDT"]},
+                "file_last_updated": "x",
+            },
+            {
+                "GDP": {"release_dates": [valid_timestamp], "extra": []},
+                "file_last_updated": "x",
+            },
+            {"GDP": {"release_dates": [valid_timestamp]}, "file_last_updated": None},
+            {
+                "GDP": {"release_dates": [valid_timestamp]},
+                "file_last_updated": "x" * 101,
+            },
+            {
+                "GDP": {"release_dates": [valid_timestamp]},
+                "file_last_updated": "bad\nmetadata",
+            },
+            {
+                "GDP": {"release_dates": [valid_timestamp] * 201},
+                "file_last_updated": "x",
+            },
+        )
+        for document in cases:
+            with self.subTest(document=document), self.assertRaisesRegex(
+                news_data.NewsValidationError, "NEWS_SOURCE_SCHEMA_INVALID"
+            ):
+                news_parser.parse_bea_release_dates(
+                    json.dumps(document, separators=(",", ":")).encode("utf-8"),
+                    self.bea_source,
+                    "2026-07-30T08:00:00Z",
+                )
 
     def test_event_series_and_scheduled_occurrence_identities_are_distinct(self):
         body = json.dumps({"release_dates": [
@@ -2223,6 +2866,438 @@ class ParserSecurityTests(unittest.TestCase):
 
 
 class IdentityCacheAndServiceTests(unittest.TestCase):
+    def test_bea_canonical_order_survives_cache_round_trip_and_api(self):
+        registry = news_sources.load_source_registry()
+        bea = next(
+            source for source in registry["sources"]
+            if source["source_id"] == "BEA_RELEASE_DATES_JSON"
+        )
+        retrieved = news_data.utc_timestamp(FIXED_NOW)
+        first_document = {
+            "Alpha Product": {"release_dates": [
+                "2026-08-01T12:00:00.1Z",
+                "2026-08-01T16:00:00.100000+04:00",
+                "2026-08-01T12:00:00Z",
+                "2026-08-01T16:00:00+04:00",
+                "2026-08-01T12:00:00.001Z",
+                "2026-08-01T07:00:00.001-05:00",
+                "2026-08-01T11:59:59.999999Z",
+            ]},
+            "Beta Product": {"release_dates": [
+                "2026-08-01T12:00:01.000001Z",
+                "2026-08-01T12:00:00.01Z",
+                "2026-08-01T07:00:00.010-05:00",
+                "2026-08-01T12:00:00.000001Z",
+                "2026-08-01T12:00:01Z",
+            ]},
+            "file_last_updated": "2026-07-29T16:45:00Z",
+        }
+        reversed_document = {
+            "Beta Product": {
+                "release_dates": list(reversed(
+                    first_document["Beta Product"]["release_dates"]
+                )),
+            },
+            "Alpha Product": {
+                "release_dates": list(reversed(
+                    first_document["Alpha Product"]["release_dates"]
+                )),
+            },
+            "file_last_updated": first_document["file_last_updated"],
+        }
+
+        def encoded(document):
+            return json.dumps(document, separators=(",", ":")).encode("utf-8")
+
+        expected = news_parser.parse_bea_release_dates(
+            encoded(first_document), bea, retrieved,
+        )
+        expected_ids = [event["event_id"] for event in expected]
+        expected_fingerprints = [
+            news_data.observation_fingerprint(event) for event in expected
+        ]
+        expected_revisions = [event["revision_number"] for event in expected]
+        expected_timestamps = [
+            "2026-08-01T11:59:59.999999Z",
+            "2026-08-01T12:00:00Z",
+            "2026-08-01T12:00:00.000001Z",
+            "2026-08-01T12:00:00.001Z",
+            "2026-08-01T12:00:00.01Z",
+            "2026-08-01T12:00:00.1Z",
+            "2026-08-01T12:00:01Z",
+            "2026-08-01T12:00:01.000001Z",
+        ]
+        self.assertEqual(
+            [event["scheduled_timestamp_utc"] for event in expected],
+            expected_timestamps,
+        )
+
+        cache_document = cached_document(*(
+            cached_wrapper(event, "event") for event in expected
+        ))
+        round_trip_storage = news_cache.InMemoryCacheStorage()
+        round_trip_storage.write(cache_document)
+        loaded = news_cache.validate_document(
+            round_trip_storage.load(), FIXED_NOW, registry,
+        )
+        self.assertEqual(
+            [wrapper["record"]["event_id"] for wrapper in loaded["records"]],
+            expected_ids,
+        )
+
+        clock = FakeClock()
+        storage = news_cache.InMemoryCacheStorage()
+        transport = valid_transport(registry)
+        transport.responses[bea["exact_endpoint"]] = response(
+            bea, body=encoded(first_document),
+        )
+        service = enabled_service(transport, clock, storage)
+        try:
+            first_api = [
+                event for event in service.economic_events_document()["events"]
+                if event["source_id"] == bea["source_id"]
+            ]
+            self.assertEqual(
+                [event["event_id"] for event in first_api], expected_ids
+            )
+            self.assertEqual(
+                [event["scheduled_timestamp_utc"] for event in first_api],
+                expected_timestamps,
+            )
+            self.assertEqual(
+                [news_data.observation_fingerprint(event) for event in first_api],
+                expected_fingerprints,
+            )
+            self.assertEqual(
+                [event["revision_number"] for event in first_api],
+                expected_revisions,
+            )
+
+            transport.responses[bea["exact_endpoint"]] = response(
+                bea, body=encoded(reversed_document),
+            )
+            clock.advance(900)
+            repeated_api = [
+                event for event in service.economic_events_document()["events"]
+                if event["source_id"] == bea["source_id"]
+            ]
+            self.assertEqual(
+                [event["event_id"] for event in repeated_api], expected_ids
+            )
+            self.assertEqual(
+                [event["scheduled_timestamp_utc"] for event in repeated_api],
+                expected_timestamps,
+            )
+            self.assertEqual(
+                [news_data.observation_fingerprint(event)
+                 for event in repeated_api],
+                expected_fingerprints,
+            )
+            self.assertEqual(
+                [event["revision_number"] for event in repeated_api],
+                expected_revisions,
+            )
+        finally:
+            self.assertTrue(service.shutdown())
+
+        failed_transport = FakeTransport({
+            source["exact_endpoint"]: RetrievalError("NEWS_SOURCE_TIMEOUT")
+            for source in registry["sources"]
+        })
+        reloaded = enabled_service(
+            failed_transport, FakeClock(clock.value), storage,
+        )
+        try:
+            cached_api = [
+                event for event in reloaded.economic_events_document()["events"]
+                if event["source_id"] == bea["source_id"]
+            ]
+            self.assertEqual(
+                [event["event_id"] for event in cached_api], expected_ids
+            )
+            self.assertEqual(
+                [event["scheduled_timestamp_utc"] for event in cached_api],
+                expected_timestamps,
+            )
+            self.assertEqual(
+                [news_data.observation_fingerprint(event) for event in cached_api],
+                expected_fingerprints,
+            )
+            self.assertEqual(
+                [event["revision_number"] for event in cached_api],
+                expected_revisions,
+            )
+        finally:
+            self.assertTrue(reloaded.shutdown())
+
+    def test_bea_equivalent_dates_remain_valid_stable_and_cache_reloadable(self):
+        registry = news_sources.load_source_registry()
+        bea = next(
+            source for source in registry["sources"]
+            if source["source_id"] == "BEA_RELEASE_DATES_JSON"
+        )
+        equivalent_dates = [
+            "2026-08-01T12:00:00Z",
+            "2026-08-01T16:00:00+04:00",
+            "2026-08-01T12:00:00Z",
+        ]
+
+        def schedule_body(dates):
+            return json.dumps({
+                "Gross Domestic Product": {"release_dates": dates},
+                "file_last_updated": "2026-07-29T16:45:00Z",
+            }, separators=(",", ":")).encode("utf-8")
+
+        clock = FakeClock()
+        storage = news_cache.InMemoryCacheStorage()
+        transport = valid_transport(registry)
+        transport.responses[bea["exact_endpoint"]] = response(
+            bea, body=schedule_body(equivalent_dates)
+        )
+        service = enabled_service(transport, clock, storage)
+        self.assertEqual(service.health_document()["status"], "NEWS_VALID")
+        first = [
+            event for event in service.economic_events_document()["events"]
+            if event["source_id"] == bea["source_id"]
+        ]
+        self.assertEqual(len(first), 1)
+        first = first[0]
+        first_fingerprint = news_data.observation_fingerprint(first)
+
+        transport.responses[bea["exact_endpoint"]] = response(
+            bea, body=schedule_body(list(reversed(equivalent_dates)))
+        )
+        clock.advance(900)
+        self.assertEqual(service.health_document()["status"], "NEWS_VALID")
+        repeated = [
+            event for event in service.economic_events_document()["events"]
+            if event["source_id"] == bea["source_id"]
+        ]
+        self.assertEqual(len(repeated), 1)
+        repeated = repeated[0]
+        self.assertEqual(repeated["event_series_id"], first["event_series_id"])
+        self.assertEqual(repeated["event_id"], first["event_id"])
+        self.assertEqual(
+            news_data.observation_fingerprint(repeated), first_fingerprint
+        )
+        self.assertEqual(repeated["revision_number"], first["revision_number"])
+
+        failed_transport = FakeTransport({
+            source["exact_endpoint"]: RetrievalError("NEWS_SOURCE_TIMEOUT")
+            for source in registry["sources"]
+        })
+        reloaded = enabled_service(failed_transport, FakeClock(clock.value), storage)
+        self.assertEqual(
+            reloaded.health_document()["status"], "NEWS_ALL_SOURCES_FAILED"
+        )
+        cached = [
+            event for event in reloaded.economic_events_document()["events"]
+            if event["source_id"] == bea["source_id"]
+        ]
+        self.assertEqual(len(cached), 1)
+        cached = cached[0]
+        self.assertEqual(cached["event_series_id"], first["event_series_id"])
+        self.assertEqual(cached["event_id"], first["event_id"])
+        self.assertEqual(news_data.observation_fingerprint(cached), first_fingerprint)
+        self.assertEqual(cached["revision_number"], first["revision_number"])
+
+    def test_rejected_bea_product_name_never_reaches_cache_or_api(self):
+        registry = news_sources.load_source_registry()
+        bea = next(
+            source for source in registry["sources"]
+            if source["source_id"] == "BEA_RELEASE_DATES_JSON"
+        )
+        rejected_canonical_result = "Rejected Product"
+        rejected_body = json.dumps({
+            "Rejected<script>secret</script> Product": {
+                "release_dates": ["2026-08-01T12:00:00Z"],
+            },
+            "file_last_updated": "2026-07-29T16:45:00Z",
+        }, separators=(",", ":")).encode("utf-8")
+        storage = InspectingCacheStorage(rejected_canonical_result)
+        transport = valid_transport(registry)
+        transport.responses[bea["exact_endpoint"]] = response(
+            bea, body=rejected_body
+        )
+        service = enabled_service(transport, cache=storage)
+        health = service.health_document()
+        bea_health = next(
+            item for item in health["source_health"]
+            if item["source_id"] == bea["source_id"]
+        )
+        serialized_api = json.dumps(
+            service.economic_events_document(), ensure_ascii=False
+        )
+        serialized_cache = json.dumps(storage.value, ensure_ascii=False)
+        self.assertEqual(health["status"], "NEWS_PARTIAL")
+        self.assertEqual(bea_health["status"], "NEWS_SOURCE_SCHEMA_INVALID")
+        self.assertEqual(storage.invalid_candidate_writes, 0)
+        self.assertNotIn("Rejected", serialized_api)
+        self.assertNotIn("Rejected", serialized_cache)
+
+    def test_oversized_bea_raw_duplicates_are_transactional_and_recover(self):
+        registry = news_sources.load_source_registry()
+        bea = next(
+            source for source in registry["sources"]
+            if source["source_id"] == "BEA_RELEASE_DATES_JSON"
+        )
+        fed = registry["sources"][0]
+        clock = FakeClock()
+        forbidden = "Oversized BEA Product"
+        storage = InspectingCacheStorage(forbidden)
+        transport = valid_transport(registry)
+        service = enabled_service(transport, clock, storage)
+        self.assertEqual(service.health_document()["status"], "NEWS_VALID")
+        trusted = next(
+            event for event in service.economic_events_document()["events"]
+            if event["source_id"] == bea["source_id"]
+        )
+
+        oversized = json.dumps({
+            forbidden: {
+                "release_dates": ["2026-08-01T12:00:00Z"] * 201,
+            },
+            "file_last_updated": "2026-07-29T16:45:00Z",
+        }, separators=(",", ":")).encode("utf-8")
+        transport.responses[bea["exact_endpoint"]] = response(
+            bea, body=oversized
+        )
+        transport.responses[fed["exact_endpoint"]] = response(
+            fed,
+            body=RSS_BODY.replace(
+                b"Official &amp; governed release", b"Independent valid update"
+            ),
+        )
+        clock.advance(900)
+        partial = service.health_document()
+        bea_health = next(
+            item for item in partial["source_health"]
+            if item["source_id"] == bea["source_id"]
+        )
+        retained = next(
+            event for event in service.economic_events_document()["events"]
+            if event["event_id"] == trusted["event_id"]
+        )
+        updated_fed = next(
+            item for item in service.news_items_document()["items"]
+            if item["source_id"] == fed["source_id"]
+        )
+        self.assertEqual(partial["status"], "NEWS_PARTIAL")
+        self.assertEqual(bea_health["status"], "NEWS_SOURCE_SCHEMA_INVALID")
+        self.assertEqual(retained["operational_freshness_status"], "NEWS_RECORD_STALE")
+        self.assertEqual(retained["event_id"], trusted["event_id"])
+        self.assertEqual(retained["revision_number"], trusted["revision_number"])
+        self.assertEqual(updated_fed["title"], "Independent valid update")
+        self.assertEqual(storage.invalid_candidate_writes, 0)
+        self.assertNotIn(forbidden, json.dumps(storage.value, ensure_ascii=False))
+
+        transport.responses[bea["exact_endpoint"]] = response(bea)
+        clock.advance(900)
+        recovered = service.health_document()
+        recovered_event = next(
+            event for event in service.economic_events_document()["events"]
+            if event["event_id"] == trusted["event_id"]
+        )
+        self.assertEqual(recovered["status"], "NEWS_VALID")
+        self.assertEqual(
+            recovered_event["operational_freshness_status"], "NEWS_RECORD_CURRENT"
+        )
+        self.assertEqual(
+            recovered_event["revision_number"], trusted["revision_number"]
+        )
+
+    def test_official_format_compatibility_through_injected_transport(self):
+        registry = news_sources.load_source_registry()
+        transport = valid_transport(registry)
+        by_id = {source["source_id"]: source for source in registry["sources"]}
+
+        bls_description = "x" * 4589
+        bls_body = (
+            "<rss><channel><item><title>Synthetic BLS metadata</title>"
+            "<link>https://www.bls.gov/bls/</link>"
+            "<pubDate>Wed, 29 Jul 2026 10:01:38 -0400</pubDate>"
+            "<description>" + bls_description + "</description>"
+            "</item></channel></rss>"
+        ).encode("utf-8")
+        bls = by_id["BLS_LATEST_RELEASES_RSS"]
+        transport.responses[bls["exact_endpoint"]] = response(
+            bls, body=bls_body, content_type="application/rss+xml"
+        )
+
+        bea_rows = "".join(
+            "<item><title>Synthetic BEA metadata {0}</title>"
+            "<link>https://www.bea.gov/news/synthetic-{0}</link>"
+            "<description>Discarded synthetic description {0}</description>"
+            "<pubDate>Wed, 29 Jul 2026 10:01:38 EDT</pubDate></item>".format(index)
+            for index in range(46)
+        )
+        bea_rss_body = ("<rss><channel>" + bea_rows + "</channel></rss>").encode(
+            "utf-8"
+        )
+        bea_rss = by_id["BEA_NEWS_RELEASE_RSS"]
+        transport.responses[bea_rss["exact_endpoint"]] = response(
+            bea_rss, body=bea_rss_body, content_type="text/xml"
+        )
+
+        bea_json_body = json.dumps({
+            "Gross Domestic Product": {
+                "release_dates": [
+                    "2026-07-30T08:30:00-04:00",
+                    "2026-08-27T08:30:00-04:00",
+                ],
+            },
+            "Personal Income and Outlays": {
+                "release_dates": ["2026-07-31T08:30:00-04:00"],
+            },
+            "file_last_updated": "2026-07-29T16:45:00Z",
+        }, separators=(",", ":")).encode("utf-8")
+        bea_json = by_id["BEA_RELEASE_DATES_JSON"]
+        transport.responses[bea_json["exact_endpoint"]] = response(
+            bea_json, body=bea_json_body, content_type="application/json"
+        )
+
+        service = enabled_service(
+            transport,
+            clock=FakeClock(
+                datetime(2026, 7, 30, 8, 0, 0, tzinfo=timezone.utc)
+            ),
+        )
+        health = service.health_document()
+        news = service.news_items_document()["items"]
+        events = service.economic_events_document()["events"]
+        source_health = {
+            source["source_id"]: source
+            for source in service.sources_document()["sources"]
+        }
+
+        self.assertEqual(health["status"], "NEWS_VALID")
+        self.assertEqual(health["network_request_count"], 6)
+        self.assertEqual(len(transport.calls), 6)
+        self.assertEqual(set(transport.calls), {
+            source["exact_endpoint"] for source in registry["sources"]
+        })
+        self.assertEqual(len(news), 50)
+        self.assertEqual(len(events), 3)
+        self.assertEqual(
+            source_health["BLS_LATEST_RELEASES_RSS"]["health"][
+                "retrieved_entry_count"
+            ], 1
+        )
+        self.assertEqual(
+            source_health["BEA_NEWS_RELEASE_RSS"]["health"][
+                "retrieved_entry_count"
+            ], 46
+        )
+        self.assertEqual(
+            source_health["BEA_RELEASE_DATES_JSON"]["health"][
+                "retrieved_entry_count"
+            ], 3
+        )
+        retained = json.dumps({"news": news, "events": events})
+        self.assertNotIn(bls_description, retained)
+        self.assertNotIn("Discarded synthetic description", retained)
+        self.assertNotIn("file_last_updated", retained)
+
     def test_complete_cache_record_schema_and_governance_validation(self):
         registry, valid_news, valid_event, cases = adversarial_cache_documents()
         valid_document = cached_document(
