@@ -31,6 +31,8 @@ entry 2026-07-31-003.
 | Private authenticated HTTPS tunnel (e.g., Tailscale) or equivalent | Phase 8 private online deployment, Phase 12.K | Not confirmed installed | App will be built deployment-ready; cannot claim "online" until independently reachable over authenticated HTTPS |
 | TradingView webhook signing secret / source allowlist | Phase 7 | Not provided | Contract and adapter can be built with a placeholder scheme; live intake needs a real secret before use |
 | Founder decision on VIEWER/FOUNDER_OPERATOR credentials | Phase 8 authentication | Not provided | Password hash must be set by Founder, never generated/stored by Claude in the repo |
+| FIB-001 exact numeric parameters (retracement/extension ratios, swing-detection rule, invalidation distance) | Phase 4 (R2-006 FIB-001 implementation) | Not provided | Correction pass (2026-07-31-004) removed a fabricated "previously approved" citation; a dated Decision Log entry with the real parameters is required before FIB-001 is implemented |
+| Tunnel technology confirmation (Tailscale vs. an equivalent authenticated tunnel) | Phase 8 deployment | Not confirmed | R2-008 contract names Tailscale only as an example; Founder should confirm the actual choice before implementation |
 
 ## Update rule
 

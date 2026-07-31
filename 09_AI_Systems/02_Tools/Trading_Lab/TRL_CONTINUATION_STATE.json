@@ -1,9 +1,9 @@
 {
-  "active_branch": "codex/TRL-R2-005-forward-paper-timeline",
-  "current_head": "5b9d850939d95ff9e7afe15ea2623b1126e9579f",
-  "current_checkpoint": "Phase 1 review, fixes, and rehearsal complete; awaiting Founder commit approval",
-  "completed_phases": ["Phase 0", "Phase 1 (pending Founder-approved commit)"],
-  "active_phase": "Phase 1 - Independently review and close TRL-R2-005 (final step: commit approval)",
+  "active_branch": "codex/TRL-R2-full-vision-execution",
+  "current_head": "49fa62c4938cc4f0d82adc32f66a4963c8fcce7d",
+  "current_checkpoint": "Phase 2 documents drafted, Founder-reviewed (CORRECTIONS REQUIRED BEFORE COMMIT), all 10 corrections applied, then a further Founder/CTO pass applied first-live fail-closed floor and deterministic intent lookup key. Awaiting final Founder commit approval.",
+  "completed_phases": ["Phase 0", "Phase 1"],
+  "active_phase": "Phase 2 - Create the full-vision delivery branch and contracts (branch created, docs written and twice corrected, not committed)",
   "files_modified_tracked": [
     "09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md",
     "09_AI_Systems/02_Tools/Trading_Lab/test_trading_lab_app.py",
@@ -56,8 +56,8 @@
     "TradingView webhook signing secret and allowlist (Phase 7)",
     "Founder-provided VIEWER/FOUNDER_OPERATOR credential hashes (Phase 8)"
   ],
-  "next_command": "Present git status/git diff --stat to the Founder and request commit approval for TRL-R2-005",
-  "next_verification": "After commit, run git log -1 and confirm working tree clean of unrelated changes; then begin Phase 2",
+  "next_command": "Present the twice-corrected 6 Phase 2 documents for final Founder commit approval, then begin Phase 3",
+  "next_verification": "Post-correction validation pass re-run clean after both passes: Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, credential-pattern scan - see decision log 2026-07-31-004 and 2026-07-31-005",
   "prohibited_commands": [
     "git reset --hard",
     "git clean",

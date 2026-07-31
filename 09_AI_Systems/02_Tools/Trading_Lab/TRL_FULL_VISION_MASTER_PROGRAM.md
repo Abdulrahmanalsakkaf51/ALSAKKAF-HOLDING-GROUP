@@ -41,8 +41,8 @@ the Founder performs the first real-money activation personally.
 | Phase | Title | Status |
 |-------|-------|--------|
 | 0 | Verify backup and repository | Complete (2026-07-31) |
-| 1 | Independently review and close TRL-R2-005 | In progress |
-| 2 | Create full-vision delivery branch + contracts | Not started |
+| 1 | Independently review and close TRL-R2-005 | Complete and pushed (2026-07-31, commit `49fa62c`) |
+| 2 | Create full-vision delivery branch + contracts | Branch created, 6 documents drafted, Founder-reviewed (corrections required), all 10 corrections applied; awaiting second approval + commit |
 | 3 | Operating-mode state machine | Not started |
 | 4 | Governed signal intelligence (TRL-R2-006) | Not started |
 | 5 | MT5 execution adapter (TRL-R2-007) | Not started |

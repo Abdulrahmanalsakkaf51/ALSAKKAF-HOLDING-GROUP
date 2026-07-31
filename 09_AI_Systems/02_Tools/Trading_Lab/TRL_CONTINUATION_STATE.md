@@ -17,11 +17,11 @@ session end or when session capacity drops below ~15%.
 
 ## Current state (2026-07-31T00:00:00Z placeholder — see JSON `last_update` for exact value)
 
-- **Active branch:** `codex/TRL-R2-005-forward-paper-timeline`
-- **Current HEAD:** `5b9d850939d95ff9e7afe15ea2623b1126e9579f`
-- **Current checkpoint:** Phase 1 review, fixes, and rehearsal complete; awaiting Founder commit approval
-- **Completed phases:** Phase 0; Phase 1 (pending only the Founder-approved commit itself)
-- **Active phase:** Phase 1 — Independently review and close TRL-R2-005 (final step: commit approval)
+- **Active branch:** `codex/TRL-R2-full-vision-execution` (created from R2-005 commit `49fa62c`; `codex/TRL-R2-005-forward-paper-timeline` remains at `49fa62c`, pushed to origin)
+- **Current HEAD:** `49fa62c4938cc4f0d82adc32f66a4963c8fcce7d` plus an uncommitted Phase 2 diff (6 new design documents)
+- **Current checkpoint:** Phase 2 documents drafted, Founder-reviewed (verdict: CORRECTIONS REQUIRED BEFORE COMMIT), all 10 corrections applied, then a further Founder/CTO pass applied two more safety clarifications (first-live fail-closed floor with override; deterministic nonce-free intent lookup key). Awaiting final Founder commit approval.
+- **Completed phases:** Phase 0; Phase 1
+- **Active phase:** Phase 2 — Create the full-vision delivery branch and contracts (branch created; contracts/threat-model/runbooks written and twice corrected; not yet committed)
 - **Exact files modified (tracked, uncommitted):**
   - `09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md`
   - `09_AI_Systems/02_Tools/Trading_Lab/test_trading_lab_app.py`
@@ -70,8 +70,8 @@ session end or when session capacity drops below ~15%.
   - MT5 demo account for rehearsal — availability unconfirmed
   - Private HTTPS tunnel (Tailscale or equivalent) for online exposure — not confirmed installed/configured
   - TradingView webhook signing secret / allowlist — not provided
-- **Next command:** Present `git status`/`git diff --stat` to the Founder and request commit approval for TRL-R2-005 (suggested message: "Implement TRL-R2-005 forward paper timeline and operational demonstration")
-- **Next verification:** After Founder approves the commit, verify `git log -1` and re-confirm working tree is clean of unrelated changes; then proceed to Phase 2 only after that commit exists
+- **Next command:** Present the twice-corrected 6 Phase 2 documents to the Founder for final commit approval (suggested message: "Add TRL full-vision Phase 2 contracts, threat model, and runbooks (Founder-reviewed, two correction passes applied)"); then begin Phase 3 (operating-mode state machine) implementation only after that commit exists
+- **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse of this file's `.json` twin, and a credential/secret-pattern scan all re-run clean after both correction passes (see `TRL_DECISION_LOG.md` 2026-07-31-004 and 2026-07-31-005); no implementation code exists yet for Phase 2, so no Python test suite run was needed or performed
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` → `last_update`
 
