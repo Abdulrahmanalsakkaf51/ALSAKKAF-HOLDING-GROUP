@@ -43,15 +43,15 @@ the Founder performs the first real-money activation personally.
 | 0 | Verify backup and repository | Complete (2026-07-31) |
 | 1 | Independently review and close TRL-R2-005 | Complete and pushed (2026-07-31, commit `49fa62c`) |
 | 2 | Create full-vision delivery branch + contracts | Complete and pushed (2026-07-31, commit `ffcdd74`) |
-| 3 | Operating-mode state machine | Implemented, corrected after Founder review removed a legacy-flag authority bypass, 447/447 tests passing twice, manually rehearsed twice; not yet committed |
-| 4 | Governed signal intelligence (TRL-R2-006) | Not started |
+| 3 | Operating-mode state machine | Complete and pushed (2026-07-31, commit `861e77a`) |
+| 4 | Governed signal intelligence (TRL-R2-006) | Implemented, Founder-corrected (durable storage, SMA-001 execution geometry removed, performance reporting added, honest confidence status), tested (569/569 twice), manually rehearsed; not yet committed |
 | 5 | MT5 execution adapter (TRL-R2-007) | Not started |
 | 6 | Controlled basket execution | Not started |
 | 7 | Optional TradingView signal intake | Not started |
 | 8 | Private online and mobile application (TRL-R2-008) | Not started |
 | 9 | Live-automation arming and emergency controls | Not started |
 | 10 | Operational reconciliation and observability | Not started |
-| 11 | Testing | Ongoing (baseline: 391 tests passing twice under -B -W error) |
+| 11 | Testing | Ongoing (baseline: 569 tests passing twice under -B -W error) |
 | 12 | Manual rehearsals | Not started |
 | 13 | Documentation | Ongoing |
 | 14 | Final repository closeout | Not started |

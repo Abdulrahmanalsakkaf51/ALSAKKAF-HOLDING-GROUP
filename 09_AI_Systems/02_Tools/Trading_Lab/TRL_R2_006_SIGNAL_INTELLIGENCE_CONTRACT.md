@@ -8,9 +8,25 @@
 |---|---|
 | Founder | Abdulrahman Yaseen Alsakkaf |
 | Checkpoint | TRL-R2-006 |
-| Status | Design contract — implementation not yet started |
+| Status | Implemented, Founder-corrected (durable storage, SMA-001 geometry removed, performance reporting added, honest confidence status), tested (569/569 twice), manually rehearsed; see `TRL_R2_006_SIGNAL_INTELLIGENCE_EVIDENCE.md`; not yet committed |
 | Depends on | TRL-R2-005 (forward paper timeline, committed) |
 | Feeds | TRL-R2-007 (MT5 execution adapter consumes only proposals that pass this pipeline) |
+
+**Implementation note (2026-08-01, superseding the 2026-07-31 note below):**
+FIB-001 remains exactly as specified below — present in the registry,
+disabled, `APPROVAL_PENDING`, no numeric parameters implemented or
+fabricated. The first Phase 4 implementation pass invented an SMA-001
+entry-zone/stop/TP1-TP4 geometry (a swing-high/swing-low stop with equal
+25% TP1-TP4 allocations at 1x/2x/3x/4x the stop distance) with no citable
+Founder approval; a Founder correction pass removed it entirely from the
+executable code path. **No SMA-001 execution geometry is approved in this
+checkpoint.** SMA-001's crossing *direction* (the exact, unmodified
+Release-1 kernel calculation) is still produced and recorded for research
+traceability as `candidate_direction`, but every crossing fails closed at
+Role 3 with `STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`, and the final
+proposal is `BLOCKED` — the pipeline cannot currently authorize an
+executable BUY/SELL proposal for SMA-001, exactly like FIB-001. See
+`TRL_BLOCKERS.md` and `TRL_R2_006_SIGNAL_INTELLIGENCE_EVIDENCE.md`.
 
 ## 1. Boundary
 

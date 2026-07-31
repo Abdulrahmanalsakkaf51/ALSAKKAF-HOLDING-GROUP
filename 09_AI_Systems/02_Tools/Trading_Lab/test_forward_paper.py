@@ -192,7 +192,10 @@ class TimelineContractTests(unittest.TestCase):
         )
 
     def test_governed_categories_and_schema(self):
-        self.assertEqual(len(EVENT_CATEGORIES), 11)
+        # 12 categories as of TRL-R2-006 (Phase 4): the original 11 plus
+        # SIGNAL_PIPELINE_STEP for the governed signal-intelligence pipeline.
+        self.assertEqual(len(EVENT_CATEGORIES), 12)
+        self.assertIn("SIGNAL_PIPELINE_STEP", EVENT_CATEGORIES)
         timeline, event = self.append_one()
         self.assertEqual(event["schema_version"], "TRL_TIMELINE_EVENT.v1")
         self.assertEqual(timeline.to_document()["schema_version"], "TRL_MARKET_TIMELINE.v1")

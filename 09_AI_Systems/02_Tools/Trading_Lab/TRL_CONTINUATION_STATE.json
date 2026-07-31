@@ -1,29 +1,72 @@
 {
   "active_branch": "codex/TRL-R2-full-vision-execution",
-  "current_head": "ffcdd7417d3fa5dceb40144b74ea5a659309644b",
-  "current_checkpoint": "Phase 2 complete, committed, and pushed. Phase 3 implemented, then corrected after Founder review found a legacy-flag ModeService bypass (fixed), tested (447/447 twice), and manually rehearsed twice. Awaiting Founder review and commit approval.",
-  "completed_phases": ["Phase 0", "Phase 1", "Phase 2"],
-  "active_phase": "Phase 3 - Operating-mode state machine (implementation, correction, tests, docs, rehearsal complete; not yet committed)",
+  "current_head": "861e77a6603d8bdb8d4369db442faab2bfadc4f8",
+  "current_checkpoint": "Phase 3 complete, committed, and pushed at 861e77a. Phase 4 (TRL-R2-006 governed signal intelligence) implemented and Founder-corrected: durable persistence with preflight/runtime construction separation, SMA-001 execution geometry removed (crossing direction only, STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED), performance/walk-forward reporting added, confidence_status made explicit. Tested (569/569 twice) and manually rehearsed. Awaiting Founder review and commit approval.",
+  "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3"],
+  "active_phase": "Phase 4 - Governed signal intelligence, Founder-corrected (implementation, correction, tests, docs, rehearsal complete; not yet committed)",
+  "phase_3_tracking_closure": {
+    "status": "complete_committed_pushed",
+    "commit": "861e77a6603d8bdb8d4369db442faab2bfadc4f8",
+    "verified_local_remote_match": true
+  },
+  "phase_4_founder_correction_items": [
+    "durable_proposal_and_audit_history_both_modes",
+    "sma001_invented_execution_geometry_removed",
+    "performance_and_walk_forward_reporting_added",
+    "confidence_status_made_explicit"
+  ],
+  "files_added_this_phase": [
+    "09_AI_Systems/02_Tools/Trading_Lab/test_signal_intelligence.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_006_SIGNAL_INTELLIGENCE_EVIDENCE.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_cli.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_confidence.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_data.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_llm_adapter.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_pipeline.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_reporting.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role1_data_quality.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role2_market_regime.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role3_strategy.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role4_news_risk.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role5_independent_risk.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role6_execution_eligibility.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_service.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_store.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_strategy_registry.py"
+  ],
   "files_modified_tracked": [
-    "09_AI_Systems/02_Tools/Trading_Lab/test_trading_lab_app.py",
     "09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_006_SIGNAL_INTELLIGENCE_CONTRACT.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_forward_paper.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/app.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_cli.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_service.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/server.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/service.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/app.js",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html"
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/timeline_data.py"
   ],
-  "files_added_this_phase": [
-    "09_AI_Systems/02_Tools/Trading_Lab/test_operating_mode.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_cli.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_service.py"
-  ],
+  "file_inventory_summary": {
+    "total": 33,
+    "new": 17,
+    "modified": 16,
+    "deleted": 0,
+    "staged": 0,
+    "committed_this_phase": 0,
+    "pushed_this_phase": 0,
+    "committed_head": "861e77a6603d8bdb8d4369db442faab2bfadc4f8"
+  },
   "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\" (run twice from Trading_Lab directory)",
-  "tests_last_result": "447/447 passing both runs (396 pre-existing + 51 operating-mode, including 15 new SingleAuthorityTests); 0 failures, 0 errors",
+  "tests_last_result": "569/569 passing both runs (447 pre-existing + 122 signal-intelligence tests); 0 failures, 0 errors",
   "active_processes": [],
   "active_ports": {
-    "8765": "confirmed no listener after both Phase 3 manual rehearsals (only TimeWait remnants)"
+    "8765": "confirmed no listener after Phase 4 correction manual rehearsal (only TimeWait remnants)"
   },
   "known_defects": [],
   "external_prerequisites": [
@@ -31,10 +74,12 @@
     "MT5 live account fingerprint - login/company/server (Phase 5/9)",
     "Private authenticated HTTPS tunnel e.g. Tailscale (Phase 8/12)",
     "TradingView webhook signing secret and allowlist (Phase 7)",
-    "Founder-provided VIEWER/FOUNDER_OPERATOR credential hashes (Phase 8)"
+    "Founder-provided VIEWER/FOUNDER_OPERATOR credential hashes (Phase 8)",
+    "FIB-001 exact numeric parameters (Phase 4 follow-up; blocker remains active)",
+    "SMA-001 exact execution-geometry parameters (Phase 4 follow-up; new blocker added this correction pass)"
   ],
-  "next_command": "Present the Phase 3 diff for Founder review and commit approval, then begin Phase 4 only after that commit exists",
-  "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - to run immediately before proposing the commit",
+  "next_command": "Present the Phase 4 diff (implementation + Founder correction pass) for Founder review and commit approval, then begin Phase 5 only after that commit exists",
+  "next_verification": "git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - to run immediately before proposing the commit (Markdown Audit already run: 0 issues)",
   "prohibited_commands": [
     "git reset --hard",
     "git clean",
@@ -43,5 +88,5 @@
     "--no-verify",
     "--no-gpg-sign"
   ],
-  "last_update": "2026-07-31T00:00:00Z"
+  "last_update": "2026-08-01T00:00:00Z"
 }

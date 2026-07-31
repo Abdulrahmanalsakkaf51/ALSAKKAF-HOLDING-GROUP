@@ -70,6 +70,12 @@ CAPABILITIES = (
     "live_arming",
     "emergency_controls",
     "report_export",
+    # Added in Phase 4 (TRL-R2-006): governed signal-pipeline proposal
+    # generation, distinct from generic strategy_evaluation because it
+    # gates the full six-role pipeline output, not just historical
+    # research. Denied by default; granted only to RESEARCH and
+    # SYNTHETIC_PAPER below. Never granted to OFF or any MT5 mode.
+    "signal_proposal_generation",
 )
 
 REASON_CODES = (
@@ -155,9 +161,11 @@ _CAPABILITY_MATRIX = {
     "RESEARCH": frozenset({
         "historical_research", "strategy_evaluation", "report_export",
         "mt5_read_only_access", "live_market_data_read",
+        "signal_proposal_generation",
     }),
     "SYNTHETIC_PAPER": frozenset({
         "synthetic_evidence", "forward_paper_fills", "report_export",
+        "signal_proposal_generation",
     }),
     "MT5_DEMO_MANUAL": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",

@@ -387,3 +387,150 @@ application on port 8765, including confirming the failed
 `--enable-forward-paper-engine` attempt left the persisted mode file
 completely unmutated. Nothing staged, committed, or pushed — awaiting
 further Founder review.
+
+## 2026-07-31-008 — Phase 3 tracking closure; Phase 4 (TRL-R2-006 signal intelligence) implemented
+
+Phase 3's operating-mode state machine, previously recorded above as "not
+yet committed," is confirmed committed and pushed at
+`861e77a6603d8bdb8d4369db442faab2bfadc4f8` (branch
+`codex/TRL-R2-full-vision-execution`, local HEAD and
+`origin/codex/TRL-R2-full-vision-execution` verified to match exactly
+before Phase 4 work began). `TRL_CONTINUATION_STATE.md`/`.json` and
+`TRL_FULL_VISION_MASTER_PROGRAM.md` are updated to reflect this; no
+tracking-only commit was created, per the governing prompt's instruction
+that this closure ride along with the Phase 4 checkpoint commit.
+
+Phase 4 implements the full six-role governed signal-intelligence pipeline
+from `TRL_R2_006_SIGNAL_INTELLIGENCE_CONTRACT.md`: Data Quality, Market
+Regime, Technical Strategy (SMA-001 ported from
+`trading_lab_core.strategy.sma`/`sma_cross_signals` unchanged; FIB-001 kept
+fully blocked with no fabricated parameters), News/Event Risk, Independent
+Risk (structurally separate module, no import of Role 3, no reuse of its
+suggested quantity, `SIZE_MISMATCH_BETWEEN_PARTNERS` on disagreement), and
+Execution Eligibility. A `BLOCKED` result at any role stops every
+downstream role from running (verified by direct test, not just by
+convention). The `TRL_SIGNAL_PROPOSAL.v1` schema reuses R2-005's
+`paper_data.validate_proposal` for the executable-proposal invariants
+rather than forking them.
+
+**Why:** the governing prompt required a completely independent second
+risk-sizing implementation (not a second call to the same formula) so a
+defect in the shared sizing code cannot silently pass both roles, and
+required FIB-001 to remain unimplemented until a dated Founder decision
+records its exact numeric parameters — neither of which previously existed
+in this codebase.
+
+**How to apply:** one new governed `signal_proposal_generation` capability
+was added to `mode_service.py` (denied in `OFF`/MT5 modes, granted in
+`RESEARCH`/`SYNTHETIC_PAPER`); `app.py`'s single subsystem-construction
+path was extended (not duplicated) with `_signal_service_for_mode` and a
+combined `_subsystem_builder_for_mode`, used by both `app.py` and
+`mode_cli.py`, so a mode transition validates both the paper service and
+the signal service before committing. The wired signal service is
+in-memory only in this checkpoint (a documented limitation, not an
+oversight — see `TRL_R2_006_SIGNAL_INTELLIGENCE_EVIDENCE.md` Section 10):
+`_subsystem_builder_for_mode` is also `ModeService`'s own
+`subsystem_builder`, exercised on every transition attempt including from
+automated tests, and must therefore never touch the filesystem by default.
+63 new tests added (`test_signal_intelligence.py`); one existing test
+(`test_forward_paper.py::test_governed_categories_and_schema`) was updated
+from an event-category count of 11 to 12 to reflect the new, additive
+`SIGNAL_PIPELINE_STEP` timeline category — no existing test was weakened,
+skipped, or deleted. Full suite: 510 tests (447 + 63), passing twice under
+`python -B -W error`. Manual rehearsal performed end-to-end against the
+real application on port 8765: OFF (signal intelligence confirmed
+unavailable) -> RESEARCH (SMA-001 BUY proposal generated via
+`signal_cli.py`, repeated for determinism, stale evidence BLOCKED, FIB-001
+BLOCKED with `STRATEGY_PARAMETERS_NOT_APPROVED`, a controlled Role 5
+mismatch fixture BLOCKED with `SIZE_MISMATCH_BETWEEN_PARTNERS`) -> OFF ->
+SYNTHETIC_PAPER (availability confirmed, no broker execution) -> OFF, with
+port 8765 confirmed clear after every stop. No broker, MT5, external
+network, or model API call occurred at any point. Nothing staged,
+committed, or pushed — awaiting Founder review and commit approval.
+
+## 2026-08-01-009 — Founder correction pass: durable persistence, SMA-001 geometry removed, performance reporting added, honest confidence status
+
+Founder review of the Phase 4 checkpoint recorded above (2026-07-31-008) found four
+contract-level gaps and required them corrected before commit — not treated as
+optional known limitations.
+
+**1. Durable persistence, rejected in-memory-only design.** The first pass wired an
+in-memory-only signal service for both `RESEARCH` and `SYNTHETIC_PAPER`; proposal and
+audit history were lost on every restart. Corrected by separating two previously
+conflated concerns in `app.py`: `_signal_service_preflight_for_mode` (side-effect-free,
+always `InMemorySignalStore`, used only as part of `ModeService`'s `subsystem_builder`
+to check a transition *would* succeed) from `_signal_service_for_mode` (the real
+runtime builder, called only after a mode is actually resolved, used by both
+application startup and `signal_cli.py`). Both available modes now construct a durable
+`LocalSignalStore`-backed service — the earlier draft that kept `SYNTHETIC_PAPER`
+in-memory-only because "it matches the existing synthetic-demonstration convention"
+was rejected: synthetic evaluations are still real governed evidence worth auditing,
+and nothing in the R2-006 contract required losing that history. Both modes share one
+durable store file; every persisted proposal's own `operating_mode`/`sample_label`
+fields keep RESEARCH and SYNTHETIC_PAPER records distinguishable. Corruption fails
+closed with a new stable reason, `SIGNAL_STORE_INTEGRITY_FAILURE` (no R2-006
+contract-defined code covers storage corruption, matching `paper_service.py`'s own
+precedent of defining implementation-layer codes). `generate_proposal` was also made
+idempotent by content (re-submitting identical governed evidence against the same
+timeline returns the already-recorded proposal rather than attempting to append
+duplicate timeline events) once durability made that case reachable for the first
+time.
+
+**2. Invented SMA-001 execution geometry removed.** The first pass invented a 20-bar
+swing-stop, 1x/2x/3x/4x-target, 25%-allocation geometry, framed in its own docstring as
+a "Phase 4 I/O adaptation" — that framing did not change the fact that no Founder ever
+approved those specific numbers, which is exactly the standard already applied to
+FIB-001. A repository-wide search of this log, `TRL_BLOCKERS.md`, and every R2-006
+document confirmed no such approval exists. The geometry-computing functions
+(`_trade_geometry`, `_candidate_quantity`) and their constants were deleted entirely
+from `signal_role3_strategy.py`, not merely left unused. SMA-001 now records only the
+exact, unmodified R1-kernel crossing *direction* as `candidate_direction` on Role 3's
+result and fails closed with a new reason, `STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`;
+the pipeline's existing short-circuit rule then blocks the proposal before Roles 5/6
+ever run. A new blocker row was added to `TRL_BLOCKERS.md` alongside FIB-001's.
+
+**3. Performance/walk-forward reporting implemented.** Not started in the first pass
+despite being part of the original Phase 4 scope. New module `signal_reporting.py`
+implements `TRL_SIGNAL_PERFORMANCE_REPORT.v1`: one sample label per report (no
+blending), walk-forward segments with validated non-overlapping boundaries, a governed
+minimum-completed-trades floor (20, matching the contract's own example), and always-
+present fee/slippage/spread assumptions. Because no strategy can currently produce a
+completed trade (item 2), every report in this checkpoint is honestly
+`INSUFFICIENT_SAMPLE` — this is the correct state, not a defect, and the report format
+never implies otherwise. `VALIDATION` was added to `signal_data.SAMPLE_LABELS`
+(previously only `IN_SAMPLE`/`OUT_OF_SAMPLE`/`WALK_FORWARD`/`SYNTHETIC_PAPER`/
+`BROKER_DEMO`/`BROKER_LIVE`) because the reporting requirement separates
+IN_SAMPLE/VALIDATION/OUT_OF_SAMPLE as three distinct labels.
+
+**4. Confidence status made explicit.** `compute_confidence()` now returns a
+`confidence_status` value (`UNCALIBRATED_HEURISTIC`, the only current member of
+`CONFIDENCE_STATUSES`) alongside the numeric score; `signal_data.py` rejects a proposal
+whose `confidence_status` doesn't match its resolved `confidence_calibration_source`,
+and rejects any calibration source that doesn't resolve to a real registered record.
+Every proposal's `explanation` field now carries the full non-promissory disclaimer
+text.
+
+**Why:** a numeric confidence score, an invented-but-plausible-looking execution
+geometry, and an in-memory-only "durable" store are each individually the kind of gap
+that looks like a small implementation detail in isolation but compounds into a real
+safety/honesty problem once later phases (execution adapters, live reporting) build on
+top of them. Founder review caught all four before commit, which is exactly what this
+review gate exists for.
+
+**How to apply:** 45 new tests added
+(`SMAGeometryBlockTests` x8, `PerformanceReportingTests` x30, `DurablePersistenceTests`
+x18, plus scattered additions/rewrites elsewhere — 122 signal-intelligence tests total,
+up from 63). Every existing test that asserted the invented executable-geometry values
+was rewritten to test the corrected behavior directly rather than edited to accept
+different invented values; no test was weakened, skipped, or deleted merely to pass. A
+stray `__pycache__` directory accidentally created by an earlier `py_compile`
+diagnostic command (not part of the implementation) was found and removed after it
+caused four pre-existing "no generated artifacts" tests to fail; this was a leftover
+from a verification command, not a defect in the corrected code. Full suite: 569 tests
+(447 + 122), passing twice under `python -B -W error`. Manual rehearsal repeated
+end-to-end against the real application on port 8765, plus a real separate-process
+`mode_cli.py`/`signal_cli.py` rehearsal sharing one isolated temporary `LOCALAPPDATA`
+(never the real one) proving `generate-proposal` in one process is visible to
+`proposal-history` in a later, separate process. Neither the SMA-001 nor FIB-001
+blocker was marked resolved. Nothing staged, committed, or pushed — awaiting Founder
+review and commit approval.

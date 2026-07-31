@@ -25,6 +25,10 @@ EVENT_CATEGORIES = (
     "PAPER_EXIT",
     "PAPER_RISK_REJECTION",
     "PAPER_SESSION_EVENT",
+    # Added in Phase 4 (TRL-R2-006): one append-only audit event per
+    # governed signal-pipeline role outcome (pass or BLOCKED), so a
+    # BLOCKED signal proposal is fully auditable after the fact.
+    "SIGNAL_PIPELINE_STEP",
 )
 
 MAX_TIMELINE_EVENTS = 5000

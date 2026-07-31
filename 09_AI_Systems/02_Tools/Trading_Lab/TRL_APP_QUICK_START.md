@@ -312,3 +312,85 @@ written atomically the same way as the forward-paper store (Section 3). It
 never contains a credential, and hand-editing it has no effect beyond
 making the file fail validation — an invalid or unsafe file always resolves
 to `OFF` at the next startup, with the recovery recorded as an audit event.
+
+## 17. Signal intelligence (TRL-R2-006, Phase 4)
+
+**RESEARCH SIGNAL — NOT A TRADE INSTRUCTION — NO BROKER EXECUTION.** Available only in
+`RESEARCH` and `SYNTHETIC_PAPER` modes; denied in `OFF` and every MT5 mode. Governed by the
+same `ModeService` as every other subsystem — there is no separate mode check.
+
+### 17.1 Local operator commands
+
+```powershell
+python -B -W error -m trading_lab_app.signal_cli signal-status
+python -B -W error -m trading_lab_app.signal_cli list-strategies
+python -B -W error -m trading_lab_app.signal_cli explain-strategy SMA-001
+python -B -W error -m trading_lab_app.signal_cli evaluate-strategy SMA-001 request.json
+python -B -W error -m trading_lab_app.signal_cli generate-proposal SMA-001 request.json
+python -B -W error -m trading_lab_app.signal_cli validate-proposal proposal.json
+python -B -W error -m trading_lab_app.signal_cli proposal-history
+python -B -W error -m trading_lab_app.signal_cli export-proposal proposal.json
+python -B -W error -m trading_lab_app.signal_cli compare-strategies
+```
+
+`request.json` is a `TRL_SIGNAL_EVALUATION_REQUEST.v1` document (see
+`signal_data.py` for the exact field list, or `test_signal_intelligence.py`'s
+`base_request()` helper for a complete worked example). `evaluate-strategy`
+prints only the per-role results; `generate-proposal` prints the full
+`TRL_SIGNAL_PROPOSAL.v1` document.
+
+FIB-001 is present in `list-strategies`/`compare-strategies` but always fails
+closed with `STRATEGY_PARAMETERS_NOT_APPROVED` — its numeric parameters are
+not Founder-approved (see `TRL_BLOCKERS.md`).
+
+### 17.2 Inspecting signal intelligence over HTTP (read-only)
+
+```powershell
+$trlSignal = Invoke-RestMethod 'http://127.0.0.1:8765/api/signal-status'
+$trlSignal | Select-Object enabled, operating_mode, signal_generation
+Invoke-RestMethod 'http://127.0.0.1:8765/api/signal-strategy-registry'
+Invoke-RestMethod 'http://127.0.0.1:8765/api/signal-proposals'
+```
+
+Same read-only rule as every other route in this application: GET/HEAD only,
+`405` with `Allow: GET, HEAD` for POST/PUT/PATCH/DELETE. There is no HTTP
+route that generates, approves, modifies, or executes a proposal.
+
+### 17.3 Persistence
+
+Proposal/audit history for the wired application signal service is durable
+in both `RESEARCH` and `SYNTHETIC_PAPER` (`LocalSignalStore`, atomic
+temp-file-plus-`os.replace` writes, the same design as the R2-005 paper
+timeline) — it survives an application restart and is shared with the
+local CLI, so `generate-proposal` in one process is visible to
+`proposal-history` in a later, separate process. The store file is
+`%LOCALAPPDATA%\ALSAKKAF\TradingLab\signal-intelligence-timeline-v1.json`;
+every persisted proposal carries its own `operating_mode` and
+`sample_label`, so RESEARCH and SYNTHETIC_PAPER records sharing that one
+file are never indistinguishable. A corrupted or hand-edited file fails
+closed with `SIGNAL_STORE_INTEGRITY_FAILURE` rather than being silently
+replaced or generating a new proposal.
+
+### 17.4 Performance and walk-forward reports
+
+```powershell
+python -B -W error -m trading_lab_app.signal_cli performance-report SMA-001 SYNTHETIC_PAPER
+python -B -W error -m trading_lab_app.signal_cli export-performance-report SMA-001 SYNTHETIC_PAPER
+python -B -W error -m trading_lab_app.signal_cli walk-forward-report SMA-001 segments.json
+```
+
+Every report covers exactly one governed `sample_label` and is built from
+the durable proposal history. Because no SMA-001 execution geometry is
+Founder-approved yet (Section 17.5), `completed_trade_count` is always
+zero and every report is honestly `INSUFFICIENT_SAMPLE` — this is expected,
+not a bug.
+
+### 17.5 SMA-001 research-only status
+
+SMA-001's crossing *direction* (exact Release-1 kernel parity) is produced
+and recorded as `role_results.technical_strategy.candidate_direction`, but
+no execution geometry (entry zone, stop, TP1-TP4, allocations, quantity) is
+Founder-approved. Every crossing therefore fails closed at Role 3 with
+`STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED` and the final proposal is
+`BLOCKED` — exactly like FIB-001's `STRATEGY_PARAMETERS_NOT_APPROVED`. See
+`TRL_BLOCKERS.md`.

@@ -14,6 +14,7 @@ from .mode_service import in_memory_mode_service
 from .mt5_service import MarketDataService
 from .news_service import OfficialNewsService
 from .paper_service import DisabledPaperService
+from .signal_service import disabled_service as disabled_signal_service
 
 
 BIND_HOST = "127.0.0.1"
@@ -64,6 +65,13 @@ PAPER_API_ROUTES = {
 
 MODE_API_ROUTES = {
     "/api/mode-status": service.mode_status_document,
+}
+
+SIGNAL_API_ROUTES = {
+    "/api/signal-status": service.signal_status_document,
+    "/api/signal-strategy-registry": service.signal_strategy_registry_document,
+    "/api/signal-proposals": service.signal_proposal_history_document,
+    "/api/signal-timeline": service.signal_timeline_document,
 }
 
 SECURITY_HEADERS = {
@@ -245,6 +253,21 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     include_body,
                 )
             return
+        signal_function = SIGNAL_API_ROUTES.get(decoded_path)
+        if signal_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    signal_function(self.server.signal_service),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_SIGNAL_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
@@ -275,6 +298,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
             or decoded_path in NEWS_API_ROUTES
             or decoded_path in PAPER_API_ROUTES
             or decoded_path in MODE_API_ROUTES
+            or decoded_path in SIGNAL_API_ROUTES
         ):
             self._handle_read(include_body=False)
             return
@@ -290,6 +314,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 or decoded_path in NEWS_API_ROUTES
                 or decoded_path in PAPER_API_ROUTES
                 or decoded_path in MODE_API_ROUTES
+                or decoded_path in SIGNAL_API_ROUTES
             )
             else "GET"
         )
@@ -708,6 +733,7 @@ def create_server(
     official_news_service=None,
     paper_service=None,
     mode_service=None,
+    signal_service=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -721,4 +747,5 @@ def create_server(
     # DisabledPaperService's no-side-effect-by-default philosophy. Real
     # startup (app.py main()) always passes an explicit, durable one.
     local_server.mode_service = mode_service or in_memory_mode_service()
+    local_server.signal_service = signal_service or disabled_signal_service()
     return local_server

@@ -11,6 +11,7 @@ from .mode_service import in_memory_mode_service
 from .mt5_service import disabled_service
 from .news_service import disabled_service as disabled_news_service
 from .paper_service import disabled_service as disabled_paper_service
+from .signal_service import disabled_service as disabled_signal_service
 from .strategy_registry import load_registry
 
 
@@ -169,6 +170,22 @@ def paper_health_document(paper_service=None):
 
 def mode_status_document(mode_service=None):
     return (mode_service or in_memory_mode_service()).mode_status_document()
+
+
+def signal_status_document(signal_service=None):
+    return (signal_service or disabled_signal_service()).status_document()
+
+
+def signal_strategy_registry_document(signal_service=None):
+    return (signal_service or disabled_signal_service()).strategy_registry_document()
+
+
+def signal_proposal_history_document(signal_service=None):
+    return (signal_service or disabled_signal_service()).proposal_history_document()
+
+
+def signal_timeline_document(signal_service=None):
+    return (signal_service or disabled_signal_service()).timeline_document()
 
 
 def strategy_registry_document():

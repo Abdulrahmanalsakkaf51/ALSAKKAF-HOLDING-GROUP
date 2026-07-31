@@ -19,6 +19,8 @@ from .paper_service import (
     ForwardPaperService,
     build_synthetic_demonstration_service,
 )
+from .signal_service import DisabledSignalService, SignalIntelligenceService
+from . import signal_service as signal_service_module
 from .server import BIND_HOST, DEFAULT_PORT, create_server
 
 
@@ -189,6 +191,102 @@ def _validate_subsystem_consistency(current_mode, paper_service):
         )
 
 
+def _signal_service_preflight_for_mode(current_mode):
+    """Side-effect-free construction used ONLY to validate, during a
+    ModeService transition attempt, that a signal service *could* be
+    constructed for the requested mode. Used exclusively as (part of)
+    ModeService's ``subsystem_builder`` — see
+    ``_subsystem_builder_for_mode`` — which is exercised on every
+    transition attempt, including from automated tests, and must
+    therefore never touch the filesystem regardless of mode. The object
+    this returns is discarded by ModeService immediately after the
+    construction-succeeds check; it is never wired into anything real.
+    Real runtime construction is ``_signal_service_for_mode`` below."""
+    if current_mode in ("RESEARCH", "SYNTHETIC_PAPER"):
+        return signal_service_module.in_memory_service(operating_mode=current_mode)
+    if current_mode == "OFF":
+        return DisabledSignalService(operating_mode=current_mode)
+    raise ModeSubsystemConfigurationError(
+        "no Phase 4 signal-service preflight rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _signal_service_for_mode(current_mode):
+    """The single, sole path from a ModeService-resolved mode to the REAL
+    runtime signal-intelligence service (TRL-R2-006/Phase 4) — the object
+    actually wired into the running server or a CLI invocation, called
+    only *after* a mode has already been resolved and validated (mirroring
+    ``_paper_service_for_mode``'s role for the paper engine). Never used as
+    ModeService's subsystem_builder (see ``_signal_service_preflight_for_mode``
+    for that side-effect-free path); this function's RESEARCH mapping
+    constructs a real, durable ``LocalSignalStore``-backed service on
+    purpose, which must not happen merely to check whether a transition
+    *would* succeed.
+
+    Both RESEARCH and SYNTHETIC_PAPER use SignalIntelligenceService's own
+    bare-construction default (LocalSignalStore), matching
+    ForwardPaperService's durable-by-default convention — proposal and
+    audit history survive an application/CLI restart for either mode
+    (Founder correction, 2026-08-01: an earlier draft kept SYNTHETIC_PAPER
+    in-memory only; that was rejected — synthetic evaluations are still
+    real governed evidence worth auditing, and losing that history was
+    never actually required by anything in the R2-006 contract). Both
+    modes share the one durable store; every persisted proposal already
+    carries its own ``operating_mode`` and ``sample_label`` fields, so
+    RESEARCH and SYNTHETIC_PAPER records can never become indistinguishable
+    even though they live in the same append-only timeline (see
+    ``TRL_R2_006_SIGNAL_INTELLIGENCE_EVIDENCE.md``).
+    """
+    if current_mode in ("RESEARCH", "SYNTHETIC_PAPER"):
+        return SignalIntelligenceService(operating_mode=current_mode)
+    if current_mode == "OFF":
+        return DisabledSignalService(operating_mode=current_mode)
+    # MT5 modes can never reach here in Phase 4 for the same reason
+    # _paper_service_for_mode's MT5 branch can't: ModeService rejects them
+    # during the availability check before any subsystem_builder call.
+    raise ModeSubsystemConfigurationError(
+        "no Phase 4 signal-service construction rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _validate_signal_subsystem_consistency(current_mode, signal_service):
+    """Fail closed if the constructed signal-intelligence subsystem does
+    not exactly match the authoritative capability set of the resolved
+    current mode."""
+    if current_mode == "OFF":
+        consistent = isinstance(signal_service, DisabledSignalService) and not signal_service.enabled
+    elif current_mode in ("RESEARCH", "SYNTHETIC_PAPER"):
+        consistent = (
+            isinstance(signal_service, SignalIntelligenceService)
+            and signal_service.enabled
+            and signal_service.operating_mode == current_mode
+        )
+    else:
+        consistent = False
+    if not consistent:
+        raise ModeSubsystemConfigurationError(
+            "{}: mode={!r} constructed signal_service={}".format(
+                MODE_SUBSYSTEM_CONFIGURATION_MISMATCH, current_mode, type(signal_service).__name__,
+            )
+        )
+
+
+def _subsystem_builder_for_mode(current_mode):
+    """The combined subsystem builder ModeService actually calls: builds
+    both the paper service (already side-effect-free by construction —
+    DisabledPaperService/InMemoryPaperStore only) and a side-effect-free
+    signal-intelligence *preflight* service for the requested mode, so a
+    transition validates that both constructions would succeed before it
+    is allowed to commit (Section 5's SUBSYSTEM_ACTIVATION_FAILED gate
+    applies to either), without touching the durable signal store. The
+    real runtime signal service is constructed separately, only after a
+    transition/startup mode resolution has already completed — see
+    ``_signal_service_for_mode`` and its call site in ``main()``."""
+    paper_service = _paper_service_for_mode(current_mode)
+    signal_service_instance = _signal_service_preflight_for_mode(current_mode)
+    return paper_service, signal_service_instance
+
+
 def run_server(
     port=DEFAULT_PORT,
     open_browser=True,
@@ -196,6 +294,7 @@ def run_server(
     official_news_service=None,
     paper_service=None,
     mode_service=None,
+    signal_service=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -204,6 +303,7 @@ def run_server(
         official_news_service=official_news_service,
         paper_service=paper_service,
         mode_service=mode_service,
+        signal_service=signal_service,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -253,6 +353,16 @@ def run_server(
             "SYNTHETIC_PAPER (then restart), or the deprecated "
             "--enable-forward-paper-demo flag"
         )
+    active_signal_service = signal_service or vars(server).get("signal_service")
+    if not isinstance(active_signal_service, (SignalIntelligenceService, DisabledSignalService)):
+        active_signal_service = DisabledSignalService()
+    if active_signal_service.enabled:
+        print(
+            "SIGNAL INTELLIGENCE ENABLED | {} | RESEARCH PROPOSALS ONLY | "
+            "NO BROKER EXECUTION".format(active_signal_service.operating_mode)
+        )
+    else:
+        print("SIGNAL INTELLIGENCE DISABLED | OFF MODE")
     active_mode_service = mode_service or getattr(server, "mode_service", None)
     if not isinstance(active_mode_service, ModeService):
         active_mode_service = in_memory_mode_service()
@@ -284,15 +394,21 @@ def run_server(
                     pass
         finally:
             try:
-                news_service = getattr(server, "official_news_service", None)
-                if news_service is not None:
-                    while news_service.shutdown() is False:
+                active_signal = vars(server).get("signal_service")
+                if active_signal is not None:
+                    while active_signal.shutdown() is False:
                         pass
             finally:
                 try:
-                    active_mode_service.shutdown()
+                    news_service = getattr(server, "official_news_service", None)
+                    if news_service is not None:
+                        while news_service.shutdown() is False:
+                            pass
                 finally:
-                    server.server_close()
+                    try:
+                        active_mode_service.shutdown()
+                    finally:
+                        server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -351,9 +467,9 @@ def main(argv=None):
     )
     official_news_service = OfficialNewsService(news_configuration)
     # The one authoritative decision path: ModeService resolved mode ->
-    # capability check -> paper-service construction. No flag may construct
-    # or activate a paper service outside it.
-    operating_mode_service = ModeService(subsystem_builder=_paper_service_for_mode)
+    # capability check -> paper-service AND signal-service construction. No
+    # flag may construct or activate either subsystem outside it.
+    operating_mode_service = ModeService(subsystem_builder=_subsystem_builder_for_mode)
     if args.enable_forward_paper_demo:
         if operating_mode_service.current_mode == "SYNTHETIC_PAPER":
             # Already there (e.g. a prior mode_cli.py transition persisted
@@ -383,8 +499,10 @@ def main(argv=None):
             "python -m trading_lab_app.mode_cli request-mode SYNTHETIC_PAPER"
         )
     paper_service = _paper_service_for_mode(operating_mode_service.current_mode)
+    signal_service_instance = _signal_service_for_mode(operating_mode_service.current_mode)
     try:
         _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
+        _validate_signal_subsystem_consistency(operating_mode_service.current_mode, signal_service_instance)
     except ModeSubsystemConfigurationError as error:
         print(str(error), file=sys.stderr)
         return 2
@@ -396,6 +514,7 @@ def main(argv=None):
             official_news_service=official_news_service,
             paper_service=paper_service,
             mode_service=operating_mode_service,
+            signal_service=signal_service_instance,
         )
     except OSError as error:
         print(

@@ -26,6 +26,7 @@
     <nav class="side-nav" aria-label="Dashboard sections">
       <a href="#overview" aria-current="page">Overview</a>
       <a href="#operating-mode">Operating mode</a>
+      <a href="#signal-intelligence">Signal intelligence</a>
       <a href="#paper-desk">Paper desk</a>
       <a href="#market-connection">Market connection</a>
       <a href="#official-news">Official news &amp; events</a>
@@ -120,6 +121,48 @@
             </dl>
           </details>
           <div class="legal-notice"><strong>NO BROKER EXECUTION</strong><span>MT5_DEMO_MANUAL, MT5_DEMO_AUTOMATED, MT5_LIVE_MANUAL and MT5_LIVE_AUTOMATED are represented in this schema but cannot be entered — no MT5 execution adapter or live-arming capability exists yet.</span></div>
+        </section>
+
+        <section id="signal-intelligence" class="section" aria-labelledby="signal-intelligence-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">GOVERNED SIX-ROLE PIPELINE · PHASE 4 · TRL-R2-006</p><h2 id="signal-intelligence-title">Signal intelligence</h2></div>
+            <span id="signal-availability-badge" class="badge badge-neutral" aria-live="polite">LOADING</span>
+          </div>
+          <p class="disclosure">RESEARCH SIGNAL — NOT A TRADE INSTRUCTION — CONFIDENCE IS NOT A PROFIT PROMISE. Server-authoritative; no client-side value is authoritative.</p>
+          <div class="legal-notice"><strong>NO BROKER EXECUTION</strong><span>This pipeline never calls order_check or order_send. Every proposal carries paper_only_status = PAPER_ONLY_NO_BROKER_ORDER regardless of operating mode.</span></div>
+          <div class="status-strip">
+            <div><span>Operating mode</span><strong id="signal-operating-mode">—</strong></div>
+            <div><span>Signal capability</span><strong id="signal-capability">—</strong></div>
+            <div><span>Startup diagnostic</span><strong id="signal-startup-diagnostic">—</strong></div>
+            <div><span>Persistence status</span><strong id="signal-persistence-status">—</strong></div>
+          </div>
+          <div class="two-column">
+            <article class="panel">
+              <h3>Strategy registry</h3>
+              <div class="table-scroll"><table><caption>Governed strategies</caption><thead><tr><th scope="col">Strategy</th><th scope="col">Version</th><th scope="col">Enabled</th><th scope="col">Approval status</th></tr></thead><tbody id="signal-strategy-table"></tbody></table></div>
+              <p class="disclosure" id="signal-fib-notice">FIB-001 is present in the registry but disabled: its exact numeric parameters are not Founder-approved (see TRL_BLOCKERS.md); no executable FIB-001 behavior exists in this checkpoint.</p>
+            </article>
+            <article class="panel">
+              <h3>Latest governed proposal</h3>
+              <div id="signal-proposal-empty" class="state-panel" role="status">No signal proposal has been generated in this server process yet. Use the local CLI: python -m trading_lab_app.signal_cli generate-proposal SMA-001 request.json</div>
+              <dl class="parameter-list" id="signal-proposal-detail" hidden>
+                <div><dt>Outcome</dt><dd id="signal-proposal-side">-</dd></div>
+                <div><dt>Instrument</dt><dd id="signal-proposal-instrument">-</dd></div>
+                <div><dt>Strategy</dt><dd id="signal-proposal-strategy">-</dd></div>
+                <div><dt>Entry zone</dt><dd id="signal-proposal-entry">-</dd></div>
+                <div><dt>Stop loss</dt><dd id="signal-proposal-stop">-</dd></div>
+                <div><dt>TP1–TP4</dt><dd id="signal-proposal-targets">-</dd></div>
+                <div><dt>Role 3 candidate quantity</dt><dd id="signal-proposal-candidate-quantity">-</dd></div>
+                <div><dt>Role 5 independent quantity</dt><dd id="signal-proposal-independent-quantity">-</dd></div>
+                <div><dt>Confidence</dt><dd id="signal-proposal-confidence">-</dd></div>
+                <div><dt>Sample label</dt><dd id="signal-proposal-sample-label">-</dd></div>
+                <div><dt>News/event-risk status</dt><dd id="signal-proposal-news-status">-</dd></div>
+                <div><dt>Evidence freshness</dt><dd id="signal-proposal-evidence-status">-</dd></div>
+                <div><dt>BLOCKED reason</dt><dd id="signal-proposal-blocked-reason">-</dd></div>
+              </dl>
+            </article>
+          </div>
+          <div class="table-scroll"><table><caption>Six-role pipeline results (most recent proposal)</caption><thead><tr><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Reasons</th></tr></thead><tbody id="signal-role-table"></tbody></table></div>
         </section>
 
         <section id="paper-desk" class="section" aria-labelledby="paper-desk-title">

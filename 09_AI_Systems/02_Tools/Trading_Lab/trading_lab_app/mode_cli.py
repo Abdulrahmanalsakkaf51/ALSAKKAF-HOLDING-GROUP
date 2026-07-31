@@ -26,14 +26,15 @@ def _print_json(value):
 
 
 def _build_service():
-    # Reuse app.py's single subsystem-construction path so a CLI-driven
-    # transition validates real subsystem construction the same way a
-    # server-startup transition does, before the transition is allowed to
-    # commit. Imported lazily to avoid any import-time coupling beyond what
-    # this one call needs.
-    from .app import _paper_service_for_mode
+    # Reuse app.py's single combined subsystem-construction path (paper
+    # service + signal-intelligence service) so a CLI-driven transition
+    # validates real subsystem construction the same way a server-startup
+    # transition does, before the transition is allowed to commit. Imported
+    # lazily to avoid any import-time coupling beyond what this one call
+    # needs.
+    from .app import _subsystem_builder_for_mode
 
-    return mode_service.ModeService(subsystem_builder=_paper_service_for_mode)
+    return mode_service.ModeService(subsystem_builder=_subsystem_builder_for_mode)
 
 
 def _cmd_show_mode(_args):
