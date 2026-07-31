@@ -1,52 +1,29 @@
 {
   "active_branch": "codex/TRL-R2-full-vision-execution",
-  "current_head": "49fa62c4938cc4f0d82adc32f66a4963c8fcce7d",
-  "current_checkpoint": "Phase 2 documents drafted, Founder-reviewed (CORRECTIONS REQUIRED BEFORE COMMIT), all 10 corrections applied, then a further Founder/CTO pass applied first-live fail-closed floor and deterministic intent lookup key. Awaiting final Founder commit approval.",
-  "completed_phases": ["Phase 0", "Phase 1"],
-  "active_phase": "Phase 2 - Create the full-vision delivery branch and contracts (branch created, docs written and twice corrected, not committed)",
+  "current_head": "ffcdd7417d3fa5dceb40144b74ea5a659309644b",
+  "current_checkpoint": "Phase 2 complete, committed, and pushed. Phase 3 implemented, then corrected after Founder review found a legacy-flag ModeService bypass (fixed), tested (447/447 twice), and manually rehearsed twice. Awaiting Founder review and commit approval.",
+  "completed_phases": ["Phase 0", "Phase 1", "Phase 2"],
+  "active_phase": "Phase 3 - Operating-mode state machine (implementation, correction, tests, docs, rehearsal complete; not yet committed)",
   "files_modified_tracked": [
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md",
     "09_AI_Systems/02_Tools/Trading_Lab/test_trading_lab_app.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/__init__.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/app.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/capabilities.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/server.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/service.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/app.js",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/styles.css"
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html"
   ],
-  "files_new_untracked_pre_session": [
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_005_FORWARD_PAPER_TIMELINE_CONTRACT.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_forward_paper.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/paper_data.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/paper_service.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/paper_store.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/synthetic_paper_demonstration.json",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/timeline_data.py"
-  ],
-  "files_added_this_session": [
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/START_TRADING_LAB_DISABLED.ps1",
-    "09_AI_Systems/02_Tools/Trading_Lab/START_TRADING_LAB_DEMO.ps1",
-    "09_AI_Systems/02_Tools/Trading_Lab/STOP_TRADING_LAB.ps1",
-    "09_AI_Systems/02_Tools/Trading_Lab/GET_TRADING_LAB_STATUS.ps1"
-  ],
-  "files_fixed_this_session_within_r2_005_diff": [
-    "trading_lab_app/paper_service.py",
-    "trading_lab_app/app.py",
-    "test_forward_paper.py",
-    "test_trading_lab_app.py"
+  "files_added_this_phase": [
+    "09_AI_Systems/02_Tools/Trading_Lab/test_operating_mode.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_cli.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_service.py"
   ],
   "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\" (run twice from Trading_Lab directory)",
-  "tests_last_result": "396/396 passing both runs; 0 failures, 0 errors",
+  "tests_last_result": "447/447 passing both runs (396 pre-existing + 51 operating-mode, including 15 new SingleAuthorityTests); 0 failures, 0 errors",
   "active_processes": [],
   "active_ports": {
-    "8765": "confirmed no listener after manual demo start/stop rehearsal"
+    "8765": "confirmed no listener after both Phase 3 manual rehearsals (only TimeWait remnants)"
   },
   "known_defects": [],
   "external_prerequisites": [
@@ -56,8 +33,8 @@
     "TradingView webhook signing secret and allowlist (Phase 7)",
     "Founder-provided VIEWER/FOUNDER_OPERATOR credential hashes (Phase 8)"
   ],
-  "next_command": "Present the twice-corrected 6 Phase 2 documents for final Founder commit approval, then begin Phase 3",
-  "next_verification": "Post-correction validation pass re-run clean after both passes: Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, credential-pattern scan - see decision log 2026-07-31-004 and 2026-07-31-005",
+  "next_command": "Present the Phase 3 diff for Founder review and commit approval, then begin Phase 4 only after that commit exists",
+  "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - to run immediately before proposing the commit",
   "prohibited_commands": [
     "git reset --hard",
     "git clean",

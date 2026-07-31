@@ -6,6 +6,7 @@ import webbrowser
 
 from . import APPLICATION_NAME, APPLICATION_VERSION
 from . import market_data
+from .mode_service import ModeService, in_memory_mode_service
 from .mt5_service import MT5ReadOnlyConfiguration, MarketDataService
 from .news_service import (
     MAX_REFRESH_SECONDS,
@@ -108,17 +109,20 @@ def build_parser():
         "--enable-forward-paper-engine",
         action="store_true",
         help=(
-            "enable the local forward paper timeline and projection; "
-            "this never enables broker orders"
+            "DEPRECATED and always fails closed in Phase 3: no approved operating "
+            "mode authorizes this capability yet; the server does not start. "
+            "See TRL_PHASE_3_OPERATING_MODE_CONTRACT.md"
         ),
     )
     parser.add_argument(
         "--enable-forward-paper-demo",
         action="store_true",
         help=(
-            "load the committed SYNTHETIC DEMONSTRATION fixture into an in-memory "
-            "paper engine so the dashboard is populated for a rehearsal; never reads "
-            "or writes production paper storage and is not live market data"
+            "DEPRECATED compatibility path: requests a transition to the governed "
+            "SYNTHETIC_PAPER mode through the operating-mode state machine, then "
+            "loads the committed SYNTHETIC DEMONSTRATION fixture; in-memory only, "
+            "never reads or writes production paper storage, not live market data. "
+            "Prefer: python -m trading_lab_app.mode_cli request-mode SYNTHETIC_PAPER"
         ),
     )
     parser.add_argument(
@@ -130,12 +134,68 @@ def build_parser():
     return parser
 
 
+LEGACY_FORWARD_PAPER_MODE_UNAVAILABLE = "LEGACY_FORWARD_PAPER_MODE_UNAVAILABLE"
+MODE_SUBSYSTEM_CONFIGURATION_MISMATCH = "MODE_SUBSYSTEM_CONFIGURATION_MISMATCH"
+
+
+class ModeSubsystemConfigurationError(RuntimeError):
+    """Fail-closed signal that a constructed subsystem does not match mode."""
+
+
+def _paper_service_for_mode(current_mode):
+    """The single, sole path from a ModeService-resolved mode to a paper
+    service. Nothing else in this module constructs a paper service.
+
+    This same function is used two ways: (a) as ModeService's
+    subsystem_builder, so a transition itself validates that construction
+    succeeds before the transition is allowed to commit, and (b) again at
+    startup, after the mode is resolved, to build the service actually
+    wired into the running server. Because both calls go through this one
+    function for the same resolved mode, the two can never disagree.
+    """
+    if current_mode == "SYNTHETIC_PAPER":
+        return build_synthetic_demonstration_service()
+    if current_mode in ("OFF", "RESEARCH"):
+        return DisabledPaperService()
+    # MT5 modes can never reach here in Phase 3: ModeService.request_transition
+    # rejects them during the availability check, before any subsystem_builder
+    # call, and no other caller may request one either. This branch exists as
+    # a defensive invariant, not a reachable path.
+    raise ModeSubsystemConfigurationError(
+        "no Phase 3 subsystem-construction rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _validate_subsystem_consistency(current_mode, paper_service):
+    """Fail closed if the constructed subsystem set does not exactly match
+    the authoritative capability set of the resolved current mode."""
+    if current_mode in ("OFF", "RESEARCH"):
+        consistent = (
+            isinstance(paper_service, DisabledPaperService) and not paper_service.enabled
+        )
+    elif current_mode == "SYNTHETIC_PAPER":
+        consistent = (
+            isinstance(paper_service, ForwardPaperService)
+            and paper_service.enabled
+            and getattr(paper_service, "is_synthetic_demonstration", False)
+        )
+    else:
+        consistent = False
+    if not consistent:
+        raise ModeSubsystemConfigurationError(
+            "{}: mode={!r} constructed paper_service={}".format(
+                MODE_SUBSYSTEM_CONFIGURATION_MISMATCH, current_mode, type(paper_service).__name__,
+            )
+        )
+
+
 def run_server(
     port=DEFAULT_PORT,
     open_browser=True,
     market_data_service=None,
     official_news_service=None,
     paper_service=None,
+    mode_service=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -143,6 +203,7 @@ def run_server(
         market_data_service=market_data_service,
         official_news_service=official_news_service,
         paper_service=paper_service,
+        mode_service=mode_service,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -188,12 +249,24 @@ def run_server(
     else:
         print("FORWARD PAPER ENGINE DISABLED | STORAGE NOT CONSTRUCTED")
         print(
-            "  To enable: trading_lab_app --enable-forward-paper-engine "
-            "(local research timeline)"
+            "  To rehearse: python -m trading_lab_app.mode_cli request-mode "
+            "SYNTHETIC_PAPER (then restart), or the deprecated "
+            "--enable-forward-paper-demo flag"
         )
+    active_mode_service = mode_service or getattr(server, "mode_service", None)
+    if not isinstance(active_mode_service, ModeService):
+        active_mode_service = in_memory_mode_service()
+    mode_status = active_mode_service.mode_status_document()
+    print(
+        "OPERATING MODE: {} | BROKER EXECUTION: {} | AUTOMATED TRADING: {}".format(
+            mode_status["current_mode"],
+            "AVAILABLE" if mode_status["broker_execution_available"] else "UNAVAILABLE",
+            "AVAILABLE" if mode_status["automated_trading_available"] else "UNAVAILABLE",
+        )
+    )
+    if mode_status["startup_diagnostic_code"] != "OK":
         print(
-            "  To rehearse: trading_lab_app --enable-forward-paper-demo "
-            "(SYNTHETIC DEMONSTRATION, in-memory only)"
+            "  Mode startup recovery: {}".format(mode_status["startup_diagnostic_code"])
         )
     print("Local dashboard: {}".format(url))
     print("Press Ctrl+C to stop.")
@@ -216,7 +289,10 @@ def run_server(
                     while news_service.shutdown() is False:
                         pass
             finally:
-                server.server_close()
+                try:
+                    active_mode_service.shutdown()
+                finally:
+                    server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -250,6 +326,18 @@ def main(argv=None):
             file=sys.stderr,
         )
         return 2
+    if args.enable_forward_paper_engine:
+        print(
+            "{}: no approved Phase 3 operating mode authorizes the legacy "
+            "--enable-forward-paper-engine capability. The application did not "
+            "start the forward-paper engine. No external connection or paper "
+            "execution occurred. Adding an eighth mode is prohibited without "
+            "Founder approval. Use --enable-forward-paper-demo, or "
+            "'python -m trading_lab_app.mode_cli request-mode SYNTHETIC_PAPER', "
+            "for a governed alternative.".format(LEGACY_FORWARD_PAPER_MODE_UNAVAILABLE),
+            file=sys.stderr,
+        )
+        return 2
     configuration = MT5ReadOnlyConfiguration(
         enabled=args.enable_mt5_read_only,
         symbol=args.mt5_symbol or "XAUUSD",
@@ -262,12 +350,44 @@ def main(argv=None):
         refresh_seconds=args.official_news_refresh_seconds or 900,
     )
     official_news_service = OfficialNewsService(news_configuration)
+    # The one authoritative decision path: ModeService resolved mode ->
+    # capability check -> paper-service construction. No flag may construct
+    # or activate a paper service outside it.
+    operating_mode_service = ModeService(subsystem_builder=_paper_service_for_mode)
     if args.enable_forward_paper_demo:
-        paper_service = build_synthetic_demonstration_service()
-    elif args.enable_forward_paper_engine:
-        paper_service = ForwardPaperService()
-    else:
-        paper_service = DisabledPaperService()
+        if operating_mode_service.current_mode == "SYNTHETIC_PAPER":
+            # Already there (e.g. a prior mode_cli.py transition persisted
+            # it): nothing to request. INVALID_TRANSITION would otherwise
+            # reject a same-mode request, which must not make an already-
+            # correct startup fail closed.
+            pass
+        else:
+            transition = operating_mode_service.request_transition(
+                "SYNTHETIC_PAPER",
+                actor="LEGACY_CLI_FLAG:--enable-forward-paper-demo",
+                reason="deprecated --enable-forward-paper-demo compatibility request",
+                actor_channel="LOCAL_OPERATOR",
+            )
+            if transition.outcome != "ACCEPTED":
+                print(
+                    "Unable to activate SYNTHETIC_PAPER via the deprecated "
+                    "--enable-forward-paper-demo flag: outcome={} reason_code={}".format(
+                        transition.outcome, transition.reason_code,
+                    ),
+                    file=sys.stderr,
+                )
+                return 2
+        print(
+            "DEPRECATED: --enable-forward-paper-demo now requests SYNTHETIC_PAPER "
+            "through the governed operating-mode state machine. Prefer: "
+            "python -m trading_lab_app.mode_cli request-mode SYNTHETIC_PAPER"
+        )
+    paper_service = _paper_service_for_mode(operating_mode_service.current_mode)
+    try:
+        _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
+    except ModeSubsystemConfigurationError as error:
+        print(str(error), file=sys.stderr)
+        return 2
     try:
         return run_server(
             port=args.port,
@@ -275,6 +395,7 @@ def main(argv=None):
             market_data_service=market_service,
             official_news_service=official_news_service,
             paper_service=paper_service,
+            mode_service=operating_mode_service,
         )
     except OSError as error:
         print(

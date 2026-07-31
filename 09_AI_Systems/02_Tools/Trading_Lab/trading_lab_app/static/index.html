@@ -18,12 +18,14 @@
       <span class="pulse" aria-hidden="true"></span>
       <span>LOCAL</span>
       <span class="badge badge-warning">PAPER/RESEARCH ONLY</span>
+      <span id="top-mode-badge" class="badge badge-neutral" aria-live="polite">MODE: —</span>
     </div>
   </header>
 
   <div class="app-shell">
     <nav class="side-nav" aria-label="Dashboard sections">
       <a href="#overview" aria-current="page">Overview</a>
+      <a href="#operating-mode">Operating mode</a>
       <a href="#paper-desk">Paper desk</a>
       <a href="#market-connection">Market connection</a>
       <a href="#official-news">Official news &amp; events</a>
@@ -81,6 +83,43 @@
             <div><span>Reason code</span><code id="reason-code">—</code></div>
             <div><span>Position</span><strong id="position-status">—</strong></div>
           </div>
+        </section>
+
+        <section id="operating-mode" class="section" aria-labelledby="operating-mode-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">GOVERNED STATE MACHINE · PHASE 3</p><h2 id="operating-mode-title">Operating mode</h2></div>
+            <span id="mode-current-badge" class="badge badge-neutral" aria-live="polite">LOADING</span>
+          </div>
+          <p class="disclosure">Server-authoritative. No client, browser, or dashboard text can change or infer the mode; this panel only displays what the local mode service reports.</p>
+          <div class="status-strip">
+            <div><span>Broker execution</span><strong id="mode-broker-execution">—</strong></div>
+            <div><span>Automated trading</span><strong id="mode-automated-trading">—</strong></div>
+            <div><span>Live arming</span><strong id="mode-live-arming">—</strong></div>
+            <div><span>Private remote access</span><strong id="mode-private-remote">—</strong></div>
+          </div>
+          <div id="mode-startup-warning" class="state-panel persistence-warning" role="alert" hidden></div>
+          <div class="two-column">
+            <article class="panel">
+              <h3>Available now</h3>
+              <ul id="mode-available-list" class="check-list"></ul>
+            </article>
+            <article class="panel warning-panel">
+              <h3>Represented but unavailable in this checkpoint</h3>
+              <ul id="mode-unavailable-list" class="check-list"></ul>
+            </article>
+          </div>
+          <div class="table-scroll"><table><caption>Governed capability matrix for the current mode</caption><thead><tr><th scope="col">Capability</th><th scope="col">Granted now</th></tr></thead><tbody id="mode-capability-table"></tbody></table></div>
+          <details class="paper-expert-details">
+            <summary>Last transition and expert detail</summary>
+            <dl class="parameter-list">
+              <div><dt>Previous mode</dt><dd id="mode-previous">-</dd></div>
+              <div><dt>Last transition event</dt><dd id="mode-last-event-type">-</dd></div>
+              <div><dt>Last rejection reason</dt><dd id="mode-last-reason">-</dd></div>
+              <div><dt>Startup diagnostic</dt><dd id="mode-startup-diagnostic">OK</dd></div>
+              <div><dt>Persistence status</dt><dd id="mode-persistence-status">-</dd></div>
+            </dl>
+          </details>
+          <div class="legal-notice"><strong>NO BROKER EXECUTION</strong><span>MT5_DEMO_MANUAL, MT5_DEMO_AUTOMATED, MT5_LIVE_MANUAL and MT5_LIVE_AUTOMATED are represented in this schema but cannot be entered — no MT5 execution adapter or live-arming capability exists yet.</span></div>
         </section>
 
         <section id="paper-desk" class="section" aria-labelledby="paper-desk-title">

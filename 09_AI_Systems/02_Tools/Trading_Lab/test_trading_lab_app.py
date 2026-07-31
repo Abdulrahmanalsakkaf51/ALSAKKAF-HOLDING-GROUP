@@ -514,6 +514,7 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
             "/api/paper-account", "/api/paper-positions", "/api/paper-history",
             "/api/market-timeline", "/api/paper-health",
         })
+        self.assertEqual(set(server.MODE_API_ROUTES), {"/api/mode-status"})
         for path in APP_DIRECTORY.glob("*.py"):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
             imports = set()

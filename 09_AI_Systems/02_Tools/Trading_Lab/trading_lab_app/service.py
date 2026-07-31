@@ -7,6 +7,7 @@ from pathlib import Path
 
 from . import APPLICATION_NAME, APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MODE
 from .capabilities import capability_manifest
+from .mode_service import in_memory_mode_service
 from .mt5_service import disabled_service
 from .news_service import disabled_service as disabled_news_service
 from .paper_service import disabled_service as disabled_paper_service
@@ -164,6 +165,10 @@ def market_timeline_document(paper_service=None):
 
 def paper_health_document(paper_service=None):
     return (paper_service or disabled_paper_service()).health_document()
+
+
+def mode_status_document(mode_service=None):
+    return (mode_service or in_memory_mode_service()).mode_status_document()
 
 
 def strategy_registry_document():

@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -300,6 +300,70 @@ function renderOfficialNews(bundle) {
   });
 }
 
+function renderModeStatus(mode) {
+  if (!mode || mode.error) {
+    setText("mode-current-badge", "UNAVAILABLE");
+    setText("top-mode-badge", "MODE: UNAVAILABLE");
+    return;
+  }
+  const badge = $("mode-current-badge");
+  badge.textContent = mode.current_mode;
+  badge.className = mode.current_mode === "OFF" ? "badge badge-neutral" : "badge badge-safe";
+  setText("top-mode-badge", `MODE: ${mode.current_mode}`);
+  setText("mode-broker-execution", mode.broker_execution_available ? "AVAILABLE" : "UNAVAILABLE");
+  setText("mode-automated-trading", mode.automated_trading_available ? "AVAILABLE" : "UNAVAILABLE");
+  setText("mode-live-arming", mode.live_arming_available ? "AVAILABLE" : "UNAVAILABLE");
+  setText("mode-private-remote", mode.private_remote_access_available ? "AVAILABLE" : "UNAVAILABLE");
+
+  const availableList = $("mode-available-list"); clearRows("mode-available-list");
+  mode.available_modes.forEach((name) => {
+    const li = document.createElement("li");
+    li.textContent = name === mode.current_mode ? `${name} (current)` : name;
+    availableList.appendChild(li);
+  });
+
+  const unavailableList = $("mode-unavailable-list"); clearRows("mode-unavailable-list");
+  Object.keys(mode.unavailable_modes).sort().forEach((name) => {
+    const li = document.createElement("li");
+    li.textContent = `${name} — ${mode.unavailable_modes[name].join(", ")}`;
+    unavailableList.appendChild(li);
+  });
+
+  const allCapabilities = new Set();
+  Object.values(mode.capability_matrix).forEach((list) => list.forEach((cap) => allCapabilities.add(cap)));
+  const granted = new Set(mode.current_capabilities);
+  const table = $("mode-capability-table"); clearRows("mode-capability-table");
+  Array.from(allCapabilities).sort().forEach((cap) => {
+    const tr = document.createElement("tr");
+    cell(tr, cap.replace(/_/g, " "));
+    cell(tr, granted.has(cap) ? "YES" : "NO");
+    table.appendChild(tr);
+  });
+
+  setText("mode-previous", mode.previous_mode || "None");
+  setText("mode-last-event-type", mode.last_transition ? mode.last_transition.event_type : "None yet");
+  const lastReason = mode.last_transition && mode.last_transition.payload
+    ? mode.last_transition.payload.rejection_reason_code
+    : null;
+  setText("mode-last-reason", lastReason || "None");
+  setText("mode-startup-diagnostic", mode.startup_diagnostic_code);
+  setText("mode-persistence-status", mode.persistence_status);
+
+  const warning = $("mode-startup-warning");
+  if (mode.startup_diagnostic_code !== "OK") {
+    warning.hidden = false;
+    warning.textContent = `Startup recovered from an invalid or unsafe persisted mode (${mode.startup_diagnostic_code}). The application started in a safe mode.`;
+  } else {
+    warning.hidden = true;
+  }
+}
+
+async function loadModeStatus() {
+  try {
+    return await getJson("/api/mode-status");
+  } catch (error) { return { error: error.message }; }
+}
+
 async function loadOfficialNews() {
   try {
     const [health, sources, items, events] = await Promise.all([getJson("/api/news-health"), getJson("/api/news-sources"), getJson("/api/news-items"), getJson("/api/economic-events")]);
@@ -314,7 +378,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
+  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -323,7 +387,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk()]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }

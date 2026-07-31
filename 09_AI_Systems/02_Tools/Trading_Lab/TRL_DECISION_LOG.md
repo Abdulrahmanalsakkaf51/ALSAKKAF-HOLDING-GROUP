@@ -252,3 +252,138 @@ found and fixed during Correction 1 of the prior pass — not reintroduced
 here). Nothing staged, committed, or pushed. Branch remains
 `codex/TRL-R2-full-vision-execution`, HEAD remains `49fa62c`. Awaiting a
 further Founder decision on whether to commit.
+
+## 2026-07-31-006 — Phase 2 committed and pushed; Phase 3 implemented
+
+**Decision:** The Founder approved the twice-corrected Phase 2 documents
+without further changes. They were staged (11 files, all under
+`Trading_Lab/`), reviewed via `git diff --cached`, and committed as
+`ffcdd7417d3fa5dceb40144b74ea5a659309644b` ("Add TRL full-vision Phase 2
+contracts, threat model, and runbooks"), then pushed to
+`origin/codex/TRL-R2-full-vision-execution` after a separate push
+authorization and verification pass. Phase 3 (operating-mode state machine)
+was then implemented on top of that commit.
+
+**Phase 3 implementation summary:** one new authoritative module,
+`trading_lab_app/mode_service.py` — a `ModeService` class implementing the
+seven governed modes (`OFF`, `RESEARCH`, `SYNTHETIC_PAPER`,
+`MT5_DEMO_MANUAL`, `MT5_DEMO_AUTOMATED`, `MT5_LIVE_MANUAL`,
+`MT5_LIVE_AUTOMATED`), a 16-capability governed matrix, the exact three-mode
+transition matrix, fail-closed transition rules, and an event-sourced,
+hash-chained, atomically-persisted audit log mirroring R2-005's proven
+architecture — plus `trading_lab_app/mode_cli.py`, the local-only operator
+CLI (`show-mode`, `list-modes`, `explain-mode`, `request-mode`,
+`transition-history`). `app.py`, `server.py`, and `service.py` were extended
+(new `/api/mode-status` read-only route; startup now resolves and prints
+the operating mode; the paper engine is constructed from the resolved mode
+when no legacy `--enable-forward-paper-*` flag is given). The dashboard
+gained a new "Operating mode" panel. Full detail, the exact transition and
+capability matrices, persistence format, and rehearsal evidence are in
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`.
+
+**A real bug was found and fixed during implementation:** the mode-status
+print path in `app.py`'s `run_server()` initially assumed any non-`None`
+`server.mode_service` attribute was a real `ModeService`, but several
+existing tests pass `mock.Mock()` as a fake server object — `Mock()`
+auto-creates attributes, so `getattr(server, "mode_service", None)`
+returned a Mock, not `None`, and `mode_status["current_mode"]` crashed with
+`TypeError: 'Mock' object is not subscriptable`. Fixed by adding the same
+`isinstance(...)` type guard the existing `paper_service`/
+`official_news_service` code already uses for exactly this reason, falling
+back to a safe in-memory mode service when the object isn't a real
+`ModeService`.
+
+**Why the mode/paper integration was decoupled rather than unified:** the
+master program's "Required mappings" section (OFF/RESEARCH → disabled
+paper; SYNTHETIC_PAPER → synthetic demo) is honored, but only when neither
+legacy `--enable-forward-paper-engine` nor `--enable-forward-paper-demo` is
+passed. Forcing the legacy flags to also drive the mode service risked
+touching already-verified, heavily-tested R2-005 startup logic for no
+required benefit this phase; both flags continue to work exactly as before.
+This is recorded as a known limitation in the Phase 3 contract, not hidden.
+
+**Why mode changes take effect on next start, not live:** the running
+server resolves its mode once at startup; `mode_cli.py` writes to the
+durable store but does not signal a running process to reload. This matches
+the master program's own framing of mode resolution as a startup-time
+concern (Section "STARTUP SAFETY") and avoids the added complexity and risk
+of hot-swapping subsystems inside a live server this phase. Verified
+directly in the manual rehearsal: each transition required a stop/start
+cycle to take visible effect, which is the intended behavior, not a defect.
+
+**How to apply:** Full suite (432 tests, up from 396) passes twice under
+`python -B -W error`. Manual loopback rehearsal performed against the real
+application on the real port 8765 (not mocks): OFF → RESEARCH →
+SYNTHETIC_PAPER → rejected `MT5_DEMO_MANUAL` (`MISSING_MT5_ADAPTER`) →
+rejected `MT5_LIVE_AUTOMATED` (`MISSING_MT5_ADAPTER` +
+`MISSING_LIVE_ARMING`) → OFF → stopped, port confirmed clear. Nothing
+staged, committed, or pushed yet for Phase 3 — awaiting Founder review per
+the 2026-07-31-001 approval-gate decision.
+
+## 2026-07-31-007 — Founder correction: removed the legacy-flag authority bypass
+
+**Decision:** The Founder's Phase 3 review found a real architectural
+contradiction: the design doc stated `ModeService` is authoritative and
+subsystems must be constructed only from the resolved governed mode, but
+`app.py` still preserved `--enable-forward-paper-engine` and
+`--enable-forward-paper-demo` as direct construction branches that never
+consulted or updated `ModeService`. This meant the reported mode
+(`/api/mode-status`) and the actually active paper service
+(`/api/paper-account`) could disagree, and a CLI flag could activate paper
+capability the state machine had not authorized. Correctly flagged as not
+acceptable to leave as a "known limitation."
+
+**Root cause:** the original Phase 3 implementation added the mode service
+as a new, parallel decision path instead of making it the *only* one — the
+old flag-driven `if/elif/else` construction logic in `main()` was left
+in place unchanged, so two independent authorities for "is paper active"
+existed side by side.
+
+**Fix:** collapsed to exactly one path —
+`ModeService` resolved mode → capability check → `_paper_service_for_mode()`.
+That single function is now the only paper-service constructor in the
+application, used both as `ModeService`'s `subsystem_builder` (so a
+transition validates real construction before committing) and again at
+startup to build what's actually wired into the server; because both calls
+consume the same resolved mode, mode-status and paper-status can no longer
+diverge. `--enable-forward-paper-demo` now calls
+`ModeService.request_transition("SYNTHETIC_PAPER", actor_channel="LOCAL_OPERATOR")`
+— identical to the `mode_cli.py` path — and fails closed if not `ACCEPTED`
+(with an idempotency exception: if already `SYNTHETIC_PAPER`, no redundant
+transition is attempted, since a same-mode request is otherwise correctly
+rejected as `INVALID_TRANSITION` and must not make an already-correct
+startup fail). `--enable-forward-paper-engine` now always fails closed with
+`LEGACY_FORWARD_PAPER_MODE_UNAVAILABLE` before any other setup work — no
+mode is constructed, no file is touched — because none of the seven Phase 3
+modes authorizes it, and adding an eighth mode or silently remapping it to
+`RESEARCH`/`SYNTHETIC_PAPER` was explicitly out of bounds. A new
+`_validate_subsystem_consistency()` check runs immediately before the
+server binds and fails closed with `MODE_SUBSYSTEM_CONFIGURATION_MISMATCH`
+if the constructed subsystem ever disagrees with the resolved mode's
+authoritative capability set — a structural invariant, not just a
+convention.
+
+**Why:** a capability gate that can be bypassed by a flag is not a gate.
+This needed to be a hard architectural correction, not a documented
+limitation, precisely because Phase 5–9 will build real broker execution on
+top of the same `ModeService` — any tolerance for a bypass here would
+compound into a real safety gap later.
+
+**How to apply:** 15 new tests added (`SingleAuthorityTests` in
+`test_operating_mode.py`), covering every item the Founder listed: OFF/
+RESEARCH cannot construct an active paper service; SYNTHETIC_PAPER
+constructs only the synthetic demonstration service; the demo flag routes
+through ModeService, results in `current_mode == SYNTHETIC_PAPER`, creates
+normal transition audit events, and cannot bypass a forced rejection; the
+engine flag fails closed before server startup with no store/network/
+listener/execution side effect; mode-status and paper-status agreement
+verified over real HTTP for all three available modes; direct helper calls
+rejecting disallowed constructions; a deliberate mismatch raising
+`MODE_SUBSYSTEM_CONFIGURATION_MISMATCH`; the existing synthetic
+demonstration remaining deterministic; exactly seven modes; no HTTP
+mutation route. Full suite: 447 tests (432 + 15), passing twice under
+`python -B -W error`. Manual rehearsal repeated end-to-end against the real
+application on port 8765, including confirming the failed
+`--enable-forward-paper-engine` attempt left the persisted mode file
+completely unmutated. Nothing staged, committed, or pushed — awaiting
+further Founder review.

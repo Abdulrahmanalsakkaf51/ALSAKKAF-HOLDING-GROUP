@@ -10,6 +10,7 @@ from urllib.parse import unquote, urlsplit
 
 from . import APPLICATION_NAME
 from . import service
+from .mode_service import in_memory_mode_service
 from .mt5_service import MarketDataService
 from .news_service import OfficialNewsService
 from .paper_service import DisabledPaperService
@@ -59,6 +60,10 @@ PAPER_API_ROUTES = {
     "/api/paper-history": service.paper_history_document,
     "/api/market-timeline": service.market_timeline_document,
     "/api/paper-health": service.paper_health_document,
+}
+
+MODE_API_ROUTES = {
+    "/api/mode-status": service.mode_status_document,
 }
 
 SECURITY_HEADERS = {
@@ -225,6 +230,21 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     include_body,
                 )
             return
+        mode_function = MODE_API_ROUTES.get(decoded_path)
+        if mode_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    mode_function(self.server.mode_service),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MODE_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
@@ -254,6 +274,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
             decoded_path in MARKET_API_ROUTES
             or decoded_path in NEWS_API_ROUTES
             or decoded_path in PAPER_API_ROUTES
+            or decoded_path in MODE_API_ROUTES
         ):
             self._handle_read(include_body=False)
             return
@@ -268,6 +289,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 decoded_path in MARKET_API_ROUTES
                 or decoded_path in NEWS_API_ROUTES
                 or decoded_path in PAPER_API_ROUTES
+                or decoded_path in MODE_API_ROUTES
             )
             else "GET"
         )
@@ -685,6 +707,7 @@ def create_server(
     market_data_service=None,
     official_news_service=None,
     paper_service=None,
+    mode_service=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -693,4 +716,9 @@ def create_server(
     local_server.market_data_service = market_data_service or MarketDataService()
     local_server.official_news_service = official_news_service or OfficialNewsService()
     local_server.paper_service = paper_service or DisabledPaperService()
+    # Defaults to an in-memory mode service (starts at OFF, touches no
+    # filesystem) when the caller does not explicitly wire one in, mirroring
+    # DisabledPaperService's no-side-effect-by-default philosophy. Real
+    # startup (app.py main()) always passes an explicit, durable one.
+    local_server.mode_service = mode_service or in_memory_mode_service()
     return local_server

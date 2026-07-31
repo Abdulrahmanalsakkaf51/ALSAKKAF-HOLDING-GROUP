@@ -8,9 +8,9 @@
 |-------|-------|
 | Document ID | TRL-R2-005-QUICK-START-005 |
 | Document Type | Local Application Operator Guide |
-| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH |
-| Version | 4.0 |
-| Date | 2026-07-27 |
+| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH; Section 16 added for TRL Phase 3 operating-mode state machine; Sections 3 and 16.2 corrected after Founder review removed the legacy-flag bypass |
+| Version | 4.2 |
+| Date | 2026-07-31 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Project | PRJ-017 - ALSAKKAF Trading Research Lab |
 | Checkpoint | TRL-R2-005 - Causal Market Timeline and Forward Paper Engine |
@@ -43,13 +43,22 @@ Synthetic mode is always the default. This command does not initialize paper sto
 
 # 3. Start the Explicit Forward Paper Engine
 
-Enable the local causal timeline and forward paper projection without enabling any signal generator or broker path:
+**As of TRL Phase 3, `--enable-forward-paper-engine` is deprecated and
+always fails closed.** No approved Phase 3 operating mode authorizes the
+unrestricted forward-paper engine, so this command now prints
+`LEGACY_FORWARD_PAPER_MODE_UNAVAILABLE` to `stderr`, exits with status `2`,
+and never starts a server, constructs a paper store, or opens a network
+connection:
 
 ```powershell
 python -B -W error 09_AI_Systems\02_Tools\Trading_Lab\trading_lab_app --enable-forward-paper-engine
 ```
 
-The starting value is a clearly synthetic research balance. Production storage is `%LOCALAPPDATA%\ALSAKKAF\TradingLab\forward-paper-timeline-v1.json`. Do not describe this projection as a brokerage account or live balance. The dashboard remains empty until a future governed Signal Desk submits proposals through the internal contract; R2-005 exposes no HTTP write route.
+Use Section 16 (`SYNTHETIC_PAPER` mode) instead. The starting value in that
+mode is a clearly synthetic research balance held in memory only — it does
+not use the `forward-paper-timeline-v1.json` production store this section
+previously described, because that store has no governed operating mode
+authorizing it yet in Phase 3.
 
 # 4. Start Explicit Official-News Mode
 
@@ -212,3 +221,94 @@ Official-news source identity is fully validated before the connector derives th
 Hostname waiting occurs before child and pipe creation and before the source's fixed post-start 20-second deadline. Each admitted source keeps the complete deadline, so a two-source hostname may take approximately two successive publisher deadlines plus synchronous process-start and finalization time. Shutdown cancels active child work and releases waiting sources through the existing controlled timeout result without permitting a waiter to start child or network work. Synchronous Windows `Process.start()` remains non-preemptible.
 
 Non-timeout DNS/connect/TLS/socket/HTTP failures and genuine non-2xx status remain `NEWS_SOURCE_HTTP_ERROR`. Provably local process, pipe, wait, crash, IPC, serialization, invalid-result, abnormal-exit, and cleanup/finalization failures use the existing sanitized `NEWS_SOURCE_INTERNAL_ERROR`. No exception details are exposed, and no schema, stable-code, endpoint, registry, digest, source, cache, or content identity changes. This is not evidence of a publisher connection-limit policy and is not publisher certification.
+
+# 16. Operating-Mode State Machine (TRL Phase 3)
+
+Every launch of the dashboard resolves a governed **operating mode** before
+anything else starts. The seven modes are `OFF`, `RESEARCH`,
+`SYNTHETIC_PAPER`, `MT5_DEMO_MANUAL`, `MT5_DEMO_AUTOMATED`,
+`MT5_LIVE_MANUAL`, and `MT5_LIVE_AUTOMATED`. Only the first three are
+available in this checkpoint; the four MT5 modes are represented in the
+schema and dashboard but always fail closed with an explicit missing-
+prerequisite reason, because no MT5 execution adapter (Phase 5) or
+live-arming capability (Phase 9) exists yet. Full design detail lives in
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`.
+
+## 16.1 Local operator commands
+
+Mode changes are made only with a local command-line tool — never through
+any HTTP route or browser control. All commands run from the repository
+root:
+
+```powershell
+python -B -W error -m trading_lab_app.mode_cli show-mode
+python -B -W error -m trading_lab_app.mode_cli list-modes
+python -B -W error -m trading_lab_app.mode_cli explain-mode SYNTHETIC_PAPER
+python -B -W error -m trading_lab_app.mode_cli request-mode RESEARCH --reason "start research"
+python -B -W error -m trading_lab_app.mode_cli transition-history --limit 10
+```
+
+`request-mode` only succeeds for an explicitly allowed transition among
+`OFF`, `RESEARCH`, and `SYNTHETIC_PAPER` (any of the three can always
+return to `OFF`). Requesting any `MT5_*` mode is rejected with a structured
+reason (`MISSING_MT5_ADAPTER`, and additionally `MISSING_LIVE_ARMING` for
+the two automated modes) — this is expected, correct behavior, not an
+error to work around.
+
+## 16.2 How mode affects what starts
+
+**There is exactly one authoritative decision path, with no exception:**
+`ModeService` resolved mode → capability check → paper-service
+construction. No command-line flag constructs or activates a paper service
+outside it — this was corrected after Founder review found the original
+implementation let a CLI flag bypass the state machine.
+
+A mode change made with `mode_cli.py` takes effect the **next time the
+dashboard starts** — the running server resolves its mode once at startup
+and does not poll the mode-state file while it is running (see Known
+Limitations in the Phase 3 contract). At startup:
+
+- `OFF` or `RESEARCH` → the paper engine stays disabled, exactly as
+  Section 2 describes.
+- `SYNTHETIC_PAPER` → the dashboard starts with the committed synthetic
+  demonstration already loaded.
+
+The legacy flags described in Sections 2–3 now route through this same
+path rather than bypassing it:
+
+- `--enable-forward-paper-demo` (deprecated) requests a transition to
+  `SYNTHETIC_PAPER` through `ModeService`, the same way
+  `mode_cli.py request-mode SYNTHETIC_PAPER` does — same audit events, same
+  validation, same atomic persistence. It fails closed (server does not
+  start) if the transition is rejected. It never activates synthetic paper
+  while the authoritative mode remains `OFF` or `RESEARCH`.
+- `--enable-forward-paper-engine` (deprecated) always fails closed with
+  `LEGACY_FORWARD_PAPER_MODE_UNAVAILABLE` before any other setup work,
+  because no Phase 3 mode authorizes it. See Section 3.
+
+`/api/mode-status` and `/api/paper-account` can never disagree about
+whether synthetic paper is active — both are derived from the same
+resolved mode through the same construction function.
+
+## 16.3 Inspecting mode over HTTP (read-only)
+
+```powershell
+$trlMode = Invoke-RestMethod 'http://127.0.0.1:8765/api/mode-status'
+$trlMode | Select-Object current_mode, broker_execution_available, automated_trading_available, live_arming_available
+$trlMode.unavailable_modes
+```
+
+`broker_execution_available`, `automated_trading_available`,
+`live_arming_available`, and `private_remote_access_available` are all
+`False` in every mode this checkpoint can reach. There is no POST, PUT,
+PATCH, or DELETE route for `/api/mode-status` — attempting one returns
+`405` with `Allow: GET, HEAD`, matching every other route in this
+application.
+
+## 16.4 Persisted state location
+
+The mode-state file is `%LOCALAPPDATA%\ALSAKKAF\TradingLab\operating-mode-state-v1.json`,
+written atomically the same way as the forward-paper store (Section 3). It
+never contains a credential, and hand-editing it has no effect beyond
+making the file fail validation — an invalid or unsafe file always resolves
+to `OFF` at the next startup, with the recovery recorded as an audit event.
