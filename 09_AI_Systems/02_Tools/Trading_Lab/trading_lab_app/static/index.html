@@ -24,6 +24,7 @@
   <div class="app-shell">
     <nav class="side-nav" aria-label="Dashboard sections">
       <a href="#overview" aria-current="page">Overview</a>
+      <a href="#paper-desk">Paper desk</a>
       <a href="#market-connection">Market connection</a>
       <a href="#official-news">Official news &amp; events</a>
       <a href="#market-chart">Market chart</a>
@@ -40,7 +41,7 @@
     <main id="main-content" tabindex="-1">
       <section class="hero" aria-labelledby="dashboard-title">
         <div>
-          <p class="eyebrow">TRL-R2-004 · OPTIONAL LOCAL OFFICIAL-SOURCE INFORMATION</p>
+          <p class="eyebrow">TRL-R2-005 · CAUSAL TIMELINE AND FORWARD PAPER FOUNDATION</p>
           <h1 id="dashboard-title">Research clarity,<br><span>without execution risk.</span></h1>
           <p class="hero-copy">A deterministic view of the committed synthetic demonstration, powered locally by the stable Release 1 paper/research kernel.</p>
         </div>
@@ -80,6 +81,39 @@
             <div><span>Reason code</span><code id="reason-code">—</code></div>
             <div><span>Position</span><strong id="position-status">—</strong></div>
           </div>
+        </section>
+
+        <section id="paper-desk" class="section" aria-labelledby="paper-desk-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">FORWARD RESEARCH ACCOUNT</p><h2 id="paper-desk-title">Paper desk</h2></div>
+            <span class="badge badge-warning">PAPER ONLY</span>
+          </div>
+          <p class="disclosure">A local forward-only research projection. It is not a brokerage account, live balance, recommendation, or order.</p>
+          <div id="paper-empty-state" class="state-panel" role="status">No active paper proposal yet. Market research proposals will appear here when the Signal Desk is enabled.</div>
+          <div class="paper-metrics-grid">
+            <article class="metric-card featured"><span>Paper balance</span><strong id="paper-balance">Not enabled</strong><small>synthetic research units when enabled</small></article>
+            <article class="metric-card"><span>Paper equity</span><strong id="paper-equity">Not enabled</strong><small>marked locally</small></article>
+            <article class="metric-card"><span>Daily paper P&amp;L</span><strong id="paper-daily-pnl">Not enabled</strong><small>never live profit</small></article>
+            <article class="metric-card"><span>Current drawdown</span><strong id="paper-drawdown">Not enabled</strong><small>governed paper-account basis</small></article>
+            <article class="metric-card"><span>Open paper risk</span><strong id="paper-open-risk">Not enabled</strong><small>fixed-stop amount</small></article>
+            <article class="metric-card"><span>Active positions</span><strong id="paper-open-positions">0</strong><small>paper positions only</small></article>
+            <article class="metric-card"><span>Completed paper trades</span><strong id="paper-completed-trades">0</strong><small>forward observations only</small></article>
+            <article class="metric-card"><span>Timeline activity</span><strong id="paper-timeline-count">0</strong><small>append-only events</small></article>
+            <article class="metric-card"><span>Risk halt</span><strong id="paper-risk-halt">INACTIVE</strong><small id="paper-risk-halt-reason">No session halt</small></article>
+          </div>
+          <div id="paper-persistence-warning" class="state-panel persistence-warning" role="alert" hidden>Paper state remains valid in memory, but its latest update was not persisted.</div>
+          <details class="paper-expert-details">
+            <summary>Expert timeline and recovery details</summary>
+            <dl class="parameter-list">
+              <div><dt>Account schema</dt><dd id="paper-account-schema">-</dd></div>
+              <div><dt>Projection ID</dt><dd id="paper-projection-id">-</dd></div>
+              <div><dt>Timeline schema</dt><dd id="paper-timeline-schema">-</dd></div>
+              <div><dt>Tail event hash</dt><dd id="paper-tail-hash">-</dd></div>
+              <div><dt>Persistence</dt><dd id="paper-persistence-status">DISABLED</dd></div>
+              <div><dt>Last observation UTC</dt><dd id="paper-last-observation">-</dd></div>
+            </dl>
+          </details>
+          <div class="legal-notice"><strong>PAPER ONLY</strong><span>No broker order, account mutation, automated trading, or real execution path exists.</span></div>
         </section>
 
         <section id="market-connection" class="section" aria-labelledby="market-connection-title">

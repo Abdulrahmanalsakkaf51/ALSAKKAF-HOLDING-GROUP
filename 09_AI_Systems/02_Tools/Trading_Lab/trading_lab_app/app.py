@@ -13,6 +13,11 @@ from .news_service import (
     OfficialNewsConfiguration,
     OfficialNewsService,
 )
+from .paper_service import (
+    DisabledPaperService,
+    ForwardPaperService,
+    build_synthetic_demonstration_service,
+)
 from .server import BIND_HOST, DEFAULT_PORT, create_server
 
 
@@ -100,6 +105,23 @@ def build_parser():
         help="bounded local refresh interval from 300 through 3600 seconds (default: 900)",
     )
     parser.add_argument(
+        "--enable-forward-paper-engine",
+        action="store_true",
+        help=(
+            "enable the local forward paper timeline and projection; "
+            "this never enables broker orders"
+        ),
+    )
+    parser.add_argument(
+        "--enable-forward-paper-demo",
+        action="store_true",
+        help=(
+            "load the committed SYNTHETIC DEMONSTRATION fixture into an in-memory "
+            "paper engine so the dashboard is populated for a rehearsal; never reads "
+            "or writes production paper storage and is not live market data"
+        ),
+    )
+    parser.add_argument(
         "--no-browser",
         action="store_true",
         help="do not open the local dashboard in the default browser",
@@ -113,12 +135,14 @@ def run_server(
     open_browser=True,
     market_data_service=None,
     official_news_service=None,
+    paper_service=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
         port,
         market_data_service=market_data_service,
         official_news_service=official_news_service,
+        paper_service=paper_service,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -150,6 +174,27 @@ def run_server(
         )
     else:
         print("OFFICIAL NEWS DISABLED | STARTUP NETWORK-SILENT")
+    active_paper_service = paper_service or vars(server).get("paper_service")
+    if not isinstance(active_paper_service, (ForwardPaperService, DisabledPaperService)):
+        active_paper_service = DisabledPaperService()
+    if active_paper_service.enabled:
+        if getattr(active_paper_service, "is_synthetic_demonstration", False):
+            print(
+                "FORWARD PAPER ENGINE — SYNTHETIC DEMONSTRATION MODE | "
+                "NOT LIVE MARKET DATA | IN-MEMORY ONLY | NO BROKER ORDERS"
+            )
+        else:
+            print("FORWARD PAPER ENGINE ENABLED | LOCAL TIMELINE | NO BROKER ORDERS")
+    else:
+        print("FORWARD PAPER ENGINE DISABLED | STORAGE NOT CONSTRUCTED")
+        print(
+            "  To enable: trading_lab_app --enable-forward-paper-engine "
+            "(local research timeline)"
+        )
+        print(
+            "  To rehearse: trading_lab_app --enable-forward-paper-demo "
+            "(SYNTHETIC DEMONSTRATION, in-memory only)"
+        )
     print("Local dashboard: {}".format(url))
     print("Press Ctrl+C to stop.")
     try:
@@ -160,12 +205,18 @@ def run_server(
         print("\nShutdown requested.")
     finally:
         try:
-            news_service = getattr(server, "official_news_service", None)
-            if news_service is not None:
-                while news_service.shutdown() is False:
+            active_paper = vars(server).get("paper_service")
+            if active_paper is not None:
+                while active_paper.shutdown() is False:
                     pass
         finally:
-            server.server_close()
+            try:
+                news_service = getattr(server, "official_news_service", None)
+                if news_service is not None:
+                    while news_service.shutdown() is False:
+                        pass
+            finally:
+                server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -192,6 +243,13 @@ def main(argv=None):
             file=sys.stderr,
         )
         return 2
+    if args.enable_forward_paper_engine and args.enable_forward_paper_demo:
+        print(
+            "--enable-forward-paper-engine and --enable-forward-paper-demo "
+            "are mutually exclusive; choose one.",
+            file=sys.stderr,
+        )
+        return 2
     configuration = MT5ReadOnlyConfiguration(
         enabled=args.enable_mt5_read_only,
         symbol=args.mt5_symbol or "XAUUSD",
@@ -204,12 +262,19 @@ def main(argv=None):
         refresh_seconds=args.official_news_refresh_seconds or 900,
     )
     official_news_service = OfficialNewsService(news_configuration)
+    if args.enable_forward_paper_demo:
+        paper_service = build_synthetic_demonstration_service()
+    elif args.enable_forward_paper_engine:
+        paper_service = ForwardPaperService()
+    else:
+        paper_service = DisabledPaperService()
     try:
         return run_server(
             port=args.port,
             open_browser=not args.no_browser,
             market_data_service=market_service,
             official_news_service=official_news_service,
+            paper_service=paper_service,
         )
     except OSError as error:
         print(

@@ -43,8 +43,11 @@ from trading_lab_app import app, capabilities, server, service  # noqa: E402
 
 
 class RunningServer:
+    def __init__(self, **server_kwargs):
+        self.server_kwargs = server_kwargs
+
     def __enter__(self):
-        self.httpd = server.create_server(0)
+        self.httpd = server.create_server(0, **self.server_kwargs)
         self.port = self.httpd.server_address[1]
         self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
         self.thread.start()
@@ -89,7 +92,7 @@ class ImportAndLaunchTests(unittest.TestCase):
                 timeout=20,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
-            self.assertEqual(completed.stdout.strip(), "2.0.0-r2.004")
+            self.assertEqual(completed.stdout.strip(), "2.0.0-r2.005")
 
     def test_no_browser_option_prevents_browser_open(self):
         fake_server = mock.Mock()
@@ -198,6 +201,51 @@ class ImportAndLaunchTests(unittest.TestCase):
             first.server_close()
 
 
+class PaperDemoActivationTests(unittest.TestCase):
+    def test_demo_and_engine_flags_are_mutually_exclusive(self):
+        printed = []
+        with mock.patch(
+            "builtins.print", side_effect=lambda *values, **_options: printed.append(values),
+        ):
+            code = app.main([
+                "--enable-forward-paper-engine", "--enable-forward-paper-demo", "--no-browser",
+            ])
+        self.assertEqual(code, 2)
+        self.assertTrue(any(
+            "mutually exclusive" in " ".join(str(item) for item in values)
+            for values in printed
+        ))
+
+    def test_demo_flag_parses_and_defaults_false(self):
+        parser = app.build_parser()
+        self.assertFalse(parser.parse_args([]).enable_forward_paper_demo)
+        self.assertTrue(
+            parser.parse_args(["--enable-forward-paper-demo"]).enable_forward_paper_demo
+        )
+
+    def test_demo_service_populates_dashboard_over_http(self):
+        paper_service = app.build_synthetic_demonstration_service()
+        with RunningServer(paper_service=paper_service) as local:
+            status, _headers, body = local.request("GET", "/api/paper-account")
+            self.assertEqual(status, 200)
+            account = json.loads(body.decode("utf-8"))
+            status, _headers, body = local.request("GET", "/api/market-timeline")
+            self.assertEqual(status, 200)
+            timeline = json.loads(body.decode("utf-8"))
+        self.assertTrue(account["enabled"])
+        self.assertTrue(account["synthetic_demonstration_values"])
+        self.assertGreater(account["completed_paper_trade_count"], 0)
+        self.assertGreater(timeline["event_count"], 0)
+
+    def test_disabled_state_message_shows_exact_activation_commands(self):
+        from trading_lab_app.paper_service import DisabledPaperService
+
+        message = DisabledPaperService().account_document()["message"]
+        self.assertIn("--enable-forward-paper-engine", message)
+        self.assertIn("--enable-forward-paper-demo", message)
+        self.assertIn("SYNTHETIC DEMONSTRATION", message)
+
+
 class ServiceContractTests(unittest.TestCase):
     def test_demo_result_is_deterministic_and_json_serializable(self):
         first = service.demo_result()
@@ -274,15 +322,16 @@ class ServiceContractTests(unittest.TestCase):
             "Commercial news", "Full-text aggregation", "General web search",
             "Social-media collection", "Broker news", "Sentiment analysis",
             "AI summarization", "Market-impact ranking", "Event-to-price joining",
-            "Signals and recommendations", "Position sizing",
-            "Stop-loss/take-profit calculation", "Paper or live execution",
+            "Signals and recommendations", "Signal-generated position sizing",
+            "Signal-generated stop-loss/take-profit calculation", "Live execution",
             "Cloud synchronization", "Payments, subscriptions and telemetry",
         }
         self.assertEqual(set(manifest["not_implemented"]), expected)
 
     def test_operating_mode_and_three_part_data_boundary_are_consistent(self):
         expected_mode = (
-            "LOCAL_RESEARCH_WITH_OPTIONAL_MT5_READ_ONLY_AND_OFFICIAL_NEWS_METADATA"
+            "LOCAL_RESEARCH_WITH_OPTIONAL_FORWARD_PAPER_TIMELINE_"
+            "MT5_READ_ONLY_AND_OFFICIAL_NEWS_METADATA"
         )
         version = service.version_document()
         manifest = capabilities.capability_manifest()
@@ -292,6 +341,7 @@ class ServiceContractTests(unittest.TestCase):
         self.assertEqual(manifest["operating_mode"], expected_mode)
         self.assertIn("MT5_READ_ONLY", expected_mode)
         self.assertIn("OFFICIAL_NEWS_METADATA", expected_mode)
+        self.assertIn("FORWARD_PAPER_TIMELINE", expected_mode)
         with RunningServer() as local:
             status, _headers, body = local.request("GET", "/api/version")
             self.assertEqual(status, 200)
@@ -313,6 +363,10 @@ class ServiceContractTests(unittest.TestCase):
         self.assertFalse(health["official_news_enabled_by_default"])
         self.assertTrue(health["optional_local_mt5_read_only_data"])
         self.assertTrue(health["optional_exact_official_news_metadata"])
+        self.assertTrue(health["forward_paper_engine_available"])
+        self.assertFalse(health["paper_engine_enabled_by_default"])
+        self.assertTrue(manifest["forward_paper_engine_capability"])
+        self.assertFalse(manifest["paper_engine_enabled_by_default"])
         for closed in (
             "execution_capability", "credential_storage_capability",
             "accounts_capability", "broker_capability",
@@ -352,6 +406,10 @@ class HttpBoundaryTests(unittest.TestCase):
                 status, _, body = local.request("GET", path)
                 self.assertEqual(status, 200)
                 self.assertEqual(json.loads(body.decode("utf-8"))["connection_status"], "MT5_DISABLED")
+            for path in server.PAPER_API_ROUTES:
+                status, _, body = local.request("GET", path)
+                self.assertEqual(status, 200)
+                self.assertFalse(json.loads(body.decode("utf-8"))["enabled"])
 
     def test_static_allowlist_and_directory_traversal_rejection(self):
         with RunningServer() as local:
@@ -396,7 +454,7 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
 
     def test_dashboard_contains_every_required_section_and_safety_label(self):
         for section_id in (
-            "overview", "market-connection", "official-news", "market-chart", "equity", "signals", "strategy",
+            "overview", "paper-desk", "market-connection", "official-news", "market-chart", "equity", "signals", "strategy",
             "reports", "risk", "future-modes", "about",
         ):
             self.assertIn('id="{}"'.format(section_id), self.html)
@@ -408,6 +466,8 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
             "ASSISTED_EXECUTION_MODE", "DISABLED · UNAUTHORIZED",
             "AUTOMATED_EXECUTION_MODE", "PROHIBITED · UNAVAILABLE",
             "future optional adapter",
+            "PAPER ONLY",
+            "No active paper proposal yet. Market research proposals will appear here when the Signal Desk is enabled.",
         ):
             self.assertIn(wording, self.html)
 
@@ -449,6 +509,10 @@ class DashboardAndNegativeSurfaceTests(unittest.TestCase):
         self.assertEqual(set(server.NEWS_API_ROUTES), {
             "/api/news-health", "/api/news-sources", "/api/news-items",
             "/api/economic-events",
+        })
+        self.assertEqual(set(server.PAPER_API_ROUTES), {
+            "/api/paper-account", "/api/paper-positions", "/api/paper-history",
+            "/api/market-timeline", "/api/paper-health",
         })
         for path in APP_DIRECTORY.glob("*.py"):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))

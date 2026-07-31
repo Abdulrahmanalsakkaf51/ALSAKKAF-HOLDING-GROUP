@@ -12,6 +12,7 @@ from . import APPLICATION_NAME
 from . import service
 from .mt5_service import MarketDataService
 from .news_service import OfficialNewsService
+from .paper_service import DisabledPaperService
 
 
 BIND_HOST = "127.0.0.1"
@@ -50,6 +51,14 @@ NEWS_API_ROUTES = {
     "/api/news-sources": service.news_sources_document,
     "/api/news-items": service.news_items_document,
     "/api/economic-events": service.economic_events_document,
+}
+
+PAPER_API_ROUTES = {
+    "/api/paper-account": service.paper_account_document,
+    "/api/paper-positions": service.paper_positions_document,
+    "/api/paper-history": service.paper_history_document,
+    "/api/market-timeline": service.market_timeline_document,
+    "/api/paper-health": service.paper_health_document,
 }
 
 SECURITY_HEADERS = {
@@ -201,6 +210,21 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     include_body,
                 )
             return
+        paper_function = PAPER_API_ROUTES.get(decoded_path)
+        if paper_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    paper_function(self.server.paper_service),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_PAPER_ENGINE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
@@ -226,7 +250,11 @@ class ApplicationHandler(BaseHTTPRequestHandler):
     def do_HEAD(self):
         raw_path = urlsplit(self.path).path
         decoded_path = unquote(raw_path)
-        if decoded_path in MARKET_API_ROUTES or decoded_path in NEWS_API_ROUTES:
+        if (
+            decoded_path in MARKET_API_ROUTES
+            or decoded_path in NEWS_API_ROUTES
+            or decoded_path in PAPER_API_ROUTES
+        ):
             self._handle_read(include_body=False)
             return
         self._method_not_allowed()
@@ -236,7 +264,11 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         decoded_path = unquote(urlsplit(self.path).path)
         allowed_methods = (
             "GET, HEAD"
-            if decoded_path in MARKET_API_ROUTES or decoded_path in NEWS_API_ROUTES
+            if (
+                decoded_path in MARKET_API_ROUTES
+                or decoded_path in NEWS_API_ROUTES
+                or decoded_path in PAPER_API_ROUTES
+            )
             else "GET"
         )
         self._send_bytes(
@@ -652,6 +684,7 @@ def create_server(
     handler_class=ApplicationHandler,
     market_data_service=None,
     official_news_service=None,
+    paper_service=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -659,4 +692,5 @@ def create_server(
     local_server = LocalApplicationServer((BIND_HOST, port), handler_class)
     local_server.market_data_service = market_data_service or MarketDataService()
     local_server.official_news_service = official_news_service or OfficialNewsService()
+    local_server.paper_service = paper_service or DisabledPaperService()
     return local_server

@@ -1,4 +1,4 @@
-"""Closed capability manifest including narrow TRL-R2-003 MT5 read-only data."""
+"""Closed capability manifest including the local forward paper engine."""
 
 from . import APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MODE
 from .news_service import STABLE_HEALTH_CODES
@@ -29,6 +29,13 @@ IMPLEMENTED = (
     "Official source health and freshness",
     "Localhost official-news and economic-event APIs",
     "Accessible official-news dashboard presentation",
+    "Append-only causal market-information timeline",
+    "Deterministic forward paper account and position projection",
+    "Forward-only entry-zone paper fills",
+    "Fixed-stop and TP1-TP4 partial paper accounting",
+    "Governed hard paper-risk controls",
+    "Atomic local paper timeline storage and deterministic recovery",
+    "Read-only localhost paper desk APIs and beginner dashboard",
 )
 
 NOT_IMPLEMENTED = (
@@ -68,9 +75,9 @@ NOT_IMPLEMENTED = (
     "Market-impact ranking",
     "Event-to-price joining",
     "Signals and recommendations",
-    "Position sizing",
-    "Stop-loss/take-profit calculation",
-    "Paper or live execution",
+    "Signal-generated position sizing",
+    "Signal-generated stop-loss/take-profit calculation",
+    "Live execution",
     "Cloud synchronization",
     "Payments, subscriptions and telemetry",
 )
@@ -85,6 +92,7 @@ def capability_manifest():
         "paper_research_only": True,
         "data_boundary": (
             "COMMITTED_SYNTHETIC_DEFAULT; "
+            "OPTIONAL_OPERATOR_ENABLED_LOCAL_FORWARD_PAPER_TIMELINE; "
             "OPTIONAL_OPERATOR_ENABLED_LOCAL_MT5_READ_ONLY; "
             "OPTIONAL_OPERATOR_ENABLED_EXACT_OFFICIAL_NEWS_METADATA"
         ),
@@ -113,6 +121,10 @@ def capability_manifest():
             "live_market_data_capability": "No external or centrally managed live-data service",
             "mt5_capability": "No unrestricted MT5 account or trading integration",
         },
+        "legacy_forward_paper_portfolio_service_meaning": (
+            "No external, shared, multi-user, broker-backed, or live portfolio service; "
+            "the implemented forward paper engine is an isolated local projection"
+        ),
         "local_mt5_read_only_connector_capability": True,
         "local_mt5_tick_and_bar_normalization_capability": True,
         "local_mt5_symbol_specification_capability": True,
@@ -132,6 +144,20 @@ def capability_manifest():
         "official_news_sentiment_capability": False,
         "official_news_market_impact_capability": False,
         "official_news_event_price_join_capability": False,
+        "forward_paper_engine_capability": True,
+        "causal_market_timeline_capability": True,
+        "paper_account_projection_capability": True,
+        "paper_position_projection_capability": True,
+        "paper_entry_zone_fill_capability": True,
+        "paper_fixed_stop_tp1_tp4_capability": True,
+        "paper_engine_enabled_by_default": False,
+        "paper_storage_constructed_when_disabled": False,
+        "signal_generation_capability": False,
+        "trade_recommendation_capability": False,
+        "broker_execution_capability": False,
+        "real_order_capability": False,
+        "account_mutation_capability": False,
+        "automated_trading_capability": False,
         "official_news_stable_health_reason_codes": list(STABLE_HEALTH_CODES),
         "order_proposal_capability": False,
         "cloud_backend_capability": False,

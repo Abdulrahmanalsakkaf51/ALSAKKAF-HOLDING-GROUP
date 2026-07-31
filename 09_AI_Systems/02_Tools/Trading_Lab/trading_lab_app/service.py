@@ -9,6 +9,7 @@ from . import APPLICATION_NAME, APPLICATION_VERSION, CHECKPOINT_ID, OPERATING_MO
 from .capabilities import capability_manifest
 from .mt5_service import disabled_service
 from .news_service import disabled_service as disabled_news_service
+from .paper_service import disabled_service as disabled_paper_service
 from .strategy_registry import load_registry
 
 
@@ -69,6 +70,14 @@ def health_document():
         "mt5_enabled_by_default": False,
         "optional_exact_official_news_metadata": True,
         "official_news_enabled_by_default": False,
+        "forward_paper_engine_available": True,
+        "paper_engine_enabled_by_default": False,
+        "signal_generation": False,
+        "trade_recommendation": False,
+        "broker_execution": False,
+        "real_orders": False,
+        "account_mutation": False,
+        "automated_trading": False,
     }
 
 
@@ -88,6 +97,15 @@ def version_document():
             "windows": "FIRST_TARGET; SOURCE-LAUNCH VALIDATED",
             "macos": "ARCHITECTURALLY_PORTABLE; NOT TESTED",
             "linux": "ARCHITECTURALLY_PORTABLE; NOT TESTED",
+        },
+        "paper_contract_schemas": {
+            "timeline": "TRL_MARKET_TIMELINE.v1",
+            "timeline_event": "TRL_TIMELINE_EVENT.v1",
+            "store": "TRL_FORWARD_PAPER_STORE.v1",
+            "proposal": "TRL_PAPER_PROPOSAL.v1",
+            "account": "TRL_PAPER_ACCOUNT.v1",
+            "position": "TRL_PAPER_POSITION.v1",
+            "health": "TRL_PAPER_HEALTH.v1",
         },
     }
 
@@ -126,6 +144,26 @@ def news_items_document(news_service=None):
 def economic_events_document(news_service=None):
     active_service = news_service or disabled_news_service()
     return active_service.economic_events_document()
+
+
+def paper_account_document(paper_service=None):
+    return (paper_service or disabled_paper_service()).account_document()
+
+
+def paper_positions_document(paper_service=None):
+    return (paper_service or disabled_paper_service()).positions_document()
+
+
+def paper_history_document(paper_service=None):
+    return (paper_service or disabled_paper_service()).history_document()
+
+
+def market_timeline_document(paper_service=None):
+    return (paper_service or disabled_paper_service()).timeline_document()
+
+
+def paper_health_document(paper_service=None):
+    return (paper_service or disabled_paper_service()).health_document()
 
 
 def strategy_registry_document():

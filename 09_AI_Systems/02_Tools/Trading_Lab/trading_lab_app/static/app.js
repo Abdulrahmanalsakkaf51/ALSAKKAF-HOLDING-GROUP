@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -26,6 +26,52 @@ function renderOverview(result, market) {
   setText("outcome", result.outcome); setText("reason-code", result.reason_code);
   setText("position-status", result.open_position ? "OPEN · MARKED" : "FLAT");
   setText("data-freshness", `${market.data_as_of} · ${market.freshness}`);
+}
+
+function renderPaperDesk(bundle) {
+  const empty = $("paper-empty-state");
+  const warning = $("paper-persistence-warning");
+  warning.hidden = true;
+  if (!bundle || bundle.error) {
+    empty.textContent = "The local paper desk is unavailable. No paper or broker action was taken.";
+    setText("paper-persistence-status", "UNAVAILABLE");
+    return;
+  }
+  const { account, positions, timeline, health } = bundle;
+  empty.textContent = account.message;
+  empty.hidden = positions.position_count > 0;
+  if (account.enabled && account.marked_equity != null) {
+    setText("paper-balance", number(account.cash, 2));
+    setText("paper-equity", number(account.marked_equity, 2));
+    setText("paper-daily-pnl", signed(account.daily_paper_pnl));
+    setText("paper-drawdown", `${number(account.current_drawdown_percent, 2)}%`);
+    setText("paper-open-risk", number(account.open_paper_risk_amount, 2));
+    pnlClass("paper-daily-pnl", account.daily_paper_pnl);
+  }
+  setText("paper-open-positions", account.open_position_count);
+  setText("paper-completed-trades", account.completed_paper_trade_count);
+  setText("paper-timeline-count", timeline.event_count);
+  setText("paper-risk-halt", health.risk_halt ? "HALTED" : "INACTIVE");
+  setText("paper-risk-halt-reason", health.risk_halt_reason || "No session halt");
+  setText("paper-account-schema", account.schema_version);
+  setText("paper-projection-id", account.projection_id);
+  setText("paper-timeline-schema", timeline.timeline_schema_version);
+  setText("paper-tail-hash", timeline.tail_event_hash);
+  setText("paper-persistence-status", health.persistence_status);
+  setText("paper-last-observation", account.last_observation_at_utc);
+  if (health.persistence_status === "WRITE_FAILED_IN_MEMORY_VALID") warning.hidden = false;
+}
+
+async function loadPaperDesk() {
+  try {
+    const [account, positions, timeline, health] = await Promise.all([
+      getJson("/api/paper-account"),
+      getJson("/api/paper-positions"),
+      getJson("/api/market-timeline"),
+      getJson("/api/paper-health"),
+    ]);
+    return { account, positions, timeline, health };
+  } catch (error) { return { error: error.message }; }
 }
 
 function chart(canvasId, tooltipId, rows, series, options = {}) {
@@ -268,7 +314,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
+  renderOverview(state.result, state.market); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -277,7 +323,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews()]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }
