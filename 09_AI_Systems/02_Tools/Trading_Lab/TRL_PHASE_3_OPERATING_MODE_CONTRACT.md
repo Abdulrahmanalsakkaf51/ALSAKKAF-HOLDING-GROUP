@@ -70,6 +70,46 @@ this checkpoint, their capability grants are never actually exercised —
 they exist so Phase 5/6/9 can extend the *same* matrix instead of building
 a second one.
 
+### 3.1 Amendment (TRL-R2-009, contract-authoring checkpoint): `manual_basket_execution`
+
+*Added while authoring `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`
+(Phase 6 contract-authoring checkpoint). This is the one narrow,
+Founder-approved capability change that contract requires; every other
+rule in this document is unchanged. No code implements this amendment yet
+— see the R2-009 contract Section 6 for the full rationale.*
+
+A seventeenth governed capability is added: `manual_basket_execution`.
+
+**The existing, broader `basket_execution` capability is not widened by
+this amendment and remains reserved exactly as before** — granted only to
+the still-future, still-unavailable `MT5_DEMO_AUTOMATED` and
+`MT5_LIVE_AUTOMATED` rows. `manual_basket_execution` is granted **only**
+to `MT5_DEMO_MANUAL`:
+
+| Mode | Capabilities granted (amended) |
+|---|---|
+| `MT5_DEMO_MANUAL` (available) | `mt5_read_only_access`, `mt5_order_check`, `mt5_order_send`, `manual_broker_execution`, `manual_basket_execution`, `emergency_controls`, `report_export` |
+
+No other mode's row changes: `OFF`, `RESEARCH`, `SYNTHETIC_PAPER`,
+`MT5_DEMO_AUTOMATED`, `MT5_LIVE_MANUAL`, and `MT5_LIVE_AUTOMATED` are not
+granted `manual_basket_execution` under any circumstance unless a later,
+separately Founder-approved contract changes that decision.
+
+`manual_basket_execution` is, by definition and by every safeguard this
+document and `TRL_R2_007_MT5_EXECUTION_CONTRACT.md` already establish for
+`MT5_DEMO_MANUAL`: manual (every basket child send still requires its own
+fresh local operator confirmation, per the R2-009 contract Section 13),
+demo-only (rejects a live account exactly as every other `MT5_DEMO_MANUAL`
+action already does), locally confirmed, non-automated, non-live, subject
+to every existing Phase 5 MT5 safeguard (Section 3/4/5–8 of R2-007), and
+additionally subject to every rule in
+`TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`. Granting this
+capability to `MT5_DEMO_MANUAL` does not, by itself, activate, arm, or
+otherwise change the availability of `MT5_DEMO_AUTOMATED`,
+`MT5_LIVE_MANUAL`, or `MT5_LIVE_AUTOMATED` — Section 2's availability
+table, Section 4's transition matrix, and Section 6's startup-safety
+downgrade for those three modes are all unchanged by this amendment.
+
 ## 4. Exact transition matrix
 
 ```

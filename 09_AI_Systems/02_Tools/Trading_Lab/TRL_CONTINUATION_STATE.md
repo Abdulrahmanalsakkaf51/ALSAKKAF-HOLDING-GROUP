@@ -18,91 +18,155 @@ session end or when session capacity drops below ~15%.
 ## Current state
 
 - **Active branch:** `codex/TRL-R2-full-vision-execution` (pushed to origin)
-- **Current HEAD:** `5a9570aa56752fce402054f5c07ce360883c7273` (Phase 4 commit
-  "Implement TRL-R2-006 governed signal intelligence"), plus an uncommitted
-  Phase 5 diff (MT5 execution adapter demo-manual slice, TRL-R2-007)
-- **Phase 4 tracking closure:** Phase 4 is complete, committed, and pushed at
-  `5a9570a`. Local HEAD and `origin/codex/TRL-R2-full-vision-execution` match
-  exactly.
-- **Current checkpoint:** Phase 5 (TRL-R2-007 MT5 execution adapter,
-  `MT5_DEMO_MANUAL` demo-manual slice only), including a Founder-review
-  correction pass. Implements a governed three-tier adapter (disabled/fake/
-  real MetaTrader5 boundary), an append-only hash-chained execution journal
-  with cross-process/in-process locking around every search-then-persist
-  critical section, an authoritative execution service (full independent
-  proposal revalidation, deterministic order-intent identity with
-  lookup-before-create idempotency, `order_check` gate, mandatory local
-  manual-confirmation gate, `order_send` gate with durable duplicate
-  protection), a local-only CLI, and a read-only HTTP/dashboard surface.
-  `MT5_DEMO_MANUAL` was already represented but unavailable in
-  `mode_service.py`; three targeted changes make it available (now reachable
-  only from/to `OFF`, and correctly restart-persistent) while leaving the
-  three automated/live MT5 modes unavailable exactly as before. SMA-001 and
-  FIB-001 remain independently blocked before reaching the adapter. A
-  Founder-review manual rehearsal found and this pass corrected a genuine
-  cross-process race (two separate processes could each create a distinct,
-  independently sendable order intent against one shared durable journal);
-  the fix and its verification are recorded in
-  `TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` Section 20. Tested (762/762 twice)
-  and manually rehearsed twice (original + correction), including real
-  separate-process CLI persistence, a real (fail-closed, no-terminal-running)
-  `RealMT5ExecutionAdapter` dependency check, and genuine two-process
-  concurrency races (creation, send, lock timeout, journal corruption).
-  Awaiting Founder review and commit approval. Basket execution (Phase 6),
-  live-automation arming (Phase 9), and reconciliation (Phase 10) are
-  explicitly out of scope and were not started.
-- **Completed phases:** Phase 0; Phase 1; Phase 2; Phase 3; Phase 4
-- **Active phase:** Phase 5 — MT5 execution adapter, demo-manual slice
-  (implementation, tests, docs, rehearsal, and Founder-review correction
-  complete; not yet committed)
-- **Exact changed/new file total:** 29 (14 new + 15 modified + 0 deleted); 0
-  files currently staged; nothing committed or pushed for Phase 5; committed
-  HEAD remains `5a9570a`
-- **Exact new files (untracked, this Phase 5 diff, not yet committed — 14 files):**
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_007_MT5_EXECUTION_EVIDENCE.md`
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_adapter.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_cli.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_concurrency.py` (Founder-review correction: two-genuine-process races)
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_data.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_http.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_journal.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_journal_lock.py` (Founder-review correction: lock-safety tests)
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_service.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_adapter.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_cli.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_data.py`
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_journal.py` (Founder-review correction: cross-process/in-process locking added)
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_service.py` (Founder-review correction: critical sections now lock-guarded)
-- **Exact files modified (tracked, uncommitted, this Phase 5 diff — 15 files):**
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md`
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md`
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json` (this document's machine-readable twin)
+- **Current HEAD:** `49b8f743b2e4db967670df35cbb11d2a4ad7f7fa` (Phase 5 commit
+  "Implement TRL-R2-007 governed MT5 execution adapter"). Local HEAD, the
+  upstream-tracking ref, and `origin/codex/TRL-R2-full-vision-execution`
+  match exactly.
+- **Phase 5 tracking closure:** Phase 5 (TRL-R2-007 MT5 execution adapter,
+  `MT5_DEMO_MANUAL` demo-manual slice, including the Founder-review
+  cross-process-locking correction) is complete, committed, and pushed at
+  `49b8f74`.
+- **Current checkpoint:** Phase 6 contract-authoring checkpoint
+  (TRL-R2-009), now including four Founder correction passes on top of
+  the original draft. The first Phase 6
+  *implementation* attempt correctly stopped fail-closed and reported
+  `PHASE 6 CONTRACT NOT FOUND` — no governing contract existed, and a
+  further conflict was identified independently: the committed Phase 3
+  capability matrix granted the broad `basket_execution` capability only
+  to the still-future `MT5_DEMO_AUTOMATED`/`MT5_LIVE_AUTOMATED` modes, not
+  to `MT5_DEMO_MANUAL`. A first contract draft resolved both (R2-009
+  authored; narrow `manual_basket_execution` amendment recorded in
+  `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1), but that draft
+  described basket children as directly extending the closed Phase 5
+  `TRL_MT5_ORDER_INTENT.v1` schema and its lookup-key functions, used a
+  nonce in the basket ID, left the confirmation code entropy/lifecycle and
+  child-check freshness underspecified, and left `send-basket-child`'s
+  child-selection ambiguous. The Founder correction pass rewrote the
+  contract to: (1) introduce six separate, independently versioned basket
+  schemas (`TRL_BASKET_PLAN.v1`, `TRL_BASKET_CHILD_INTENT.v1`,
+  `TRL_BASKET_CHECK_RESULT.v1`, `TRL_BASKET_CONFIRMATION.v1`,
+  `TRL_BASKET_CHILD_EXECUTION_RESULT.v1`, `TRL_BASKET_STATUS.v1`) that
+  reference the Phase 5 parent intent without modifying it (Section 1.1);
+  (2) make `basket_id`/`basket_child_id` fully deterministic with no nonce
+  anywhere in the basket layer; (3) define an exact confirmation challenge
+  (`sha256("TRL-BASKET-CONFIRM.v1\n"+basket_id+"\n"+canonical_basket_plan_hash)[:16]`,
+  entered as `CONFIRM-BASKET <16-hex>`) and a precise multi-child-send
+  authorization lifecycle with explicit invalidation conditions; (4)
+  reference the existing Phase 5 `CHECK_FRESHNESS_SECONDS = 120` /
+  `CONFIRMATION_LIFETIME_SECONDS = 300` constants (no new duration
+  invented) with a three-point freshness revalidation rule; (5) replace
+  the ambiguous per-child-ID send command with an argument-free
+  `send-basket-next`, service-computed only; and (6) expand the state
+  machine to distinguish `REJECTED`/`BLOCKED`/`FAILED`/
+  `PARTIALLY_COMPLETED` truthfully, with `reconciliation_required` as a
+  derived flag. A third, final lifecycle correction then fixed a genuine
+  confirmation-challenge contradiction the second draft still had: the
+  challenge formula bound only `basket_id` + `canonical_basket_plan_hash`,
+  both of which never change for a basket's lifetime, so it would have
+  silently reused the same "single-use" challenge across two different
+  confirmation cycles. The contract now defines a `confirmation_basis_hash`
+  (Section 13.1) that changes whenever the filled-child set or the
+  required-check set changes, a matching deterministic
+  `confirmation_request_id`, and precise reuse-vs-new-basis behavior. It
+  also corrects a second issue: the second draft's stale-check rule would
+  have reset an already-`FILLED` child back to a pre-check state; Section
+  24.2 now explicitly distinguishes zero-prior-fills staleness from
+  post-fill staleness, permanently preserving every `FILLED` child's
+  record and returning the basket to `CHECK_REQUIRED` (never
+  `PARTIALLY_COMPLETED`, now strictly a permanent-stop status) while
+  `TRL_BASKET_STATUS.v1` keeps reporting truthful progress
+  (`filled_child_count`/`completed_quantity`). Third, the child-state
+  vocabulary was corrected to the Founder's exact 11-value list —
+  `CANCELLED` and child-level `AWAITING_CONFIRMATION` removed (Section
+  14.5) — and the reason-code/event vocabularies were renamed for exact,
+  duplicate-free final names
+  (`BASKET_JOURNAL_INTEGRITY_UNCERTAIN`/`BASKET_EXECUTION_LOCK_UNAVAILABLE`/
+  `BASKET_PARTIALLY_COMPLETED`/`BASKET_COMPLETED`). A fourth, final
+  correction then fixed a remaining flaw in that same third pass's own
+  fix: an expired-but-unaccepted confirmation request could be reissued
+  using the identical `confirmation_basis_hash`-derived
+  `confirmation_request_id` and `challenge_hex`, only replacing its
+  timestamps — meaning an expired challenge could become valid again upon
+  reissue. Confirmation-*basis* identity (the execution-authority
+  snapshot) is now separated from confirmation-*cycle* identity (a new,
+  durable, monotonic, never-reused `confirmation_cycle_number`, Section
+  13.1a); a cycle's own fixed timestamps and number are folded into both
+  `confirmation_request_id` and `challenge_hex` (Section 13.1b–13.1c), so
+  every cycle — including a same-basis reissue after expiry — produces a
+  genuinely unique challenge. An expired or invalidated confirmation
+  record is now explicitly permanently immutable and never reactivated;
+  `confirm-basket` resolves an entered challenge against cycle history in
+  exact precedence order (current cycle → this basket's own expired cycle
+  → this basket's own invalidated cycle → wrong request → mismatch), so an
+  old challenge always returns `BASKET_CONFIRMATION_EXPIRED` specifically
+  rather than ever being accepted merely because a newer cycle exists. A
+  new `BASKET_CONFIRMATION_EXPIRED` journal event and a renamed
+  `BASKET_CONFIRMATION_WRONG_REQUEST` reason code (replacing
+  `BASKET_CONFIRMATION_WRONG_BASKET`) were added. A fifth, final
+  correction then found that the fourth pass's own basis design still
+  contained a genuine contradiction: `confirmation_basis_hash` bound
+  `ordered_filled_child_ids`/`next_eligible_child_id` as **live** values,
+  yet the contract also claimed one accepted confirmation authorizes the
+  *entire* sequential send of remaining children — since an ordinary
+  successful fill changes both live values, the send-time check as written
+  would have wrongly rejected every child past the first one sent under a
+  cycle. The confirmation basis is now a **fixed authorization checkpoint**
+  computed once at request time: `authorized_prior_filled_child_ids`
+  (immutable pre-cycle snapshot), `authorized_remaining_child_ids` (the
+  complete unsent set this cycle may authorize sequentially — a child
+  stays listed even after it fills), and `authorized_start_child_id`
+  (informational only, not required to track the live next child). A child
+  reaching `FILLED` no longer invalidates the authorization, changes the
+  basis, or requires reconfirmation — only an explicit invalidation
+  condition (stale check, account/plan mismatch, rejection, uncertainty,
+  terminal state, integrity loss) does. Section 26's send-time gate now
+  checks live-next-child *membership* in `authorized_remaining_child_ids`
+  rather than exact equality against a frozen field. A wrong
+  `confirm-basket` entry was also clarified as a `BASKET_CONFIRMATION_REJECTED`
+  attempt-level event only — never a competing request, never a
+  `"REJECTED"` request-lifecycle status.
+  `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1 was reviewed after
+  each pass and needed no change (its cross-references are section-number
+  only and remain valid). The Founder approved this contract-authoring
+  checkpoint and authorized a local commit of exactly these 7 files. This
+  checkpoint remains documentation-only: no Python, JavaScript, HTML, CSS,
+  or test file was changed; no Phase 6 source module exists; the checkpoint
+  is locally committed and not yet pushed.
+- **Completed phases:** Phase 0; Phase 1; Phase 2; Phase 3; Phase 4; Phase 5
+- **Active phase:** Phase 6 — contract-authoring checkpoint complete and
+  **Founder-approved** (`TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`,
+  through four Founder correction passes; the narrow
+  `manual_basket_execution` Phase 3 amendment). This checkpoint's 7 files
+  are the Phase 6 contract-authoring local commit; Phase 6 *implementation*
+  has not started and awaits a separate future checkpoint; remote push of
+  this contract-authoring commit is pending separate Founder approval.
+- **Exact changed/new file total (this contract-authoring checkpoint):** 7
+  (1 new + 6 modified + 0 deleted) — this checkpoint's own local commit;
+  not yet pushed
+- **Exact new file:**
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`
+- **Exact files modified (tracked, uncommitted):**
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` (new Section 3.1: `manual_basket_execution` capability amendment)
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md` (Phase 5 row closed out as committed/pushed; Phase 6 row updated)
   - `09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md` (this document)
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json` (this document's machine-readable twin)
   - `09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md`
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md`
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_007_MT5_EXECUTION_CONTRACT.md` (Status line only — Phase 5 implements a slice of it, not a substantive content change)
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_operating_mode.py` (3 assertions updated: MT5_DEMO_MANUAL is now available/restart-persistent; the 3 automated/live modes are unaffected)
-  - `09_AI_Systems/02_Tools/Trading_Lab/test_signal_intelligence.py` (1 assertion updated: MT5_DEMO_MANUAL resolves to a disabled signal service rather than raising)
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/app.py` (execution-adapter/service construction path, mirroring the paper/signal builder pattern)
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_service.py` (MT5_DEMO_MANUAL admitted; new `AUTOMATED_OR_LIVE_MT5_MODES` restart-safety subset)
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/server.py` (read-only `EXECUTION_API_ROUTES`)
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/service.py` (execution status/journal document wrappers)
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/app.js` (MT5 execution dashboard panel, no innerHTML)
-  - `09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html` (MT5 execution dashboard panel; corrected stale "no MT5 adapter" notice)
-- **Exact tests last run:** `python -B -W error -m unittest discover -s . -p "test_*.py"` from the Trading_Lab directory, run twice
-- **Exact test results:** 762/762 passing both runs (569 pre-existing + 191 new Phase 5 tests [166 original + 25 Founder-review-correction] + 2 net-new Phase 3 tests added while correcting 3 stale assertions); 0 failures, 0 errors
-- **Active processes:** None. Manual rehearsal performed twice against an isolated temporary `LOCALAPPDATA`/temp directory using the real `mode_cli`/`mt5_execution_cli` entry points as separate process invocations, including one real (fail-closed) `RealMT5ExecutionAdapter` dependency/terminal check and genuine two-process concurrency races (creation, send, lock timeout, journal corruption). Port confirmed clear after every stop.
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md` (SMA-001/FIB-001 rows extended to note they also gate Phase 6 basket construction)
+- **Exact tests last run:** None this checkpoint — no source or test file
+  was authorized to change; the 762-test baseline (Phase 5, `49b8f74`) is
+  unaffected and was not re-run
+- **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
-- **Known defects:** None outstanding. One was found and corrected during Founder review this checkpoint (cross-process execution-locking race, `TRL_DECISION_LOG.md` entry 2026-08-01-011) — see `TRL_BLOCKERS.md` and `TRL_DECISION_LOG.md`
-- **External prerequisites (program-wide; Phase 5 adds none new, narrows one):**
+- **Known defects:** None outstanding
+- **External prerequisites (program-wide; unchanged by this checkpoint):**
   - MT5 demo account fingerprint (login/company/server) for real order_check/order_send rehearsal — not provided; `ACCOUNT_UNAVAILABLE` is the correct fail-closed outcome (`TRL_BLOCKERS.md`)
   - MT5 live account fingerprint (company/server/login) — not provided
   - Private HTTPS tunnel (Tailscale or equivalent) for online exposure — not confirmed installed/configured
   - TradingView webhook signing secret / allowlist — not provided
-  - FIB-001 exact numeric parameters — not provided; blocker remains active and independently re-enforced by Phase 5 (`TRL_BLOCKERS.md`)
-  - SMA-001 exact execution-geometry parameters — not provided; blocker remains active and independently re-enforced by Phase 5's own `EXECUTION_GEOMETRY_APPROVED_STRATEGIES` allowlist (`TRL_BLOCKERS.md`)
-- **Next command:** Present the Phase 5 diff (including the Phase 4 tracking closure and the Founder-review concurrency correction) to the Founder for review and commit approval; do not begin Phase 6 until that commit exists
-- **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan all to be run immediately before proposing the commit
+  - FIB-001 exact numeric parameters — not provided; blocker remains active, now also independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
+  - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, now also independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
+- **Next command:** Obtain separate Founder approval to push this contract-authoring checkpoint's commit to `origin/codex/TRL-R2-full-vision-execution`; do not begin Phase 6 *implementation* until a further, separate Founder instruction authorizes it
+- **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan were run before this checkpoint's local commit; re-run the same set before any future push
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`
 

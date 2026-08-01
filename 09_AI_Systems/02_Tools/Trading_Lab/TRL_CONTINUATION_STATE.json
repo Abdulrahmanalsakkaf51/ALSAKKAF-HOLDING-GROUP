@@ -1,94 +1,116 @@
 {
   "active_branch": "codex/TRL-R2-full-vision-execution",
-  "current_head": "5a9570aa56752fce402054f5c07ce360883c7273",
-  "current_checkpoint": "Phase 4 complete, committed, and pushed at 5a9570a. Phase 5 (TRL-R2-007 MT5 execution adapter, MT5_DEMO_MANUAL demo-manual slice only) implemented and Founder-review corrected: three-tier adapter (disabled/fake/real), append-only hash-chained execution journal with cross-process/in-process locking around every search-then-persist critical section, authoritative execution service with full independent proposal revalidation, deterministic order-intent identity with lookup-before-create idempotency, order_check gate, mandatory local manual-confirmation gate, order_send gate with durable duplicate protection, local-only CLI, read-only HTTP/dashboard. MT5_DEMO_MANUAL admitted in mode_service.py (reachable only from/to OFF, correctly restart-persistent); the three automated/live MT5 modes remain unavailable. SMA-001 and FIB-001 remain independently blocked. A genuine cross-process execution-locking race was found during Founder review and corrected before commit. Tested (762/762 twice) and manually rehearsed twice. Awaiting Founder review and commit approval.",
-  "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3", "Phase 4"],
-  "active_phase": "Phase 5 - MT5 execution adapter, demo-manual slice (implementation, tests, docs, rehearsal, and Founder-review correction complete; not yet committed)",
-  "phase_4_tracking_closure": {
+  "current_head": "49b8f743b2e4db967670df35cbb11d2a4ad7f7fa",
+  "current_checkpoint": "Phase 6 contract-authoring checkpoint (TRL-R2-009), including four Founder correction passes on top of the original draft (see TRL_DECISION_LOG.md entries 012-016 for full detail). Summary of the most recent (fifth) pass: the fourth draft's confirmation_basis_hash bound ordered_filled_child_ids/next_eligible_child_id as live values, while the contract also claimed one accepted confirmation authorizes the entire sequential send of remaining children - since an ordinary successful fill changes both live values, the send-time check as written would have wrongly rejected every child past the first one sent under a cycle. The confirmation basis is now a fixed authorization checkpoint computed once at request time: authorized_prior_filled_child_ids (immutable pre-cycle snapshot), authorized_remaining_child_ids (the complete unsent set this cycle may authorize sequentially, staying listed even after a child fills), and authorized_start_child_id (informational only). A child reaching FILLED no longer invalidates the authorization, changes the basis, or requires reconfirmation - only an explicit invalidation condition does. Section 26's send-time gate now checks live-next-child membership in authorized_remaining_child_ids rather than exact equality against a frozen field. A wrong confirm-basket entry was clarified as a BASKET_CONFIRMATION_REJECTED attempt-level event only, never a competing request or a REJECTED request-lifecycle status. Documentation-only checkpoint throughout: no Python/JavaScript/HTML/CSS/test file changed; no Phase 6 source module exists. The Founder approved this checkpoint and authorized a local commit of exactly these 7 files; the checkpoint is locally committed and not yet pushed.",
+  "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3", "Phase 4", "Phase 5"],
+  "active_phase": "Phase 6 - contract-authoring checkpoint complete and Founder-approved (TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md through four Founder correction passes; narrow manual_basket_execution Phase 3 amendment). This checkpoint is locally committed; Phase 6 implementation itself has not started and awaits a separate future checkpoint; remote push of this contract-authoring commit is pending separate Founder approval.",
+  "phase_5_tracking_closure": {
     "status": "complete_committed_pushed",
-    "commit": "5a9570aa56752fce402054f5c07ce360883c7273",
+    "commit": "49b8f743b2e4db967670df35cbb11d2a4ad7f7fa",
     "verified_local_remote_match": true
   },
-  "phase_5_scope_notes": [
-    "demo_manual_mode_only_no_live_no_automated",
-    "single_attempt_per_intent_no_repriced_retry",
-    "no_basket_execution_phase_6",
-    "no_automatic_reconciliation_phase_10",
-    "entry_zone_must_be_a_collapsed_exact_price_or_fails_closed"
-  ],
-  "founder_review_correction": {
-    "defect_found": "cross_process_execution_locking_race",
-    "description": "build_order_intent and confirm_and_send had no mutual exclusion across separate OS processes sharing one durable journal; two genuine separate processes racing the identical proposal each created a distinct order_intent_id, with one silently lost from the durable file.",
-    "correction": "added _CrossProcessFileLock (atomic exclusive-file-creation mutex, owner-token-verified release, bounded stale-lock recovery) and _ThreadLock to mt5_execution_journal.py; ExecutionJournalWriter.acquire_creation_lock() wraps both critical sections and reloads from disk on acquisition; new EXECUTION_LOCK_UNAVAILABLE reason code fails closed on contention.",
-    "secondary_defect_found_during_correction": "the lock's original release() unconditionally unlinked whatever file existed at the lock path, which would have deleted a different owner's live lock after a stale-lock break; fixed with a unique owner token checked before unlink",
-    "verified_by": ["test_mt5_execution_concurrency.py (7 tests, two genuine separate processes)", "test_mt5_execution_journal_lock.py (14 tests)", "TwoFreshJournalIdentityTests (4 tests)", "manual rehearsal re-run 5x plus lock-timeout and journal-corruption-under-lock scenarios"],
-    "evidence_doc_section": "TRL_R2_007_MT5_EXECUTION_EVIDENCE.md Section 20",
-    "decision_log_entry": "2026-08-01-011"
+  "phase_6_contract_authoring": {
+    "prior_stop_outcome": "PHASE_6_CONTRACT_NOT_FOUND",
+    "capability_conflict_found": "TRL_PHASE_3_OPERATING_MODE_CONTRACT.md granted basket_execution only to MT5_DEMO_AUTOMATED/MT5_LIVE_AUTOMATED (both unavailable), not to MT5_DEMO_MANUAL",
+    "resolution": "TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md authored as the governing Phase 6 contract; narrow manual_basket_execution capability added to MT5_DEMO_MANUAL only via TRL_PHASE_3_OPERATING_MODE_CONTRACT.md Section 3.1; broad basket_execution capability left unchanged and reserved for future automated modes",
+    "numbering_rationale": "R2-009 selected because R2-008 (TRL_R2_008_PRIVATE_ONLINE_OPERATIONS_CONTRACT.md) already exists and governs the unrelated Phase 8 checkpoint; R2-008 was not renamed, overwritten, or reinterpreted",
+    "sma_001_status": "remains blocked (STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED); not resolved by this checkpoint",
+    "fib_001_status": "remains blocked (STRATEGY_PARAMETERS_NOT_APPROVED); not resolved by this checkpoint",
+    "implementation_started": false,
+    "source_or_test_files_changed": 0,
+    "founder_correction_pass": {
+      "issues_corrected": [
+        "basket children no longer extend TRL_MT5_ORDER_INTENT.v1/ORDER_INTENT_FIELDS or call Phase 5 lookup-key functions; six separate basket schemas introduced instead (TRL_BASKET_PLAN.v1, TRL_BASKET_CHILD_INTENT.v1, TRL_BASKET_CHECK_RESULT.v1, TRL_BASKET_CONFIRMATION.v1, TRL_BASKET_CHILD_EXECUTION_RESULT.v1, TRL_BASKET_STATUS.v1)",
+        "basket_id and basket_child_id are now fully deterministic with no nonce anywhere in the basket layer",
+        "confirmation challenge now exactly derived (sha256(\"TRL-BASKET-CONFIRM.v1\\n\"+basket_id+\"\\n\"+canonical_basket_plan_hash)[:16]) with exact CONFIRM-BASKET <16-hex> entry syntax and a defined multi-child-send authorization lifecycle with explicit invalidation conditions",
+        "check-freshness rule now references the existing Phase 5 CHECK_FRESHNESS_SECONDS=120 and CONFIRMATION_LIFETIME_SECONDS=300 constants (no new/conflicting duration invented), revalidated at three defined points",
+        "send-basket-child <basket_id> <child_id> replaced with argument-free send-basket-next <basket_id>; service alone computes the next eligible child",
+        "basket state vocabulary expanded to distinguish REJECTED (governance/schema failure, zero sends) from BLOCKED (SMA/FIB or capability gate, zero sends) from FAILED (first-ever child rejected by broker, zero prior fills) from PARTIALLY_COMPLETED (partial success, one or more prior fills); reconciliation_required redefined as a derived flag, not a competing status",
+        "reason-code and event vocabularies deduplicated (e.g. BASKET_CONFIRMATION_ALREADY_ACCEPTED replaces ALREADY_CONSUMED; BASKET_CHILD_NOT_NEXT_ELIGIBLE replaces two overlapping sequence-violation codes)"
+      ],
+      "phase_3_amendment_reviewed": true,
+      "phase_3_amendment_changed": false,
+      "reason_no_change_needed": "TRL_PHASE_3_OPERATING_MODE_CONTRACT.md Section 3.1 references R2-009 by section number only (Section 6, Section 13), both of which remain valid after the correction"
+    },
+    "founder_correction_pass_2_final_lifecycle": {
+      "issues_corrected": [
+        "confirmation challenge previously derived from only basket_id+canonical_basket_plan_hash (both immutable for a basket's whole lifetime), which would have regenerated the same 'single-use' challenge across two genuinely different confirmation cycles; a new confirmation_basis_hash binds account fingerprint, ordered already-filled child IDs, ordered currently-required check IDs/hashes (new deterministic check_result_id), next eligible child, operating mode, and the CONFIRMATION_LIFETIME_SECONDS value; a deterministic confirmation_request_id derives from basket_id+plan_hash+basis_hash; TRL_BASKET_CONFIRMATION.v1 extended accordingly with a canonical_confirmation_record_hash covering only immutable identity fields",
+        "unchanged-basis re-request now reuses the existing active confirmation request/challenge (BASKET_CONFIRMATION_REQUEST_REUSED) instead of silently regenerating an identical one; a changed basis invalidates the prior request and produces a new request ID and challenge (BASKET_CONFIRMATION_BASIS_CHANGED)",
+        "stale-check handling after one or more prior fills no longer resets an already-FILLED child; Section 24.2 splits zero-prior-fills staleness from post-fill staleness, permanently preserving every FILLED child's record and returning the basket to CHECK_REQUIRED (never PARTIALLY_COMPLETED, redefined as a permanent-stop-only status) while TRL_BASKET_STATUS.v1 gains filled_child_count/completed_quantity fields for truthful progress reporting",
+        "child-state vocabulary corrected to the Founder's exact 11-value list (CREATED, CHECK_REQUIRED, CHECKING, CHECK_PASSED, SEND_RESERVED, FILLED, PARTIALLY_FILLED, REJECTED, FROZEN_PENDING_RECONCILIATION, EXPIRED, BLOCKED); CANCELLED removed (Phase 6 implements no cancellation of any kind) and child-level AWAITING_CONFIRMATION removed (basket confirmation is authoritative, not duplicated per child)",
+        "basket-level vocabulary gained an explicit initial CREATED state distinct from CHECK_REQUIRED, plus explicit nonterminal/terminal lists; FROZEN reconfirmed terminal for Phase 6 sending while remaining Phase-10-reconciliation-examinable",
+        "reason codes BASKET_JOURNAL_INTEGRITY_UNCERTAIN and BASKET_EXECUTION_LOCK_UNAVAILABLE replace earlier BASKET_LOOKUP_STORE_INTEGRITY_UNCERTAIN/BASKET_LOCK_UNAVAILABLE; new BASKET_RECHECK_REQUIRED and BASKET_CHILD_ALREADY_FILLED added; event names BASKET_PARTIALLY_COMPLETED/BASKET_COMPLETED replace BASKET_PARTIAL_SUCCESS/BASKET_COMPLETE so every event name matches its basket_status value exactly"
+      ],
+      "phase_3_amendment_reviewed": true,
+      "phase_3_amendment_changed": false
+    },
+    "founder_correction_pass_3_confirmation_cycle_immutability": {
+      "issues_corrected": [
+        "prior draft's confirmation_basis_hash-only request/challenge derivation let an expired-but-unaccepted request be reissued with the identical confirmation_request_id and challenge_hex (only timestamps replaced), meaning an expired challenge could become valid again on reissue - not approved",
+        "confirmation-basis identity (execution-authority snapshot: basket, account, filled-child set, required-check set, next eligible child, mode, confirmation-lifetime policy value) separated from confirmation-cycle identity (new confirmation_cycle_number: durable, monotonic, allocated only at new-record creation under the cross-process lock by scanning journal history for the highest existing cycle for the basket, never reused/decremented/reset; a corrupted/unreadable journal fails closed with BASKET_JOURNAL_INTEGRITY_UNCERTAIN rather than restarting numbering at 1)",
+        "confirmation_request_id formula extended to include confirmation_cycle_number + requested_at_utc + expires_at_utc (computed once, at cycle creation, never recomputed); challenge_hex formula extended to include confirmation_request_id itself; both are now unique per cycle, including a same-basis reissue after expiry",
+        "TRL_BASKET_CONFIRMATION.v1 gained confirmation_cycle_number and a distinct expired_at_utc field (separate from invalidated_at_utc); canonical_confirmation_record_hash renamed to canonical_confirmation_request_hash, still covering only immutable identity fields",
+        "confirm-basket now resolves an entered challenge in exact precedence order: current cycle (proceed to full acceptance checks) -> this basket's own expired prior cycle (BASKET_CONFIRMATION_EXPIRED specifically, per Founder instruction that an old challenge is never accepted merely because a newer cycle exists) -> this basket's own invalidated prior cycle (BASKET_CONFIRMATION_INVALIDATED) -> a different basket's cycle or this basket's already-accepted cycle (BASKET_CONFIRMATION_WRONG_REQUEST, renamed from BASKET_CONFIRMATION_WRONG_BASKET) -> no match (BASKET_CONFIRMATION_MISMATCH)",
+        "new BASKET_CONFIRMATION_EXPIRED journal event added (distinct from basket-level BASKET_EXPIRED), appended the instant a cycle's expiry is materialized; every BASKET_CONFIRMATION_*/BASKET_RECHECK_REQUIRED event payload now references the affected cycle's confirmation_request_id and confirmation_cycle_number",
+        "TRL_BASKET_STATUS.v1 gained active_confirmation_cycle_number alongside the existing active_confirmation_request_id"
+      ],
+      "phase_3_amendment_reviewed": true,
+      "phase_3_amendment_changed": false
+    },
+    "founder_correction_pass_4_authorization_progression": {
+      "issues_corrected": [
+        "confirmation_basis_hash previously bound ordered_filled_child_ids/next_eligible_child_id as live values, recomputed and compared at every send; combined with the contract's own claim that one accepted confirmation authorizes the entire sequential send of remaining children, an ordinary successful fill would have caused the send-time equality check (next_eligible_child_id equals the child just computed) to fail for every child past the first - a genuine contradiction found before implementation",
+        "confirmation basis redefined as a fixed authorization checkpoint (Section 13.1/13.1.1), computed once at request-basket-confirmation time and never recomputed against live post-acceptance progress: authorized_prior_filled_child_ids (immutable pre-cycle snapshot, normally empty for a first cycle), authorized_remaining_child_ids (complete unsent set this cycle may authorize sequentially - a child stays listed even after it fills), authorized_start_child_id (informational only, not required to track the live next child)",
+        "TRL_BASKET_CONFIRMATION.v1 fields ordered_filled_child_ids/next_eligible_child_id renamed to the three authorized_* fields above",
+        "Section 13.4.1 rewritten to state explicitly that a child reaching FILLED never by itself invalidates the authorization, creates a new cycle, requires the challenge again, or changes the basis; Section 13.6 gained an explicit 'never invalidates' companion list (fill, live-next-child advancing, completed_quantity/filled_child_count increasing, read-only inspection)",
+        "Section 26 send-time gate corrected from exact-equality against a frozen next_eligible_child_id to membership of the live-derived next-eligible child in authorized_remaining_child_ids, with every lower-indexed child either in authorized_prior_filled_child_ids or durably FILLED during the same cycle",
+        "confirmation_status vocabulary on TRL_BASKET_STATUS.v1 corrected to drop an inconsistent REJECTED value; a wrong confirm-basket entry is a BASKET_CONFIRMATION_REJECTED attempt-level journal event only, the confirmation record's own status remains REQUESTED afterward (no competing request, no new request-lifecycle status)",
+        "TRL_BASKET_STATUS.v1 gained authorized_start_child_id, authorized_remaining_child_ids, a separate live_next_eligible_child_id, remaining_quantity, and terminal_reason"
+      ],
+      "phase_3_amendment_reviewed": true,
+      "phase_3_amendment_changed": false
+    }
   },
-  "files_added_this_phase": [
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_007_MT5_EXECUTION_EVIDENCE.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_adapter.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_cli.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_concurrency.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_data.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_http.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_journal.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_journal_lock.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_service.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_adapter.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_cli.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_data.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_journal.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_service.py"
+  "files_added_this_checkpoint": [
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md"
   ],
   "files_modified_tracked": [
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md",
     "09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_007_MT5_EXECUTION_CONTRACT.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_operating_mode.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_signal_intelligence.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/app.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_service.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/server.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/service.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/app.js",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html"
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md"
   ],
   "file_inventory_summary": {
-    "total": 29,
-    "new": 14,
-    "modified": 15,
+    "total": 7,
+    "new": 1,
+    "modified": 6,
     "deleted": 0,
     "staged": 0,
-    "committed_this_phase": 0,
-    "pushed_this_phase": 0,
-    "committed_head": "5a9570aa56752fce402054f5c07ce360883c7273"
+    "committed_this_checkpoint": 1,
+    "pushed_this_checkpoint": 0,
+    "committed_head": "advances past 49b8f743b2e4db967670df35cbb11d2a4ad7f7fa with this checkpoint's own new local commit (exact SHA determined by git at commit time)"
   },
-  "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\" (run twice from Trading_Lab directory)",
-  "tests_last_result": "762/762 passing both runs (569 pre-existing + 191 new Phase 5 tests [166 original + 25 Founder-review-correction] + 2 net-new Phase 3 tests added while correcting 3 stale assertions); 0 failures, 0 errors",
+  "tests_last_run": "None this checkpoint - no source or test file was authorized to change",
+  "tests_last_result": "762/762 baseline unaffected (from Phase 5, commit 49b8f74); not re-run this checkpoint",
   "active_processes": [],
   "active_ports": {
-    "8765": "confirmed no listener after Phase 5 manual rehearsal (both rounds)"
+    "8765": "confirmed no listener as of last check"
   },
   "known_defects": [],
-  "defects_found_and_corrected_this_checkpoint": [
-    "cross_process_execution_locking_race (see founder_review_correction above)"
-  ],
+  "defects_found_and_corrected_this_checkpoint": [],
   "external_prerequisites": [
     "MT5 demo account fingerprint - login/company/server (Phase 5 real order_check/order_send rehearsal; ACCOUNT_UNAVAILABLE is the correct fail-closed outcome without it)",
     "MT5 live account fingerprint - login/company/server (Phase 9)",
     "Private authenticated HTTPS tunnel e.g. Tailscale (Phase 8/12)",
     "TradingView webhook signing secret and allowlist (Phase 7)",
     "Founder-provided VIEWER/FOUNDER_OPERATOR credential hashes (Phase 8)",
-    "FIB-001 exact numeric parameters (blocker remains active, independently re-enforced by Phase 5)",
-    "SMA-001 exact execution-geometry parameters (blocker remains active, independently re-enforced by Phase 5's own execution-geometry allowlist)"
+    "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
+    "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "Present the Phase 5 diff (including the Phase 4 tracking closure and the Founder-review concurrency correction) for Founder review and commit approval, then begin Phase 6 only after that commit exists",
-  "next_verification": "git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - to run immediately before proposing the commit (Markdown Audit already run: 0 issues)",
+  "next_command": "Obtain separate Founder approval to push this contract-authoring checkpoint's commit to origin/codex/TRL-R2-full-vision-execution; do not begin Phase 6 implementation until a further, separate Founder instruction authorizes it",
+  "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - run before this checkpoint's local commit; re-run the same set before any future push",
   "prohibited_commands": [
     "git reset --hard",
     "git clean",

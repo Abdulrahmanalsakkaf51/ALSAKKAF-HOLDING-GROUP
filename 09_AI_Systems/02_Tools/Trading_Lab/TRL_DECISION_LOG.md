@@ -668,3 +668,404 @@ redesigned) and a precise LOCALAPPDATA disclosure correcting an earlier overly-b
 claim (`TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` Section 20.6–20.7). Neither SMA-001 nor FIB-001 was
 touched. Phase 6 was not started. Nothing staged, committed, or pushed — awaiting Founder review
 and commit approval.
+
+## 2026-08-01-012 — Phase 5 tracking closure; Phase 6 fail-closed stop; TRL-R2-009 contract-authoring checkpoint
+
+**What:** Phase 5 (TRL-R2-007 MT5 execution adapter, `MT5_DEMO_MANUAL` demo-manual
+slice) is complete, committed, and pushed at `49b8f743b2e4db967670df35cbb11d2a4ad7f7fa`;
+tracking updated accordingly (`TRL_FULL_VISION_MASTER_PROGRAM.md`,
+`TRL_CONTINUATION_STATE.md/.json`). No separate tracking-only commit was created for
+this closure; it is recorded here for inclusion in whichever future commit the
+Founder next approves.
+
+**1. Phase 6 implementation attempt — correct fail-closed stop.** A Phase 6
+implementation kickoff was received. Startup verification (branch, HEAD, upstream,
+main SHA, clean tree, port 8765, no running process) passed. A full search of
+`TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_CONTINUATION_STATE.md/.json`,
+`TRL_DECISION_LOG.md`, `TRL_BLOCKERS.md`, `TRL_R2_007_MT5_EXECUTION_CONTRACT.md`
+Section 5.6, `TRL_FULL_SYSTEM_THREAT_MODEL.md` Section 3.6, and
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` found no dedicated Phase 6 controlled-basket
+contract — only forward-reference fragments (a `basket_child_id` identity hook, a
+threat/mitigation sentence pair, and a capability-matrix placeholder). Unlike every
+other phase (5 → R2-007, 8 → R2-008), Phase 6 had never been assigned a `TRL-R2-0XX`
+contract number. Per the kickoff instruction's own explicit rule ("If no Phase 6
+controlled-basket contract exists, stop and report... Do not invent a contract"), the
+correct outcome — `PHASE 6 CONTRACT NOT FOUND` — was reported with no implementation,
+no file change, and no repository state change of any kind.
+
+**2. Independent conflict found during the same review.** Separately from the missing
+contract, `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`'s committed, approved capability
+matrix was found to grant the broad `basket_execution` capability only to the
+still-future, still-unavailable `MT5_DEMO_AUTOMATED`/`MT5_LIVE_AUTOMATED` rows —
+`MT5_DEMO_MANUAL`'s granted set does not include it. This directly conflicts with any
+design that assumes `MT5_DEMO_MANUAL` can perform basket execution without a
+capability-matrix change, and was reported alongside the missing-contract finding
+rather than resolved unilaterally.
+
+**3. Contract-authoring checkpoint (this entry).** The Founder subsequently issued a
+dedicated, implementation-scoped-out "contract-authoring checkpoint" instruction with
+explicit authoritative decisions resolving both findings above:
+`TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` is now authored as the governing
+Phase 6 contract. **Numbering:** R2-009, not R2-006 (already implemented, unrelated)
+and not R2-008 (`TRL_R2_008_PRIVATE_ONLINE_OPERATIONS_CONTRACT.md` already exists and
+governs the unrelated Phase 8 private/online checkpoint) — R2-008 was not renamed,
+overwritten, reinterpreted, or substantively modified. **Capability decision:** a new,
+narrow capability `manual_basket_execution` is granted only to `MT5_DEMO_MANUAL`
+(`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1); the existing broad
+`basket_execution` capability is left unchanged, still reserved for the future
+automated/live modes only. Basket order-checking additionally requires
+`mt5_order_check`; basket child sending additionally requires `mt5_order_send` and
+`manual_broker_execution` — `manual_basket_execution` alone is never sufficient.
+**Everything else in the R2-009 contract** (basket/child schemas, deterministic
+lookup-before-create identities extending R2-007 Section 5.1/5.6 exactly as already
+anticipated, zero-tolerance exact quantity/allocation conservation with no rounding
+direction invented, inherited-order-type/no-conversion policy, sequential
+single-attempt-per-child send with the existing cross-process lock, truthful
+rejection/partial/uncertain-freeze behavior, an explicit no-rollback/no-compensation
+statement, reuse of the existing Phase 5 adapter/journal/locking architecture with a
+closed additive event/reason-code vocabulary, a local-only CLI, and a strictly
+read-only HTTP/dashboard surface) follows directly from the Founder's authoritative
+decisions and from the already-committed Phase 5/R2-007/Phase 3 architecture — no
+business or safety rule was invented independently. SMA-001
+(`STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`) and FIB-001
+(`STRATEGY_PARAMETERS_NOT_APPROVED`) remain fully blocked and are independently
+re-enforced by the new contract for basket construction specifically
+(`TRL_BLOCKERS.md`). This checkpoint changed documentation only: one new file
+(`TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`) and five narrowly-scoped
+tracking/contract edits — no Python, JavaScript, HTML, CSS, or test file was touched;
+no Phase 6 source module exists; Phase 7 was not started; nothing was staged,
+committed, or pushed.
+
+## 2026-08-01-013 — Founder correction pass on the R2-009 contract: schema compatibility, confirmation lifecycle, check freshness, sequential child authority
+
+**What:** The Founder reviewed the first R2-009 draft (entry 2026-08-01-012) and issued
+four corrections, all resolved in this pass. The contract-authoring scope remains
+unchanged (7 files: 1 new + 6 modified, 0 staged); only the content of
+`TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` was rewritten. No Python,
+JavaScript, HTML, CSS, or test file was touched; nothing staged, committed, or pushed;
+Phase 6 implementation has not started; Phase 7 was not started.
+
+**1. Phase 5 schema-compatibility correction.** The first draft described basket
+children as an extension of `TRL_MT5_ORDER_INTENT.v1`/`ORDER_INTENT_FIELDS` (two new
+nullable fields, `basket_id`/`basket_child_id`) and described the basket-child lookup
+key as extending Phase 5's `execution_intent_lookup_key` function with the
+`approved_aggregate_risk_id`/`basket_child_id` fields R2-007 Section 5.1 had reserved
+for future use. Both would have required modifying the closed, already-implemented
+Phase 5 `v1` schema and its lookup-key function. The Founder ruled `TRL_MT5_ORDER_INTENT.v1`
+must remain completely unchanged. The contract now defines six separate,
+independently versioned basket schemas (`TRL_BASKET_PLAN.v1`, `TRL_BASKET_CHILD_INTENT.v1`,
+`TRL_BASKET_CHECK_RESULT.v1`, `TRL_BASKET_CONFIRMATION.v1`,
+`TRL_BASKET_CHILD_EXECUTION_RESULT.v1`, `TRL_BASKET_STATUS.v1` — new Section 1.1,
+Sections 9–12/36), each referencing the Phase 5 parent order intent by ID and pinned
+content hash without adding any field to it. `TRL_R2_007_MT5_EXECUTION_CONTRACT.md`
+Section 5.6's forward-looking `basket_child_id` sketch is explicitly noted as
+superseded for Phase 6 purposes by the new Section 17.4 derivation — that file itself
+was not touched (out of this checkpoint's authorized scope).
+
+**2. Basket-identity correction: no nonce in the basket ID.** The first draft generated
+`basket_id` with a random creation nonce, mirroring Phase 5's `order_intent_id`
+pattern. The Founder ruled the basket ID itself must never contain a nonce — it must be
+a pure deterministic function of the basket's own immutable identity. Corrected:
+`basket_id = "bsk_" + sha256("TRL-BASKET-ID.v1\n" + basket_lookup_key)[:32]` (Section
+17.2); `basket_child_id` similarly derived deterministically from `basket_id` +
+`canonical_basket_plan_hash` + child index + target/allocation/quantity + inherited
+authority fields, with no nonce anywhere in the basket layer (Section 17.4). The only
+nonce in the combined Phase 5 + Phase 6 design remains Phase 5's own
+`client_intent_nonce` on the parent order intent, untouched.
+
+**3. Confirmation-challenge and lifecycle correction.** The first draft reused Phase
+5's 8-hex-character `confirmation_challenge_code` pattern with no defined multi-child
+authorization lifecycle, leaving ambiguous whether each `send-basket-child` call needed
+to resupply the code. The Founder specified an exact derivation
+(`sha256("TRL-BASKET-CONFIRM.v1\n"+basket_id+"\n"+canonical_basket_plan_hash)[:16]`,
+lowercase hex), an exact entry syntax (`CONFIRM-BASKET <16-hex-challenge>`, ASCII,
+case-sensitive prefix, exactly one space, exactly 16 lowercase hex characters, no
+extra content), and a precise lifecycle (Section 13.4/13.4.1): the code is single-use,
+but the resulting `ACCEPTED` `TRL_BASKET_CONFIRMATION.v1` record is a durable,
+basket-scoped authorization that persists across multiple sequential child sends until
+explicitly invalidated (Section 13.6: plan/account mismatch, any required child's check
+going stale, basket/confirmation expiry, a child rejection/partial/uncertain result, or
+the basket reaching a terminal state) — later child sends never resubmit or re-consume
+the code. Confirmation acceptance is cross-process-lock-protected so two concurrent
+`confirm-basket` calls produce at most one accepted event.
+
+**4. Check-freshness and next-child-sequencing correction.** The first draft left
+check-freshness duration and the interaction between all-child checking, confirmation,
+and later sequential sends unspecified, and retained a `send-basket-child <basket_id>
+<child_id>` command whose child-ID argument created room for operator error (skip,
+resend, reorder). The Founder required an exact, Phase-5-referenced freshness bound
+rather than a new invented one: the contract now cites the existing, already-committed
+`mt5_execution_service.CHECK_FRESHNESS_SECONDS = 120` and
+`CONFIRMATION_LIFETIME_SECONDS = 300` constants unchanged (Section 24.1), revalidated
+at exactly three points (confirmation request, confirmation acceptance, and
+immediately before each individual child send) — a stale check at any of the three
+invalidates the confirmation and returns the basket to `CHECK_REQUIRED` for every
+required child, not just the stale one. The CLI's per-child-ID send command is replaced
+with an argument-free `send-basket-next <basket_id>` (Section 26/34) — the service
+alone computes the next eligible child from durable state, so there is no argument an
+operator could use to select the wrong one. The basket state vocabulary was expanded
+accordingly (Section 14) to distinguish `REJECTED` (governance/schema rejection, zero
+broker sends) from `BLOCKED` (SMA-001/FIB-001 or capability-gate rejection, zero broker
+sends) from `FAILED` (the first-ever sent child rejected by the broker with zero prior
+fills) from `PARTIALLY_COMPLETED` ("partial success" — one or more children filled
+before the basket stopped), with `reconciliation_required` redefined as a derived
+boolean flag (true exactly for `PARTIALLY_COMPLETED`/`FROZEN`) rather than a competing
+status value. The reason-code and event vocabularies (Sections 15–16) were
+deduplicated during the same pass (e.g. `BASKET_CONFIRMATION_ALREADY_ACCEPTED`
+replaces "already consumed" phrasing to match the new lifecycle's own terminology;
+`BASKET_CHILD_NOT_NEXT_ELIGIBLE` replaces two overlapping sequence-violation codes).
+
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1 was reviewed against all four
+corrections and required no change — its only R2-009 cross-references are by section
+number (Section 6, Section 13), both of which remain valid after the rewrite; the
+capability decision itself (`manual_basket_execution` granted only to `MT5_DEMO_MANUAL`,
+`basket_execution` unchanged) is untouched. SMA-001 and FIB-001 remain fully blocked,
+independently re-enforced by the corrected contract at basket-construction time.
+
+## 2026-08-01-014 — Founder final lifecycle correction on the R2-009 contract: confirmation cycles, stale checks after partial progress, child-state consistency
+
+**What:** The Founder reviewed the second R2-009 draft (entry 2026-08-01-013) and found
+a real contradiction plus two further gaps, all resolved in this pass. The
+contract-authoring scope remains unchanged (7 files: 1 new + 6 modified, 0 staged);
+only the content of `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` was rewritten.
+No Python, JavaScript, HTML, CSS, or test file was touched; nothing staged, committed,
+or pushed; Phase 6 implementation has not started; Phase 7 was not started.
+
+**1. Confirmation-cycle contradiction.** The second draft derived the confirmation
+challenge from only `basket_id` + `canonical_basket_plan_hash` — both of which never
+change for a basket's lifetime. That formula would silently regenerate the *same*
+challenge across two genuinely different confirmation cycles (e.g. before any child was
+sent, versus after one child filled and the remaining children's checks were refreshed),
+even though the first challenge had already been declared permanently single-use. The
+Founder introduced a `confirmation_basis_hash` (Section 13.1) binding basket ID, plan
+hash, account fingerprint, the ordered set of already-filled children, the ordered set
+of currently-required fresh child checks (by a new deterministic `check_result_id` —
+Section 11), the next eligible child, operating mode, and the `CONFIRMATION_LIFETIME_SECONDS`
+*value* (not a live timestamp, so the basis stays reproducible for reuse checks). The
+challenge formula now includes this basis hash; a deterministic, nonce-free
+`confirmation_request_id` is derived from basket ID + plan hash + basis hash (Section
+13.1). Re-requesting confirmation with an unchanged basis reuses the existing active
+request and challenge (`BASKET_CONFIRMATION_REQUEST_REUSED`); any basis change
+invalidates the prior request and produces a genuinely new request ID and challenge
+(`BASKET_CONFIRMATION_BASIS_CHANGED`) — this is why a later valid confirmation cycle is
+never "reuse" of the earlier single-use acceptance. `TRL_BASKET_CONFIRMATION.v1`
+(Section 12) was extended with the new identity fields plus a `canonical_confirmation_record_hash`
+(Section 12.1) that, mirroring the plan-hash pattern, covers only the immutable request
+identity and excludes the four mutable lifecycle fields (`status`, `accepted_at_utc`,
+`invalidated_at_utc`, `invalidated_reason`). HTTP confirmation remains prohibited without
+exception.
+
+**2. Stale checks after one or more fills must never reset a filled child.** The prior
+draft's stale-check rule returned "every required child" to `CHECK_REQUIRED` without
+distinguishing whether any child had already filled — which, read literally, would have
+reset an already-`FILLED` child's status. The Founder ruled this must never happen:
+Section 24.2 now defines two explicit scenarios. **(A) Zero prior fills:** unchanged from
+the prior draft — every currently-required child needs a fresh check again. **(B) One or
+more prior fills:** every `FILLED` child's `TRL_BASKET_CHILD_EXECUTION_RESULT.v1` record
+and journal history is preserved permanently and is never rechecked, resent, replaced,
+rolled back, compensated, or counted as pending (Section 11.1 marks a `FILLED` record
+immutable); only the remaining, still-unsent children require fresh checks; the basket
+returns to `CHECK_REQUIRED` while `TRL_BASKET_STATUS.v1` (Section 36, new
+`filled_child_count`/`completed_quantity` fields) continues truthfully reporting the
+preserved progress. **This recoverable state is explicitly not `PARTIALLY_COMPLETED`**
+(Section 14.3/14.4) — `PARTIALLY_COMPLETED` is now defined strictly as a *permanent* stop
+requiring both a prior fill and a later definitive non-recoverable event (rejection,
+expiry-after-fills), never an ordinary recheck cycle. The next-eligible-child rule
+(Section 26) was correspondingly tightened to require every lower-indexed child to be
+`FILLED` and the target child's check to be one of the confirmation's own bound
+`ordered_required_check_ids`.
+
+**3. Child-state vocabulary correction.** The prior draft's child vocabulary included
+`CANCELLED` (Phase 6 implements no broker, automatic, rollback, compensation, or
+reconciliation cancellation, so no code path can legitimately produce it) and a
+child-level `AWAITING_CONFIRMATION` (basket confirmation is authoritative at the basket
+level; a duplicated per-child confirmation state could contradict it). Both are removed.
+The corrected, Founder-approved minimum vocabulary (Section 14.5) is exactly: `CREATED,
+CHECK_REQUIRED, CHECKING, CHECK_PASSED, SEND_RESERVED, FILLED, PARTIALLY_FILLED,
+REJECTED, FROZEN_PENDING_RECONCILIATION, EXPIRED, BLOCKED` — with `EXPIRED`/`BLOCKED`
+child transitions now precisely defined as flowing from the corresponding basket-level
+terminal transition, and `PARTIALLY_FILLED` explicitly terminal for Phase 6 (no
+remainder-chasing attempt). The basket-level vocabulary gained an explicit initial
+`CREATED` state (distinct from `CHECK_REQUIRED`, which now means "needs a (re)check,
+having been touched before") and explicit nonterminal/terminal lists (Section 14.2);
+`FROZEN` is confirmed terminal for Phase 6 sending specifically, while remaining
+examinable only by a later, separately Founder-approved Phase 10 reconciliation phase.
+Reason codes `BASKET_RECHECK_REQUIRED` and `BASKET_CHILD_ALREADY_FILLED` were added, and
+`BASKET_LOOKUP_STORE_INTEGRITY_UNCERTAIN`/`BASKET_LOCK_UNAVAILABLE` were renamed to the
+Founder's exact final names `BASKET_JOURNAL_INTEGRITY_UNCERTAIN`/
+`BASKET_EXECUTION_LOCK_UNAVAILABLE` throughout the contract; event names
+`BASKET_PARTIAL_SUCCESS`/`BASKET_COMPLETE` were renamed to `BASKET_PARTIALLY_COMPLETED`/
+`BASKET_COMPLETED` so every event name is character-identical to the `basket_status`
+value it reports.
+
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1 was reviewed against this
+correction and required no change. Phase 5 backward compatibility (Section 1.1) was
+reconfirmed unaffected — every new confirmation-cycle field lives only on the Phase-6-
+owned `TRL_BASKET_CONFIRMATION.v1`. SMA-001 and FIB-001 remain fully blocked.
+
+## 2026-08-01-015 — Founder final correction on the R2-009 contract: expired-request immutability and unique reconfirmation challenges
+
+**What:** The Founder reviewed the third R2-009 draft (entry 2026-08-01-014) and found
+that its own fix still permitted an expired-but-unaccepted confirmation request to be
+reissued using the *same* `confirmation_basis_hash`-derived `confirmation_request_id`
+and the *same* `challenge_hex`, only replacing its timestamps — meaning an expired
+challenge could, under that design, become valid again the moment it was reissued. This
+is corrected in this pass. The contract-authoring scope remains unchanged (7 files: 1
+new + 6 modified, 0 staged); only the content of
+`TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` was rewritten. No Python,
+JavaScript, HTML, CSS, or test file was touched; nothing staged, committed, or pushed;
+Phase 6 implementation has not started; Phase 7 was not started.
+
+**Fix: separate confirmation-basis identity from confirmation-cycle identity.**
+`confirmation_basis_hash` (Section 13.1) is retained exactly as the deterministic
+snapshot of the current execution authority (basket, account, filled-child set,
+required-check set, next eligible child, mode, confirmation-lifetime policy value) —
+but it no longer, by itself, identifies one confirmation-request instance, because the
+same unchanged basis can legitimately span more than one *cycle* (an expired-and-
+reissued attempt at confirming that same basis). A new immutable, durable, monotonic
+`confirmation_cycle_number` (Section 13.1a) — starting at `1` per basket, allocated only
+when a genuinely new request record is created, under the cross-process lock, by
+scanning the journal for the highest existing cycle number for that basket and never
+reused, decremented, or reset (a corrupted/unreadable journal fails closed with
+`BASKET_JOURNAL_INTEGRITY_UNCERTAIN` rather than restarting numbering at `1`) — is now
+folded, together with that cycle's own freshly assigned `requested_at_utc`/
+`expires_at_utc`, into both `confirmation_request_id` and `challenge_hex` (Section
+13.1b–13.1c). Because a cycle's own fixed timestamps and number are baked into its
+request ID and challenge, **every cycle produces a unique challenge, including a
+same-basis reissue after expiry** — an expired cycle's record (`TRL_BASKET_CONFIRMATION.v1`,
+now with an `expired_at_utc` field distinct from `invalidated_at_utc`) is never rewritten,
+its identity fields never change again, and its challenge can never coincide with, or
+later be accepted as, any subsequent cycle's challenge. `confirm-basket` now resolves an
+entered challenge against basket confirmation-cycle history in explicit precedence order
+(Section 13.4): matches the current cycle → full acceptance checks; matches this
+basket's own prior **expired** cycle → reject with `BASKET_CONFIRMATION_EXPIRED`
+specifically (per the Founder's exact instruction — an old challenge is never accepted
+merely because a newer cycle now exists); matches a prior **invalidated** cycle → reject
+with `BASKET_CONFIRMATION_INVALIDATED`; matches a different basket's cycle (or this
+basket's already-`ACCEPTED` cycle, unreachable in practice) → reject with the renamed
+`BASKET_CONFIRMATION_WRONG_REQUEST` (replacing `BASKET_CONFIRMATION_WRONG_BASKET`, since
+a wrong challenge can now be wrong-cycle as well as wrong-basket); matches nothing →
+`BASKET_CONFIRMATION_MISMATCH`. A new `BASKET_CONFIRMATION_EXPIRED` journal event was
+added (distinct from the basket-level `BASKET_EXPIRED`), appended the instant a cycle's
+expiry is materialized; every `BASKET_CONFIRMATION_*`/`BASKET_RECHECK_REQUIRED` event's
+payload now references the affected cycle's `confirmation_request_id` **and**
+`confirmation_cycle_number`. Repeated status inspection or a same-basis re-request while
+a cycle remains active still never extends its window (`requested_at_utc`/
+`expires_at_utc` immutable once assigned — unchanged behavior from entry 014, now
+additionally guaranteed by the cycle's timestamps being baked into its own identity
+hash, making an accidental extension structurally impossible rather than merely a
+documented rule). `TRL_BASKET_STATUS.v1` gained `active_confirmation_cycle_number`
+alongside the existing `active_confirmation_request_id`.
+
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1 was reviewed against this
+correction and required no change. Phase 5 backward compatibility (Section 1.1) was
+reconfirmed unaffected — `confirmation_cycle_number` exists only on the Phase-6-owned
+`TRL_BASKET_CONFIRMATION.v1`; no Phase 5 schema gained a new required field. SMA-001 and
+FIB-001 remain fully blocked.
+
+## 2026-08-01-016 — Founder correction on the R2-009 contract: authorization-progression contradiction between one-confirmation sequential sending and a live-recomputed basis
+
+**What:** The Founder found a genuine internal contradiction in the fourth R2-009 draft
+(entry 2026-08-01-015) before any implementation began: `confirmation_basis_hash` bound
+`ordered_filled_child_ids` and `next_eligible_child_id` as **live** values, and Section
+13.4's acceptance check plus Section 26's send-time check both compared the accepted
+record's frozen values against a **freshly recomputed** basis/next-child at send time.
+Because the same contract also claimed (Section 13.4.1) that one accepted confirmation
+authorizes the *entire* sequential run of remaining children, and because an ordinary
+successful fill necessarily changes both the live filled-child set and the live
+next-eligible child, the send-time check as written (`its next_eligible_child_id equals
+the child just computed`) would have failed for every child past the first one sent
+under a cycle — silently contradicting the multi-child-authorization design the same
+document claimed to implement. This is corrected in this pass, before any implementation
+exists. The contract-authoring scope remains unchanged (7 files: 1 new + 6 modified, 0
+staged); only the content of `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` was
+rewritten. No Python, JavaScript, HTML, CSS, or test file was touched; nothing staged,
+committed, or pushed; Phase 6 implementation has not started; Phase 7 was not started.
+
+**Fix: the confirmation basis is now a fixed authorization checkpoint, not a live
+projection.** Three renamed, precisely-defined fields (Section 13.1.1) replace the old
+live pair: **(A)** `authorized_prior_filled_child_ids` — the children already `FILLED`
+*before* this cycle was requested (normally empty for a first cycle), an immutable
+snapshot never updated by this cycle's own later fills; **(B)**
+`authorized_remaining_child_ids` — the *complete* ordered set of unsent children this
+one accepted cycle may authorize sending, in sequence, not merely "the next one," and a
+child stays listed here for the whole cycle even after it fills; **(C)**
+`authorized_start_child_id` — the lowest-index member of (B) at request time, purely
+informational/display, explicitly not required to keep equaling the *live* next-eligible
+child as progression advances. `confirmation_basis_hash` (Section 13.1) is now computed
+**once**, at `request-basket-confirmation` time, and is never recomputed against a later,
+more-advanced live state during normal progression — Section 13.4's accept-time
+recomputation and Section 13.3 step 6's re-request comparison are both explicitly
+reframed as defensive checks against otherwise-unexpected drift (since no child of a
+cycle can fill before that cycle is accepted, given `request-basket-confirmation` is only
+reachable from `CHECK_COMPLETE`/`AWAITING_CONFIRMATION`, before any send), not as
+mechanisms that ever fire during ordinary successful multi-child progress. Section 26's
+send-time gate is corrected to match: the live next-eligible child (still freshly derived
+every time, and now explicitly documented as a *derived service projection*, never a
+confirmation-record field) must be a **member** of `authorized_remaining_child_ids` with
+every lower-indexed child either in `authorized_prior_filled_child_ids` or durably
+`FILLED` during this same cycle — replacing the old, incorrect exact-equality check
+against a single frozen `next_eligible_child_id` field. Section 13.4.1 was rewritten to
+state explicitly, per the Founder's authoritative list, that a child reaching `FILLED`
+never by itself invalidates the authorization, creates a new cycle, requires the
+challenge again, changes the basis, or permits parallel execution — and Section 13.6's
+invalidation-condition list now carries an explicit "never invalidates" companion list
+covering exactly those cases. Section 24.2.B (stale check after prior fills) and the
+testing/rehearsal sections (40/41) were updated to reference the renamed fields and to
+require an explicit multi-child-under-one-confirmation rehearsal (confirm once, then
+`send-basket-next` three separate times for a three-child basket, verifying the
+confirmation record's identity fields never change). `TRL_BASKET_STATUS.v1` (Section 36)
+gained `authorized_start_child_id`, `authorized_remaining_child_ids`, a separate
+`live_next_eligible_child_id`, and `remaining_quantity`, and its `confirmation_status`
+vocabulary was corrected to drop an inconsistent `REJECTED` value — a wrong
+`confirm-basket` entry is, and always was intended to be, an attempt-level
+`BASKET_CONFIRMATION_REJECTED` journal event, never a competing request or a new
+request-lifecycle status value (the record's own `status` field remains `REQUESTED`
+afterward, per Section 13.4, now stated explicitly to prevent a future implementation
+from inventing a contradictory `"REJECTED"` status).
+
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1 was reviewed against this correction
+and required no change. Phase 5 backward compatibility (Section 1.1) was reconfirmed
+unaffected — every renamed/added field lives only on the Phase-6-owned
+`TRL_BASKET_CONFIRMATION.v1`/`TRL_BASKET_STATUS.v1`. SMA-001 and FIB-001 remain fully
+blocked.
+
+## 2026-08-01-017 — Founder approval and local commit of the TRL-R2-009 contract-authoring checkpoint
+
+**Decision:** The Founder reviewed the R2-009 contract through all four correction passes
+(entries 2026-08-01-013 through -016) and approved:
+
+- `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` as the governing Phase 6 —
+  Controlled Basket Execution contract.
+- The narrow capability amendment `manual_basket_execution`, granted only to
+  `MT5_DEMO_MANUAL` (`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1). The broad
+  `basket_execution` capability remains unchanged and reserved for the still-future,
+  still-unavailable `MT5_DEMO_AUTOMATED`/`MT5_LIVE_AUTOMATED` modes.
+- A local commit of exactly the 7 files that make up this contract-authoring checkpoint
+  (1 new, 6 modified — the R2-009 contract itself plus the six tracking/governance
+  documents kept in sync with it).
+
+**Why:** The original Phase 6 implementation attempt correctly stopped fail-closed with
+`PHASE 6 CONTRACT NOT FOUND` because no governing contract existed. Four Founder
+correction passes then closed every substantive gap found in successive drafts: Phase 5
+backward compatibility (no change to `TRL_MT5_ORDER_INTENT.v1` or any other Phase 5 `v1`
+schema/function/persisted document); fully deterministic, nonce-free basket and
+basket-child identity; an exact, versioned, single-use-per-cycle confirmation challenge
+with permanently immutable expired/invalidated records; and a fixed authorization-
+checkpoint confirmation-basis design that correctly allows one accepted confirmation to
+govern the sequential sending of an entire basket's remaining children without a normal
+successful fill ever forcing reconfirmation. With no further contradictions found, the
+Founder authorized finalizing and committing this checkpoint locally.
+
+**How to apply:** This commit records the *contract*, not an *implementation* — Phase 6
+source code, tests, CLI, HTTP routes, and dashboard changes remain entirely unbuilt and
+are explicitly deferred to a separate, later checkpoint that must itself follow this
+contract without inventing business or safety rules. Remote push of this checkpoint's
+commit requires a separate, explicit Founder approval, per the standing commit/push
+policy (`TRL_DECISION_LOG.md` entry 2026-07-31-001) — this decision authorizes the local
+commit only, not the push. Phase 5 remains complete, committed, and pushed at
+`49b8f743b2e4db967670df35cbb11d2a4ad7f7fa`. SMA-001
+(`STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`) and FIB-001
+(`STRATEGY_PARAMETERS_NOT_APPROVED`) remain fully blocked and are unaffected by this
+approval. Phase 7 was not started and is not referenced as available anywhere in the
+approved contract.
