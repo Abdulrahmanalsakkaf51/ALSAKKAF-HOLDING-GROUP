@@ -23,6 +23,7 @@ from .signal_service import DisabledSignalService, SignalIntelligenceService
 from . import signal_service as signal_service_module
 from . import mt5_execution_adapter
 from . import mt5_execution_service
+from . import basket_execution_service
 from .server import BIND_HOST, DEFAULT_PORT, create_server
 
 
@@ -358,6 +359,55 @@ def _validate_execution_subsystem_consistency(current_mode, execution_service_in
         )
 
 
+def _basket_service_for_mode(current_mode, mode_service_instance, journal=None, account_fingerprint=None):
+    """The real runtime Phase 6 (TRL-R2-009) basket-execution service,
+    constructed only after a mode has already been resolved — mirrors
+    ``_execution_service_for_mode`` exactly, including its adapter-tier
+    selection rule (``_execution_adapter_for_mode``) and its default
+    journal/account-fingerprint construction, so both services always
+    agree on which adapter tier, which durable journal file, and which
+    account fingerprint are in force for a given mode: no second adapter
+    tier, no second journal file, no second fingerprint source is ever
+    introduced. Never reaches into ``ExecutionService``'s private
+    attributes — mt5_execution_service.py is Phase 5 and stays untouched
+    (Section 1.1); this function reconstructs the identical inputs from
+    the same side-effect-free construction rules instead."""
+    if current_mode in ("OFF", "RESEARCH", "SYNTHETIC_PAPER"):
+        return basket_execution_service.disabled_basket_service(operating_mode=current_mode)
+    if current_mode == "MT5_DEMO_MANUAL":
+        from .mt5_execution_journal import ExecutionJournalWriter
+        return basket_execution_service.BasketExecutionService(
+            adapter=_execution_adapter_for_mode(current_mode),
+            mode_service=mode_service_instance,
+            journal=journal if journal is not None else ExecutionJournalWriter(),
+            account_fingerprint=account_fingerprint or mt5_execution_service.account_fingerprint_from_environment(),
+        )
+    raise ModeSubsystemConfigurationError(
+        "no Phase 6 basket-service construction rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _validate_basket_subsystem_consistency(current_mode, basket_service_instance):
+    if current_mode in ("OFF", "RESEARCH", "SYNTHETIC_PAPER"):
+        consistent = (
+            isinstance(basket_service_instance, basket_execution_service.DisabledBasketExecutionService)
+            and not basket_service_instance.enabled
+        )
+    elif current_mode == "MT5_DEMO_MANUAL":
+        consistent = (
+            isinstance(basket_service_instance, basket_execution_service.BasketExecutionService)
+            and basket_service_instance.enabled
+        )
+    else:
+        consistent = False
+    if not consistent:
+        raise ModeSubsystemConfigurationError(
+            "{}: mode={!r} constructed basket_service={}".format(
+                MODE_SUBSYSTEM_CONFIGURATION_MISMATCH, current_mode, type(basket_service_instance).__name__,
+            )
+        )
+
+
 def _subsystem_builder_for_mode(current_mode):
     """The combined subsystem builder ModeService actually calls: builds
     the paper service, a side-effect-free signal-intelligence *preflight*
@@ -384,6 +434,7 @@ def run_server(
     mode_service=None,
     signal_service=None,
     execution_service=None,
+    basket_service=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -394,6 +445,7 @@ def run_server(
         mode_service=mode_service,
         signal_service=signal_service,
         execution_service=execution_service,
+        basket_service=basket_service,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -465,6 +517,16 @@ def run_server(
             print("  No approved MT5 demo account fingerprint is configured (external blocker).")
     else:
         print("MT5 EXECUTION DISABLED | {} MODE".format(active_execution_service.operating_mode))
+    active_basket_service = basket_service or vars(server).get("basket_service")
+    if not isinstance(active_basket_service, (basket_execution_service.BasketExecutionService, basket_execution_service.DisabledBasketExecutionService)):
+        active_basket_service = basket_execution_service.disabled_basket_service()
+    if active_basket_service.enabled:
+        print(
+            "BASKET EXECUTION ENABLED | DEMO-MANUAL ONLY | LIVE/AUTOMATED EXECUTION DISABLED | "
+            "MANUAL CONFIRMATION REQUIRED FOR EVERY CHILD SEND"
+        )
+    else:
+        print("BASKET EXECUTION DISABLED | {} MODE".format(active_basket_service.operating_mode))
     active_mode_service = mode_service or getattr(server, "mode_service", None)
     if not isinstance(active_mode_service, ModeService):
         active_mode_service = in_memory_mode_service()
@@ -508,15 +570,21 @@ def run_server(
                             pass
                 finally:
                     try:
-                        news_service = getattr(server, "official_news_service", None)
-                        if news_service is not None:
-                            while news_service.shutdown() is False:
+                        active_basket = vars(server).get("basket_service")
+                        if active_basket is not None:
+                            while active_basket.shutdown() is False:
                                 pass
                     finally:
                         try:
-                            active_mode_service.shutdown()
+                            news_service = getattr(server, "official_news_service", None)
+                            if news_service is not None:
+                                while news_service.shutdown() is False:
+                                    pass
                         finally:
-                            server.server_close()
+                            try:
+                                active_mode_service.shutdown()
+                            finally:
+                                server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -608,13 +676,29 @@ def main(argv=None):
         )
     paper_service = _paper_service_for_mode(operating_mode_service.current_mode)
     signal_service_instance = _signal_service_for_mode(operating_mode_service.current_mode)
+    # One shared journal writer and one shared account-fingerprint config
+    # for this process, handed to both the Phase 5 execution service and
+    # the Phase 6 basket service — the exact same durable journal file and
+    # the exact same fingerprint, never a second instance of either.
+    shared_journal = None
+    shared_account_fingerprint = None
+    if operating_mode_service.current_mode == "MT5_DEMO_MANUAL":
+        from .mt5_execution_journal import ExecutionJournalWriter
+        shared_journal = ExecutionJournalWriter()
+        shared_account_fingerprint = mt5_execution_service.account_fingerprint_from_environment()
     execution_service_instance = _execution_service_for_mode(
         operating_mode_service.current_mode, operating_mode_service,
+        journal=shared_journal, account_fingerprint=shared_account_fingerprint,
+    )
+    basket_service_instance = _basket_service_for_mode(
+        operating_mode_service.current_mode, operating_mode_service,
+        journal=shared_journal, account_fingerprint=shared_account_fingerprint,
     )
     try:
         _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
         _validate_signal_subsystem_consistency(operating_mode_service.current_mode, signal_service_instance)
         _validate_execution_subsystem_consistency(operating_mode_service.current_mode, execution_service_instance)
+        _validate_basket_subsystem_consistency(operating_mode_service.current_mode, basket_service_instance)
     except ModeSubsystemConfigurationError as error:
         print(str(error), file=sys.stderr)
         return 2
@@ -628,6 +712,7 @@ def main(argv=None):
             mode_service=operating_mode_service,
             signal_service=signal_service_instance,
             execution_service=execution_service_instance,
+            basket_service=basket_service_instance,
         )
     except OSError as error:
         print(

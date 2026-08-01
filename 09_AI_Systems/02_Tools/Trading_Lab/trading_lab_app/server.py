@@ -3,6 +3,7 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+import re
 import socket
 from socketserver import ThreadingMixIn
 import threading
@@ -16,6 +17,7 @@ from .news_service import OfficialNewsService
 from .paper_service import DisabledPaperService
 from .signal_service import disabled_service as disabled_signal_service
 from .mt5_execution_service import disabled_service as disabled_execution_service
+from .basket_execution_service import disabled_basket_service
 
 
 BIND_HOST = "127.0.0.1"
@@ -87,6 +89,39 @@ EXECUTION_API_ROUTES = {
     "/api/mt5-terminal-status": service.mt5_terminal_status_document,
     "/api/execution-journal": service.mt5_execution_journal_document,
 }
+
+# TRL-R2-009 (Phase 6): read-only only, exactly the same discipline as
+# EXECUTION_API_ROUTES above — no route here may create, check, confirm,
+# send, retry, cancel, compensate, reconcile, or otherwise mutate any
+# basket state (TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md Section
+# 35). "/api/execution-basket/<safe-id>" is not a fixed key here because it
+# takes a path parameter; it is matched separately by
+# _basket_detail_id_from_path below, using the exact basket_id shape
+# (basket_execution_data._BASKET_ID_PATTERN) so no unvalidated path
+# fragment ever reaches the basket service.
+BASKET_API_ROUTES = {
+    "/api/basket-execution-status": service.basket_execution_status_document,
+    "/api/execution-baskets": service.execution_baskets_document,
+    "/api/execution-basket-journal": service.execution_basket_journal_document,
+}
+
+_BASKET_DETAIL_PATH_PREFIX = "/api/execution-basket/"
+_BASKET_ID_PATTERN = re.compile(r"^bsk_[0-9a-f]{32}$")
+
+
+def _basket_detail_id_from_path(decoded_path):
+    """Return the basket_id if decoded_path is exactly
+    "/api/execution-basket/<valid-basket-id>", else None. A path under this
+    prefix whose remainder does not match the exact governed basket_id
+    shape is treated as an unregistered route entirely (404 on GET/HEAD,
+    the generic "GET" 405 on a mutation attempt) — the raw fragment is
+    never reflected back or passed to the basket service unvalidated."""
+    if not decoded_path.startswith(_BASKET_DETAIL_PATH_PREFIX):
+        return None
+    candidate = decoded_path[len(_BASKET_DETAIL_PATH_PREFIX):]
+    if not _BASKET_ID_PATTERN.fullmatch(candidate):
+        return None
+    return candidate
 
 SECURITY_HEADERS = {
     "Cache-Control": "no-store, max-age=0",
@@ -297,6 +332,37 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     include_body,
                 )
             return
+        basket_function = BASKET_API_ROUTES.get(decoded_path)
+        if basket_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    basket_function(self.server.basket_service),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_BASKET_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
+        basket_id = _basket_detail_id_from_path(decoded_path)
+        if basket_id is not None:
+            try:
+                document = service.execution_basket_document(self.server.basket_service, basket_id)
+                self._send_json(
+                    200 if document.get("found") else 404,
+                    document,
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_BASKET_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
@@ -329,6 +395,8 @@ class ApplicationHandler(BaseHTTPRequestHandler):
             or decoded_path in MODE_API_ROUTES
             or decoded_path in SIGNAL_API_ROUTES
             or decoded_path in EXECUTION_API_ROUTES
+            or decoded_path in BASKET_API_ROUTES
+            or _basket_detail_id_from_path(decoded_path) is not None
         ):
             self._handle_read(include_body=False)
             return
@@ -346,6 +414,8 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 or decoded_path in MODE_API_ROUTES
                 or decoded_path in SIGNAL_API_ROUTES
                 or decoded_path in EXECUTION_API_ROUTES
+                or decoded_path in BASKET_API_ROUTES
+                or _basket_detail_id_from_path(decoded_path) is not None
             )
             else "GET"
         )
@@ -766,6 +836,7 @@ def create_server(
     mode_service=None,
     signal_service=None,
     execution_service=None,
+    basket_service=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -781,4 +852,5 @@ def create_server(
     local_server.mode_service = mode_service or in_memory_mode_service()
     local_server.signal_service = signal_service or disabled_signal_service()
     local_server.execution_service = execution_service or disabled_execution_service()
+    local_server.basket_service = basket_service or disabled_basket_service()
     return local_server

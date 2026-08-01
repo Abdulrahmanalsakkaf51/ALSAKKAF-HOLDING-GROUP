@@ -157,6 +157,41 @@
           </div>
         </section>
 
+        <section id="basket-execution" class="section" aria-labelledby="basket-execution-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">CONTROLLED MANUAL DEMO BASKET EXECUTION · PHASE 6 · TRL-R2-009</p><h2 id="basket-execution-title">Basket execution</h2></div>
+            <span id="basket-availability-badge" class="badge badge-neutral" aria-live="polite">LOADING</span>
+          </div>
+          <p class="disclosure">DEMO ONLY — LIVE EXECUTION DISABLED — AUTOMATED EXECUTION DISABLED — MANUAL CONFIRMATION REQUIRED FOR EVERY CHILD SEND. Server-authoritative; no client-side value is authoritative. No HTTP route on this dashboard can build, check, confirm, or send a basket child — every mutation is local-CLI-only.</p>
+          <div class="legal-notice"><strong>SMA-001 / FIB-001 BLOCKED</strong><span>SMA-001's execution geometry and FIB-001's numeric parameters are not Founder-approved; neither strategy can reach a basket check in this checkpoint (see TRL_BLOCKERS.md).</span></div>
+          <div class="status-strip">
+            <div><span>Operating mode</span><strong id="basket-operating-mode">—</strong></div>
+            <div><span>manual_basket_execution</span><strong id="basket-capability-granted">—</strong></div>
+            <div><span>Baskets recorded</span><strong id="basket-count">—</strong></div>
+          </div>
+          <div class="table-scroll"><table><caption>Baskets (this server process)</caption><thead><tr><th scope="col">Basket ID</th><th scope="col">Status</th><th scope="col">Confirmation</th><th scope="col">Filled / total</th><th scope="col">Reconciliation required</th></tr></thead><tbody id="basket-list-table"></tbody></table></div>
+          <article class="panel">
+            <h3>Latest basket detail</h3>
+            <div id="basket-detail-empty" class="state-panel" role="status">No basket has been built in this server process yet. Use the local CLI: python -m trading_lab_app.basket_execution_cli build-basket &lt;parent_order_intent_id&gt;</div>
+            <dl class="parameter-list" id="basket-detail" hidden>
+              <div><dt>Basket ID</dt><dd id="basket-detail-id">-</dd></div>
+              <div><dt>Basket status</dt><dd id="basket-detail-status">-</dd></div>
+              <div><dt>Confirmation status</dt><dd id="basket-detail-confirmation-status">-</dd></div>
+              <div><dt>Active confirmation cycle</dt><dd id="basket-detail-cycle">-</dd></div>
+              <div><dt>Authorized start child</dt><dd id="basket-detail-authorized-start">-</dd></div>
+              <div><dt>Authorized remaining children</dt><dd id="basket-detail-authorized-remaining">-</dd></div>
+              <div><dt>Live next eligible child</dt><dd id="basket-detail-live-next">-</dd></div>
+              <div><dt>Completed quantity</dt><dd id="basket-detail-completed-quantity">-</dd></div>
+              <div><dt>Remaining quantity</dt><dd id="basket-detail-remaining-quantity">-</dd></div>
+              <div><dt>Filled children</dt><dd id="basket-detail-filled-count">-</dd></div>
+              <div><dt>Reconciliation required</dt><dd id="basket-detail-reconciliation">-</dd></div>
+              <div><dt>Terminal reason</dt><dd id="basket-detail-terminal-reason">-</dd></div>
+              <div><dt>Rejection reasons</dt><dd id="basket-detail-rejection-reasons">-</dd></div>
+            </dl>
+            <div class="table-scroll"><table><caption>Children</caption><thead><tr><th scope="col">Child</th><th scope="col">Target price</th><th scope="col">Allocation %</th><th scope="col">Quantity</th><th scope="col">Check</th><th scope="col">Fresh</th><th scope="col">Send outcome</th><th scope="col">Execution state</th></tr></thead><tbody id="basket-children-table"></tbody></table></div>
+          </article>
+        </section>
+
         <section id="signal-intelligence" class="section" aria-labelledby="signal-intelligence-title">
           <div class="section-heading">
             <div><p class="eyebrow">GOVERNED SIX-ROLE PIPELINE · PHASE 4 · TRL-R2-006</p><h2 id="signal-intelligence-title">Signal intelligence</h2></div>

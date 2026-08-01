@@ -30,6 +30,17 @@ APP_DIRECTORY = Path(__file__).resolve().parent
 READY_POLL_INTERVAL_SECONDS = 0.01
 READY_TIMEOUT_SECONDS = 30.0
 
+# Named fixture helper (test-maintenance only, no Phase 5 behavior change):
+# every proposal fixture in this file must remain unexpired at the moment
+# it reaches build_order_intent's real-wall-clock expiry check. There is no
+# controlled-clock seam here -- every worker below is a genuinely separate
+# OS process launched via subprocess, so an in-process fake clock could not
+# be shared with it even if one existed. One durable, far-future timestamp,
+# referenced consistently from this single named constant, replaces the
+# scattered hardcoded "2026-08-01T13:00:00.000000Z" values that were valid
+# when this file was written but have since passed real wall-clock time.
+FIXTURE_PROPOSAL_EXPIRES_AT_UTC = "2035-08-01T13:00:00.000000Z"
+
 _CREATE_WORKER_SOURCE = r'''
 import json
 import sys
@@ -51,7 +62,7 @@ mes.EXECUTION_GEOMETRY_APPROVED_STRATEGIES = frozenset({{"SMA-001"}})
 proposal = sd.build_signal_proposal(
     created_at_utc="2026-08-01T11:00:00.000000Z",
     observed_at_utc="2026-08-01T11:00:00.000000Z",
-    expires_at_utc="2026-08-01T13:00:00.000000Z",
+    expires_at_utc={expires_at_utc!r},
     instrument="XAUUSD", side="BUY", entry_type="ENTRY_ZONE",
     entry_zone_lower="1899", entry_zone_upper="1899", stop_loss="1895",
     targets=["1902", "1905", "1908", "1911"], target_allocations_percent=["25", "25", "25", "25"],
@@ -165,7 +176,11 @@ def _wait_for(path, timeout=READY_TIMEOUT_SECONDS):
 def _run_two_workers(source_template, temp_dir, extra_setup=None):
     worker_path = temp_dir / "worker.py"
     worker_path.write_text(
-        source_template.format(app_dir=str(APP_DIRECTORY)), encoding="utf-8",
+        source_template.format(
+            app_dir=str(APP_DIRECTORY),
+            expires_at_utc=FIXTURE_PROPOSAL_EXPIRES_AT_UTC,
+        ),
+        encoding="utf-8",
     )
     if extra_setup is not None:
         extra_setup(temp_dir)
@@ -252,7 +267,7 @@ class ConcurrentSendTests(unittest.TestCase):
         proposal = sd.build_signal_proposal(
             created_at_utc="2026-08-01T11:00:00.000000Z",
             observed_at_utc="2026-08-01T11:00:00.000000Z",
-            expires_at_utc="2026-08-01T13:00:00.000000Z",
+            expires_at_utc=FIXTURE_PROPOSAL_EXPIRES_AT_UTC,
             instrument="XAUUSD", side="BUY", entry_type="ENTRY_ZONE",
             entry_zone_lower="1899", entry_zone_upper="1899", stop_loss="1895",
             targets=["1902", "1905", "1908", "1911"], target_allocations_percent=["25", "25", "25", "25"],

@@ -1,9 +1,9 @@
 {
   "active_branch": "codex/TRL-R2-full-vision-execution",
-  "current_head": "d4b8ca5625cceeae403e6cbaf0e6628efc947722",
+  "current_head": "3b6d4db052144da92e7376f6bc3b0268a17e92ee",
   "current_checkpoint": "Phase 6 contract checkpoint (TRL-R2-009) complete, Founder-approved, committed, and pushed at d4b8ca5625cceeae403e6cbaf0e6628efc947722 (commit message: Define TRL-R2-009 controlled basket execution contract; push recorded as 49b8f74..d4b8ca5 on codex/TRL-R2-full-vision-execution). Local HEAD, remote branch, and upstream-tracking ref were verified equal at that SHA immediately after the push, with a clean working tree. The commit contains exactly 7 documentation/governance files (1 added, 6 modified, 0 deleted; 2818 insertions, 147 deletions). Reached through four Founder correction passes on the original draft, then Founder-approved commit and push (see TRL_DECISION_LOG.md entries 012-018 for full detail): six separate basket schemas with no Phase 5 schema modification; fully deterministic nonce-free basket/child identities; an exact, cycle-scoped, permanently-immutable-once-expired confirmation challenge; a fixed authorization-checkpoint confirmation-basis design (authorized_prior_filled_child_ids/authorized_remaining_child_ids/authorized_start_child_id) that lets one accepted confirmation govern an entire basket's sequential sends without a normal successful fill ever forcing reconfirmation. This continuation-state synchronization checkpoint corrects stale pre-push wording in the tracking documents to reflect the verified commit-and-push; it does not itself modify the R2-009 contract, the Phase 3 amendment, or TRL_BLOCKERS.md, none of which contained stale text. The exact staged/committed/pushed state of this synchronization checkpoint is authoritatively determined by Git at any given moment (current HEAD, upstream-tracking ref, remote branch ref, working-tree status), not restated here. Phase 6 implementation itself has not started; the next authorized checkpoint is Phase 6 controlled-basket implementation against the verified R2-009 contract, gated on this synchronization checkpoint itself reaching Founder-approved, verified commit-and-push status.",
   "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3", "Phase 4", "Phase 5"],
-  "active_phase": "Phase 6 - contract checkpoint (TRL-R2-009) complete, Founder-approved, committed, and pushed at d4b8ca5625cceeae403e6cbaf0e6628efc947722. Phase 6 implementation itself has not started; the next authorized checkpoint is Phase 6 controlled-basket implementation against the verified R2-009 contract, gated on the continuation-state synchronization checkpoint (see continuation_state_sync_pass) itself reaching Founder-approved, verified commit-and-push status.",
+  "active_phase": "Phase 6 - contract checkpoint (TRL-R2-009) complete, Founder-approved, committed, and pushed at d4b8ca5625cceeae403e6cbaf0e6628efc947722; continuation-state synchronization checkpoint complete at 3b6d4db052144da92e7376f6bc3b0268a17e92ee. Phase 6 IMPLEMENTATION is complete against the verified R2-009 contract, including a Founder correction round (identity circularity, partial-fill governance, full-suite recovery, test-count arithmetic, true cross-process proof - TRL_DECISION_LOG.md entry 2026-08-01-020) - see phase_6_implementation below and TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md. The implementation checkpoint is Founder-approved and locally committed; remote push verification is a separate, later checkpoint. The exact current staged/committed/pushed state is always authoritative from Git directly (current HEAD, upstream-tracking ref, remote branch ref, working-tree status), not restated here.",
   "phase_5_tracking_closure": {
     "status": "complete_committed_pushed",
     "commit": "49b8f743b2e4db967670df35cbb11d2a4ad7f7fa",
@@ -103,14 +103,41 @@
     ],
     "repository_status_authority": "Git is the sole authority for this checkpoint's current staged/committed/pushed status (current HEAD, upstream-tracking ref, remote branch ref, working-tree status) - not restated here, since any fixed value here would go stale the moment that status changes"
   },
-  "tests_last_run": "None this checkpoint - no source or test file was authorized to change",
-  "tests_last_result": "762/762 baseline unaffected (from Phase 5, commit 49b8f74); not re-run this checkpoint",
+  "phase_6_implementation": {
+    "status": "complete, Founder-corrected once, locally committed; remote push pending",
+    "new_modules": ["basket_execution_data.py", "basket_execution_service.py", "basket_execution_cli.py"],
+    "additive_modules_modified": ["mt5_execution_journal.py", "mode_service.py", "app.py", "server.py", "service.py", "static/index.html", "static/app.js"],
+    "new_tests": 138,
+    "new_test_files": ["test_basket_execution_data.py", "test_basket_execution_service.py", "test_basket_execution_cli.py", "test_basket_execution_http.py", "test_basket_execution_concurrency.py"],
+    "founder_approved_contract_amendment": "Two additive BASKET_REASON_CODES entries (BASKET_CHILD_SEND_REJECTED, BASKET_CHILD_SEND_PARTIALLY_FILLED) added to Section 15 during implementation - see TRL_DECISION_LOG.md entry 2026-08-01-019",
+    "implementation_bugs_found_and_fixed": [
+      "_finalize_send dead-code reason-code expression (BASKET_CHILD_SEND_REJECTED / silent BASKET_FROZEN fallback)",
+      "confirm_basket check ordering: BASKET_CONFIRMATION_UNAVAILABLE fired before the more specific BASKET_CONFIRMATION_ALREADY_ACCEPTED, reordered",
+      "EXECUTION_GEOMETRY_APPROVED_STRATEGIES imported by value (frozen snapshot); changed to a dynamic module reference",
+      "dead self.account_fingerprint assignment in BasketExecutionService.__init__ (assigned a function object, never read) removed",
+      "confirm_basket's parse_confirmation_entry call could raise an uncaught basket_execution_data.BasketValidationError instead of a governed BasketExecutionServiceError; wrapped",
+      "compute_child_quantities's canonical_decimal calls could raise an uncaught timeline_data.TimelineValidationError instead of a governed BasketValidationError; wrapped via the existing _price helper"
+    ],
+    "founder_correction_round_2026_08_01_020": {
+      "full_suite_recovery": "5 failures/errors in test_mt5_execution_concurrency.py reproduced, root-caused to hardcoded expires_at_utc now in the past (confirmed pre-existing in the committed baseline via an isolated git worktree export), fixed via one named far-future fixture constant, no assertion weakened",
+      "child_identity_circularity": "basket_child_lookup_key previously listed canonical_basket_plan_hash as an input despite that hash being computed FROM the child IDs it produces; corrected to a non-circular formula deriving from basket_id + parent_proposal_id/canonical_parent_proposal_hash + parent_order_intent_id/canonical_parent_order_intent_hash + per-child economic fields, under new domain TRL-BASKET-CHILD-LOOKUP.v1",
+      "partial_fill_governance": "basket_status on a child PARTIALLY_FILLED result changed from PARTIALLY_COMPLETED to FROZEN, regardless of prior fills; PARTIALLY_COMPLETED now reserved exclusively for later-rejection-after-fills",
+      "test_count_reconciliation": "762 (baseline, re-verified via isolated git worktree --detach export) + 138 (new, verified via grep -c cross-check) = 900, matching full-suite discovery exactly, both runs, zero failures/errors",
+      "true_cross_process_proof": "test_basket_execution_concurrency.py added (8 tests): real subprocess.Popen worker processes proving one authoritative BASKET_CREATED event/basket_id under a creation race, and exactly one order_send call (proven via per-call marker files) under a send race, the loser failing closed with BASKET_CHILD_SEND_ALREADY_RESERVED",
+      "second_manual_rehearsal": "12 consolidated checkpoints, all passed, including live invocation of both cross-process test suites from within the rehearsal script"
+    },
+    "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md"
+  },
+  "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\", run twice, post-correction-round",
+  "tests_last_result": "900 tests both runs, identical: 0 failures, 0 errors. The originally reported 889-test/5-failure run is superseded (see founder_correction_round_2026_08_01_020.full_suite_recovery).",
   "active_processes": [],
   "active_ports": {
     "8765": "confirmed no listener as of last check"
   },
   "known_defects": [],
-  "defects_found_and_corrected_this_checkpoint": [],
+  "defects_found_and_corrected_this_checkpoint": [
+    "see phase_6_implementation.implementation_bugs_found_and_fixed above; all fixed and covered by a regression test"
+  ],
   "external_prerequisites": [
     "MT5 demo account fingerprint - login/company/server (Phase 5 real order_check/order_send rehearsal; ACCOUNT_UNAVAILABLE is the correct fail-closed outcome without it)",
     "MT5 live account fingerprint - login/company/server (Phase 9)",
@@ -120,7 +147,7 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "Obtain Founder-approved commit and push of the continuation-state synchronization checkpoint; Phase 6 controlled-basket implementation may then begin against the verified, pushed R2-009 contract once a further, separate implementation-authorizing prompt is issued",
+  "next_command": "Obtain Founder review and separate commit/push authorization for the completed Phase 6 implementation (currently uncommitted)",
   "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
@@ -130,5 +157,5 @@
     "--no-verify",
     "--no-gpg-sign"
   ],
-  "last_update": "2026-08-01T00:00:00Z"
+  "last_update": "2026-08-01T21:15:00Z"
 }

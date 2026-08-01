@@ -18,12 +18,17 @@ session end or when session capacity drops below ~15%.
 ## Current state
 
 - **Active branch:** `codex/TRL-R2-full-vision-execution` (pushed to origin)
-- **Current HEAD:** `d4b8ca5625cceeae403e6cbaf0e6628efc947722` ("Define
-  TRL-R2-009 controlled basket execution contract"). Local HEAD, the
-  upstream-tracking ref, and `origin/codex/TRL-R2-full-vision-execution`
-  were verified equal at this exact SHA immediately after the push; the
-  working tree was clean at that point (before the documentation-
-  synchronization edits described below were made).
+- **Current HEAD:** the Phase 6 implementation checkpoint described below is
+  Founder-approved and locally committed on top of
+  `3b6d4db052144da92e7376f6bc3b0268a17e92ee` ("Synchronize TRL-R2-009
+  continuation state", itself verified equal across local HEAD, the
+  upstream-tracking ref, and `origin/codex/TRL-R2-full-vision-execution` at
+  the time of that push). Remote push of the implementation commit is a
+  separate, later, Founder-authorized checkpoint. Per the Git-authoritative
+  model this document uses throughout, the exact current HEAD, upstream
+  equality, and push status are always read from `git rev-parse HEAD` /
+  `git status` directly, not restated here as a fixed value that would
+  otherwise go stale the moment either changes.
 - **Phase 5 tracking closure:** Phase 5 (TRL-R2-007 MT5 execution adapter,
   `MT5_DEMO_MANUAL` demo-manual slice, including the Founder-review
   cross-process-locking correction) is complete, committed, and pushed at
@@ -165,17 +170,40 @@ session end or when session capacity drops below ~15%.
   only and remain valid). The Founder approved this contract-authoring
   checkpoint, exactly these 7 files were committed and pushed at
   `d4b8ca5625cceeae403e6cbaf0e6628efc947722` (verified equal across local
-  HEAD, remote branch, and upstream-tracking ref). This checkpoint remains
+  HEAD, remote branch, and upstream-tracking ref). That checkpoint was
   documentation-only: no Python, JavaScript, HTML, CSS, or test file was
-  changed; no Phase 6 source module exists.
+  changed; no Phase 6 source module existed yet. **A later, separate
+  implementation checkpoint (this document's "Active phase" entry above)
+  has since built Phase 6 against this exact contract; that implementation
+  is not part of the `d4b8ca5` commit — it is its own, separate,
+  Founder-approved local commit, per Git directly.**
 - **Completed phases:** Phase 0; Phase 1; Phase 2; Phase 3; Phase 4; Phase 5
 - **Active phase:** Phase 6 — contract checkpoint (TRL-R2-009) complete,
-  **Founder-approved, committed, and pushed** at `d4b8ca5625cceeae403e6cbaf0e6628efc947722`.
-  Phase 6 *implementation* has not started; the next authorized checkpoint
-  is Phase 6 controlled-basket implementation against the verified R2-009
-  contract, gated on this continuation-state synchronization checkpoint
-  (below) itself reaching Founder-approved, verified commit-and-push
-  status.
+  Founder-approved, committed, and pushed at `d4b8ca5625cceeae403e6cbaf0e6628efc947722`;
+  the continuation-state synchronization checkpoint reached the same
+  status at `3b6d4db052144da92e7376f6bc3b0268a17e92ee`. **Phase 6
+  implementation is now complete against the verified R2-009 contract**:
+  `basket_execution_data.py`, `basket_execution_service.py`,
+  `basket_execution_cli.py` (new); `mt5_execution_journal.py`,
+  `mode_service.py`, `app.py`, `server.py`, `service.py`,
+  `static/index.html`, `static/app.js` (additive); `test_basket_execution_concurrency.py`
+  (new, true separate-process races); 138 new tests; full 900-test suite
+  run twice with identical, deterministic results and **zero failures,
+  zero errors**; manually rehearsed twice (original + Founder-correction
+  round) via the real CLI entry points with a fake adapter only, including
+  true separate-process proof. See
+  `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md` for the complete
+  record, including one narrow Founder-approved additive amendment to
+  Section 15's `BASKET_REASON_CODES` (`TRL_DECISION_LOG.md` entry
+  2026-08-01-019), the Founder correction round that fixed a genuine
+  child-identity formula circularity and a partial-fill status defect
+  (`TRL_DECISION_LOG.md` entry 2026-08-01-020), and every implementation
+  bug found and fixed along the way. **This implementation checkpoint is
+  Founder-approved and locally committed; remote push is a separate, later,
+  Founder-authorized checkpoint** — per the Git-authoritative model this
+  document already uses, its exact staged/committed/pushed state is
+  determined by `git status` at any given moment, not by a self-description
+  here.
 - **Continuation-state synchronization checkpoint — governance-boundary
   scope:** of the seven-file governance boundary, exactly 4 files required
   correction to reflect the verified `d4b8ca5` commit-and-push (stale
@@ -190,12 +218,17 @@ session end or when session capacity drops below ~15%.
   The exact staged/committed/pushed state of this four-file synchronization
   checkpoint is, per the Git-authoritative model above, always read from
   Git directly rather than restated here.
-- **Exact tests last run:** None this checkpoint — no source or test file
-  was authorized to change; the 762-test baseline (Phase 5, `49b8f74`) is
-  unaffected and was not re-run
+- **Exact tests last run:** `python -B -W error -m unittest discover -s . -p "test_*.py"`,
+  run twice post-correction-round, both runs identical: **900 tests, 0
+  failures, 0 errors**. The pre-existing Phase 5 `test_mt5_execution_concurrency.py`
+  fixture staleness (hardcoded `expires_at_utc="2026-08-01T13:00:00.000000Z"`,
+  now in the past) that caused 5 failures/errors in the original checkpoint
+  report was fixed as a narrow, Founder-authorized test-fixture maintenance
+  pass — see `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md` Section
+  21.1 and `TRL_DECISION_LOG.md` entry 2026-08-01-020.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
-- **Known defects:** None outstanding
+- **Known defects:** None outstanding.
 - **External prerequisites (program-wide; unchanged by this checkpoint):**
   - MT5 demo account fingerprint (login/company/server) for real order_check/order_send rehearsal — not provided; `ACCOUNT_UNAVAILABLE` is the correct fail-closed outcome (`TRL_BLOCKERS.md`)
   - MT5 live account fingerprint (company/server/login) — not provided
@@ -203,7 +236,7 @@ session end or when session capacity drops below ~15%.
   - TradingView webhook signing secret / allowlist — not provided
   - FIB-001 exact numeric parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
   - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
-- **Next command:** Obtain Founder-approved commit and push of this continuation-state synchronization checkpoint; Phase 6 controlled-basket implementation may then begin against the verified, pushed R2-009 contract once a further, separate implementation-authorizing prompt is issued
+- **Next command:** Obtain separate, explicit Founder authorization for the remote push of the locally committed Phase 6 implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`

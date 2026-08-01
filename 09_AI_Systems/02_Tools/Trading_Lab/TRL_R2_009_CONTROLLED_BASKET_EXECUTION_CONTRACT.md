@@ -8,9 +8,9 @@
 |---|---|
 | Founder | Abdulrahman Yaseen Alsakkaf |
 | Checkpoint | TRL-R2-009 (implementation checkpoint: Phase 6 — Controlled Basket Execution) |
-| Status | **Founder-approved**, governing Phase 6 contract, through four Founder correction passes (`TRL_DECISION_LOG.md` entries 2026-08-01-013 through -016; approval recorded in entry 2026-08-01-017). Design contract only — Phase 6 implementation itself has not started and is deferred to a separate, later checkpoint. |
+| Status | **Founder-approved**, governing Phase 6 contract, through four Founder correction passes (`TRL_DECISION_LOG.md` entries 2026-08-01-013 through -016; approval recorded in entry 2026-08-01-017; committed and pushed at `d4b8ca5`). Phase 6 has now been **implemented, tested, manually rehearsed, and Founder-corrected once more during implementation** (identity-formula circularity, partial-fill governance — entry 2026-08-01-020) against this contract (see `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md`); the implementation checkpoint is Founder-approved and locally committed, with remote push a separate, later, Founder-authorized checkpoint. Two narrow, additive amendments to Section 15's `BASKET_REASON_CODES` and Section 17.4's child-identity formula were made during implementation, by Founder decision — see entries 2026-08-01-019 and -020 and the evidence document Sections 11.1/21.2. |
 | Depends on | TRL-R2-005 (paper engine), TRL-R2-006 (signal proposals), TRL-R2-007 (MT5 execution adapter, Phase 5 `MT5_DEMO_MANUAL` slice, committed at `49b8f74`), `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` (as narrowly amended alongside this contract) |
-| Feeds | Phase 6 implementation (a later checkpoint); Phase 9 (live-automation arming) and Phase 10 (reconciliation) remain independently gated and are not advanced by this contract |
+| Feeds | Phase 9 (live-automation arming) and Phase 10 (reconciliation of `FROZEN`/`PARTIALLY_COMPLETED` baskets, Section 33) remain independently gated and are not advanced by this contract or its implementation |
 
 ## 0. Numbering decision
 
@@ -1002,6 +1002,7 @@ SENDING
   --(the first-ever-sent child is REJECTED/CANCELLED-equivalent broker outcome, zero prior FILLED children)--> FAILED
   --(a later child is REJECTED after >=1 prior child FILLED)--> PARTIALLY_COMPLETED
   --(any child result is UNCERTAIN / malformed / ambiguous)--> FROZEN
+  --(any child result is PARTIALLY_FILLED, regardless of prior FILLED count, Section 28)--> FROZEN
   --(a currently-required child's check goes stale before ITS OWN send, zero prior FILLED children)--> CHECK_REQUIRED, confirmation invalidated, every unsent child returns to CHECK_REQUIRED (Section 24.2.A)
   --(a currently-required child's check goes stale before ITS OWN send, >=1 prior child already FILLED)--> CHECK_REQUIRED, confirmation invalidated, filled children permanently preserved, only remaining unsent children return to CHECK_REQUIRED (Section 24.2.B) — this is NOT PARTIALLY_COMPLETED
   --(basket or confirmation expiry reached mid-sequence, zero prior FILLED)--> EXPIRED
@@ -1057,8 +1058,9 @@ a `FROZEN` basket further.
   that returns to `CHECK_REQUIRED` after one or more fills because a
   remaining child's check went stale (Section 14.4) is still fully
   recoverable and is not this status.
-- **`FROZEN`** — an uncertain/ambiguous/malformed broker result on any
-  child, regardless of how many prior children filled.
+- **`FROZEN`** — an uncertain/ambiguous/malformed broker result, **or a
+  partial fill (Section 28)**, on any child, regardless of how many prior
+  children filled.
 - A basket with one or more successfully filled children and a later,
   permanent stop is always `PARTIALLY_COMPLETED`, never `FAILED` or
   `REJECTED` — those two are reserved exclusively for the zero-prior-fill
@@ -1191,6 +1193,8 @@ BASKET_CHILD_CHECK_FAILED
 BASKET_CHILD_CHECK_STALE
 BASKET_RECHECK_REQUIRED
 BASKET_CHILD_ALREADY_FILLED
+BASKET_CHILD_SEND_REJECTED
+BASKET_CHILD_SEND_PARTIALLY_FILLED
 BASKET_CONFIRMATION_FORMAT_INVALID
 BASKET_CONFIRMATION_MISMATCH
 BASKET_CONFIRMATION_WRONG_REQUEST
@@ -1226,7 +1230,22 @@ entirely; "request" covers both without implying only the basket differs.
 `BASKET_LOOKUP_STORE_INTEGRITY_UNCERTAIN`, and
 `BASKET_EXECUTION_LOCK_UNAVAILABLE` replaces an earlier draft's
 `BASKET_LOCK_UNAVAILABLE` — both renamed for exact, final, consistent
-naming; every other section of this contract that referenced the old
+naming. `BASKET_CHILD_SEND_REJECTED` and `BASKET_CHILD_SEND_PARTIALLY_FILLED`
+are the `order_send`-stage counterparts of `BASKET_CHILD_CHECK_FAILED`
+(which covers only the `order_check` stage): Sections 27, 28, and 36
+require `terminal_reason`/`invalidation_reason` to name, from this closed
+vocabulary, the exact reason a basket stopped, and the original list had
+no code capturing a broker-rejected or broker-partially-filled child
+`order_send` result — discovered during implementation and added here,
+narrowly and additively, per Founder decision. `BASKET_CHILD_SEND_REJECTED`
+is recorded as the `invalidation_reason`/`terminal_reason` for Section 27's
+rejection transition (both the zero-prior-fill `FAILED` case and the
+prior-fill `PARTIALLY_COMPLETED` case); `BASKET_CHILD_SEND_PARTIALLY_FILLED`
+for Section 28's partial-fill transition. Neither changes any approved
+behavior — every prior section describing the rejection or partial-fill
+transition already required exactly this outcome; this only supplies the
+missing vocabulary entry the closed reason-code list needs to name it;
+every other section of this contract that referenced the old
 names uses the new ones.
 
 ## 16. Event vocabulary — basket journal extension
@@ -1343,33 +1362,53 @@ correct by construction.
    corrupted or unavailable journal is never treated as permission to
    construct and send a replacement basket.**
 
-### 17.4 Basket child identity — deterministic, no nonce
+### 17.4 Basket child identity — deterministic, no nonce, non-circular
+
+**Founder correction (implementation-phase correction round, Decision Log
+entry 2026-08-01-020):** the original wording of this section listed
+`canonical_basket_plan_hash` as an input to `basket_child_lookup_key`. This
+is circular: `canonical_basket_plan_hash` (Section 17 plan-hash rule) is
+itself computed from the assembled plan's ordered child descriptors, which
+include each child's own `basket_child_id` — a final plan hash can never be
+an input to the child IDs that are themselves part of that same plan hash.
+An implementation-phase draft had silently substituted `basket_id` into that
+field's slot as a workaround; that substitution is **not approved** and is
+replaced by this corrected, non-circular formula instead.
 
 Each child's lookup key is computed from the basket's own immutable
-identity plus this child's own immutable plan facts — never from Phase
-5's `execution_intent_lookup_key`/`order_intent_id_for` functions, which
-this contract does not call, extend, or modify (Section 1.1):
+identity plus the immutable parent-proposal/parent-order-intent identity
+this basket was built from, plus this child's own immutable plan facts —
+never from `canonical_basket_plan_hash`, and never from Phase 5's
+`execution_intent_lookup_key`/`order_intent_id_for` functions, which this
+contract does not call, extend, or modify (Section 1.1):
 
 | Field | Meaning |
 |---|---|
-| `basket_id` | the owning basket |
-| `canonical_basket_plan_hash` | pins the exact basket-plan content |
+| `basket_id` | the owning basket — itself a pure function of the same governed parent/lookup context, available before the plan is assembled |
+| `parent_proposal_id` / `canonical_parent_proposal_hash` | anchors the child to the exact immutable governed proposal the whole basket derives from |
+| `parent_order_intent_id` / `canonical_parent_order_intent_hash` | anchors the child to the exact immutable Phase 5 parent order intent |
+| `account_fingerprint_hash` | inherited from the parent intent |
 | `child_index` | this child's ordered position |
 | `target_price` | this child's target |
 | `target_allocation_percent` | this child's allocation |
 | `child_quantity` | this child's computed quantity slice |
-| `account_fingerprint_hash` / `broker_native_instrument` / `side` / `order_type` / `entry_price` / `stop_loss` / `strategy_id` / `strategy_version` / `risk_policy_hash` / `operating_mode` / `expires_at_utc` | inherited authority/execution-instruction fields, unchanged from the basket plan |
+| `broker_native_instrument` / `side` / `order_type` / `entry_price` / `stop_loss` / `strategy_id` / `strategy_version` / `risk_policy_hash` / `operating_mode` / `expires_at_utc` | inherited authority/execution-instruction fields, unchanged from the parent intent |
 
 ```
-basket_child_lookup_key = "bclk_" + sha256(canonical_json(above fields))[:32]
+basket_child_lookup_key = "bclk_" + sha256(
+    "TRL-BASKET-CHILD-LOOKUP.v1\n" + canonical_json(above fields)
+)[:32]
 basket_child_id = "bc_" + sha256("TRL-BASKET-CHILD-ID.v1\n" + basket_child_lookup_key)[:16]
 ```
 
-Both are deterministic functions with **no nonce and no random value**.
-This supersedes, for Phase 6 purposes, the forward-looking `basket_child_id`
-derivation sketch in `TRL_R2_007_MT5_EXECUTION_CONTRACT.md` Section 5.6
-(written before any basket contract existed; that file is not modified by
-this checkpoint — Section 3).
+Both are deterministic functions with **no nonce and no random value**, and
+neither depends on `canonical_basket_plan_hash`. The final plan hash may
+(and does) include the ordered child IDs this formula produces — that
+dependency runs in one direction only, plan hash ← child IDs, never the
+reverse. This supersedes, for Phase 6 purposes, the forward-looking
+`basket_child_id` derivation sketch in `TRL_R2_007_MT5_EXECUTION_CONTRACT.md`
+Section 5.6 (written before any basket contract existed; that file is not
+modified by this checkpoint — Section 3).
 
 ### 17.5 Child idempotency key
 
@@ -1738,18 +1777,35 @@ reservation yet is impossible by construction.
 
 ## 28. Partial-fill behavior
 
+**Founder correction (implementation-phase correction round, Decision Log
+entry 2026-08-01-020):** this section previously marked the basket
+`PARTIALLY_COMPLETED` on any child partial fill. `PARTIALLY_COMPLETED` is a
+*definitive, no-uncertainty-remaining* permanent stop (Section 14.3) — a
+broker-confirmed partial fill is not that; a broker returning less than the
+full requested quantity for one child carries exactly the same
+follow-up-required character as an uncertain or malformed result (Section
+29), so it is governed the same way: it **freezes** the basket. This
+corrects the earlier wording; `PARTIALLY_COMPLETED` is reserved exclusively
+for Section 27's later-rejection-after-fills case, never for a partial fill.
+
 A child `PARTIALLY_FILLED` result is represented exactly as
 `PARTIALLY_FILLED` on that child (Section 14.5, terminal for Phase 6) —
 never silently upgraded to `FILLED`, never downgraded to `REJECTED`, never
 treated as a zero fill, and never treated as basket completion by itself.
 A partial fill on any child stops further child submission and marks the
-basket `PARTIALLY_COMPLETED` with `reconciliation_required = true`. The
-exact broker response is preserved unmodified. This is a **child-level**
-partial fill, kept terminologically and structurally distinct from the
-**basket-level, permanent** `PARTIALLY_COMPLETED` status it produces
-(Section 4, Section 14.3) — which is itself kept distinct from a merely
-**recoverable** stale-check `CHECK_REQUIRED`-with-progress cycle
-(Section 14.4).
+basket `FROZEN` (never `PARTIALLY_COMPLETED`) with `reconciliation_required
+= true`, exactly as Section 29 already requires for an uncertain/malformed
+result — **regardless of whether one or more earlier children already
+reached `FILLED`.** The exact broker response, and the exact confirmed
+partial quantity where the broker result reliably provides one, are
+preserved unmodified; an absent, malformed, or contradictory executed
+quantity is treated as an uncertain result under Section 29, not fabricated.
+This is a **child-level** partial fill, kept terminologically and
+structurally distinct from the **basket-level** `FROZEN` status it now
+produces — which is itself kept distinct from a merely **recoverable**
+stale-check `CHECK_REQUIRED`-with-progress cycle (Section 14.4) and from
+the **definitive, permanent** `PARTIALLY_COMPLETED` stop Section 27 alone
+produces.
 
 ## 29. Uncertain-result behavior
 

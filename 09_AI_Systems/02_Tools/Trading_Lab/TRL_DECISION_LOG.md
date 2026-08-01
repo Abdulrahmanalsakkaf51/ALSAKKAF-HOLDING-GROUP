@@ -1109,3 +1109,168 @@ complete, committed, and pushed at
 `49b8f743b2e4db967670df35cbb11d2a4ad7f7fa`. SMA-001
 (`STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`) and FIB-001
 (`STRATEGY_PARAMETERS_NOT_APPROVED`) remain fully blocked. Phase 7 was not started.
+
+## 2026-08-01-019 — Founder decision during Phase 6 implementation: added two reason codes closing a gap in `BASKET_REASON_CODES`
+
+**Decision:** While implementing `basket_execution_service.py._finalize_send`, found
+that Section 15's closed `BASKET_REASON_CODES` vocabulary had no code for a child
+`order_send` result coming back `REJECTED` or `PARTIALLY_FILLED` from the broker, even
+though Sections 27, 28, and 36 require `terminal_reason` and a confirmation cycle's
+`invalidation_reason` to name, from that exact closed list, why the basket stopped in
+precisely these two cases. The only adjacent code, `BASKET_CHILD_CHECK_FAILED`, covers
+only the earlier `order_check` (pretrade check) stage, not `order_send`. The draft
+implementation papered over this with a dead `"X" if False else new_status` expression
+that evaluated to a basket-status string (`"FAILED"`/`"PARTIALLY_COMPLETED"`), which is
+not a member of `BASKET_REASON_CODES`, so `_invalidate_active_cycle`'s own defensive
+fallback silently substituted the wrong `BASKET_FROZEN` reason. Rather than invent
+vocabulary unilaterally, this was raised to the Founder via `AskUserQuestion`, offering
+(a) add two new additive codes mirroring the existing check-stage naming, (b) reuse
+existing codes only, or (c) a different mapping. The Founder chose (a). Two codes were
+added to `BASKET_REASON_CODES` in both `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`
+Section 15 and `basket_execution_data.py`: `BASKET_CHILD_SEND_REJECTED` and
+`BASKET_CHILD_SEND_PARTIALLY_FILLED`.
+
+**Why:** This is the same class of gap the Founder has caught and corrected in every
+earlier R2-009 contract-correction round (entries 013–016) — a place where documented,
+already-approved behavior (Sections 27/28's rejection and partial-fill transitions) had
+no way to be represented truthfully within the contract's own closed vocabulary. Adding
+reason codes is itself a contract-vocabulary change, so — consistent with this session's
+standing rule against silently rewriting the approved contract — it required a separate
+Founder decision rather than an implementer's unilateral choice, exactly like the
+Section 6 capability amendment did.
+
+**How to apply:** `basket_execution_service.py._finalize_send` now sets
+`record["terminal_reason"]`, appends to `record["rejection_reasons"]`, and passes to
+`_invalidate_active_cycle` exactly `BASKET_CHILD_SEND_REJECTED` for a rejected child
+send (both the zero-prior-fill `FAILED` case and the prior-fill `PARTIALLY_COMPLETED`
+case) and exactly `BASKET_CHILD_SEND_PARTIALLY_FILLED` for a partially-filled child send
+— replacing the dead-code expression and its silent `BASKET_FROZEN` fallback. No
+approved behavior (state transitions, statuses, event types) changed; only the missing
+reason-code vocabulary entries were supplied. `_check_basket_expiry` was also made
+consistent: it already set `terminal_reason = "BASKET_EXPIRED"` but never appended that
+reason to `record["rejection_reasons"]`; it now does, for parity with every other
+terminal-transition site. This entry, and the two contract/data-module edits it
+describes, remain uncommitted and unpushed pending the same commit/push approval gate as
+every other change in this program (entry 2026-07-31-001).
+
+## 2026-08-01-020 — Founder correction round: child-identity circularity, partial-fill governance, full-suite recovery, true cross-process proof
+
+**Decision:** The Founder reviewed the Phase 6 "READY FOR FOUNDER REVIEW" checkpoint and
+held it for six specific corrections before another READY verdict could be considered.
+
+**1. Full-suite recovery.** The full suite failed twice (889 tests, 2 failures, 3 errors),
+all in the pre-existing `test_mt5_execution_concurrency.py`. Reproduced with `-v` before
+any edit: every failure/error traced to the exact same root cause,
+`ExecutionServiceError: PROPOSAL_EXPIRED`, from the hardcoded fixture
+`expires_at_utc="2026-08-01T13:00:00.000000Z"` (two occurrences) now in the past relative
+to real wall-clock time. Confirmed production code behaved correctly in every case — this
+was pure test-fixture staleness, not a Phase 5 or Phase 6 behavioral defect. The file uses
+real, separate `subprocess.Popen` worker processes (required to catch a genuine
+cross-process race a `threading.Lock` could not), so no in-process fake-clock seam could
+be shared with a worker even if one existed. Per the Founder's explicit authorization, both
+occurrences were replaced with one named, far-future constant,
+`FIXTURE_PROPOSAL_EXPIRES_AT_UTC = "2035-08-01T13:00:00.000000Z"`, referenced consistently
+rather than scattered inline strings. No assertion was weakened, removed, skipped, or
+caught-and-hidden; the original concurrency scenarios and expected results are unchanged.
+Result: `test_mt5_execution_concurrency` now passes 7/7, and this was independently
+re-verified as the correct isolated root cause by running the exact same 5 previously-
+failing tests against a truly isolated `git worktree --detach` export of the already-
+*committed* baseline (`3b6d4db052144da92e7376f6bc3b0268a17e92ee`) — the identical 5
+failures reproduce there too, proving the staleness pre-dates this session's Phase 6 work
+entirely and is a pure passage-of-time issue, not something introduced by any Phase 6 code.
+
+**2. Child-identity circularity.** The R2-009 contract's Section 17.4, and the matching
+`basket_execution_data.basket_child_lookup_key`/`basket_execution_service.build_basket`
+implementation, listed `canonical_basket_plan_hash` as an input to each child's lookup key
+— but `canonical_basket_plan_hash` is itself computed from the assembled plan's ordered
+child descriptors, which include each child's own `basket_child_id`. A final plan hash can
+never be an input to the child IDs that are themselves part of that same plan hash; this
+is a genuine circularity in the *contract itself*, not merely an implementation
+shortcoming. An earlier implementation-phase draft had silently substituted `basket_id`
+into that field's slot as an undisclosed workaround — not approved. Per the Founder's
+exact specification, the lookup key now derives from `basket_id` plus the immutable
+parent-proposal identity (`parent_proposal_id`/`canonical_parent_proposal_hash`) and
+parent-order-intent identity (`parent_order_intent_id`/`canonical_parent_order_intent_hash`)
+plus each child's own economic fields — never from `canonical_basket_plan_hash` — with a
+new domain-separator, `TRL-BASKET-CHILD-LOOKUP.v1`, folded into the hash. The existing,
+already-approved `bc_`/16-hex `basket_child_id` prefix and length are unchanged (per the
+Founder's own instruction to keep repository-approved prefixes over the illustrative
+`bch_`/32 sketch). `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` Section 17.4,
+`basket_execution_data.py`, `basket_execution_service.py`, and the identity tests in
+`test_basket_execution_data.py` were all updated consistently. No seventh persisted schema
+was added — the identity input is an internal deterministic derivation basis, not a new
+persisted business document, exactly as instructed.
+
+**3. Final partial-fill governance.** The contract's Section 28 and the implementation
+both marked the basket `PARTIALLY_COMPLETED` on any child partial fill. Per Founder
+decision, this is corrected: a broker-confirmed partial fill now **freezes** the basket
+(`basket_status -> FROZEN`, `reconciliation_required = true`) exactly as an uncertain/
+malformed result already does (Section 29) — **regardless of whether any earlier child
+already reached `FILLED`** — because a partial fill carries the same
+follow-up-required, no-longer-purely-algorithmic character as an uncertain result, not the
+zero-uncertainty-remaining character `PARTIALLY_COMPLETED` requires. `PARTIALLY_COMPLETED`
+is now reserved exclusively for Section 27's later-rejection-after-fills case. The child's
+own state remains exactly `PARTIALLY_FILLED` with reason `BASKET_CHILD_SEND_PARTIALLY_FILLED`
+(the two reason codes approved in entry 019 are unchanged and un-weakened); the basket-level
+journal sequence changes from `BASKET_CHILD_SEND_RESULT` → `BASKET_CHILD_PARTIAL` →
+`BASKET_PARTIALLY_COMPLETED` to `BASKET_CHILD_SEND_RESULT` → `BASKET_CHILD_PARTIAL` →
+`BASKET_FROZEN` → `BASKET_RECONCILIATION_REQUIRED`, mirroring the uncertain-result event
+sequence exactly. `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md` Sections 14.3, 28,
+and the SENDING-state transition diagram, `basket_execution_service.py`'s `_finalize_send`,
+and the corresponding tests in `test_basket_execution_service.py` were all updated
+consistently; a new test proves the after-earlier-fill case specifically stays `FROZEN`,
+never `PARTIALLY_COMPLETED`.
+
+**4. Test-count arithmetic.** Recounted every Phase 6 test file directly (both via
+isolated `python -m unittest <module>` runs and an independent `grep -c "^    def test_"`
+cross-check, which matched exactly): `test_basket_execution_data.py` 52,
+`test_basket_execution_service.py` 45, `test_basket_execution_cli.py` 17,
+`test_basket_execution_http.py` 16 (130 total before item 5 below added a fifth file).
+Independently re-verified the pre-Phase-6 baseline using a genuinely isolated
+`git worktree add --detach` export of the committed `3b6d4db` (outside the repository
+working tree, isolated `LOCALAPPDATA`, no branch created, working tree/index untouched,
+worktree removed afterward): confirmed exactly 762 tests discovered, with the same 5
+pre-existing concurrency failures described in item 1. The previously reported 889-vs-890
+one-test gap cannot be forensically re-diagnosed after the fact — the state it described
+has been superseded by this correction round's own edits — but the *current* arithmetic
+is now proven exactly self-consistent by direct, independent measurement rather than
+asserted: 762 + 130 (four files) + 8 (`test_basket_execution_concurrency.py`, item 5) =
+900, and the full-suite discovery count is exactly 900, both full-suite runs, both with
+zero failures and zero errors.
+
+**5. True cross-process proof.** Added `test_basket_execution_concurrency.py` (8 tests),
+mirroring `test_mt5_execution_concurrency.py`'s exact house style — real, separate
+`subprocess.Popen` worker processes (never threads, never sequential in-process calls,
+never a mocked lock), synchronized with readiness-marker files polled with a bounded
+timeout. `ConcurrentBasketCreationTests` (4 tests) proves two independently spawned
+processes racing `build_basket` against the same isolated journal/parent-intent converge
+on the identical `basket_id`, with exactly one authoritative `BASKET_CREATED` event and
+one `BASKET_REUSED` event in the journal, a valid post-race hash chain, and no lock file
+left behind. `ConcurrentChildSendTests` (4 tests) proves two processes racing
+`send_basket_next` against the same accepted confirmation cycle result in exactly one
+process reaching the adapter's `order_send` — proven by an independent, per-call marker
+file in the isolated temp directory (in-memory counters are not visible across process
+boundaries) — the other failing closed with exactly `BASKET_CHILD_SEND_ALREADY_RESERVED`;
+exactly one `BASKET_CHILD_SEND_RESERVED` and one `BASKET_CHILD_SEND_RESULT` event in the
+journal; and the won child never resent after a simulated restart. All 8 tests use
+`FakeExecutionAdapter` only, confirmed deterministic across 4 repeated runs.
+
+**Why:** Every one of these six matters is exactly the class of defect the Founder has
+caught and corrected throughout this entire program (entries 003, 007, 009, 011, 013–016,
+019) — a place where documented or implemented behavior did not actually match what the
+contract's own logic required, or where a prior verification claim (full-suite green,
+cross-process safety) was not actually backed by the evidence it implied. Holding the
+READY verdict until each was independently reproduced, root-caused, and fixed — rather
+than accepted on the strength of a prior summary — is the same discipline this program has
+applied at every checkpoint.
+
+**How to apply:** All identity-formula, partial-fill-status, and reason-code changes
+described in the contract corrections above are the current, sole governing text — the
+prior wording is superseded, not merely supplemented. Any future Phase 6 work must treat
+`basket_child_lookup_key` as deriving from parent-proposal/parent-order-intent identity,
+never from `canonical_basket_plan_hash`; must treat a broker partial fill as a `FROZEN`
+outcome, never `PARTIALLY_COMPLETED`, regardless of prior fills; and must run
+`test_basket_execution_concurrency.py` as part of any future targeted-test pass on this
+module, not only the full-suite discovery run. This entry, and the source/test/contract
+edits it describes, remain uncommitted and unpushed pending the same commit/push approval
+gate as every other change in this program (entry 2026-07-31-001).

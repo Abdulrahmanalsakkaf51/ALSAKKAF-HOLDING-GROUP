@@ -91,6 +91,16 @@ CAPABILITIES = (
     # research. Denied by default; granted only to RESEARCH and
     # SYNTHETIC_PAPER below. Never granted to OFF or any MT5 mode.
     "signal_proposal_generation",
+    # Added in Phase 6 (TRL-R2-009): manual, demo-only, locally confirmed
+    # controlled basket execution. Necessary but never sufficient by
+    # itself — every basket operation also requires the pre-existing
+    # capability its underlying action already needs (mt5_order_check /
+    # mt5_order_send / manual_broker_execution). Granted only to
+    # MT5_DEMO_MANUAL below; denied to every other mode, including the
+    # still-unavailable automated/live MT5 modes, unless a later,
+    # separately Founder-approved contract changes this
+    # (TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md Section 6.1).
+    "manual_basket_execution",
 )
 
 REASON_CODES = (
@@ -190,6 +200,7 @@ _CAPABILITY_MATRIX = {
     "MT5_DEMO_MANUAL": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",
         "manual_broker_execution", "emergency_controls", "report_export",
+        "manual_basket_execution",
     }),
     "MT5_DEMO_AUTOMATED": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",

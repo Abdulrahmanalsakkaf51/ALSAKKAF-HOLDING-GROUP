@@ -13,6 +13,7 @@ from .news_service import disabled_service as disabled_news_service
 from .paper_service import disabled_service as disabled_paper_service
 from .signal_service import disabled_service as disabled_signal_service
 from .mt5_execution_service import disabled_service as disabled_execution_service
+from .basket_execution_service import disabled_basket_service
 from .strategy_registry import load_registry
 
 
@@ -203,6 +204,33 @@ def mt5_terminal_status_document(execution_service=None):
 
 def mt5_execution_journal_document(execution_service=None):
     return (execution_service or disabled_execution_service()).journal_document()
+
+
+# TRL-R2-009 (Phase 6): read-only only, mirroring the Phase 5 execution
+# routes above exactly — no HTTP route may create, check, confirm, send,
+# retry, cancel, compensate, or otherwise mutate any basket state (see
+# server.py's global method-not-allowed default for every non-GET/HEAD
+# verb). The journal slice is explicitly bounded per
+# TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md Section 35.
+BASKET_JOURNAL_HTTP_MAX_EVENTS = 500
+
+
+def basket_execution_status_document(basket_service=None):
+    return (basket_service or disabled_basket_service()).status_document()
+
+
+def execution_baskets_document(basket_service=None):
+    return (basket_service or disabled_basket_service()).list_baskets_document()
+
+
+def execution_basket_document(basket_service, basket_id):
+    return (basket_service or disabled_basket_service()).basket_status_document(basket_id)
+
+
+def execution_basket_journal_document(basket_service=None):
+    return (basket_service or disabled_basket_service()).basket_journal_document(
+        limit=BASKET_JOURNAL_HTTP_MAX_EVENTS,
+    )
 
 
 def strategy_registry_document():

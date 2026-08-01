@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, basket: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -478,6 +478,83 @@ async function loadMt5Execution() {
   } catch (error) { return { error: error.message }; }
 }
 
+function renderBasketExecution(bundle) {
+  const badge = $("basket-availability-badge");
+  if (!bundle || bundle.error || !bundle.status) {
+    badge.textContent = "UNAVAILABLE"; badge.className = "badge badge-neutral";
+    setText("basket-operating-mode", "—"); setText("basket-capability-granted", "—"); setText("basket-count", "—");
+    $("basket-list-table").replaceChildren();
+    $("basket-detail-empty").hidden = false; $("basket-detail").hidden = true;
+    return;
+  }
+  const { status, baskets } = bundle;
+  badge.textContent = status.enabled ? "AVAILABLE (DEMO ONLY)" : "UNAVAILABLE";
+  badge.className = status.enabled ? "badge badge-warning" : "badge badge-neutral";
+  setText("basket-operating-mode", status.operating_mode);
+  setText("basket-capability-granted", status.manual_basket_execution_granted ? "GRANTED" : "NOT GRANTED");
+
+  const list = baskets || [];
+  setText("basket-count", list.length);
+  const listTable = $("basket-list-table");
+  listTable.replaceChildren();
+  list.forEach((basket) => {
+    const tr = document.createElement("tr");
+    cell(tr, basket.basket_id || "—");
+    cell(tr, basket.basket_status || "—");
+    cell(tr, basket.confirmation_status || "—");
+    cell(tr, basket.found ? `${basket.filled_child_count} / ${basket.child_count}` : "—");
+    cell(tr, basket.reconciliation_required ? "YES" : "NO");
+    listTable.appendChild(tr);
+  });
+
+  const detailEmpty = $("basket-detail-empty");
+  const detail = $("basket-detail");
+  if (!list.length) {
+    detailEmpty.hidden = false; detail.hidden = true;
+    $("basket-children-table").replaceChildren();
+    return;
+  }
+  detailEmpty.hidden = true; detail.hidden = false;
+  const latest = list[list.length - 1];
+  setText("basket-detail-id", latest.basket_id);
+  setText("basket-detail-status", latest.basket_status);
+  setText("basket-detail-confirmation-status", latest.confirmation_status);
+  setText("basket-detail-cycle", latest.active_confirmation_cycle_number);
+  setText("basket-detail-authorized-start", latest.authorized_start_child_id);
+  setText("basket-detail-authorized-remaining", (latest.authorized_remaining_child_ids || []).join(", ") || "—");
+  setText("basket-detail-live-next", latest.live_next_eligible_child_id);
+  setText("basket-detail-completed-quantity", latest.completed_quantity);
+  setText("basket-detail-remaining-quantity", latest.remaining_quantity);
+  setText("basket-detail-filled-count", `${latest.filled_child_count} / ${latest.child_count}`);
+  setText("basket-detail-reconciliation", latest.reconciliation_required ? "YES" : "NO");
+  setText("basket-detail-terminal-reason", latest.terminal_reason);
+  setText("basket-detail-rejection-reasons", (latest.rejection_reasons || []).join(", ") || "—");
+
+  const childrenTable = $("basket-children-table");
+  childrenTable.replaceChildren();
+  (latest.children || []).forEach((child) => {
+    const tr = document.createElement("tr");
+    cell(tr, child.basket_child_id);
+    cell(tr, child.target_price);
+    cell(tr, child.target_allocation_percent);
+    cell(tr, child.child_quantity);
+    cell(tr, child.check_status || "—");
+    cell(tr, child.check_fresh ? "YES" : "NO");
+    cell(tr, child.send_status || "—");
+    cell(tr, child.execution_state);
+    childrenTable.appendChild(tr);
+  });
+}
+
+async function loadBasketExecution() {
+  try {
+    const [status, basketsDoc] = await Promise.all([
+      getJson("/api/basket-execution-status"), getJson("/api/execution-baskets"),
+    ]);
+    return { status, baskets: basketsDoc.baskets };
+  } catch (error) { return { error: error.message }; }
+}
+
 async function loadOfficialNews() {
   try {
     const [health, sources, items, events] = await Promise.all([getJson("/api/news-health"), getJson("/api/news-sources"), getJson("/api/news-items"), getJson("/api/economic-events")]);
@@ -492,7 +569,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderMt5Execution(state.mt5); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
+  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderMt5Execution(state.mt5); renderBasketExecution(state.basket); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -501,7 +578,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution()]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5, state.basket] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution(), loadBasketExecution()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }

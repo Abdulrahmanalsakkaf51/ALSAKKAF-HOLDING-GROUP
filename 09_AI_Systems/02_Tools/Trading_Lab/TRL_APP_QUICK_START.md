@@ -471,8 +471,57 @@ fails closed rather than being silently replaced or allowing any action to proce
 
 ### 18.6 Scope limitations
 
-Single order per proposal only (no basket execution — Phase 6); one `order_check` and
-one manual-confirmed `order_send` attempt per order intent (no automatic repriced
-retry); live modes and automated submission remain unavailable (Phase 9); an uncertain
-`order_send` result freezes permanently rather than being automatically reconciled
-(Phase 10). See `TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` for full detail.
+Single order per proposal only; one `order_check` and one manual-confirmed `order_send`
+attempt per order intent (no automatic repriced retry); live modes and automated
+submission remain unavailable (Phase 9); an uncertain `order_send` result freezes
+permanently rather than being automatically reconciled (Phase 10). See
+`TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` for full detail. Basket (multi-child) execution
+is Phase 6 — see Section 19 below.
+
+## 19. Controlled basket execution (TRL-R2-009, Phase 6)
+
+Manual, demo-only, 2–4-child basket execution built from an already-eligible Phase 5
+parent order intent: per-child `order_check`, one confirmation cycle authorizing the
+complete ordered remaining child set, one explicit `send-basket-next` per child with no
+automatic progression. Live and automated basket execution do not exist. Reuses the
+same adapter, journal, and lock Phase 5 uses — no new durable store.
+
+### 19.1 Enter the mode
+
+Same as Section 18.1: `python -m trading_lab_app.mode_cli request-mode MT5_DEMO_MANUAL`.
+`manual_basket_execution` is granted only in this mode, and only in addition to the
+Phase 5 capabilities each basket operation already needs (`mt5_order_check` for checks,
+`mt5_order_send`/`manual_broker_execution` for sends).
+
+### 19.2 Local operator commands
+
+```
+python -B -W error -m trading_lab_app.basket_execution_cli basket-status
+python -B -W error -m trading_lab_app.basket_execution_cli inspect-basket <basket_id>
+python -B -W error -m trading_lab_app.basket_execution_cli build-basket <parent_order_intent_id>
+python -B -W error -m trading_lab_app.basket_execution_cli check-basket <basket_id>
+python -B -W error -m trading_lab_app.basket_execution_cli request-basket-confirmation <basket_id>
+python -B -W error -m trading_lab_app.basket_execution_cli confirm-basket <basket_id> "CONFIRM-BASKET <16-hex>"
+python -B -W error -m trading_lab_app.basket_execution_cli send-basket-next <basket_id>
+python -B -W error -m trading_lab_app.basket_execution_cli inspect-basket-child <basket_id> <basket_child_id>
+python -B -W error -m trading_lab_app.basket_execution_cli basket-journal --limit 20
+```
+
+`send-basket-next` takes no child-identifying argument — the service alone computes
+which child is next eligible; the operator cannot skip, reorder, or resend a child.
+
+### 19.3 Inspecting basket status over HTTP (read-only)
+
+`GET /api/basket-execution-status`, `GET /api/execution-baskets`,
+`GET /api/execution-basket/<basket_id>`, `GET /api/execution-basket-journal`. Same
+read-only rule as every other route: GET/HEAD only, `405` with `Allow: GET, HEAD` for
+POST/PUT/PATCH/DELETE. No HTTP route can build, check, confirm, or send a basket child.
+
+### 19.4 Scope limitations
+
+No live or automated basket execution (Phase 9); a `FROZEN`/`PARTIALLY_COMPLETED`
+basket requires the same manual, human-operator reconciliation path a frozen single
+order already does today — Phase 6 detects and freezes these states truthfully but does
+not resolve them (Phase 10). See `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md`
+for full detail, including disclosed implementation-level design choices and
+limitations.
