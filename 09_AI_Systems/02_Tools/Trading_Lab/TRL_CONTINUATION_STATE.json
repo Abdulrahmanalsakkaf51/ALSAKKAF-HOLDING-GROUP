@@ -1,9 +1,9 @@
 {
   "active_branch": "codex/TRL-R2-full-vision-execution",
-  "current_head": "49b8f743b2e4db967670df35cbb11d2a4ad7f7fa",
-  "current_checkpoint": "Phase 6 contract-authoring checkpoint (TRL-R2-009), including four Founder correction passes on top of the original draft (see TRL_DECISION_LOG.md entries 012-016 for full detail). Summary of the most recent (fifth) pass: the fourth draft's confirmation_basis_hash bound ordered_filled_child_ids/next_eligible_child_id as live values, while the contract also claimed one accepted confirmation authorizes the entire sequential send of remaining children - since an ordinary successful fill changes both live values, the send-time check as written would have wrongly rejected every child past the first one sent under a cycle. The confirmation basis is now a fixed authorization checkpoint computed once at request time: authorized_prior_filled_child_ids (immutable pre-cycle snapshot), authorized_remaining_child_ids (the complete unsent set this cycle may authorize sequentially, staying listed even after a child fills), and authorized_start_child_id (informational only). A child reaching FILLED no longer invalidates the authorization, changes the basis, or requires reconfirmation - only an explicit invalidation condition does. Section 26's send-time gate now checks live-next-child membership in authorized_remaining_child_ids rather than exact equality against a frozen field. A wrong confirm-basket entry was clarified as a BASKET_CONFIRMATION_REJECTED attempt-level event only, never a competing request or a REJECTED request-lifecycle status. Documentation-only checkpoint throughout: no Python/JavaScript/HTML/CSS/test file changed; no Phase 6 source module exists. The Founder approved this checkpoint and authorized a local commit of exactly these 7 files; the checkpoint is locally committed and not yet pushed.",
+  "current_head": "d4b8ca5625cceeae403e6cbaf0e6628efc947722",
+  "current_checkpoint": "Phase 6 contract checkpoint (TRL-R2-009) complete, Founder-approved, committed, and pushed at d4b8ca5625cceeae403e6cbaf0e6628efc947722 (commit message: Define TRL-R2-009 controlled basket execution contract; push recorded as 49b8f74..d4b8ca5 on codex/TRL-R2-full-vision-execution). Local HEAD, remote branch, and upstream-tracking ref were verified equal at that SHA immediately after the push, with a clean working tree. The commit contains exactly 7 documentation/governance files (1 added, 6 modified, 0 deleted; 2818 insertions, 147 deletions). Reached through four Founder correction passes on the original draft, then Founder-approved commit and push (see TRL_DECISION_LOG.md entries 012-018 for full detail): six separate basket schemas with no Phase 5 schema modification; fully deterministic nonce-free basket/child identities; an exact, cycle-scoped, permanently-immutable-once-expired confirmation challenge; a fixed authorization-checkpoint confirmation-basis design (authorized_prior_filled_child_ids/authorized_remaining_child_ids/authorized_start_child_id) that lets one accepted confirmation govern an entire basket's sequential sends without a normal successful fill ever forcing reconfirmation. This continuation-state synchronization checkpoint corrects stale pre-push wording in the tracking documents to reflect the verified commit-and-push; it does not itself modify the R2-009 contract, the Phase 3 amendment, or TRL_BLOCKERS.md, none of which contained stale text. The exact staged/committed/pushed state of this synchronization checkpoint is authoritatively determined by Git at any given moment (current HEAD, upstream-tracking ref, remote branch ref, working-tree status), not restated here. Phase 6 implementation itself has not started; the next authorized checkpoint is Phase 6 controlled-basket implementation against the verified R2-009 contract, gated on this synchronization checkpoint itself reaching Founder-approved, verified commit-and-push status.",
   "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3", "Phase 4", "Phase 5"],
-  "active_phase": "Phase 6 - contract-authoring checkpoint complete and Founder-approved (TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md through four Founder correction passes; narrow manual_basket_execution Phase 3 amendment). This checkpoint is locally committed; Phase 6 implementation itself has not started and awaits a separate future checkpoint; remote push of this contract-authoring commit is pending separate Founder approval.",
+  "active_phase": "Phase 6 - contract checkpoint (TRL-R2-009) complete, Founder-approved, committed, and pushed at d4b8ca5625cceeae403e6cbaf0e6628efc947722. Phase 6 implementation itself has not started; the next authorized checkpoint is Phase 6 controlled-basket implementation against the verified R2-009 contract, gated on the continuation-state synchronization checkpoint (see continuation_state_sync_pass) itself reaching Founder-approved, verified commit-and-push status.",
   "phase_5_tracking_closure": {
     "status": "complete_committed_pushed",
     "commit": "49b8f743b2e4db967670df35cbb11d2a4ad7f7fa",
@@ -89,8 +89,19 @@
     "deleted": 0,
     "staged": 0,
     "committed_this_checkpoint": 1,
-    "pushed_this_checkpoint": 0,
-    "committed_head": "advances past 49b8f743b2e4db967670df35cbb11d2a4ad7f7fa with this checkpoint's own new local commit (exact SHA determined by git at commit time)"
+    "pushed_this_checkpoint": 1,
+    "committed_head": "d4b8ca5625cceeae403e6cbaf0e6628efc947722",
+    "verified_local_remote_tracking_match": true
+  },
+  "continuation_state_sync_pass": {
+    "description": "A separate, smaller governance-boundary checkpoint correcting stale pre-push wording left over in the tracking documents after the d4b8ca5 commit-and-push completed. Does not modify the R2-009 contract, the Phase 3 amendment, or TRL_BLOCKERS.md - none contained stale text. Documentation-only; implements no Phase 6 source code.",
+    "files_modified": [
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md",
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md",
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json",
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md"
+    ],
+    "repository_status_authority": "Git is the sole authority for this checkpoint's current staged/committed/pushed status (current HEAD, upstream-tracking ref, remote branch ref, working-tree status) - not restated here, since any fixed value here would go stale the moment that status changes"
   },
   "tests_last_run": "None this checkpoint - no source or test file was authorized to change",
   "tests_last_result": "762/762 baseline unaffected (from Phase 5, commit 49b8f74); not re-run this checkpoint",
@@ -109,8 +120,8 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "Obtain separate Founder approval to push this contract-authoring checkpoint's commit to origin/codex/TRL-R2-full-vision-execution; do not begin Phase 6 implementation until a further, separate Founder instruction authorizes it",
-  "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - run before this checkpoint's local commit; re-run the same set before any future push",
+  "next_command": "Obtain Founder-approved commit and push of the continuation-state synchronization checkpoint; Phase 6 controlled-basket implementation may then begin against the verified, pushed R2-009 contract once a further, separate implementation-authorizing prompt is issued",
+  "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
     "git clean",

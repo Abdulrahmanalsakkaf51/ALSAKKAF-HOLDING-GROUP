@@ -1069,3 +1069,43 @@ commit only, not the push. Phase 5 remains complete, committed, and pushed at
 (`STRATEGY_PARAMETERS_NOT_APPROVED`) remain fully blocked and are unaffected by this
 approval. Phase 7 was not started and is not referenced as available anywhere in the
 approved contract.
+
+## 2026-08-01-018 — Founder approval and verified remote push of the TRL-R2-009 contract-authoring checkpoint
+
+**Decision:** The Founder separately authorized pushing the local commit recorded in
+entry 2026-08-01-017 (`d4b8ca5625cceeae403e6cbaf0e6628efc947722`, "Define TRL-R2-009
+controlled basket execution contract") to `origin/codex/TRL-R2-full-vision-execution`.
+Pre-push verification confirmed the exact expected pre-push state (branch, HEAD, upstream
+SHA at the prior Phase 5 commit, one commit ahead, clean working tree and index, no
+untracked files, exactly the 7 documentation/governance files in the commit, port 8765
+clear, no Trading Lab Python process). The push completed as `49b8f74..d4b8ca5
+codex/TRL-R2-full-vision-execution -> codex/TRL-R2-full-vision-execution`. Post-push
+verification confirmed local HEAD, `origin/codex/TRL-R2-full-vision-execution`, and the
+upstream-tracking ref all equal `d4b8ca5625cceeae403e6cbaf0e6628efc947722` exactly, with
+no ahead/behind marker, a clean working tree and index, no untracked files, no additional
+commit created, and `main` unchanged at `8ada27f915091b91ddbc421aae06c7c5b36e068f`.
+
+**Why:** This is the standard two-step commit/push approval the program's commit/push
+policy requires (`TRL_DECISION_LOG.md` entry 2026-07-31-001) — a separate, explicit
+Founder authorization for the push, distinct from the earlier authorization for the local
+commit itself (entry 2026-08-01-017).
+
+**How to apply:** `TRL-R2-009` is now the governing Phase 6 contract, committed and
+pushed, available to any future session working from this branch without relying on
+uncommitted local state. Phase 6 implementation remains entirely unbuilt and is
+explicitly deferred to a separate, later checkpoint that must follow this pushed
+contract without inventing business or safety rules. A subsequent continuation-state
+synchronization pass (this same session) found and corrected stale "push pending"
+wording in `TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_CONTINUATION_STATE.md`, and
+`TRL_CONTINUATION_STATE.json` left over from before this push completed — including a
+stale `Current HEAD` field in `TRL_CONTINUATION_STATE.md` that still named the prior
+Phase 5 commit rather than this verified checkpoint. That synchronization is itself a
+distinct, later governance checkpoint from the R2-009 commit this entry records; its
+exact repository status (staged, committed, pushed) is determined by Git at any given
+moment, not restated here — Phase 6 controlled-basket implementation requires that
+synchronization checkpoint to independently reach the same Founder-approved,
+verified-equal commit-and-push status this entry records for `d4b8ca5`. Phase 5 remains
+complete, committed, and pushed at
+`49b8f743b2e4db967670df35cbb11d2a4ad7f7fa`. SMA-001
+(`STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`) and FIB-001
+(`STRATEGY_PARAMETERS_NOT_APPROVED`) remain fully blocked. Phase 7 was not started.

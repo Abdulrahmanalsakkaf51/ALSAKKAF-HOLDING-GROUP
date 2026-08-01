@@ -18,14 +18,49 @@ session end or when session capacity drops below ~15%.
 ## Current state
 
 - **Active branch:** `codex/TRL-R2-full-vision-execution` (pushed to origin)
-- **Current HEAD:** `49b8f743b2e4db967670df35cbb11d2a4ad7f7fa` (Phase 5 commit
-  "Implement TRL-R2-007 governed MT5 execution adapter"). Local HEAD, the
+- **Current HEAD:** `d4b8ca5625cceeae403e6cbaf0e6628efc947722` ("Define
+  TRL-R2-009 controlled basket execution contract"). Local HEAD, the
   upstream-tracking ref, and `origin/codex/TRL-R2-full-vision-execution`
-  match exactly.
+  were verified equal at this exact SHA immediately after the push; the
+  working tree was clean at that point (before the documentation-
+  synchronization edits described below were made).
 - **Phase 5 tracking closure:** Phase 5 (TRL-R2-007 MT5 execution adapter,
   `MT5_DEMO_MANUAL` demo-manual slice, including the Founder-review
   cross-process-locking correction) is complete, committed, and pushed at
-  `49b8f74`.
+  `49b8f743b2e4db967670df35cbb11d2a4ad7f7fa`.
+- **Phase 6 contract checkpoint (TRL-R2-009):** complete, Founder-approved,
+  committed, and pushed at `d4b8ca5625cceeae403e6cbaf0e6628efc947722`
+  (commit message "Define TRL-R2-009 controlled basket execution
+  contract"; push recorded as `49b8f74..d4b8ca5` on
+  `codex/TRL-R2-full-vision-execution`). That commit contains exactly 7
+  documentation/governance files (1 added, 6 modified, 0 deleted; 2818
+  insertions, 147 deletions) — `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`
+  (new) plus `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`,
+  `TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_CONTINUATION_STATE.md`,
+  `TRL_CONTINUATION_STATE.json`, `TRL_DECISION_LOG.md`, and
+  `TRL_BLOCKERS.md` (modified). The narrow `manual_basket_execution`
+  capability is Founder-approved for `MT5_DEMO_MANUAL` only; the broad
+  `basket_execution` capability remains unchanged and reserved for the
+  still-future, still-unavailable automated modes. **The next authorized
+  checkpoint is Phase 6 controlled-basket implementation against this
+  verified R2-009 contract** — not yet started.
+- **Continuation-state synchronization checkpoint:** `TRL_CONTINUATION_STATE.md`/
+  `.json`, `TRL_FULL_VISION_MASTER_PROGRAM.md`, and `TRL_DECISION_LOG.md`
+  (entry `2026-08-01-018`) record the verified `d4b8ca5` commit-and-push
+  checkpoint as the governing Phase 6 baseline. This synchronization is
+  documentation-only: it does not implement Phase 6 and does not alter the
+  R2-009 contract. It is not part of, and does not retroactively change,
+  the `d4b8ca5` commit itself — a distinct, later checkpoint. **The exact
+  repository state of this synchronization checkpoint (staged, committed,
+  or pushed) is authoritatively determined by Git at any given moment —
+  current HEAD, the upstream-tracking ref, the remote branch ref, and
+  working-tree status — not by a self-description in this document, which
+  would otherwise need updating every time that state changes.** Phase 6
+  controlled-basket implementation may begin only after this
+  synchronization checkpoint itself has Founder-approved, verified
+  commit-and-push status (by the same Git-authoritative check this
+  document already uses for the R2-009 checkpoint above) and a further,
+  separate implementation-authorizing prompt is issued.
 - **Current checkpoint:** Phase 6 contract-authoring checkpoint
   (TRL-R2-009), now including four Founder correction passes on top of
   the original draft. The first Phase 6
@@ -128,30 +163,33 @@ session end or when session capacity drops below ~15%.
   `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.1 was reviewed after
   each pass and needed no change (its cross-references are section-number
   only and remain valid). The Founder approved this contract-authoring
-  checkpoint and authorized a local commit of exactly these 7 files. This
-  checkpoint remains documentation-only: no Python, JavaScript, HTML, CSS,
-  or test file was changed; no Phase 6 source module exists; the checkpoint
-  is locally committed and not yet pushed.
+  checkpoint, exactly these 7 files were committed and pushed at
+  `d4b8ca5625cceeae403e6cbaf0e6628efc947722` (verified equal across local
+  HEAD, remote branch, and upstream-tracking ref). This checkpoint remains
+  documentation-only: no Python, JavaScript, HTML, CSS, or test file was
+  changed; no Phase 6 source module exists.
 - **Completed phases:** Phase 0; Phase 1; Phase 2; Phase 3; Phase 4; Phase 5
-- **Active phase:** Phase 6 — contract-authoring checkpoint complete and
-  **Founder-approved** (`TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`,
-  through four Founder correction passes; the narrow
-  `manual_basket_execution` Phase 3 amendment). This checkpoint's 7 files
-  are the Phase 6 contract-authoring local commit; Phase 6 *implementation*
-  has not started and awaits a separate future checkpoint; remote push of
-  this contract-authoring commit is pending separate Founder approval.
-- **Exact changed/new file total (this contract-authoring checkpoint):** 7
-  (1 new + 6 modified + 0 deleted) — this checkpoint's own local commit;
-  not yet pushed
-- **Exact new file:**
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`
-- **Exact files modified (tracked, uncommitted):**
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` (new Section 3.1: `manual_basket_execution` capability amendment)
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md` (Phase 5 row closed out as committed/pushed; Phase 6 row updated)
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md` (this document)
+- **Active phase:** Phase 6 — contract checkpoint (TRL-R2-009) complete,
+  **Founder-approved, committed, and pushed** at `d4b8ca5625cceeae403e6cbaf0e6628efc947722`.
+  Phase 6 *implementation* has not started; the next authorized checkpoint
+  is Phase 6 controlled-basket implementation against the verified R2-009
+  contract, gated on this continuation-state synchronization checkpoint
+  (below) itself reaching Founder-approved, verified commit-and-push
+  status.
+- **Continuation-state synchronization checkpoint — governance-boundary
+  scope:** of the seven-file governance boundary, exactly 4 files required
+  correction to reflect the verified `d4b8ca5` commit-and-push (stale
+  "push pending" wording predating the push); `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md`,
+  `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`, and `TRL_BLOCKERS.md` were
+  reviewed and needed no change:
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md` (Phase 6 row updated: commit `d4b8ca5` recorded, stale push-pending wording removed)
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md` (this document — Current HEAD corrected from the stale Phase 5 SHA to `d4b8ca5`; checkpoint/push status resynchronized)
   - `09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json` (this document's machine-readable twin)
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md`
-  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md` (SMA-001/FIB-001 rows extended to note they also gate Phase 6 basket construction)
+  - `09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md` (entry `2026-08-01-018` recording the verified commit-and-push)
+
+  The exact staged/committed/pushed state of this four-file synchronization
+  checkpoint is, per the Git-authoritative model above, always read from
+  Git directly rather than restated here.
 - **Exact tests last run:** None this checkpoint — no source or test file
   was authorized to change; the 762-test baseline (Phase 5, `49b8f74`) is
   unaffected and was not re-run
@@ -163,10 +201,10 @@ session end or when session capacity drops below ~15%.
   - MT5 live account fingerprint (company/server/login) — not provided
   - Private HTTPS tunnel (Tailscale or equivalent) for online exposure — not confirmed installed/configured
   - TradingView webhook signing secret / allowlist — not provided
-  - FIB-001 exact numeric parameters — not provided; blocker remains active, now also independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
-  - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, now also independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
-- **Next command:** Obtain separate Founder approval to push this contract-authoring checkpoint's commit to `origin/codex/TRL-R2-full-vision-execution`; do not begin Phase 6 *implementation* until a further, separate Founder instruction authorizes it
-- **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan were run before this checkpoint's local commit; re-run the same set before any future push
+  - FIB-001 exact numeric parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
+  - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
+- **Next command:** Obtain Founder-approved commit and push of this continuation-state synchronization checkpoint; Phase 6 controlled-basket implementation may then begin against the verified, pushed R2-009 contract once a further, separate implementation-authorizing prompt is issued
+- **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`
 
