@@ -6,7 +6,7 @@
 | Document Type | Master Delivery Program |
 | Status | Active |
 | Version | 1.0 |
-| Date | 2026-07-31 |
+| Date | 2026-08-01 |
 | Owner | Abdulrahman Alsakkaf |
 | Related System | AOS / Trading Lab (PRJ-017) |
 | Related Protocol | OPS-001, CLAUDE-001 |
@@ -44,14 +44,14 @@ the Founder performs the first real-money activation personally.
 | 1 | Independently review and close TRL-R2-005 | Complete and pushed (2026-07-31, commit `49fa62c`) |
 | 2 | Create full-vision delivery branch + contracts | Complete and pushed (2026-07-31, commit `ffcdd74`) |
 | 3 | Operating-mode state machine | Complete and pushed (2026-07-31, commit `861e77a`) |
-| 4 | Governed signal intelligence (TRL-R2-006) | Implemented, Founder-corrected (durable storage, SMA-001 execution geometry removed, performance reporting added, honest confidence status), tested (569/569 twice), manually rehearsed; not yet committed |
-| 5 | MT5 execution adapter (TRL-R2-007) | Not started |
+| 4 | Governed signal intelligence (TRL-R2-006) | Implemented, Founder-corrected (durable storage, SMA-001 execution geometry removed, performance reporting added, honest confidence status), tested (569/569 twice), manually rehearsed; complete, committed and pushed (2026-08-01, commit `5a9570a`) |
+| 5 | MT5 execution adapter (TRL-R2-007) | Demo-manual slice implemented, tested (762/762 twice), manually rehearsed twice (original + Founder-review correction), Founder-review-corrected (a cross-process execution-locking race was found and fixed — see `TRL_DECISION_LOG.md` entry 2026-08-01-011); awaiting Founder review and commit approval. Basket execution, live modes, automated submission and reconciliation remain out of scope (Phases 6/9/10) |
 | 6 | Controlled basket execution | Not started |
 | 7 | Optional TradingView signal intake | Not started |
 | 8 | Private online and mobile application (TRL-R2-008) | Not started |
 | 9 | Live-automation arming and emergency controls | Not started |
 | 10 | Operational reconciliation and observability | Not started |
-| 11 | Testing | Ongoing (baseline: 569 tests passing twice under -B -W error) |
+| 11 | Testing | Ongoing (baseline: 762 tests passing twice under -B -W error) |
 | 12 | Manual rehearsals | Not started |
 | 13 | Documentation | Ongoing |
 | 14 | Final repository closeout | Not started |

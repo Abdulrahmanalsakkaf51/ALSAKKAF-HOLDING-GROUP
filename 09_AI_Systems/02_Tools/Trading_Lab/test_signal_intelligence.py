@@ -1328,11 +1328,21 @@ class ModeIntegrationTests(unittest.TestCase):
         self.assertEqual(result["proposal"]["operating_mode"], "SYNTHETIC_PAPER")
 
     def test_mt5_modes_remain_unavailable(self):
-        # Item 50
+        # Item 50. MT5_DEMO_MANUAL became available in Phase 5 (TRL-R2-007)
+        # but signal proposal generation is still not part of its capability
+        # grant (see mode_service._CAPABILITY_MATRIX) — it now resolves to a
+        # DisabledSignalService rather than raising. The three remaining MT5
+        # modes are still entirely unreachable and still raise.
         from trading_lab_app.app import _signal_service_for_mode, ModeSubsystemConfigurationError
+        from trading_lab_app.signal_service import DisabledSignalService
         for mode in ms.MT5_MODES:
+            if mode == "MT5_DEMO_MANUAL":
+                continue
             with self.assertRaises(ModeSubsystemConfigurationError):
                 _signal_service_for_mode(mode)
+        demo_manual_service = _signal_service_for_mode("MT5_DEMO_MANUAL")
+        self.assertIsInstance(demo_manual_service, DisabledSignalService)
+        self.assertFalse(demo_manual_service.enabled)
 
     def test_direct_helper_calls_cannot_bypass_mode_service(self):
         # Item 51

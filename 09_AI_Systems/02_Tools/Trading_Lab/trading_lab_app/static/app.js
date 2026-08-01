@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -433,6 +433,51 @@ async function loadSignalIntelligence() {
   } catch (error) { return { error: error.message }; }
 }
 
+function renderMt5Execution(bundle) {
+  const badge = $("mt5-availability-badge");
+  if (!bundle || bundle.error || !bundle.status) {
+    badge.textContent = "UNAVAILABLE"; badge.className = "badge badge-neutral";
+    setText("mt5-operating-mode", "—"); setText("mt5-adapter-tier", "—");
+    setText("mt5-dependency", "—"); setText("mt5-fingerprint-configured", "—");
+    return;
+  }
+  const { status, account, journal } = bundle;
+  badge.textContent = status.enabled ? "AVAILABLE (DEMO ONLY)" : "UNAVAILABLE";
+  badge.className = status.enabled ? "badge badge-warning" : "badge badge-neutral";
+  setText("mt5-operating-mode", status.operating_mode);
+  setText("mt5-adapter-tier", status.adapter_tier);
+  setText("mt5-dependency", status.dependency && status.dependency.available ? "AVAILABLE" : "UNAVAILABLE");
+  setText("mt5-fingerprint-configured", status.account_fingerprint_configured ? "CONFIGURED" : "NOT CONFIGURED (external blocker)");
+
+  const terminal = (bundle.terminal) || {};
+  setText("mt5-terminal-connected", terminal.connected ? "YES" : "NO");
+  setText("mt5-terminal-trade-allowed", terminal.trade_allowed ? "YES" : "NO");
+  setText("mt5-account-login", (account && account.login_redacted) || "—");
+  setText("mt5-account-trade-mode", (account && account.trade_mode_name) || "—");
+
+  const empty = $("mt5-journal-empty");
+  const detail = $("mt5-journal-detail");
+  const events = (journal && journal.events) || [];
+  if (!events.length) {
+    empty.hidden = false; detail.hidden = true;
+    return;
+  }
+  empty.hidden = true; detail.hidden = false;
+  const latest = events[events.length - 1];
+  setText("mt5-journal-event-type", latest.event_type);
+  setText("mt5-journal-event-time", latest.occurred_at_utc);
+}
+
+async function loadMt5Execution() {
+  try {
+    const [status, account, terminal, journal] = await Promise.all([
+      getJson("/api/mt5-execution-status"), getJson("/api/mt5-account-status"),
+      getJson("/api/mt5-terminal-status"), getJson("/api/execution-journal"),
+    ]);
+    return { status, account, terminal, journal };
+  } catch (error) { return { error: error.message }; }
+}
+
 async function loadOfficialNews() {
   try {
     const [health, sources, items, events] = await Promise.all([getJson("/api/news-health"), getJson("/api/news-sources"), getJson("/api/news-items"), getJson("/api/economic-events")]);
@@ -447,7 +492,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
+  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderMt5Execution(state.mt5); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -456,7 +501,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence()]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }

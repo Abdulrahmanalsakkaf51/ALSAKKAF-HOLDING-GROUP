@@ -21,6 +21,8 @@ from .paper_service import (
 )
 from .signal_service import DisabledSignalService, SignalIntelligenceService
 from . import signal_service as signal_service_module
+from . import mt5_execution_adapter
+from . import mt5_execution_service
 from .server import BIND_HOST, DEFAULT_PORT, create_server
 
 
@@ -157,9 +159,12 @@ def _paper_service_for_mode(current_mode):
     """
     if current_mode == "SYNTHETIC_PAPER":
         return build_synthetic_demonstration_service()
-    if current_mode in ("OFF", "RESEARCH"):
+    if current_mode in ("OFF", "RESEARCH", "MT5_DEMO_MANUAL"):
+        # The forward-paper engine is unrelated to Phase 5 MT5 execution;
+        # it stays disabled in MT5_DEMO_MANUAL exactly as it does in OFF/
+        # RESEARCH.
         return DisabledPaperService()
-    # MT5 modes can never reach here in Phase 3: ModeService.request_transition
+    # The three remaining MT5 modes can never reach here: ModeService.request_transition
     # rejects them during the availability check, before any subsystem_builder
     # call, and no other caller may request one either. This branch exists as
     # a defensive invariant, not a reachable path.
@@ -171,7 +176,7 @@ def _paper_service_for_mode(current_mode):
 def _validate_subsystem_consistency(current_mode, paper_service):
     """Fail closed if the constructed subsystem set does not exactly match
     the authoritative capability set of the resolved current mode."""
-    if current_mode in ("OFF", "RESEARCH"):
+    if current_mode in ("OFF", "RESEARCH", "MT5_DEMO_MANUAL"):
         consistent = (
             isinstance(paper_service, DisabledPaperService) and not paper_service.enabled
         )
@@ -204,7 +209,13 @@ def _signal_service_preflight_for_mode(current_mode):
     Real runtime construction is ``_signal_service_for_mode`` below."""
     if current_mode in ("RESEARCH", "SYNTHETIC_PAPER"):
         return signal_service_module.in_memory_service(operating_mode=current_mode)
-    if current_mode == "OFF":
+    if current_mode in ("OFF", "MT5_DEMO_MANUAL"):
+        # Signal proposal generation is not part of MT5_DEMO_MANUAL's
+        # capability grant (see mode_service._CAPABILITY_MATRIX); an
+        # operator building an order intent supplies an already-generated
+        # governed proposal (e.g. from a RESEARCH/SYNTHETIC_PAPER session)
+        # rather than generating one while execution capabilities are
+        # active.
         return DisabledSignalService(operating_mode=current_mode)
     raise ModeSubsystemConfigurationError(
         "no Phase 4 signal-service preflight rule exists for mode {!r}".format(current_mode)
@@ -239,11 +250,12 @@ def _signal_service_for_mode(current_mode):
     """
     if current_mode in ("RESEARCH", "SYNTHETIC_PAPER"):
         return SignalIntelligenceService(operating_mode=current_mode)
-    if current_mode == "OFF":
+    if current_mode in ("OFF", "MT5_DEMO_MANUAL"):
         return DisabledSignalService(operating_mode=current_mode)
-    # MT5 modes can never reach here in Phase 4 for the same reason
-    # _paper_service_for_mode's MT5 branch can't: ModeService rejects them
-    # during the availability check before any subsystem_builder call.
+    # The three remaining MT5 modes can never reach here for the same
+    # reason _paper_service_for_mode's MT5 branch can't: ModeService
+    # rejects them during the availability check before any
+    # subsystem_builder call.
     raise ModeSubsystemConfigurationError(
         "no Phase 4 signal-service construction rule exists for mode {!r}".format(current_mode)
     )
@@ -253,7 +265,7 @@ def _validate_signal_subsystem_consistency(current_mode, signal_service):
     """Fail closed if the constructed signal-intelligence subsystem does
     not exactly match the authoritative capability set of the resolved
     current mode."""
-    if current_mode == "OFF":
+    if current_mode in ("OFF", "MT5_DEMO_MANUAL"):
         consistent = isinstance(signal_service, DisabledSignalService) and not signal_service.enabled
     elif current_mode in ("RESEARCH", "SYNTHETIC_PAPER"):
         consistent = (
@@ -271,20 +283,96 @@ def _validate_signal_subsystem_consistency(current_mode, signal_service):
         )
 
 
+def _execution_adapter_for_mode(current_mode):
+    """The single, sole path from a resolved mode to an MT5 execution
+    adapter TIER. Constructing ``RealMT5ExecutionAdapter`` here is safe
+    and side-effect-free (mirrors ``LocalMT5ReadOnlyConnector``): it never
+    imports MetaTrader5 and never opens a broker session merely by being
+    instantiated — the import and the session both happen lazily, only
+    inside a later adapter method call that ``mt5_execution_service``
+    itself only reaches after ModeService has already granted the
+    relevant capability. OFF/RESEARCH/SYNTHETIC_PAPER always get the
+    disabled adapter, which cannot import MetaTrader5 under any call."""
+    if current_mode == "MT5_DEMO_MANUAL":
+        return mt5_execution_adapter.RealMT5ExecutionAdapter()
+    if current_mode in ("OFF", "RESEARCH", "SYNTHETIC_PAPER"):
+        return mt5_execution_adapter.disabled_adapter()
+    raise ModeSubsystemConfigurationError(
+        "no Phase 5 execution-adapter construction rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _execution_service_preflight_for_mode(current_mode):
+    """Side-effect-free construction used ONLY to validate, during a
+    ModeService transition attempt, that an execution service *could* be
+    constructed for the requested mode. Discarded immediately afterward;
+    never wired into anything real. See ``_execution_service_for_mode``
+    for the real runtime construction path."""
+    if current_mode in ("OFF", "RESEARCH", "SYNTHETIC_PAPER"):
+        return mt5_execution_service.disabled_service(operating_mode=current_mode)
+    if current_mode == "MT5_DEMO_MANUAL":
+        return mt5_execution_service.ExecutionService(adapter=_execution_adapter_for_mode(current_mode))
+    raise ModeSubsystemConfigurationError(
+        "no Phase 5 execution-service preflight rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _execution_service_for_mode(current_mode, mode_service_instance, journal=None, account_fingerprint=None):
+    """The real runtime execution service, wired to the live ModeService
+    instance (so every capability check reflects the actual current mode,
+    not the mode at construction time) and, in MT5_DEMO_MANUAL, the real
+    adapter tier. Called only after a mode has already been resolved."""
+    if current_mode in ("OFF", "RESEARCH", "SYNTHETIC_PAPER"):
+        return mt5_execution_service.disabled_service(operating_mode=current_mode)
+    if current_mode == "MT5_DEMO_MANUAL":
+        from .mt5_execution_journal import ExecutionJournalWriter
+        return mt5_execution_service.ExecutionService(
+            adapter=_execution_adapter_for_mode(current_mode),
+            mode_service=mode_service_instance,
+            journal=journal if journal is not None else ExecutionJournalWriter(),
+            account_fingerprint=account_fingerprint or mt5_execution_service.account_fingerprint_from_environment(),
+        )
+    raise ModeSubsystemConfigurationError(
+        "no Phase 5 execution-service construction rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _validate_execution_subsystem_consistency(current_mode, execution_service_instance):
+    if current_mode in ("OFF", "RESEARCH", "SYNTHETIC_PAPER"):
+        consistent = (
+            isinstance(execution_service_instance, mt5_execution_service.DisabledExecutionService)
+            and not execution_service_instance.enabled
+        )
+    elif current_mode == "MT5_DEMO_MANUAL":
+        consistent = (
+            isinstance(execution_service_instance, mt5_execution_service.ExecutionService)
+            and execution_service_instance.enabled
+        )
+    else:
+        consistent = False
+    if not consistent:
+        raise ModeSubsystemConfigurationError(
+            "{}: mode={!r} constructed execution_service={}".format(
+                MODE_SUBSYSTEM_CONFIGURATION_MISMATCH, current_mode, type(execution_service_instance).__name__,
+            )
+        )
+
+
 def _subsystem_builder_for_mode(current_mode):
     """The combined subsystem builder ModeService actually calls: builds
-    both the paper service (already side-effect-free by construction —
-    DisabledPaperService/InMemoryPaperStore only) and a side-effect-free
-    signal-intelligence *preflight* service for the requested mode, so a
-    transition validates that both constructions would succeed before it
-    is allowed to commit (Section 5's SUBSYSTEM_ACTIVATION_FAILED gate
-    applies to either), without touching the durable signal store. The
-    real runtime signal service is constructed separately, only after a
-    transition/startup mode resolution has already completed — see
-    ``_signal_service_for_mode`` and its call site in ``main()``."""
+    the paper service, a side-effect-free signal-intelligence *preflight*
+    service, and a side-effect-free execution-adapter preflight service
+    for the requested mode, so a transition validates that every
+    construction would succeed before it is allowed to commit (Section
+    5's SUBSYSTEM_ACTIVATION_FAILED gate applies to all three), without
+    touching any durable store or broker session. The real runtime
+    services are constructed separately, only after a transition/startup
+    mode resolution has already completed — see ``_signal_service_for_mode``
+    and ``_execution_service_for_mode`` and their call sites in ``main()``."""
     paper_service = _paper_service_for_mode(current_mode)
     signal_service_instance = _signal_service_preflight_for_mode(current_mode)
-    return paper_service, signal_service_instance
+    execution_service_instance = _execution_service_preflight_for_mode(current_mode)
+    return paper_service, signal_service_instance, execution_service_instance
 
 
 def run_server(
@@ -295,6 +383,7 @@ def run_server(
     paper_service=None,
     mode_service=None,
     signal_service=None,
+    execution_service=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -304,6 +393,7 @@ def run_server(
         paper_service=paper_service,
         mode_service=mode_service,
         signal_service=signal_service,
+        execution_service=execution_service,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -363,6 +453,18 @@ def run_server(
         )
     else:
         print("SIGNAL INTELLIGENCE DISABLED | OFF MODE")
+    active_execution_service = execution_service or vars(server).get("execution_service")
+    if not isinstance(active_execution_service, (mt5_execution_service.ExecutionService, mt5_execution_service.DisabledExecutionService)):
+        active_execution_service = mt5_execution_service.disabled_service()
+    if active_execution_service.enabled:
+        print(
+            "MT5 EXECUTION ENABLED | DEMO-MANUAL ONLY | LIVE EXECUTION DISABLED | "
+            "MANUAL CONFIRMATION REQUIRED FOR EVERY ORDER"
+        )
+        if not active_execution_service.account_fingerprint.configured:
+            print("  No approved MT5 demo account fingerprint is configured (external blocker).")
+    else:
+        print("MT5 EXECUTION DISABLED | {} MODE".format(active_execution_service.operating_mode))
     active_mode_service = mode_service or getattr(server, "mode_service", None)
     if not isinstance(active_mode_service, ModeService):
         active_mode_service = in_memory_mode_service()
@@ -400,15 +502,21 @@ def run_server(
                         pass
             finally:
                 try:
-                    news_service = getattr(server, "official_news_service", None)
-                    if news_service is not None:
-                        while news_service.shutdown() is False:
+                    active_execution = vars(server).get("execution_service")
+                    if active_execution is not None:
+                        while active_execution.shutdown() is False:
                             pass
                 finally:
                     try:
-                        active_mode_service.shutdown()
+                        news_service = getattr(server, "official_news_service", None)
+                        if news_service is not None:
+                            while news_service.shutdown() is False:
+                                pass
                     finally:
-                        server.server_close()
+                        try:
+                            active_mode_service.shutdown()
+                        finally:
+                            server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -500,9 +608,13 @@ def main(argv=None):
         )
     paper_service = _paper_service_for_mode(operating_mode_service.current_mode)
     signal_service_instance = _signal_service_for_mode(operating_mode_service.current_mode)
+    execution_service_instance = _execution_service_for_mode(
+        operating_mode_service.current_mode, operating_mode_service,
+    )
     try:
         _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
         _validate_signal_subsystem_consistency(operating_mode_service.current_mode, signal_service_instance)
+        _validate_execution_subsystem_consistency(operating_mode_service.current_mode, execution_service_instance)
     except ModeSubsystemConfigurationError as error:
         print(str(error), file=sys.stderr)
         return 2
@@ -515,6 +627,7 @@ def main(argv=None):
             paper_service=paper_service,
             mode_service=operating_mode_service,
             signal_service=signal_service_instance,
+            execution_service=execution_service_instance,
         )
     except OSError as error:
         print(

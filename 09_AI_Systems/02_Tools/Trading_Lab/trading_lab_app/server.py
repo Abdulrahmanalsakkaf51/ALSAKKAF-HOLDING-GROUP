@@ -15,6 +15,7 @@ from .mt5_service import MarketDataService
 from .news_service import OfficialNewsService
 from .paper_service import DisabledPaperService
 from .signal_service import disabled_service as disabled_signal_service
+from .mt5_execution_service import disabled_service as disabled_execution_service
 
 
 BIND_HOST = "127.0.0.1"
@@ -72,6 +73,19 @@ SIGNAL_API_ROUTES = {
     "/api/signal-strategy-registry": service.signal_strategy_registry_document,
     "/api/signal-proposals": service.signal_proposal_history_document,
     "/api/signal-timeline": service.signal_timeline_document,
+}
+
+# Phase 5 (TRL-R2-007): read-only only. No POST/PUT/PATCH/DELETE route
+# exists for MT5 execution anywhere in this module — see do_POST etc.
+# below, which are globally method-not-allowed for every path. Nothing
+# here can connect, initialize, run order_check, run order_send, confirm,
+# retry, cancel, or modify execution state; those actions are local-CLI-
+# only (mt5_execution_cli.py).
+EXECUTION_API_ROUTES = {
+    "/api/mt5-execution-status": service.mt5_execution_status_document,
+    "/api/mt5-account-status": service.mt5_account_status_document,
+    "/api/mt5-terminal-status": service.mt5_terminal_status_document,
+    "/api/execution-journal": service.mt5_execution_journal_document,
 }
 
 SECURITY_HEADERS = {
@@ -268,6 +282,21 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     include_body,
                 )
             return
+        execution_function = EXECUTION_API_ROUTES.get(decoded_path)
+        if execution_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    execution_function(self.server.execution_service),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_EXECUTION_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
@@ -299,6 +328,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
             or decoded_path in PAPER_API_ROUTES
             or decoded_path in MODE_API_ROUTES
             or decoded_path in SIGNAL_API_ROUTES
+            or decoded_path in EXECUTION_API_ROUTES
         ):
             self._handle_read(include_body=False)
             return
@@ -315,6 +345,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 or decoded_path in PAPER_API_ROUTES
                 or decoded_path in MODE_API_ROUTES
                 or decoded_path in SIGNAL_API_ROUTES
+                or decoded_path in EXECUTION_API_ROUTES
             )
             else "GET"
         )
@@ -734,6 +765,7 @@ def create_server(
     paper_service=None,
     mode_service=None,
     signal_service=None,
+    execution_service=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -748,4 +780,5 @@ def create_server(
     # startup (app.py main()) always passes an explicit, durable one.
     local_server.mode_service = mode_service or in_memory_mode_service()
     local_server.signal_service = signal_service or disabled_signal_service()
+    local_server.execution_service = execution_service or disabled_execution_service()
     return local_server

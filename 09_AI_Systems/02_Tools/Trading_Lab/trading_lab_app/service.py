@@ -12,6 +12,7 @@ from .mt5_service import disabled_service
 from .news_service import disabled_service as disabled_news_service
 from .paper_service import disabled_service as disabled_paper_service
 from .signal_service import disabled_service as disabled_signal_service
+from .mt5_execution_service import disabled_service as disabled_execution_service
 from .strategy_registry import load_registry
 
 
@@ -186,6 +187,22 @@ def signal_proposal_history_document(signal_service=None):
 
 def signal_timeline_document(signal_service=None):
     return (signal_service or disabled_signal_service()).timeline_document()
+
+
+def mt5_execution_status_document(execution_service=None):
+    return (execution_service or disabled_execution_service()).status_document()
+
+
+def mt5_account_status_document(execution_service=None):
+    return (execution_service or disabled_execution_service()).account_status_document()
+
+
+def mt5_terminal_status_document(execution_service=None):
+    return (execution_service or disabled_execution_service()).terminal_status_document()
+
+
+def mt5_execution_journal_document(execution_service=None):
+    return (execution_service or disabled_execution_service()).journal_document()
 
 
 def strategy_registry_document():

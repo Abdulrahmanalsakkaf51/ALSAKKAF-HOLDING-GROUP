@@ -1,38 +1,45 @@
 {
   "active_branch": "codex/TRL-R2-full-vision-execution",
-  "current_head": "861e77a6603d8bdb8d4369db442faab2bfadc4f8",
-  "current_checkpoint": "Phase 3 complete, committed, and pushed at 861e77a. Phase 4 (TRL-R2-006 governed signal intelligence) implemented and Founder-corrected: durable persistence with preflight/runtime construction separation, SMA-001 execution geometry removed (crossing direction only, STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED), performance/walk-forward reporting added, confidence_status made explicit. Tested (569/569 twice) and manually rehearsed. Awaiting Founder review and commit approval.",
-  "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3"],
-  "active_phase": "Phase 4 - Governed signal intelligence, Founder-corrected (implementation, correction, tests, docs, rehearsal complete; not yet committed)",
-  "phase_3_tracking_closure": {
+  "current_head": "5a9570aa56752fce402054f5c07ce360883c7273",
+  "current_checkpoint": "Phase 4 complete, committed, and pushed at 5a9570a. Phase 5 (TRL-R2-007 MT5 execution adapter, MT5_DEMO_MANUAL demo-manual slice only) implemented and Founder-review corrected: three-tier adapter (disabled/fake/real), append-only hash-chained execution journal with cross-process/in-process locking around every search-then-persist critical section, authoritative execution service with full independent proposal revalidation, deterministic order-intent identity with lookup-before-create idempotency, order_check gate, mandatory local manual-confirmation gate, order_send gate with durable duplicate protection, local-only CLI, read-only HTTP/dashboard. MT5_DEMO_MANUAL admitted in mode_service.py (reachable only from/to OFF, correctly restart-persistent); the three automated/live MT5 modes remain unavailable. SMA-001 and FIB-001 remain independently blocked. A genuine cross-process execution-locking race was found during Founder review and corrected before commit. Tested (762/762 twice) and manually rehearsed twice. Awaiting Founder review and commit approval.",
+  "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3", "Phase 4"],
+  "active_phase": "Phase 5 - MT5 execution adapter, demo-manual slice (implementation, tests, docs, rehearsal, and Founder-review correction complete; not yet committed)",
+  "phase_4_tracking_closure": {
     "status": "complete_committed_pushed",
-    "commit": "861e77a6603d8bdb8d4369db442faab2bfadc4f8",
+    "commit": "5a9570aa56752fce402054f5c07ce360883c7273",
     "verified_local_remote_match": true
   },
-  "phase_4_founder_correction_items": [
-    "durable_proposal_and_audit_history_both_modes",
-    "sma001_invented_execution_geometry_removed",
-    "performance_and_walk_forward_reporting_added",
-    "confidence_status_made_explicit"
+  "phase_5_scope_notes": [
+    "demo_manual_mode_only_no_live_no_automated",
+    "single_attempt_per_intent_no_repriced_retry",
+    "no_basket_execution_phase_6",
+    "no_automatic_reconciliation_phase_10",
+    "entry_zone_must_be_a_collapsed_exact_price_or_fails_closed"
   ],
+  "founder_review_correction": {
+    "defect_found": "cross_process_execution_locking_race",
+    "description": "build_order_intent and confirm_and_send had no mutual exclusion across separate OS processes sharing one durable journal; two genuine separate processes racing the identical proposal each created a distinct order_intent_id, with one silently lost from the durable file.",
+    "correction": "added _CrossProcessFileLock (atomic exclusive-file-creation mutex, owner-token-verified release, bounded stale-lock recovery) and _ThreadLock to mt5_execution_journal.py; ExecutionJournalWriter.acquire_creation_lock() wraps both critical sections and reloads from disk on acquisition; new EXECUTION_LOCK_UNAVAILABLE reason code fails closed on contention.",
+    "secondary_defect_found_during_correction": "the lock's original release() unconditionally unlinked whatever file existed at the lock path, which would have deleted a different owner's live lock after a stale-lock break; fixed with a unique owner token checked before unlink",
+    "verified_by": ["test_mt5_execution_concurrency.py (7 tests, two genuine separate processes)", "test_mt5_execution_journal_lock.py (14 tests)", "TwoFreshJournalIdentityTests (4 tests)", "manual rehearsal re-run 5x plus lock-timeout and journal-corruption-under-lock scenarios"],
+    "evidence_doc_section": "TRL_R2_007_MT5_EXECUTION_EVIDENCE.md Section 20",
+    "decision_log_entry": "2026-08-01-011"
+  },
   "files_added_this_phase": [
-    "09_AI_Systems/02_Tools/Trading_Lab/test_signal_intelligence.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_006_SIGNAL_INTELLIGENCE_EVIDENCE.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_cli.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_confidence.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_data.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_llm_adapter.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_pipeline.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_reporting.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role1_data_quality.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role2_market_regime.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role3_strategy.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role4_news_risk.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role5_independent_risk.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_role6_execution_eligibility.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_service.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_store.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/signal_strategy_registry.py"
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_007_MT5_EXECUTION_EVIDENCE.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_adapter.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_cli.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_concurrency.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_data.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_http.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_journal.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_journal_lock.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_mt5_execution_service.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_adapter.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_cli.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_data.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_journal.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mt5_execution_service.py"
   ],
   "files_modified_tracked": [
     "09_AI_Systems/02_Tools/Trading_Lab/TRL_APP_QUICK_START.md",
@@ -41,44 +48,46 @@
     "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md",
     "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
     "09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_006_SIGNAL_INTELLIGENCE_CONTRACT.md",
-    "09_AI_Systems/02_Tools/Trading_Lab/test_forward_paper.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_007_MT5_EXECUTION_CONTRACT.md",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_operating_mode.py",
+    "09_AI_Systems/02_Tools/Trading_Lab/test_signal_intelligence.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/app.py",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_cli.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/mode_service.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/server.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/service.py",
     "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/app.js",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html",
-    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/timeline_data.py"
+    "09_AI_Systems/02_Tools/Trading_Lab/trading_lab_app/static/index.html"
   ],
   "file_inventory_summary": {
-    "total": 33,
-    "new": 17,
-    "modified": 16,
+    "total": 29,
+    "new": 14,
+    "modified": 15,
     "deleted": 0,
     "staged": 0,
     "committed_this_phase": 0,
     "pushed_this_phase": 0,
-    "committed_head": "861e77a6603d8bdb8d4369db442faab2bfadc4f8"
+    "committed_head": "5a9570aa56752fce402054f5c07ce360883c7273"
   },
   "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\" (run twice from Trading_Lab directory)",
-  "tests_last_result": "569/569 passing both runs (447 pre-existing + 122 signal-intelligence tests); 0 failures, 0 errors",
+  "tests_last_result": "762/762 passing both runs (569 pre-existing + 191 new Phase 5 tests [166 original + 25 Founder-review-correction] + 2 net-new Phase 3 tests added while correcting 3 stale assertions); 0 failures, 0 errors",
   "active_processes": [],
   "active_ports": {
-    "8765": "confirmed no listener after Phase 4 correction manual rehearsal (only TimeWait remnants)"
+    "8765": "confirmed no listener after Phase 5 manual rehearsal (both rounds)"
   },
   "known_defects": [],
+  "defects_found_and_corrected_this_checkpoint": [
+    "cross_process_execution_locking_race (see founder_review_correction above)"
+  ],
   "external_prerequisites": [
-    "MT5 demo account credentials (Phase 5/12 manual rehearsal)",
-    "MT5 live account fingerprint - login/company/server (Phase 5/9)",
+    "MT5 demo account fingerprint - login/company/server (Phase 5 real order_check/order_send rehearsal; ACCOUNT_UNAVAILABLE is the correct fail-closed outcome without it)",
+    "MT5 live account fingerprint - login/company/server (Phase 9)",
     "Private authenticated HTTPS tunnel e.g. Tailscale (Phase 8/12)",
     "TradingView webhook signing secret and allowlist (Phase 7)",
     "Founder-provided VIEWER/FOUNDER_OPERATOR credential hashes (Phase 8)",
-    "FIB-001 exact numeric parameters (Phase 4 follow-up; blocker remains active)",
-    "SMA-001 exact execution-geometry parameters (Phase 4 follow-up; new blocker added this correction pass)"
+    "FIB-001 exact numeric parameters (blocker remains active, independently re-enforced by Phase 5)",
+    "SMA-001 exact execution-geometry parameters (blocker remains active, independently re-enforced by Phase 5's own execution-geometry allowlist)"
   ],
-  "next_command": "Present the Phase 4 diff (implementation + Founder correction pass) for Founder review and commit approval, then begin Phase 5 only after that commit exists",
+  "next_command": "Present the Phase 5 diff (including the Phase 4 tracking closure and the Founder-review concurrency correction) for Founder review and commit approval, then begin Phase 6 only after that commit exists",
   "next_verification": "git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - to run immediately before proposing the commit (Markdown Audit already run: 0 issues)",
   "prohibited_commands": [
     "git reset --hard",

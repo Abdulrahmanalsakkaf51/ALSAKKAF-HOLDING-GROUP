@@ -53,6 +53,21 @@ MT5_MODES = (
     "MT5_LIVE_AUTOMATED",
 )
 
+# The subset of MT5_MODES a fresh process start must never silently
+# resume into (see _load_startup_state's MODE_STARTUP_SAFE_DOWNGRADE
+# below). MT5_DEMO_MANUAL is deliberately excluded as of Phase 5
+# (TRL-R2-007): every order_send it permits still requires a fresh,
+# explicit local manual confirmation typed by an operator for that
+# specific order, so persisting this one mode across a restart carries
+# no unattended-execution risk — unlike the three modes still listed
+# here, which represent future automated or live capability that must
+# never reactivate merely because a stored value says so.
+AUTOMATED_OR_LIVE_MT5_MODES = (
+    "MT5_DEMO_AUTOMATED",
+    "MT5_LIVE_MANUAL",
+    "MT5_LIVE_AUTOMATED",
+)
+
 CAPABILITIES = (
     "historical_research",
     "strategy_evaluation",
@@ -131,8 +146,13 @@ MODE_DESCRIPTIONS = {
         "credentials, no external network call."
     ),
     "MT5_DEMO_MANUAL": (
-        "Represents future manually confirmed MT5 demo execution. "
-        "Unavailable until the Phase 5 MT5 execution adapter exists."
+        "Manually confirmed MT5 demo execution (Phase 5, TRL-R2-007). "
+        "Every order_send requires explicit local operator confirmation; "
+        "live execution, automated submission and basket orders remain "
+        "unavailable. Requires a configured, approved demo account "
+        "fingerprint and the optional real broker package at the point an "
+        "actual broker action is attempted; entering this mode alone "
+        "never connects to a broker."
     ),
     "MT5_DEMO_AUTOMATED": (
         "Represents future governed automated MT5 demo execution. "
@@ -188,27 +208,34 @@ _CAPABILITY_MATRIX = {
     }),
 }
 
-# Modes that can actually be entered in this checkpoint. All four MT5 modes
-# are represented in MODES/_CAPABILITY_MATRIX/MODE_DESCRIPTIONS but are never
-# available here, because no MT5 execution adapter (Phase 5) or live-arming
-# capability (Phase 9) has been implemented yet.
-_AVAILABLE_MODES = frozenset({"OFF", "RESEARCH", "SYNTHETIC_PAPER"})
+# Modes that can actually be entered in this checkpoint. MT5_DEMO_MANUAL
+# became available in Phase 5 (TRL-R2-007): the governed adapter/journal/
+# service now exist in mt5_execution_adapter.py / mt5_execution_service.py.
+# The three automated/live MT5 modes remain represented in
+# MODES/_CAPABILITY_MATRIX/MODE_DESCRIPTIONS but are still never available,
+# because no live-arming capability (Phase 9) or automated-execution design
+# (Phase 9) has been implemented yet.
+_AVAILABLE_MODES = frozenset({"OFF", "RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"})
 
 _UNAVAILABLE_REASONS = {
-    "MT5_DEMO_MANUAL": ("MISSING_MT5_ADAPTER",),
     "MT5_DEMO_AUTOMATED": ("MISSING_MT5_ADAPTER", "MISSING_LIVE_ARMING"),
     "MT5_LIVE_MANUAL": ("MISSING_MT5_ADAPTER",),
     "MT5_LIVE_AUTOMATED": ("MISSING_MT5_ADAPTER", "MISSING_LIVE_ARMING"),
 }
 
-# The exact allowed transition matrix among currently-available modes. MT5
-# modes have no entries here at all (source or destination) because they can
-# never be the current mode nor a reachable destination in Phase 3; requests
-# targeting them are rejected earlier, during the availability check.
+# The exact allowed transition matrix among currently-available modes.
+# MT5_DEMO_MANUAL is reachable only from OFF and only returns to OFF —
+# entering or leaving it is always a deliberate, single, local-operator
+# step, never chained through RESEARCH/SYNTHETIC_PAPER in one transition.
+# The three remaining MT5 modes have no entries here at all (source or
+# destination) because they can never be the current mode nor a reachable
+# destination in this checkpoint; requests targeting them are rejected
+# earlier, during the availability check.
 _ALLOWED_TRANSITIONS = {
-    "OFF": frozenset({"RESEARCH", "SYNTHETIC_PAPER"}),
+    "OFF": frozenset({"RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"}),
     "RESEARCH": frozenset({"OFF", "SYNTHETIC_PAPER"}),
     "SYNTHETIC_PAPER": frozenset({"OFF", "RESEARCH"}),
+    "MT5_DEMO_MANUAL": frozenset({"OFF"}),
 }
 
 
@@ -705,7 +732,7 @@ class ModeService:
             }, allow_persist_failure_block=False)
             return
         resolved_mode = self._replay_current_mode()
-        if resolved_mode in MT5_MODES:
+        if resolved_mode in AUTOMATED_OR_LIVE_MT5_MODES:
             self._current_mode = "OFF"
             self._append_event("MODE_STARTUP_SAFE_DOWNGRADE", {
                 "loaded_mode": resolved_mode,

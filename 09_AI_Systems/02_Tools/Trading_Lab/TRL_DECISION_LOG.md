@@ -6,7 +6,7 @@
 | Document Type | Decision Log |
 | Status | Active |
 | Version | 1.0 |
-| Date | 2026-07-31 |
+| Date | 2026-08-01 |
 | Owner | Abdulrahman Alsakkaf |
 
 # TRL Full-Vision Program — Decision Log
@@ -534,3 +534,137 @@ end-to-end against the real application on port 8765, plus a real separate-proce
 `proposal-history` in a later, separate process. Neither the SMA-001 nor FIB-001
 blocker was marked resolved. Nothing staged, committed, or pushed — awaiting Founder
 review and commit approval.
+
+## 2026-08-01-010 — Phase 4 tracking closure; Phase 5 (TRL-R2-007 MT5 execution adapter) implemented
+
+**What:** Phase 4 (TRL-R2-006 governed signal intelligence, including its Founder
+correction pass) is complete, committed, and pushed at `5a9570a`; tracking updated
+accordingly (`TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_CONTINUATION_STATE.md/.json`) per
+the Phase 5 kickoff instructions. No tracking-only commit was created; this closure is
+recorded for inclusion in the Phase 5 checkpoint commit.
+
+Phase 5 implements the `MT5_DEMO_MANUAL` demo-manual slice of
+`TRL_R2_007_MT5_EXECUTION_CONTRACT.md` — see
+`TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` for full detail. Three decisions worth recording
+here specifically:
+
+**1. Scope resolution: no contract/kickoff conflict.** The R2-007 contract describes the
+full multi-phase end state (basket children, live modes, arming tokens, automatic
+reconciliation) while the kickoff prompt forbids implementing most of that in this
+checkpoint. `TRL_FULL_VISION_MASTER_PROGRAM.md`'s existing phase table already maps each
+excluded piece to its own later phase number (baskets → Phase 6, live-automation arming
+→ Phase 9, reconciliation → Phase 10), and `mode_service.py`'s own committed Phase 3
+description text already framed `MT5_DEMO_MANUAL` as exactly "Phase 5's" deliverable.
+This was treated as a clear, well-supported reading — not a genuine contradiction
+requiring a stop-and-report — and Phase 5 was scoped to the demo-manual, single-order,
+non-basket, non-automated slice accordingly.
+
+**2. Restart-safety fix for `MT5_DEMO_MANUAL`.** The existing Phase 3 startup safe-
+downgrade (`_load_startup_state`, `MODE_STARTUP_SAFE_DOWNGRADE`) force-resets any
+persisted MT5 mode to `OFF` on every fresh `ModeService` construction — a genuine safety
+property for the three automated/live modes (their whole risk is *unattended*
+resumption after a crash/restart). Wiring `MT5_DEMO_MANUAL` in naively would have made
+it force-reset on every single CLI invocation too, since each `mt5_execution_cli.py`
+command constructs a fresh `ModeService` in its own process (mirroring `mode_cli.py`'s
+existing, already-relied-upon pattern for `RESEARCH`/`SYNTHETIC_PAPER`) — silently
+breaking the entire CLI-driven workflow this checkpoint depends on. Caught by exercising
+the actual CLI as separate process invocations during the manual rehearsal, not by the
+automated test suite alone (which used a single shared `ModeService` instance per test
+and would not have caught a cross-process regression). Fixed by introducing
+`AUTOMATED_OR_LIVE_MT5_MODES` (excludes `MT5_DEMO_MANUAL`) as the actual downgrade-check
+set — the reasoning: every `order_send` `MT5_DEMO_MANUAL` permits still requires a
+fresh, explicit local manual confirmation for that specific order, so persisting the
+*mode* across a restart creates no unattended-execution risk, unlike the three modes
+still covered by the downgrade. Two existing Phase 3 tests in `test_operating_mode.py`
+that asserted a blanket "no MT5 mode ever survives restart" were corrected (not
+weakened) to test the now-intentional distinction; the safety property for the three
+still-forbidden modes is preserved and re-asserted under its own dedicated test.
+
+**3. SMA-001 defense-in-depth gate.** `signal_strategy_registry.executable_status`
+alone does not block SMA-001 (`approval_status` is `EXPERIMENTAL_RESEARCH_ONLY`, not
+`APPROVAL_PENDING`) — only Role 3's pipeline-internal crossing-detection logic blocks it
+from ever reaching an executable proposal. Because a hand-built, schema-valid proposal
+object could claim `strategy_id="SMA-001"` with an executable side without going
+through the pipeline, `mt5_execution_service.py` adds its own independent, empty
+`EXECUTION_GEOMETRY_APPROVED_STRATEGIES` allowlist, checked before any adapter call,
+reusing the identical `STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED` reason code Role 3
+already uses. Neither the SMA-001 nor FIB-001 blocker was resolved, weakened, or worked
+around.
+
+**Why:** the restart-safety issue in particular is the kind of gap that a narrowly-scoped
+in-process test suite cannot catch by construction (each test constructs one
+`ModeService` and keeps using it), which is exactly why the kickoff instructions require
+a real, separate-process manual rehearsal in addition to the automated suite.
+
+**How to apply:** 166 new tests across six new test files, plus 3 existing Phase 3/4
+assertions corrected (not weakened) to match the now-intentional `MT5_DEMO_MANUAL`
+availability/persistence — see `TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` Section 17 for the
+full breakdown. Full suite: 737 tests, passing twice under `python -B -W error`. Manual
+rehearsal performed against an isolated temporary `LOCALAPPDATA` using the real CLI
+entry points as separate process invocations, including one real (fail-closed, no
+credential displayed) `RealMT5ExecutionAdapter` dependency/terminal check — the optional
+`MetaTrader5` package happens to already be installed in this development environment
+(not installed by this work), but no MT5 terminal process was running, so the check
+correctly reported `TERMINAL_UNAVAILABLE`. No real broker order was submitted at any
+point. Neither SMA-001 nor FIB-001 was marked resolved. Nothing staged, committed, or
+pushed — awaiting Founder review and commit approval.
+
+## 2026-08-01-011 — Founder review: cross-process execution-locking race found and corrected
+
+**What:** A Founder-review manual rehearsal, run *after* entry 010's Phase 5 checkpoint, asked for
+an explicit audit of the R2-007 contract's execution-intent identity rules against two scenarios:
+identical governed input built against two genuinely independent fresh journals, and identical
+governed input raced concurrently against *one* shared journal.
+
+**Two-fresh-journal result:** matches the contract exactly, no defect. The contract's Section 5.1
+lookup key (no nonce, no price) is deterministic and identical across both independent journals;
+the Section 5.3 `execution_intent_id` is explicitly nonce-salted by contract design and legitimately
+differs between two journals that have never seen each other's data — the contract never claims
+otherwise. See `TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` Section 20.1–20.2.
+
+**Concurrent-single-journal result: a real defect.** `build_order_intent`'s lookup-before-create
+sequence and `confirm_and_send`'s duplicate-check-then-reserve sequence had no mutual exclusion
+across separate OS processes. Reproduced directly with two genuine `python -B` processes racing
+against one initially empty durable journal: both succeeded, both minted a *different*
+`order_intent_id`, and the durable file ended up recording only one of them — the other process's
+write was silently lost, while that process's own in-memory state still believed its creation had
+succeeded and could have gone on to attempt a real send for an intent the journal had no record of.
+This is exactly the kind of gap a single-process-oriented test suite cannot catch by construction,
+which is why the kickoff instructions require real separate-process rehearsal in addition to the
+automated suite — and why it surfaced now rather than during the original implementation.
+
+**Correction:** added `_CrossProcessFileLock` (atomic exclusive-file-creation mutex,
+owner-token-verified release, bounded stale-lock recovery) and `_ThreadLock` (in-memory-store
+equivalent) to `mt5_execution_journal.py`; `ExecutionJournalWriter.acquire_creation_lock()` wraps
+both critical sections, reloading the journal from disk immediately on acquisition so a stale
+in-memory snapshot can never defeat the lock. New reason code `EXECUTION_LOCK_UNAVAILABLE` fails
+closed on contention rather than proceeding unlocked. A second, independently-caught defect during
+this same correction: the lock's original `release()` unconditionally unlinked whatever file
+currently existed at the lock path — if a lock was ever broken as stale and re-acquired by a
+different owner, the original (late) owner's `release()` would have deleted that new owner's live
+lock. Fixed with a unique owner token written into the lock file and checked before unlink. Full
+detail: `TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` Section 20.3–20.4.
+
+**Why:** duplicate broker orders and lost audit records are exactly the failure mode the entire
+execution-intent identity design (contract Section 5) exists to prevent; a race that defeats it
+silently, with no error raised to either caller, is a safety-critical defect, not a minor one.
+
+**How to apply:** 25 new tests (7 `test_mt5_execution_concurrency.py` — genuine separate-process
+races for both intent creation and send, synchronized via readiness-marker files rather than a
+sleep guess; 14 `test_mt5_execution_journal_lock.py` — acquire/release/exception-safety/timeout/
+stale-lock/owner-token-safety/reload-after-acquire; 4 `TwoFreshJournalIdentityTests` formalizing
+the two-fresh-journal experiment as a permanent regression). One test-isolation defect found and
+fixed during this same pass: `test_mt5_execution_concurrency.py`'s send-race setup monkeypatched
+`EXECUTION_GEOMETRY_APPROVED_STRATEGIES` without restoring it, polluting later test files' module
+state in a full-suite run — fixed with `addCleanup`. Full suite: 762 tests, passing twice under
+`python -B -W error` (up from 737; a stray `__pycache__` from an earlier `py_compile` diagnostic
+command was found and removed first, exactly the same class of leftover-artifact issue recorded in
+entry 009 — not a defect in the corrected code). The original two-genuine-process race was re-run
+five more times after the fix, plus the permanent automated regression, with zero recurrence.
+Manual rehearsal repeated for lock timeout and journal-corruption-under-lock, both against isolated
+temporary storage with the fake adapter only. Also completed during this pass: a status-command
+side-effect audit (found to be intentional, contract-required, bounded Phase 3 behavior — not
+redesigned) and a precise LOCALAPPDATA disclosure correcting an earlier overly-broad "untouched"
+claim (`TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` Section 20.6–20.7). Neither SMA-001 nor FIB-001 was
+touched. Phase 6 was not started. Nothing staged, committed, or pushed — awaiting Founder review
+and commit approval.

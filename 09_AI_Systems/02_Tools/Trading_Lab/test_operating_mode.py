@@ -139,8 +139,15 @@ class StartupResolutionTests(unittest.TestCase):
         )
         self.assertEqual(history[-1]["payload"]["loaded_mode"], "MT5_LIVE_AUTOMATED")
 
-    def test_restart_cannot_restore_any_mt5_mode(self):
-        for mt5_mode in ms.MT5_MODES:
+    def test_restart_cannot_restore_automated_or_live_mt5_mode(self):
+        # Updated for Phase 5 (TRL-R2-007): MT5_DEMO_MANUAL is excluded
+        # here and covered by its own restart-persistence test below —
+        # every order_send it permits still requires a fresh, explicit
+        # local manual confirmation, so persisting that one mode across a
+        # restart carries no unattended-execution risk. The three
+        # automated/live modes below still represent real future
+        # automation risk and must still never survive a restart.
+        for mt5_mode in ms.AUTOMATED_OR_LIVE_MT5_MODES:
             with self.subTest(mode=mt5_mode):
                 store = ms.InMemoryModeStateStore()
                 seed = ms.ModeService(store=store, session_started_at_utc="2020-01-01T00:00:00.000000Z")
@@ -153,6 +160,23 @@ class StartupResolutionTests(unittest.TestCase):
                 store.save(ms.storage_document(seed._session_started_at_utc, seed._log))
                 restarted = ms.ModeService(store=store)
                 self.assertEqual(restarted.current_mode, "OFF")
+
+    def test_restart_preserves_mt5_demo_manual(self):
+        # New in Phase 5 (TRL-R2-007): unlike the automated/live MT5
+        # modes, MT5_DEMO_MANUAL is a legitimate, deliberately
+        # restart-persistent mode — required by the CLI-driven workflow
+        # (mt5_execution_cli.py), where each command is its own process
+        # and relies on the durably persisted mode.
+        store = ms.InMemoryModeStateStore()
+        seed = ms.ModeService(store=store, session_started_at_utc="2020-01-01T00:00:00.000000Z")
+        transition = seed.request_transition(
+            "MT5_DEMO_MANUAL", actor="tester", actor_channel="LOCAL_OPERATOR",
+        )
+        self.assertEqual(transition.outcome, "ACCEPTED")
+        restarted = ms.ModeService(store=store)
+        self.assertEqual(restarted.current_mode, "MT5_DEMO_MANUAL")
+        history = restarted.transition_history()
+        self.assertEqual(history[-1]["event_type"], "MODE_STATE_LOADED")
 
 
 class CapabilityMatrixTests(unittest.TestCase):
@@ -184,11 +208,18 @@ class CapabilityMatrixTests(unittest.TestCase):
         service_instance.request_transition("SYNTHETIC_PAPER", actor="tester")
         self.assertEqual(built, ["SYNTHETIC_PAPER"])
 
-    def test_mt5_demo_manual_represented_but_unavailable(self):
-        # Item 8
+    def test_mt5_demo_manual_available_since_phase_5(self):
+        # Item 8, updated for Phase 5 (TRL-R2-007): the governed MT5
+        # execution adapter now exists (mt5_execution_adapter.py /
+        # mt5_execution_service.py), so MT5_DEMO_MANUAL is no longer
+        # blocked on MISSING_MT5_ADAPTER. It has no unavailable_reasons
+        # and is reachable only from OFF.
         self.assertIn("MT5_DEMO_MANUAL", ms.MODES)
-        self.assertFalse(ms.is_available("MT5_DEMO_MANUAL"))
-        self.assertEqual(ms.unavailable_reasons("MT5_DEMO_MANUAL"), ("MISSING_MT5_ADAPTER",))
+        self.assertTrue(ms.is_available("MT5_DEMO_MANUAL"))
+        self.assertEqual(ms.unavailable_reasons("MT5_DEMO_MANUAL"), ())
+        self.assertIn("MT5_DEMO_MANUAL", ms.in_memory_mode_service().available_modes())
+        self.assertEqual(ms.allowed_destinations("OFF") & {"MT5_DEMO_MANUAL"}, {"MT5_DEMO_MANUAL"})
+        self.assertEqual(ms.allowed_destinations("MT5_DEMO_MANUAL"), frozenset({"OFF"}))
 
     def test_mt5_demo_automated_represented_but_unavailable(self):
         # Item 9
@@ -261,13 +292,27 @@ class CapabilityMatrixTests(unittest.TestCase):
 
 class TransitionRuleTests(unittest.TestCase):
     def test_unavailable_transition_leaves_mode_unchanged(self):
-        # Item 13
+        # Item 13. MT5_LIVE_MANUAL remains unavailable (Phase 9 live-arming
+        # capability does not exist yet) — MT5_DEMO_MANUAL became available
+        # in Phase 5 and is covered by its own availability test instead.
+        service_instance = ms.in_memory_mode_service()
+        service_instance.request_transition("RESEARCH", actor="tester")
+        before = service_instance.current_mode
+        result = service_instance.request_transition("MT5_LIVE_MANUAL", actor="tester")
+        self.assertEqual(result.outcome, "REJECTED")
+        self.assertEqual(result.reason_code, "MISSING_MT5_ADAPTER")
+        self.assertEqual(service_instance.current_mode, before)
+
+    def test_mt5_demo_manual_not_reachable_from_research(self):
+        # MT5_DEMO_MANUAL is available (Phase 5) but only reachable from
+        # OFF, mirroring the deliberate, single, local-operator step the
+        # kickoff instructions require.
         service_instance = ms.in_memory_mode_service()
         service_instance.request_transition("RESEARCH", actor="tester")
         before = service_instance.current_mode
         result = service_instance.request_transition("MT5_DEMO_MANUAL", actor="tester")
         self.assertEqual(result.outcome, "REJECTED")
-        self.assertEqual(result.reason_code, "MISSING_MT5_ADAPTER")
+        self.assertEqual(result.reason_code, "INVALID_TRANSITION")
         self.assertEqual(service_instance.current_mode, before)
 
     def test_failed_persistence_leaves_mode_unchanged(self):
@@ -302,10 +347,19 @@ class TransitionRuleTests(unittest.TestCase):
             self.assertIn("OFF", ms.allowed_destinations(mode))
 
     def test_exact_transition_matrix(self):
-        self.assertEqual(ms.allowed_destinations("OFF"), frozenset({"RESEARCH", "SYNTHETIC_PAPER"}))
+        # MT5_DEMO_MANUAL joined the reachable set in Phase 5 (TRL-R2-007),
+        # reachable only from OFF and returning only to OFF; the three
+        # remaining MT5 modes stay fully unreachable.
+        self.assertEqual(
+            ms.allowed_destinations("OFF"),
+            frozenset({"RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"}),
+        )
         self.assertEqual(ms.allowed_destinations("RESEARCH"), frozenset({"OFF", "SYNTHETIC_PAPER"}))
         self.assertEqual(ms.allowed_destinations("SYNTHETIC_PAPER"), frozenset({"OFF", "RESEARCH"}))
+        self.assertEqual(ms.allowed_destinations("MT5_DEMO_MANUAL"), frozenset({"OFF"}))
         for mt5_mode in ms.MT5_MODES:
+            if mt5_mode == "MT5_DEMO_MANUAL":
+                continue
             self.assertEqual(ms.allowed_destinations(mt5_mode), frozenset())
 
     def test_repeated_identical_transition_is_deterministic(self):
@@ -415,7 +469,9 @@ class HttpAndDashboardIntegrationTests(unittest.TestCase):
         )
         self.assertIn("PAPER ONLY", html)
         self.assertIn('id="operating-mode"', html)
-        self.assertIn("no MT5 execution adapter or live-arming capability exists yet", html)
+        # Updated for Phase 5 (TRL-R2-007): MT5_DEMO_MANUAL is now
+        # available; the remaining MT5 modes still lack live-arming.
+        self.assertIn("no live-arming capability exists yet", html)
 
     def test_off_and_research_do_not_expose_synthetic_paper_as_active(self):
         # Item 23

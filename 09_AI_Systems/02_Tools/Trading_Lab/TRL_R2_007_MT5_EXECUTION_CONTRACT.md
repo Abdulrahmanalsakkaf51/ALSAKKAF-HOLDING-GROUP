@@ -8,7 +8,7 @@
 |---|---|
 | Founder | Abdulrahman Yaseen Alsakkaf |
 | Checkpoint | TRL-R2-007 |
-| Status | Design contract — implementation not yet started. Revised after Founder Phase 2 document review (correction pass, see `TRL_DECISION_LOG.md`) and a final Founder/CTO correction pass adding the first-live-activation risk floor and the deterministic intent lookup key. |
+| Status | Design contract. Revised after Founder Phase 2 document review (correction pass, see `TRL_DECISION_LOG.md`) and a final Founder/CTO correction pass adding the first-live-activation risk floor and the deterministic intent lookup key. Phase 5 (2026-08-01) implements the `MT5_DEMO_MANUAL` demo-manual, single-order, non-basket, non-automated slice of this contract — see `TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` for exactly what is implemented and what remains deferred to later phases (baskets → Phase 6, live modes/arming → Phase 9, automatic reconciliation → Phase 10). |
 | Depends on | TRL-R2-005 (paper engine), TRL-R2-006 (signal proposals), existing `mt5_service.py` read-only connector |
 | Feeds | Phase 9 (live-automation arming and emergency controls) gates every mutation this adapter can perform |
 

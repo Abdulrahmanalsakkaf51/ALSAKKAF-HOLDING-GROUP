@@ -8,9 +8,9 @@
 |-------|-------|
 | Document ID | TRL-R2-005-QUICK-START-005 |
 | Document Type | Local Application Operator Guide |
-| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH; Section 16 added for TRL Phase 3 operating-mode state machine; Sections 3 and 16.2 corrected after Founder review removed the legacy-flag bypass |
-| Version | 4.2 |
-| Date | 2026-07-31 |
+| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH; Section 16 added for TRL Phase 3 operating-mode state machine; Sections 3 and 16.2 corrected after Founder review removed the legacy-flag bypass; Section 17 added for Phase 4 signal intelligence; Section 18 added for Phase 5 MT5 execution adapter |
+| Version | 4.3 |
+| Date | 2026-08-01 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Project | PRJ-017 - ALSAKKAF Trading Research Lab |
 | Checkpoint | TRL-R2-005 - Causal Market Timeline and Forward Paper Engine |
@@ -394,3 +394,85 @@ Founder-approved. Every crossing therefore fails closed at Role 3 with
 `STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED` and the final proposal is
 `BLOCKED` — exactly like FIB-001's `STRATEGY_PARAMETERS_NOT_APPROVED`. See
 `TRL_BLOCKERS.md`.
+
+## 18. MT5 execution adapter (TRL-R2-007, Phase 5)
+
+**DEMO ONLY — LIVE EXECUTION DISABLED — MANUAL CONFIRMATION REQUIRED FOR EVERY ORDER.**
+Available only in `MT5_DEMO_MANUAL` (reachable only from `OFF`, returns only to `OFF`);
+denied in every other mode. No HTTP route can check, confirm, or send an order — this
+CLI is the only mutation path. SMA-001 and FIB-001 both remain blocked before ever
+reaching the adapter (Section 17.5, `TRL_BLOCKERS.md`).
+
+### 18.1 Enter the mode
+
+```powershell
+python -B -W error -m trading_lab_app.mode_cli request-mode MT5_DEMO_MANUAL --reason "demo rehearsal"
+```
+
+### 18.2 Local operator commands
+
+```powershell
+python -B -W error -m trading_lab_app.mt5_execution_cli mt5-status
+python -B -W error -m trading_lab_app.mt5_execution_cli mt5-dependency-status
+python -B -W error -m trading_lab_app.mt5_execution_cli mt5-terminal-status
+python -B -W error -m trading_lab_app.mt5_execution_cli mt5-account-status
+python -B -W error -m trading_lab_app.mt5_execution_cli mt5-symbol-status XAUUSD
+python -B -W error -m trading_lab_app.mt5_execution_cli execution-capabilities
+python -B -W error -m trading_lab_app.mt5_execution_cli execution-journal --limit 20
+python -B -W error -m trading_lab_app.mt5_execution_cli inspect-proposal proposal.json
+python -B -W error -m trading_lab_app.mt5_execution_cli build-order-intent proposal.json
+python -B -W error -m trading_lab_app.mt5_execution_cli check-order <order_intent_id>
+python -B -W error -m trading_lab_app.mt5_execution_cli send-demo-order <order_intent_id>
+python -B -W error -m trading_lab_app.mt5_execution_cli send-demo-order <order_intent_id> --confirm <code>
+python -B -W error -m trading_lab_app.mt5_execution_cli inspect-execution <order_intent_id>
+```
+
+`proposal.json` is an already-generated, fully validated `TRL_SIGNAL_PROPOSAL.v1`
+document (e.g. exported from a `RESEARCH`/`SYNTHETIC_PAPER` session via
+`signal_cli export-proposal`) — the argument accepts either a file path or literal JSON
+text. `send-demo-order` without `--confirm` requests confirmation and prints a short
+challenge code plus its expiry; re-run the exact same command with `--confirm <code>` to
+actually submit. Every rejection prints `{"outcome": "REJECTED", "reason_code": ...}`
+and exits nonzero.
+
+### 18.3 Account fingerprint configuration (required before real execution)
+
+No Founder-approved MT5 demo account fingerprint is configured by default — this is an
+intentional external blocker (`ACCOUNT_UNAVAILABLE`; see `TRL_BLOCKERS.md`), never
+silently bypassed. To configure one, set all three environment variables before starting
+the application or CLI (never commit these to Git):
+
+```powershell
+$env:TRL_MT5_DEMO_LOGIN = "<demo account number>"
+$env:TRL_MT5_DEMO_COMPANY = "<exact broker company name>"
+$env:TRL_MT5_DEMO_SERVER = "<exact broker server name>"
+```
+
+### 18.4 Inspecting execution status over HTTP (read-only)
+
+```powershell
+Invoke-RestMethod 'http://127.0.0.1:8765/api/mt5-execution-status'
+Invoke-RestMethod 'http://127.0.0.1:8765/api/mt5-account-status'
+Invoke-RestMethod 'http://127.0.0.1:8765/api/mt5-terminal-status'
+Invoke-RestMethod 'http://127.0.0.1:8765/api/execution-journal'
+```
+
+Same read-only rule as every other route: GET/HEAD only, `405` with
+`Allow: GET, HEAD` for POST/PUT/PATCH/DELETE. The account-status response never
+includes the raw login number — only a `login_redacted` value.
+
+### 18.5 Execution journal persistence
+
+The append-only, hash-chained execution journal is durable
+(`%LOCALAPPDATA%\ALSAKKAF\TradingLab\mt5-execution-journal-v1.json`) and shared with the
+local CLI, so an order intent built in one process is visible (and its duplicate/idempotency
+protection still applies) in a later, separate process. A corrupted or hand-edited file
+fails closed rather than being silently replaced or allowing any action to proceed.
+
+### 18.6 Scope limitations
+
+Single order per proposal only (no basket execution — Phase 6); one `order_check` and
+one manual-confirmed `order_send` attempt per order intent (no automatic repriced
+retry); live modes and automated submission remain unavailable (Phase 9); an uncertain
+`order_send` result freezes permanently rather than being automatically reconciled
+(Phase 10). See `TRL_R2_007_MT5_EXECUTION_EVIDENCE.md` for full detail.
