@@ -2,7 +2,14 @@
   "active_branch": "codex/TRL-R2-full-vision-execution",
   "current_head": "3b6d4db052144da92e7376f6bc3b0268a17e92ee",
   "current_checkpoint": "Phase 6 contract checkpoint (TRL-R2-009) complete, Founder-approved, committed, and pushed at d4b8ca5625cceeae403e6cbaf0e6628efc947722 (commit message: Define TRL-R2-009 controlled basket execution contract; push recorded as 49b8f74..d4b8ca5 on codex/TRL-R2-full-vision-execution). Local HEAD, remote branch, and upstream-tracking ref were verified equal at that SHA immediately after the push, with a clean working tree. The commit contains exactly 7 documentation/governance files (1 added, 6 modified, 0 deleted; 2818 insertions, 147 deletions). Reached through four Founder correction passes on the original draft, then Founder-approved commit and push (see TRL_DECISION_LOG.md entries 012-018 for full detail): six separate basket schemas with no Phase 5 schema modification; fully deterministic nonce-free basket/child identities; an exact, cycle-scoped, permanently-immutable-once-expired confirmation challenge; a fixed authorization-checkpoint confirmation-basis design (authorized_prior_filled_child_ids/authorized_remaining_child_ids/authorized_start_child_id) that lets one accepted confirmation govern an entire basket's sequential sends without a normal successful fill ever forcing reconfirmation. This continuation-state synchronization checkpoint corrects stale pre-push wording in the tracking documents to reflect the verified commit-and-push; it does not itself modify the R2-009 contract, the Phase 3 amendment, or TRL_BLOCKERS.md, none of which contained stale text. The exact staged/committed/pushed state of this synchronization checkpoint is authoritatively determined by Git at any given moment (current HEAD, upstream-tracking ref, remote branch ref, working-tree status), not restated here. Phase 6 implementation itself has not started; the next authorized checkpoint is Phase 6 controlled-basket implementation against the verified R2-009 contract, gated on this synchronization checkpoint itself reaching Founder-approved, verified commit-and-push status.",
-  "completed_phases": ["Phase 0", "Phase 1", "Phase 2", "Phase 3", "Phase 4", "Phase 5"],
+  "completed_phases": [
+    "Phase 0",
+    "Phase 1",
+    "Phase 2",
+    "Phase 3",
+    "Phase 4",
+    "Phase 5"
+  ],
   "active_phase": "Phase 6 - contract checkpoint (TRL-R2-009) complete, Founder-approved, committed, and pushed at d4b8ca5625cceeae403e6cbaf0e6628efc947722; continuation-state synchronization checkpoint complete at 3b6d4db052144da92e7376f6bc3b0268a17e92ee. Phase 6 IMPLEMENTATION is complete against the verified R2-009 contract, including a Founder correction round (identity circularity, partial-fill governance, full-suite recovery, test-count arithmetic, true cross-process proof - TRL_DECISION_LOG.md entry 2026-08-01-020) - see phase_6_implementation below and TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md. The implementation checkpoint is Founder-approved and locally committed; remote push verification is a separate, later checkpoint. The exact current staged/committed/pushed state is always authoritative from Git directly (current HEAD, upstream-tracking ref, remote branch ref, working-tree status), not restated here.",
   "phase_5_tracking_closure": {
     "status": "complete_committed_pushed",
@@ -105,10 +112,28 @@
   },
   "phase_6_implementation": {
     "status": "complete, Founder-corrected once, locally committed; remote push pending",
-    "new_modules": ["basket_execution_data.py", "basket_execution_service.py", "basket_execution_cli.py"],
-    "additive_modules_modified": ["mt5_execution_journal.py", "mode_service.py", "app.py", "server.py", "service.py", "static/index.html", "static/app.js"],
+    "new_modules": [
+      "basket_execution_data.py",
+      "basket_execution_service.py",
+      "basket_execution_cli.py"
+    ],
+    "additive_modules_modified": [
+      "mt5_execution_journal.py",
+      "mode_service.py",
+      "app.py",
+      "server.py",
+      "service.py",
+      "static/index.html",
+      "static/app.js"
+    ],
     "new_tests": 138,
-    "new_test_files": ["test_basket_execution_data.py", "test_basket_execution_service.py", "test_basket_execution_cli.py", "test_basket_execution_http.py", "test_basket_execution_concurrency.py"],
+    "new_test_files": [
+      "test_basket_execution_data.py",
+      "test_basket_execution_service.py",
+      "test_basket_execution_cli.py",
+      "test_basket_execution_http.py",
+      "test_basket_execution_concurrency.py"
+    ],
     "founder_approved_contract_amendment": "Two additive BASKET_REASON_CODES entries (BASKET_CHILD_SEND_REJECTED, BASKET_CHILD_SEND_PARTIALLY_FILLED) added to Section 15 during implementation - see TRL_DECISION_LOG.md entry 2026-08-01-019",
     "implementation_bugs_found_and_fixed": [
       "_finalize_send dead-code reason-code expression (BASKET_CHILD_SEND_REJECTED / silent BASKET_FROZEN fallback)",
@@ -140,12 +165,37 @@
       "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
       "09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md"
     ],
-    "schemas_defined": ["TRL_MARKET_SNAPSHOT.v1", "TRL_EVIDENCE_ITEM.v1", "TRL_OPPORTUNITY_CARD.v1", "TRL_VIRTUAL_OPPORTUNITY.v1", "TRL_OPPORTUNITY_DECISION.v1", "TRL_LEARNING_TELEMETRY.v1"],
-    "decision_statuses": ["TRADE_CANDIDATE", "WAIT", "REJECT", "BLOCKED", "EXPIRED"],
+    "schemas_defined": [
+      "TRL_MARKET_SNAPSHOT.v1",
+      "TRL_EVIDENCE_ITEM.v1",
+      "TRL_OPPORTUNITY_CARD.v1",
+      "TRL_VIRTUAL_OPPORTUNITY.v1",
+      "TRL_OPPORTUNITY_DECISION.v1",
+      "TRL_LEARNING_TELEMETRY.v1"
+    ],
+    "decision_statuses": [
+      "TRADE_CANDIDATE",
+      "WAIT",
+      "REJECT",
+      "BLOCKED",
+      "EXPIRED"
+    ],
     "non_circular_identity_design": "evidence_id scoped to snapshot_id + proposed_side + own fields (never opportunity_id, which does not exist yet); opportunity_id computed after from snapshot_id + concepts + sorted evidence_ids; decision_id and telemetry_id reference opportunity_id/decision_id forward only - no cycle",
-    "virtual_lattice_bounds": {"min": 1, "max": 6, "max_selected_for_preview": 1},
+    "virtual_lattice_bounds": {
+      "min": 1,
+      "max": 6,
+      "max_selected_for_preview": 1
+    },
     "execution_boundary": "no order_check, no order_send, no RealMT5ExecutionAdapter, no broker/MetaTrader5 connection, no Phase 6 basket construction or confirmation, no ModeService bypass, no live/automated mode activation",
-    "new_blockers_added": ["LIVE_MARKET_DATA_NOT_APPROVED", "INTELLIGENCE_SCORING_NOT_VALIDATED", "EXECUTION_HANDOFF_NOT_APPROVED", "AUTOMATIC_LEARNING_NOT_APPROVED", "STRATEGY_PROMOTION_NOT_APPROVED", "NEWS_SENTIMENT_SOURCE_NOT_APPROVED", "MACRO_DATA_SOURCE_NOT_APPROVED"],
+    "new_blockers_added": [
+      "LIVE_MARKET_DATA_NOT_APPROVED",
+      "INTELLIGENCE_SCORING_NOT_VALIDATED",
+      "EXECUTION_HANDOFF_NOT_APPROVED",
+      "AUTOMATIC_LEARNING_NOT_APPROVED",
+      "STRATEGY_PROMOTION_NOT_APPROVED",
+      "NEWS_SENTIMENT_SOURCE_NOT_APPROVED",
+      "MACRO_DATA_SOURCE_NOT_APPROVED"
+    ],
     "sma_001_status": "remains blocked (STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED); independently re-enforced by this contract's Section 9.2 gate",
     "fib_001_status": "remains blocked (STRATEGY_PARAMETERS_NOT_APPROVED); independently re-enforced by this contract's Section 9.2 gate",
     "phase_6_touched": false,
@@ -154,17 +204,39 @@
   },
   "trl_r2_010_founder_correction_pass": {
     "status": "applied to the same contract, now part of the Founder-approved governing contract; implementation not started; exact staged/committed/pushed state determined by Git directly",
-    "canonical_instrument_allowlist": ["XAUUSD", "NAS100", "EURUSD", "GBPUSD", "USDJPY"],
-    "canonical_timeframe_allowlist": ["M5", "M15", "H1", "H4", "D1"],
+    "canonical_instrument_allowlist": [
+      "XAUUSD",
+      "NAS100",
+      "EURUSD",
+      "GBPUSD",
+      "USDJPY"
+    ],
+    "canonical_timeframe_allowlist": [
+      "M5",
+      "M15",
+      "H1",
+      "H4",
+      "D1"
+    ],
     "evidence_opportunity_id_removed": true,
     "evidence_completeness_rule": "exactly one non-expired evidence item per each of the 11 categories; duplicate or missing category fails closed",
     "score_formulas": {
       "effective_evidence_score": "quantize_4(normalized_strength * confidence)",
-      "directional_categories": ["MARKET_STRUCTURE", "TREND", "MOMENTUM", "MULTI_TIMEFRAME_ALIGNMENT", "CONTRADICTING_EVIDENCE"],
+      "directional_categories": [
+        "MARKET_STRUCTURE",
+        "TREND",
+        "MOMENTUM",
+        "MULTI_TIMEFRAME_ALIGNMENT",
+        "CONTRADICTING_EVIDENCE"
+      ],
       "supporting_score_denominator": 5,
       "contradiction_score_denominator": 5,
       "uncertainty_score_denominator": 11,
-      "severity_only_categories": ["EVENT_RISK", "EXECUTION_COST", "RISK_EXPOSURE"]
+      "severity_only_categories": [
+        "EVENT_RISK",
+        "EXECUTION_COST",
+        "RISK_EXPOSURE"
+      ]
     },
     "new_thresholds": {
       "HARD_EVENT_RISK_BLOCK_MIN": "0.9000",
@@ -178,10 +250,18 @@
       "file": "09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md",
       "section_added": "3.2",
       "capability_name": "market_intelligence_research",
-      "granted_modes": ["RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"],
+      "granted_modes": [
+        "RESEARCH",
+        "SYNTHETIC_PAPER",
+        "MT5_DEMO_MANUAL"
+      ],
       "mode_service_py_touched": false
     },
-    "corrected_scope": {"new": 1, "modified": 6, "deleted": 0},
+    "corrected_scope": {
+      "new": 1,
+      "modified": 6,
+      "deleted": 0
+    },
     "phase_6_touched": false,
     "phase_7_started": false,
     "decision_log_entry": "2026-08-02-022"
@@ -202,17 +282,40 @@
       "BUY": "stop_price < entry_trigger < strictly increasing target_prices",
       "SELL": "stop_price > entry_trigger > strictly decreasing target_prices"
     },
-    "reward_risk_formulas": ["risk_distance", "target_reward_distance", "weighted_reward_distance", "reward_risk_ratio", "distance_to_market", "snapshot_mid_price"],
+    "reward_risk_formulas": [
+      "risk_distance",
+      "target_reward_distance",
+      "weighted_reward_distance",
+      "reward_risk_ratio",
+      "distance_to_market",
+      "snapshot_mid_price"
+    ],
     "virtual_opportunity_id_excludes_rank": true,
-    "state_derivation_order": ["EXPIRED", "INVALIDATED", "REJECTED", "WATCHING", "ACTIVATED"],
+    "state_derivation_order": [
+      "EXPIRED",
+      "INVALIDATED",
+      "REJECTED",
+      "WATCHING",
+      "ACTIVATED"
+    ],
     "preview_quantity_conservation": "fail-closed, no redistribution; new reason code MARKET_INTELLIGENCE_PREVIEW_QUANTITY_NOT_EXACTLY_REPRESENTABLE",
     "decision_order_steps": 23,
-    "new_reason_codes_this_pass": ["MARKET_INTELLIGENCE_EVIDENCE_EXPIRED", "MARKET_INTELLIGENCE_PREVIEW_QUANTITY_NOT_EXACTLY_REPRESENTABLE"],
+    "new_reason_codes_this_pass": [
+      "MARKET_INTELLIGENCE_EVIDENCE_EXPIRED",
+      "MARKET_INTELLIGENCE_PREVIEW_QUANTITY_NOT_EXACTLY_REPRESENTABLE"
+    ],
     "uncertainty_wait_comparison_corrected_to_strict_gt": true,
     "cli_input_safety_rules_added": true,
     "demonstration_fixture_required": true,
-    "files_requiring_no_further_change_this_pass": ["TRL_PHASE_3_OPERATING_MODE_CONTRACT.md", "TRL_BLOCKERS.md"],
-    "cumulative_scope": {"new": 1, "modified": 6, "deleted": 0},
+    "files_requiring_no_further_change_this_pass": [
+      "TRL_PHASE_3_OPERATING_MODE_CONTRACT.md",
+      "TRL_BLOCKERS.md"
+    ],
+    "cumulative_scope": {
+      "new": 1,
+      "modified": 6,
+      "deleted": 0
+    },
     "phase_6_touched": false,
     "phase_7_started": false,
     "decision_log_entry": "2026-08-02-023"
@@ -235,12 +338,38 @@
     },
     "product_working_name": "TRL CORTEX V0",
     "baseline_head": "b1fedab1f91b91b184434ff32fe0dcbddf8d9985",
-    "new_modules": ["market_intelligence_data.py", "market_intelligence_journal.py", "market_intelligence_service.py", "market_intelligence_cli.py"],
-    "additive_modules_modified": ["mode_service.py", "app.py", "server.py", "service.py", "static/index.html", "static/app.js"],
+    "new_modules": [
+      "market_intelligence_data.py",
+      "market_intelligence_journal.py",
+      "market_intelligence_service.py",
+      "market_intelligence_cli.py"
+    ],
+    "additive_modules_modified": [
+      "mode_service.py",
+      "app.py",
+      "server.py",
+      "service.py",
+      "static/index.html",
+      "static/app.js"
+    ],
     "phase5_6_files_touched": 0,
-    "new_test_files": ["test_market_intelligence_data.py", "test_market_intelligence_journal.py", "test_market_intelligence_service.py", "test_market_intelligence_cli.py", "test_market_intelligence_http.py", "test_market_intelligence_concurrency.py"],
+    "new_test_files": [
+      "test_market_intelligence_data.py",
+      "test_market_intelligence_journal.py",
+      "test_market_intelligence_service.py",
+      "test_market_intelligence_cli.py",
+      "test_market_intelligence_http.py",
+      "test_market_intelligence_concurrency.py"
+    ],
     "new_tests": 160,
-    "new_tests_by_module": {"data": 77, "journal": 13, "service": 30, "cli": 17, "http": 21, "concurrency": 2},
+    "new_tests_by_module": {
+      "data": 77,
+      "journal": 13,
+      "service": 30,
+      "cli": 17,
+      "http": 21,
+      "concurrency": 2
+    },
     "shared_test_helper": "mi_test_support.py (not test_*-named, not discovered as an empty test module)",
     "fixture": "fixtures/trl_cortex_v0_synthetic_trade_candidate.json",
     "accelerated_v0_decisions": [
@@ -256,12 +385,20 @@
     "targeted_test_result": "573 tests (6 new MI modules + ModeService + app/server + Phase 5 execution incl. concurrency + Phase 6 basket), 0 failures, 0 errors",
     "full_suite_runs": {
       "reconciled_arithmetic": "900 (baseline) + 160 (new) = 1060",
-      "accepted_pair": {"run_a": "1060 tests, 0 failures, 0 errors", "run_b": "1060 tests, 0 failures, 0 errors"},
+      "accepted_pair": {
+        "run_a": "1060 tests, 0 failures, 0 errors",
+        "run_b": "1060 tests, 0 failures, 0 errors"
+      },
       "pre_existing_intermittent_flake_investigated": {
         "test": "test_mt5_execution_concurrency.ConcurrentSendTests.test_two_processes_racing_confirm_and_send_send_at_most_once",
         "observed_in": "2 of 6 full-suite runs across this checkpoint (same failure both times)",
         "root_cause": "pre-existing Phase 5 true-separate-process timing sensitivity, unrelated to this checkpoint",
-        "evidence": ["file byte-identical to committed baseline (exact git hash-object blob comparison, not git diff --stat inference)", "passes 3/3 in isolation", "does not reproduce from the 900-test baseline run alone", "intermittent (2 of 6 full-suite attempts), not deterministic"],
+        "evidence": [
+          "file byte-identical to committed baseline (exact git hash-object blob comparison, not git diff --stat inference)",
+          "passes 3/3 in isolation",
+          "does not reproduce from the 900-test baseline run alone",
+          "intermittent (2 of 6 full-suite attempts), not deterministic"
+        ],
         "action_taken": "reported transparently; no Phase 5 source or test modified"
       }
     },
@@ -297,7 +434,10 @@
         "a prior chat-report summary imprecisely stated replay-session bounds as start_index/end_index/step_size bounds [1,1000] - the contract's own Section 14.1 text was already correct; a projected-step-count cap of 10000 was additionally added (Section 14.2, formula ceil((end_index-start_index+1)/step_size), reason code MARKET_DATA_REPLAY_PROJECTED_STEP_LIMIT_EXCEEDED)"
       ],
       "section_renumbering": "restructured throughout to accommodate the new material (Section 10.6 storage envelope; Section 11 per-schema identity tables; Sections 17-19 storage/journal/corruption/pagination; capability moved to 20, CLI to 21, HTTP to 22, R2-010 boundary to 23, blockers to 24, acceptance requirements to 25, tonight-ready boundary to 26, remaining decisions to 27)",
-      "cross_references_updated": ["TRL_PHASE_3_OPERATING_MODE_CONTRACT.md Section 3.3", "TRL_BLOCKERS.md"],
+      "cross_references_updated": [
+        "TRL_PHASE_3_OPERATING_MODE_CONTRACT.md Section 3.3",
+        "TRL_BLOCKERS.md"
+      ],
       "reason_code_table_added": "29-entry closed reason-code table, Section 24.1",
       "scope_unchanged": true,
       "decision_log_entry": "2026-08-02-027 (additive Founder-review amendment, original decision text unchanged)"
@@ -313,36 +453,78 @@
       "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
       "09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md"
     ],
-    "schemas_defined": ["TRL_MARKET_BAR.v1", "TRL_MARKET_DATASET_MANIFEST.v1", "TRL_REPLAY_SESSION.v1", "TRL_REPLAY_STEP.v1", "TRL_REPLAY_SNAPSHOT.v1"],
-    "approved_data_sources": ["SYNTHETIC_FIXTURE", "LOCAL_HISTORICAL_FILE"],
-    "canonical_instrument_allowlist": ["XAUUSD", "NAS100", "EURUSD", "GBPUSD", "USDJPY"],
-    "canonical_timeframe_allowlist": ["M5", "M15", "H1", "H4", "D1"],
+    "schemas_defined": [
+      "TRL_MARKET_BAR.v1",
+      "TRL_MARKET_DATASET_MANIFEST.v1",
+      "TRL_REPLAY_SESSION.v1",
+      "TRL_REPLAY_STEP.v1",
+      "TRL_REPLAY_SNAPSHOT.v1"
+    ],
+    "approved_data_sources": [
+      "SYNTHETIC_FIXTURE",
+      "LOCAL_HISTORICAL_FILE"
+    ],
+    "canonical_instrument_allowlist": [
+      "XAUUSD",
+      "NAS100",
+      "EURUSD",
+      "GBPUSD",
+      "USDJPY"
+    ],
+    "canonical_timeframe_allowlist": [
+      "M5",
+      "M15",
+      "H1",
+      "H4",
+      "D1"
+    ],
     "csv_header": "instrument,timeframe,observed_at_utc,open,high,low,close,spread,tick_volume",
     "max_input_file_size_bytes": 33554432,
     "max_bars_per_dataset": 250000,
     "min_bars_per_dataset": 2,
     "non_circular_identity_design": "bar_id from own OHLC/spread/volume/source_classification fields only; dataset_id from instrument+timeframe+source_classification+source_reference+ordered_bar_refs; replay_session_id from dataset_id+range+step_size; replay_step_id from session identity+sequence+range; replay_snapshot_id from session+step+window - strictly forward-referencing, no cycle",
     "dataset_reuse_decision": "source_reference included in dataset identity (Founder decision): same bars + same source_reference = reuse; same bars + different source_reference = distinct manifest; individual bar identities always reused",
-    "replay_statuses": ["READY", "RUNNING", "COMPLETED", "CANCELLED", "CORRUPTED"],
+    "replay_statuses": [
+      "READY",
+      "RUNNING",
+      "COMPLETED",
+      "CANCELLED",
+      "CORRUPTED"
+    ],
     "replay_window_max_bars": 100,
     "execution_boundary": "no order_check, no order_send, no RealMT5ExecutionAdapter, no MetaTrader5/broker/TradingView connection, no external network, no automatic evidence generation, no R2-010 or Phase 5/6 journal write, no ModeService bypass, no live/automated mode activation",
     "capability_amendment": {
       "file": "09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md",
       "section_added": "3.3",
       "capability_name": "market_data_research",
-      "granted_modes": ["RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"],
+      "granted_modes": [
+        "RESEARCH",
+        "SYNTHETIC_PAPER",
+        "MT5_DEMO_MANUAL"
+      ],
       "mode_service_py_touched": false
     },
-    "new_blockers_added": ["EXTERNAL_MARKET_DATA_FEED_NOT_APPROVED", "BROKER_HISTORY_IMPORT_NOT_APPROVED", "AUTOMATIC_EVIDENCE_GENERATION_NOT_APPROVED", "REPLAY_TO_INTELLIGENCE_HANDOFF_NOT_APPROVED", "REPLAY_TO_EXECUTION_HANDOFF_NOT_APPROVED", "DATASET_PROVENANCE_NOT_VERIFIED"],
+    "new_blockers_added": [
+      "EXTERNAL_MARKET_DATA_FEED_NOT_APPROVED",
+      "BROKER_HISTORY_IMPORT_NOT_APPROVED",
+      "AUTOMATIC_EVIDENCE_GENERATION_NOT_APPROVED",
+      "REPLAY_TO_INTELLIGENCE_HANDOFF_NOT_APPROVED",
+      "REPLAY_TO_EXECUTION_HANDOFF_NOT_APPROVED",
+      "DATASET_PROVENANCE_NOT_VERIFIED"
+    ],
     "cli_commands": 11,
     "http_routes": 6,
     "r2_010_touched": false,
     "phase_7_started": false,
-    "scope": {"new": 1, "modified": 6, "deleted": 0},
+    "scope": {
+      "new": 1,
+      "modified": 6,
+      "deleted": 0
+    },
     "decision_log_entry": "2026-08-02-027"
   },
-  "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\", run twice, post-correction-round",
-  "tests_last_result": "900 tests both runs, identical: 0 failures, 0 errors. The originally reported 889-test/5-failure run is superseded (see founder_correction_round_2026_08_01_020.full_suite_recovery). TRL-R2-010 implementation (see trl_r2_010_implementation above) separately reconciles to 1060 tests (900 + 160 new).",
+  "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\", working directory set to 09_AI_Systems/02_Tools/Trading_Lab",
+  "tests_last_result": "1249 tests, both runs identical: 0 failures, 0 errors. Reconciles exactly to 1060 (R2-010 checkpoint baseline) + 189 (R2-011 new, post two Founder-review correction passes: reason-code conformance, then locked rejection journaling). See trl_r2_011_implementation.reason_code_conformance_correction and .locked_rejection_journaling_correction for full detail.",
   "active_processes": [],
   "active_ports": {
     "8765": "confirmed no listener as of last check"
@@ -360,7 +542,7 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "TRL-R2-010 is closed as a completed and remotely verified checkpoint (see trl_r2_010_implementation above). TRL-R2-011's governing contract is now also closed as a completed and remotely verified checkpoint (see trl_r2_011_market_data_fabric_replay_v0_contract_checkpoint above); its implementation has not been formally authorized or started - a separate, later Founder decision is required. Obtain separate, explicit Founder authorization for the remote push of the already-locally-committed Phase 6 implementation, and separately for any future TRL-R2-011 implementation",
+  "next_command": "TRL-R2-011 implementation is Founder-approved and locally committed as this checkpoint's commit. Remote push is a separate, later, Founder-authorized action, not yet taken. Separate, explicit Founder authorization is still needed for the remote push of both this checkpoint and the already-locally-committed Phase 6 implementation checkpoint.",
   "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
@@ -370,5 +552,136 @@
     "--no-verify",
     "--no-gpg-sign"
   ],
-  "last_update": "2026-08-02T08:00:00Z"
+  "last_update": "2026-08-03T09:30:00Z",
+  "trl_r2_011_implementation": {
+    "status": "Founder-approved for local commit; being locally committed as this checkpoint's commit; remote push is a separate, later, Founder-authorized action, not yet taken. Exact committed HEAD and push status are always read from git rev-parse HEAD / git status directly.",
+    "governing_contract_commit": "678de02d739a89a0fcc58765178bd8935f4db868",
+    "product_working_name": "TRL CORTEX DATA FABRIC V0",
+    "new_modules": [
+      "market_data_replay_data.py",
+      "market_data_replay_storage.py",
+      "market_data_replay_journal.py",
+      "market_data_replay_service.py",
+      "market_data_replay_cli.py"
+    ],
+    "additive_modules_modified": [
+      "mode_service.py",
+      "app.py",
+      "server.py",
+      "service.py",
+      "static/index.html",
+      "static/app.js"
+    ],
+    "phase5_6_files_touched": 0,
+    "r2_010_files_touched": 0,
+    "new_test_files": [
+      "test_market_data_replay_data.py",
+      "test_market_data_replay_storage.py",
+      "test_market_data_replay_journal.py",
+      "test_market_data_replay_service.py",
+      "test_market_data_replay_cli.py",
+      "test_market_data_replay_http.py",
+      "test_market_data_replay_concurrency.py"
+    ],
+    "new_tests": 189,
+    "new_tests_by_module": {
+      "data": 64,
+      "storage": 14,
+      "journal": 18,
+      "service": 55,
+      "cli": 8,
+      "http": 16,
+      "concurrency": 14
+    },
+    "shared_test_helper": "mdr_test_support.py (not test_*-named, not discovered as an empty test module)",
+    "fixture": "fixtures/trl_cortex_data_fabric_v0_synthetic.csv",
+    "fixture_deterministic_result": {
+      "instrument": "XAUUSD",
+      "timeframe": "M5",
+      "bar_count": 24,
+      "first_observed_at_utc": "2026-01-05T00:00:00.000000Z",
+      "last_observed_at_utc": "2026-01-05T02:00:00.000000Z",
+      "gap_count": 1,
+      "largest_gap_intervals": 1,
+      "dataset_id": "mds_e13cd213c16527457a6e77dc8d6b715d",
+      "canonical_dataset_hash": "44c6a8694da6a7b9c111067572e42d257afcbb6b850b763c8f2ad9a30a291d2a"
+    },
+    "disclosed_v0_decisions": [
+      "Reason-code reuse for two unlisted condition classes (instrument/timeframe allowlist and mixed-file violations reuse MARKET_DATA_CSV_SHAPE_INVALID; OHLC/spread invariant violations reuse MARKET_DATA_DECIMAL_GRAMMAR_INVALID) - the contract Section 24.1 table has no dedicated code for either",
+      "Canonical JSON/hashing uses timeline_data.deterministic_json_text + sha256_text (the established Phase 5/6/6A precedent every existing governed schema module uses) rather than trading_lab_core.canonical.canonical_json, which exists only for the unrelated Release-1 reproducibility engine"
+    ],
+    "targeted_test_result": "seven new modules (189 tests) individually OK; exact combined targeted suite of 28 modules run as one process: 762 tests, 0 failures, 0 errors, 75.78s elapsed",
+    "full_suite_runs": {
+      "reconciled_arithmetic": "1060 (baseline) + 189 (new, post both correction passes) = 1249",
+      "invocation": "python -B -W error -m unittest discover -s . -p \"test_*.py\", working directory set to 09_AI_Systems/02_Tools/Trading_Lab",
+      "accepted_pair": {
+        "run_a": "1249 tests, 0 failures, 0 errors, 145.61s",
+        "run_b": "1249 tests, 0 failures, 0 errors, 145.89s"
+      },
+      "pre_existing_cwd_dependent_test_investigated": {
+        "tests": [
+          "test_market_intelligence_cli.GrantedModeTests.test_preview_generated_when_granted",
+          "test_market_intelligence_cli.GrantedModeTests.test_analyze_and_inspect_round_trip_when_granted"
+        ],
+        "observed_in": "deterministically, on both attempts, only when the identical discovery command is instead run with the working directory set to the repository root",
+        "root_cause": "both tests pass a relative fixture path (fixtures/trl_cortex_v0_synthetic_trade_candidate.json) to cli.main(), which resolves only when CWD is the Trading Lab directory itself; unrelated to this checkpoint",
+        "evidence": [
+          "git diff --stat reports zero changes to test_market_intelligence_cli.py",
+          "git blame attributes the relative-path line to commit ea9cc3e (R2-010 implementation), not this checkpoint",
+          "passes 17/17 in isolation regardless of CWD",
+          "the 1060-test pre-existing baseline (excluding all seven new R2-011 modules) passes 1060/1060 clean at the repository-root CWD",
+          "all seven new R2-011 modules combined with this file alone pass 172/172 clean"
+        ],
+        "action_taken": "reported transparently in the evidence document Section 12.5; no R2-010 source or test modified; accepted Run A/Run B pair uses the CWD under which this pre-existing test resolves its own relative path, exactly as intended by the file itself",
+        "exact_failure_text": [
+          "AttributeError: 'NoneType' object has no attribute 'group' (test_preview_generated_when_granted, line 151: opportunity_id = match.group(1))",
+          "AssertionError: 1 != 0 (test_analyze_and_inspect_round_trip_when_granted, line 138: self.assertEqual(exit_code, 0))"
+        ],
+        "exact_relative_path": "fixtures/trl_cortex_v0_synthetic_trade_candidate.json",
+        "exact_expected_path": "C:\\ALSAKKAF_WT\\PRJ017_CODEX\\09_AI_Systems\\02_Tools\\Trading_Lab\\fixtures\\trl_cortex_v0_synthetic_trade_candidate.json",
+        "exact_incorrectly_resolved_path": "C:\\ALSAKKAF_WT\\PRJ017_CODEX\\fixtures\\trl_cortex_v0_synthetic_trade_candidate.json (does not exist)",
+        "blob_hash_proof": {
+          "baseline_commit_5c53396a_blob": "910f1d4aa1e432244a933439916083cd1c338c0a",
+          "working_tree_blob": "910f1d4aa1e432244a933439916083cd1c338c0a",
+          "r2010_implementation_commit_ea9cc3e_blob": "910f1d4aa1e432244a933439916083cd1c338c0a",
+          "conclusion": "all three byte-identical; file unchanged since R2-010"
+        },
+        "classification": "pre-existing working-directory portability defect in an untouched existing R2-010 test; not an R2-011 regression",
+        "reconfirmed_after_second_pass": true,
+        "reconfirmed_blob_hash": "910f1d4aa1e432244a933439916083cd1c338c0a"
+      }
+    },
+    "manual_rehearsal": "completed via real CLI entry points (market_data_replay_cli, mode_cli), a real HTTP server, and the real dashboard static files, against an isolated temporary LOCALAPPDATA; all 35 required rehearsal steps passed - import/reuse/distinct-manifest-different-source-reference, replay create/advance/restart-persist/complete/no-step-after-completion/cancel-of-completed-is-noop, snapshot non_live/non_executable, all six HTTP routes 200 and 405 on POST, dashboard panel present, zero R2-010 or execution journal files created, mode returned to OFF, port/process/lock state clean afterward",
+    "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md",
+    "reason_code_conformance_correction": {
+      "performed": true,
+      "defects_found_and_fixed": [
+        "MARKET_DATA_JOURNAL_CORRUPTED was declared in the closed vocabulary but never emitted; _require_journal_integrity raised an invented, non-governed alias (MARKET_DATA_JOURNAL_INTEGRITY_UNCERTAIN) instead - fixed to raise the exact contract code",
+        "a corrupted stored dataset envelope leaked the import-context MARKET_DATA_CSV_SHAPE_INVALID code on reload instead of the storage-load code MARKET_DATA_STORAGE_INTEGRITY_FAILURE - fixed by wrapping validate_storage_envelope in _parse_envelope_bytes and re-raising uniformly under the storage code",
+        "MARKET_DATA_REPLAY_ALREADY_COMPLETED was declared but never observable in any response - fixed by attaching reason_code to replay_next's already-completed short-circuit response, matching Section 15.1's 'governed completed result returned instead' wording"
+      ],
+      "remaining_reuse_decisions_confirmed_conforming": [
+        "instrument/timeframe-allowlist and mixed-instrument/timeframe-file violations reuse MARKET_DATA_CSV_SHAPE_INVALID - confirmed via exhaustive 29-row check as the only fitting code in the closed vocabulary",
+        "OHLC/spread invariant violations reuse MARKET_DATA_DECIMAL_GRAMMAR_INVALID - confirmed via the same exhaustive check"
+      ],
+      "conformance_table_location": "TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md Section 2.3 (all 29 codes)",
+      "net_new_tests_added_during_correction": 16,
+      "no_existing_test_modified": true,
+      "no_contract_modified": true
+    },
+    "locked_rejection_journaling_correction": {
+      "performed": true,
+      "finding": "import_market_data's MARKET_DATASET_REJECTED append was the one remaining unlocked journal mutation, recorded before the mutation lock was acquired; earlier R2-010 precedent (market_intelligence_service._reject, also unlocked) does not satisfy R2-011's own Section 18.1 locking requirement",
+      "fix": "unified rejection-recording and accept/reuse paths under one lock acquisition per import_market_data call; fresh post-reload corruption check (_fail_if_journal_corrupted) applied uniformly to all four mutation methods, replacing the prior pre-lock-only _require_journal_integrity (removed as dead code); exact precedence rules: corruption > pending rejection > journal-full/event-too-large; lock-timeout preserves the pending reason only as non-authoritative diagnostic text, never a new alias",
+      "net_new_tests_added": 18,
+      "new_tests_breakdown": {
+        "test_market_data_replay_service.py (LockedRejectionTests)": 12,
+        "test_market_data_replay_journal.py (owner-token mismatch)": 1,
+        "test_market_data_replay_concurrency.py (ConcurrentInvalidImportTests)": 5
+      },
+      "journal_mutation_audit_location": "TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md Section 2.5 (all ten event types)",
+      "no_existing_test_modified": true,
+      "no_contract_modified": true
+    }
+  }
 }

@@ -26,6 +26,7 @@ from . import mt5_execution_service
 from . import basket_execution_service
 from . import market_intelligence_data
 from . import market_intelligence_service
+from . import market_data_replay_service
 from .server import BIND_HOST, DEFAULT_PORT, create_server
 
 
@@ -470,6 +471,72 @@ def _validate_market_intelligence_subsystem_consistency(current_mode, mi_service
         )
 
 
+def _market_data_replay_service_preflight_for_mode(current_mode):
+    """Side-effect-free construction used ONLY to validate, during a
+    ModeService transition attempt, that a Market Data Fabric and Replay V0
+    (TRL CORTEX DATA FABRIC V0, TRL-R2-011) service *could* be constructed
+    for the requested mode. Discarded immediately afterward; never wired
+    into anything real, never touches the durable journal or dataset
+    storage. See ``_market_data_replay_service_for_mode`` for the real
+    runtime construction path."""
+    if current_mode in ("RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"):
+        from .market_data_replay_journal import in_memory_mdr_journal_writer
+        from .market_data_replay_storage import InMemoryDatasetStorage
+        return market_data_replay_service.MarketDataReplayService(
+            journal=in_memory_mdr_journal_writer(), storage=InMemoryDatasetStorage(),
+        )
+    if current_mode == "OFF":
+        return market_data_replay_service.disabled_service(operating_mode=current_mode)
+    raise ModeSubsystemConfigurationError(
+        "no Phase 6B Market Data Fabric preflight rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _market_data_replay_service_for_mode(current_mode, mode_service_instance, journal=None, storage=None):
+    """The real runtime Market Data Fabric and Replay V0 service
+    (TRL-R2-011), granted in RESEARCH/SYNTHETIC_PAPER/MT5_DEMO_MANUAL
+    exactly per the ``market_data_research`` capability grant
+    (``mode_service._CAPABILITY_MATRIX``) -- never in OFF or any other MT5
+    mode. Uses its own dedicated, durable Market Data Fabric journal file
+    and dataset storage directory (Section 17.1), wholly separate from the
+    Phase 5/6 execution journal and the R2-010 Market Intelligence
+    journal."""
+    if current_mode in ("RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"):
+        from .market_data_replay_journal import MarketDataReplayJournalWriter
+        from .market_data_replay_storage import LocalDatasetStorage
+        return market_data_replay_service.MarketDataReplayService(
+            mode_service=mode_service_instance,
+            journal=journal if journal is not None else MarketDataReplayJournalWriter(),
+            storage=storage if storage is not None else LocalDatasetStorage(),
+        )
+    if current_mode == "OFF":
+        return market_data_replay_service.disabled_service(operating_mode=current_mode)
+    raise ModeSubsystemConfigurationError(
+        "no Phase 6B Market Data Fabric construction rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _validate_market_data_replay_subsystem_consistency(current_mode, mdr_service_instance):
+    if current_mode == "OFF":
+        consistent = (
+            isinstance(mdr_service_instance, market_data_replay_service.DisabledMarketDataReplayService)
+            and not mdr_service_instance.enabled
+        )
+    elif current_mode in ("RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"):
+        consistent = (
+            isinstance(mdr_service_instance, market_data_replay_service.MarketDataReplayService)
+            and mdr_service_instance.enabled
+        )
+    else:
+        consistent = False
+    if not consistent:
+        raise ModeSubsystemConfigurationError(
+            "{}: mode={!r} constructed market_data_replay_service={}".format(
+                MODE_SUBSYSTEM_CONFIGURATION_MISMATCH, current_mode, type(mdr_service_instance).__name__,
+            )
+        )
+
+
 def _subsystem_builder_for_mode(current_mode):
     """The combined subsystem builder ModeService actually calls: builds
     the paper service, a side-effect-free signal-intelligence *preflight*
@@ -485,7 +552,11 @@ def _subsystem_builder_for_mode(current_mode):
     signal_service_instance = _signal_service_preflight_for_mode(current_mode)
     execution_service_instance = _execution_service_preflight_for_mode(current_mode)
     market_intelligence_service_instance = _market_intelligence_service_preflight_for_mode(current_mode)
-    return paper_service, signal_service_instance, execution_service_instance, market_intelligence_service_instance
+    market_data_replay_service_instance = _market_data_replay_service_preflight_for_mode(current_mode)
+    return (
+        paper_service, signal_service_instance, execution_service_instance,
+        market_intelligence_service_instance, market_data_replay_service_instance,
+    )
 
 
 def run_server(
@@ -499,6 +570,7 @@ def run_server(
     execution_service=None,
     basket_service=None,
     market_intelligence_service_instance=None,
+    market_data_replay_service_instance=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -511,6 +583,7 @@ def run_server(
         execution_service=execution_service,
         basket_service=basket_service,
         market_intelligence_service_instance=market_intelligence_service_instance,
+        market_data_replay_service_instance=market_data_replay_service_instance,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -602,6 +675,13 @@ def run_server(
         )
     else:
         print("TRL CORTEX V0 MARKET INTELLIGENCE DISABLED | {} MODE".format(active_mi_service.operating_mode))
+    active_mdr_service = market_data_replay_service_instance or vars(server).get("market_data_replay_service_instance")
+    if not isinstance(active_mdr_service, (market_data_replay_service.MarketDataReplayService, market_data_replay_service.DisabledMarketDataReplayService)):
+        active_mdr_service = market_data_replay_service.disabled_service()
+    if active_mdr_service.enabled:
+        print("TRL CORTEX DATA FABRIC V0 ENABLED | RESEARCH ONLY | LOCAL DATA ONLY | LIVE DATA DISABLED | EXECUTION DISABLED")
+    else:
+        print("TRL CORTEX DATA FABRIC V0 DISABLED | {} MODE".format(active_mdr_service.operating_mode))
     active_mode_service = mode_service or getattr(server, "mode_service", None)
     if not isinstance(active_mode_service, ModeService):
         active_mode_service = in_memory_mode_service()
@@ -657,15 +737,21 @@ def run_server(
                                     pass
                         finally:
                             try:
-                                news_service = getattr(server, "official_news_service", None)
-                                if news_service is not None:
-                                    while news_service.shutdown() is False:
+                                active_mdr = vars(server).get("market_data_replay_service_instance")
+                                if active_mdr is not None:
+                                    while active_mdr.shutdown() is False:
                                         pass
                             finally:
                                 try:
-                                    active_mode_service.shutdown()
+                                    news_service = getattr(server, "official_news_service", None)
+                                    if news_service is not None:
+                                        while news_service.shutdown() is False:
+                                            pass
                                 finally:
-                                    server.server_close()
+                                    try:
+                                        active_mode_service.shutdown()
+                                    finally:
+                                        server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -780,12 +866,20 @@ def main(argv=None):
     market_intelligence_service_instance = _market_intelligence_service_for_mode(
         operating_mode_service.current_mode, operating_mode_service,
     )
+    # Market Data Fabric and Replay V0 (TRL-R2-011) uses its own dedicated,
+    # durable journal file and dataset storage directory (Section 17.1) --
+    # never the Phase 5/6 shared_journal, and never the R2-010 Market
+    # Intelligence journal.
+    market_data_replay_service_instance = _market_data_replay_service_for_mode(
+        operating_mode_service.current_mode, operating_mode_service,
+    )
     try:
         _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
         _validate_signal_subsystem_consistency(operating_mode_service.current_mode, signal_service_instance)
         _validate_execution_subsystem_consistency(operating_mode_service.current_mode, execution_service_instance)
         _validate_basket_subsystem_consistency(operating_mode_service.current_mode, basket_service_instance)
         _validate_market_intelligence_subsystem_consistency(operating_mode_service.current_mode, market_intelligence_service_instance)
+        _validate_market_data_replay_subsystem_consistency(operating_mode_service.current_mode, market_data_replay_service_instance)
     except ModeSubsystemConfigurationError as error:
         print(str(error), file=sys.stderr)
         return 2
@@ -801,6 +895,7 @@ def main(argv=None):
             execution_service=execution_service_instance,
             basket_service=basket_service_instance,
             market_intelligence_service_instance=market_intelligence_service_instance,
+            market_data_replay_service_instance=market_data_replay_service_instance,
         )
     except OSError as error:
         print(

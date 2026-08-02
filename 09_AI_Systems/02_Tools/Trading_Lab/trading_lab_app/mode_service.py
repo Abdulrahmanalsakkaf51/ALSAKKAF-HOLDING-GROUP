@@ -111,6 +111,19 @@ CAPABILITIES = (
     # operations remain available regardless of mode (Section 5.1) and
     # never require this capability.
     "market_intelligence_research",
+    # Added in Phase 6B (TRL-R2-011): research-only local historical/
+    # synthetic market-data import and deterministic step-driven replay
+    # (TRL CORTEX DATA FABRIC V0) -- never live data, never broker
+    # history, never an external network call, never automatic evidence
+    # generation, never an R2-010 or execution handoff of any kind
+    # (Section 4/20). Granted to RESEARCH, SYNTHETIC_PAPER and
+    # MT5_DEMO_MANUAL only; denied to OFF and to every remaining MT5
+    # mode -- identical matrix to market_intelligence_research, for the
+    # identical reason (local research alongside a demo-manual execution
+    # mode creates no execution risk by itself). Read-only market-data
+    # status/list/inspect/journal operations remain available regardless
+    # of mode and never require this capability.
+    "market_data_research",
 )
 
 REASON_CODES = (
@@ -202,15 +215,18 @@ _CAPABILITY_MATRIX = {
         "historical_research", "strategy_evaluation", "report_export",
         "mt5_read_only_access", "live_market_data_read",
         "signal_proposal_generation", "market_intelligence_research",
+        "market_data_research",
     }),
     "SYNTHETIC_PAPER": frozenset({
         "synthetic_evidence", "forward_paper_fills", "report_export",
         "signal_proposal_generation", "market_intelligence_research",
+        "market_data_research",
     }),
     "MT5_DEMO_MANUAL": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",
         "manual_broker_execution", "emergency_controls", "report_export",
         "manual_basket_execution", "market_intelligence_research",
+        "market_data_research",
     }),
     "MT5_DEMO_AUTOMATED": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",

@@ -234,6 +234,31 @@
           </article>
         </section>
 
+        <section id="market-data-fabric" class="section" aria-labelledby="market-data-fabric-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">RESEARCH-ONLY LOCAL HISTORICAL DATA AND DETERMINISTIC REPLAY · CHECKPOINT TRL-R2-011</p><h2 id="market-data-fabric-title">TRL CORTEX DATA FABRIC V0</h2></div>
+            <span id="mdr-availability-badge" class="badge badge-neutral" aria-live="polite">LOADING</span>
+          </div>
+          <p class="disclosure">RESEARCH ONLY — LOCAL DATA ONLY — LIVE DATA DISABLED — EXECUTION DISABLED. Server-authoritative; no client-side value is authoritative. No HTTP route on this dashboard can import a dataset, create a replay session, advance replay, or cancel a replay session — every mutation is local-CLI-only.</p>
+          <div class="legal-notice"><strong>NO LIVE DATA · NO BROKER HISTORY · NO EXECUTION HANDOFF</strong><span>Every dataset here is either a committed synthetic fixture or unverified local user-supplied history — never a live or broker-verified feed. Every replay snapshot always has <code>non_live: true</code> and <code>non_executable: true</code>; nothing here can ever become a Phase 5 order intent, a Phase 6 basket, or an R2-010 Opportunity Card without a separate, explicitly Founder-approved handoff contract.</span></div>
+          <div class="status-strip">
+            <div><span>Operating mode</span><strong id="mdr-operating-mode">—</strong></div>
+            <div><span>market_data_research</span><strong id="mdr-capability-granted">—</strong></div>
+            <div><span>Datasets imported</span><strong id="mdr-dataset-count">—</strong></div>
+            <div><span>Replay sessions</span><strong id="mdr-session-count">—</strong></div>
+          </div>
+          <div class="table-scroll"><table><caption>Imported datasets (this server process)</caption><thead><tr><th scope="col">Dataset ID</th><th scope="col">Instrument / TF</th><th scope="col">Source</th><th scope="col">Reference</th><th scope="col">Bars</th><th scope="col">First → Last</th><th scope="col">Gaps</th><th scope="col">Largest gap</th><th scope="col">Dataset hash</th></tr></thead><tbody id="mdr-dataset-table"></tbody></table></div>
+          <div class="table-scroll"><table><caption>Replay sessions</caption><thead><tr><th scope="col">Session ID</th><th scope="col">Status</th><th scope="col">Current index</th><th scope="col">Window</th><th scope="col">Non-live</th><th scope="col">Non-executable</th></tr></thead><tbody id="mdr-session-table"></tbody></table></div>
+          <div class="state-panel" role="status">
+            Remaining blockers: <code>EXTERNAL_MARKET_DATA_FEED_NOT_APPROVED</code>,
+            <code>BROKER_HISTORY_IMPORT_NOT_APPROVED</code>,
+            <code>AUTOMATIC_EVIDENCE_GENERATION_NOT_APPROVED</code>,
+            <code>REPLAY_TO_INTELLIGENCE_HANDOFF_NOT_APPROVED</code>,
+            <code>REPLAY_TO_EXECUTION_HANDOFF_NOT_APPROVED</code>,
+            <code>DATASET_PROVENANCE_NOT_VERIFIED</code>.
+          </div>
+        </section>
+
         <section id="signal-intelligence" class="section" aria-labelledby="signal-intelligence-title">
           <div class="section-heading">
             <div><p class="eyebrow">GOVERNED SIX-ROLE PIPELINE · PHASE 4 · TRL-R2-006</p><h2 id="signal-intelligence-title">Signal intelligence</h2></div>

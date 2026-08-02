@@ -1868,3 +1868,120 @@ separate Git checkpoint is completed — per the Git-authoritative model this do
 throughout, the exact current staged/committed/pushed state of both the governing-contract
 publication and this closure pass is always read from `git status`/`git rev-parse HEAD` directly,
 not restated here as a fixed value.
+
+## 2026-08-02-029 — TRL-R2-011 implementation completed for Founder review, against the approved governing contract
+
+**Decision:** Implemented TRL CORTEX DATA FABRIC V0 completely as a controlled, local,
+research-only vertical slice on top of the Founder-approved, remotely verified governing
+contract (commit `678de02d739a89a0fcc58765178bd8935f4db868`), without redesigning or
+weakening it: `market_data_replay_data.py` (five governed schemas plus the non-governed
+`TRL_MARKET_DATASET_STORAGE_ENVELOPE.v1` container, deterministic identities computed
+strictly bar → dataset → replay session → replay step → replay snapshot with a direct
+no-cycle acceptance test, strict CSV grammar/parsing, exact bar-validation and
+exact-multiple-only gap detection), `market_data_replay_storage.py` (content-addressed,
+atomic, immutable-after-acceptance local dataset storage with full revalidation on every
+load), `market_data_replay_journal.py` (a wholly separate hash-chained journal, closed
+ten-event vocabulary, atomic batches, two distinct corruption cases, cross-process
+owner-token locking), `market_data_replay_service.py` (the exact 14-step import
+atomicity/reuse sequence; replay-session lifecycle with explicit reuse behavior verified
+for all five statuses; the exact replay-next 11-step sequence with atomic
+non-terminal/terminal batches; idempotent cancellation with the Founder's
+cancel-of-completed no-op rule), `market_data_replay_cli.py` (all 11 command families), a
+committed synthetic fixture (`fixtures/trl_cortex_data_fabric_v0_synthetic.csv`, 24
+`XAUUSD`/`M5` bars with one exact-multiple gap), 171 new tests across seven new test
+modules plus one shared non-discovered test helper (`mdr_test_support.py`), additive
+wiring into `mode_service.py` (one capability, `market_data_research`, granted to
+`RESEARCH`/`SYNTHETIC_PAPER`/`MT5_DEMO_MANUAL` only) /`app.py`/`server.py` (six read-only
+HTTP routes with strictly validated pagination) /`service.py`/`static/index.html`/
+`static/app.js` (one new read-only dashboard panel, no `innerHTML`), and a new evidence
+document. No live data. No network. No broker history. No automatic evidence generation.
+No R2-010 handoff. No execution handoff. **Updated by a dedicated Founder-review
+correction pass** that performed a complete implementation-conformance audit of every one
+of the contract's 29 closed Section 24.1 reason codes and found three genuine defects
+(not merely "disclosed decisions"), all corrected in the authorized R2-011 source only —
+no existing test or contract touched: (1) `MARKET_DATA_JOURNAL_CORRUPTED` was declared in
+the closed vocabulary but never emitted, an invented non-governed alias
+(`MARKET_DATA_JOURNAL_INTEGRITY_UNCERTAIN`) was raised instead for Section 18.3 Case A —
+fixed to raise the exact contract code; (2) a corrupted *stored* dataset envelope leaked
+the import-context `MARKET_DATA_CSV_SHAPE_INVALID` code on reload instead of the
+storage-load code `MARKET_DATA_STORAGE_INTEGRITY_FAILURE` (Section 10.6 requirement 15) —
+fixed by uniformly re-raising any revalidation failure under the storage code; (3)
+`MARKET_DATA_REPLAY_ALREADY_COMPLETED` was declared but never actually observable in any
+response — fixed by attaching it to `replay_next`'s already-completed short-circuit,
+matching Section 15.1's "governed completed result returned instead" wording. Sixteen new
+tests were added closing the coverage gaps that let these three pass unnoticed
+(`JournalCorruptionTests`, `LockTimeoutConversionTests`, `StorageIntegrityFailureCaseBTests`,
+`ReplaySessionCorruptionTests`). After these three corrections, an exhaustive 29-row check
+confirmed the two remaining reason-code reuse decisions (instrument/timeframe-allowlist
+and mixed-file violations reusing `MARKET_DATA_CSV_SHAPE_INVALID`; OHLC/spread-invariant
+violations reusing `MARKET_DATA_DECIMAL_GRAMMAR_INVALID` — neither condition named by any
+of the 29 codes) are the only contract-conforming choice available in the closed
+vocabulary, not a deviation. A separate, unrelated engineering decision remains as
+originally recorded: canonical JSON/hashing uses this repository's established Phase
+5/6/6A precedent (`timeline_data.deterministic_json_text`/`sha256_text`, the same
+functions `market_intelligence_data.py` and every existing journal module already use),
+not the unrelated Release-1 reproducibility encoder the contract's generic formula
+description happens to share a name with. Full conformance table:
+`TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` Section 2.
+
+**Why:** The implementation instruction explicitly authorized building the complete V0
+vertical slice in one pass against the already-fully-specified contract (Section 27: "No
+V0 implementation-authority decision remains unresolved"), reusing proven repository
+patterns where compatible, and explicitly authorized documented engineering judgment
+calls for the narrow cases above where the contract's closed vocabulary genuinely named
+no source — not shortcuts taken for convenience, and neither changes a schema field, an
+identity input, a validation rule, or a reason code's governed meaning. The subsequent
+Founder-review correction pass required a rigorous, code-by-code conformance audit rather
+than accepting the original "known limitation" framing at face value — that audit is what
+surfaced the three genuine defects above, which a looser review would have missed. **A
+second, narrower Founder-review correction pass** then found that an earlier checkpoint's
+implementation precedent (`market_intelligence_service._reject`, also unlocked) does not
+override R2-011's own Section 18.1 requirement for cross-process locking on every journal
+mutation: `import_market_data`'s `MARKET_DATASET_REJECTED` append was the one remaining
+unlocked mutation, recorded before the mutation lock was ever acquired. Fixed by unifying
+the rejection-recording and accept/reuse paths under one lock acquisition per call, with a
+fresh, post-reload corruption check (`_fail_if_journal_corrupted`, applied uniformly to
+all four mutation methods, replacing the removed pre-lock-only `_require_journal_integrity`)
+taking precedence over any pending rejection reason, and exact precedence for
+lock-timeout/journal-full/event-too-large conditions — full detail and a complete
+ten-event-type journal-mutation audit table (confirming every mutation is now
+lock-protected, reloaded-after-lock, atomically persisted, and owner-token-safely
+released) in `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` Sections 2.4-2.5.
+
+**Why (second pass):** the correction instructions explicitly rejected "matching R2-010
+precedent" as justification for any R2-011 contract deviation — the governing contract's
+own Section 18.1 is authoritative regardless of what an earlier checkpoint did, and citing
+precedent without independently verifying it against the current contract is not the same
+as conformance.
+
+**How to apply:** This implementation is complete, targeted-tested (189 new tests across
+seven modules, all individually OK; an exact combined targeted suite of 28 modules — all
+seven new plus ModeService, app/server, all six R2-010 modules, all six Phase 5 modules,
+all five Phase 6 modules — run as one process: 762 tests, 0 failures, 0 errors, 75.78s),
+full-suite-tested twice consecutively with zero failures/errors (1249 tests each,
+reconciling exactly to 1060 baseline + 189 new), separate-process
+concurrency-tested (dataset-import race, replay-session-creation race, replay-next race,
+and simultaneous invalid-import race — all converging correctly with no duplicate
+authority, no duplicate step, and no lost rejection event), and manually
+rehearsed end-to-end via the real CLI entry points, the real HTTP server, and the real
+dashboard against an isolated `LOCALAPPDATA` (all 35 required rehearsal steps passed) —
+see `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` for the complete record,
+including a fully investigated, pre-existing, untouched R2-010 test
+(`test_market_intelligence_cli.GrantedModeTests`, proven byte-identical since commit
+`ea9cc3e` via `git hash-object` blob-hash comparison across three reference points,
+reconfirmed unchanged again after the second correction pass)
+whose own relative fixture path only resolves when the test process's working directory
+is the Trading Lab directory itself — disclosed in full (Section 12.5) exactly as the
+R2-010 evidence document disclosed a comparable pre-existing Phase 5 concurrency-timing
+sensitivity, and not worked around by touching any existing test or R2-010 source. Phase
+5, Phase 6, and R2-010 remain completely unchanged (`git diff --stat` confirms zero
+changes to any `mt5_execution_*`/`basket_execution_*`/`market_intelligence_*` file); the
+only Phase-3-adjacent file touched is `mode_service.py` (16 insertions, 0 deletions,
+purely additive capability wiring). Phase 7 was not started. **The Founder reviewed this
+complete record and approved it for local commit; this checkpoint's exact 26-file scope
+is being locally committed as this checkpoint's commit.** Remote push remains a further,
+separate, later Founder-authorized action, not yet taken, per the standing commit/push
+policy (`TRL_DECISION_LOG.md` entry 2026-07-31-001). This entry deliberately does not cite
+a fixed commit SHA — per the governing instruction not to guess it — the exact
+committed/pushed state is authoritatively `git status`/`git rev-parse HEAD` at any later
+point this document is read.

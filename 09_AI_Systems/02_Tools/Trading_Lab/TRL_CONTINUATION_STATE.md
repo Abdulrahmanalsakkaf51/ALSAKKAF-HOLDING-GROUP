@@ -491,6 +491,86 @@ session end or when session capacity drops below ~15%.
   document already uses, the exact current staged/committed/pushed state
   of this documentation-closure pass itself is always read from `git
   status`/`git rev-parse HEAD` directly, not restated here.
+- **TRL-R2-011 implementation (TRL CORTEX DATA FABRIC V0) — complete for
+  Founder review, uncommitted:** built against the Founder-approved,
+  remotely verified governing contract (`678de02d739a89a0fcc58765178bd8935f4db868`)
+  with no redesign. New: `market_data_replay_data.py` (five governed
+  schemas + non-governed storage envelope, deterministic identities, strict
+  CSV grammar, gap detection), `market_data_replay_storage.py`
+  (content-addressed immutable dataset store, atomic write, full
+  revalidation on load), `market_data_replay_journal.py` (separate
+  hash-chained journal, closed ten-event vocabulary), `market_data_replay_service.py`
+  (import atomicity/reuse per the exact 14-step sequence, replay-session
+  lifecycle with reuse-by-status for every one of the five statuses),
+  `market_data_replay_cli.py` (11 commands),
+  `fixtures/trl_cortex_data_fabric_v0_synthetic.csv` (24 `XAUUSD`/`M5`
+  bars, one exact-multiple gap), `mdr_test_support.py` (shared,
+  non-discovered test helper). Additive: `mode_service.py`
+  (`market_data_research` granted to `RESEARCH`/`SYNTHETIC_PAPER`/
+  `MT5_DEMO_MANUAL` only — the only Phase-3-adjacent file touched, 16
+  insertions/0 deletions), `app.py`, `server.py`, `service.py`,
+  `static/index.html`, `static/app.js`. A dedicated Founder-review
+  correction pass then performed a complete implementation-conformance
+  audit of every one of the contract's 29 closed reason codes and found
+  three genuine defects, all corrected in the authorized R2-011 source
+  only (no existing test or contract touched): `MARKET_DATA_JOURNAL_CORRUPTED`
+  was declared but never emitted (an invented, non-governed alias was
+  raised instead); a corrupted *stored* dataset envelope leaked the
+  import-context `MARKET_DATA_CSV_SHAPE_INVALID` code instead of the
+  storage-load code `MARKET_DATA_STORAGE_INTEGRITY_FAILURE`;
+  `MARKET_DATA_REPLAY_ALREADY_COMPLETED` was declared but never actually
+  observable in any response. All three are now fixed and test-verified;
+  the two remaining reason-code reuse decisions (allowlist/mixed-file
+  violations, OHLC-invariant violations, neither named by any of the 29
+  codes) were confirmed, after an exhaustive 29-row check, to be the only
+  contract-conforming choice available — see
+  `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` Section 2 for the
+  complete conformance table. **A second, narrower Founder-review
+  correction pass** then found the one remaining unlocked journal
+  mutation: `import_market_data`'s `MARKET_DATASET_REJECTED` append was
+  recorded before the mutation lock was ever acquired, citing R2-010
+  precedent that does not itself satisfy R2-011's own Section 18.1
+  locking requirement. Fixed by unifying the rejection-recording and
+  accept/reuse paths under one lock acquisition per call, with a fresh,
+  post-reload corruption check taking precedence over any pending
+  rejection reason, and exact precedence rules for lock-timeout/
+  journal-full/event-too-large recorded in
+  `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` Section 2.4/2.5
+  (including a complete ten-event-type journal-mutation audit table
+  confirming every mutation is now lock-protected). 189 new tests across
+  seven new test modules (`test_market_data_replay_data.py` 64,
+  `_storage.py` 14, `_journal.py` 18, `_service.py` 55, `_cli.py` 8,
+  `_http.py` 16, `_concurrency.py` 14); an exact combined targeted suite
+  of 28 modules (all seven new plus ModeService, app/server, all six
+  R2-010 modules, all six Phase 5 modules, all five Phase 6 modules)
+  passed as one run: 762 tests, 0 failures, 0 errors; two consecutive
+  clean full-suite runs (1249 tests each, reconciling exactly to 1060 +
+  189), run with the working directory set to the Trading Lab directory —
+  see the evidence document Section 12.5 for the complete, blob-hash-proven
+  disclosure of a fully investigated, pre-existing, untouched R2-010 test
+  (`test_market_intelligence_cli.py`, byte-identical since commit
+  `ea9cc3e`, confirmed via `git hash-object` against three reference
+  points, reconfirmed unchanged after this second pass) whose own relative
+  fixture path is working-directory-dependent, exactly as the R2-010
+  evidence document disclosed a comparable pre-existing Phase 5
+  concurrency-timing sensitivity. A real separate-process concurrency
+  proof (`test_market_data_replay_concurrency.py`, 14 tests: dataset-import
+  race, replay-session-creation race, replay-next race, and simultaneous
+  *invalid*-import race, all converging correctly with no duplicate
+  authority, no duplicate step, and no lost rejection event) and a full
+  35-step manual rehearsal (isolated `LOCALAPPDATA`, real
+  CLI entry points, real HTTP server, real dashboard) both completed with
+  every assertion passing. **Founder-approved for local commit.** This
+  checkpoint's exact 26-file scope (15 new, 11 modified, 0 deleted) is
+  being locally committed as this checkpoint's commit; remote push is a
+  separate, later, Founder-authorized action, per the standing commit/push
+  policy (`TRL_DECISION_LOG.md` entry 2026-07-31-001). Per the
+  Git-authoritative model this document already uses throughout, this
+  checkpoint's exact committed HEAD and push status are always read from
+  `git rev-parse HEAD`/`git status` directly rather than restated here as
+  a value that would otherwise go stale the moment either changes. See
+  `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` for the complete
+  record.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
 - **Known defects:** None outstanding.
@@ -502,13 +582,14 @@ session end or when session capacity drops below ~15%.
   - FIB-001 exact numeric parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
   - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
 - **Next command:** TRL-R2-010 is closed as a completed and remotely
-  verified checkpoint. TRL-R2-011's governing contract is now also closed
-  as a completed and remotely verified checkpoint (committed and pushed at
-  `678de02d739a89a0fcc58765178bd8935f4db868`); its implementation has not
-  been formally authorized or started — a separate, later Founder decision
-  is required before implementation begins. Separate, explicit Founder
-  authorization is still needed for the remote push of the
-  already-locally-committed Phase 6 implementation checkpoint
+  verified checkpoint. TRL-R2-011's governing contract is closed as a
+  completed and remotely verified checkpoint (committed and pushed at
+  `678de02d739a89a0fcc58765178bd8935f4db868`). **TRL-R2-011 implementation
+  is Founder-approved and locally committed as this checkpoint's commit**
+  — remote push is a separate, later, Founder-authorized action, not yet
+  taken. Separate, explicit Founder authorization is still needed for the
+  remote push of both this checkpoint and the already-locally-committed
+  Phase 6 implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`

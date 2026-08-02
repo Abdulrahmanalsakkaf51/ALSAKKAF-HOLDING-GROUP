@@ -7,7 +7,7 @@ import re
 import socket
 from socketserver import ThreadingMixIn
 import threading
-from urllib.parse import unquote, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 from . import APPLICATION_NAME
 from . import service
@@ -19,6 +19,9 @@ from .signal_service import disabled_service as disabled_signal_service
 from .mt5_execution_service import disabled_service as disabled_execution_service
 from .basket_execution_service import disabled_basket_service
 from .market_intelligence_service import disabled_service as disabled_market_intelligence_service
+from .market_data_replay_service import disabled_service as disabled_market_data_replay_service
+from .market_data_replay_data import DATASET_ID_PATTERN, REPLAY_SESSION_ID_PATTERN
+from .market_data_replay_service import MarketDataServiceError
 
 
 BIND_HOST = "127.0.0.1"
@@ -126,6 +129,58 @@ MARKET_INTELLIGENCE_API_ROUTES = {
 _MARKET_OPPORTUNITY_DETAIL_PATH_PREFIX = "/api/market-opportunity/"
 _OPPORTUNITY_ID_PATTERN = re.compile(r"^opp_[0-9a-f]{32}$")
 
+# TRL-R2-011 (Phase 6B): strictly read-only routes, same discipline as
+# MARKET_INTELLIGENCE_API_ROUTES above -- no route here may import data,
+# create a replay session, advance replay, or cancel a replay session
+# (Section 22). "/api/market-datasets" and "/api/replay-sessions" accept
+# strictly validated read-only "offset"/"limit" query parameters (Section
+# 19); "/api/market-dataset/<safe-id>" additionally accepts them for its
+# bar-reference page. Detail routes take a path parameter, matched
+# separately below using the exact governed dataset_id/replay_session_id
+# shape, so no unvalidated path fragment ever reaches the service.
+MARKET_DATA_API_ROUTES = {
+    "/api/market-data-status": service.market_data_status_document,
+}
+MARKET_DATA_PAGINATED_ROUTES = {
+    "/api/market-datasets": service.market_datasets_document,
+    "/api/replay-sessions": service.replay_sessions_document,
+}
+
+_MARKET_DATASET_DETAIL_PATH_PREFIX = "/api/market-dataset/"
+_REPLAY_SESSION_DETAIL_PATH_PREFIX = "/api/replay-session/"
+_REPLAY_SNAPSHOT_DETAIL_PATH_PREFIX = "/api/replay-snapshot/"
+
+
+def _safe_id_from_path(decoded_path, prefix, pattern):
+    if not decoded_path.startswith(prefix):
+        return None
+    candidate = decoded_path[len(prefix):]
+    if not pattern.fullmatch(candidate):
+        return None
+    return candidate
+
+
+def _parse_pagination_query(query_string):
+    """Strictly validate optional ``offset``/``limit`` query parameters.
+    Returns ``(offset, limit)`` as ``int`` or ``None``. Raises ``ValueError``
+    on any malformed or repeated parameter -- pagination parameters are
+    read-only filters and must never silently coerce invalid input
+    (Section 19)."""
+    parsed = parse_qs(query_string, keep_blank_values=True, strict_parsing=False)
+    offset = None
+    limit = None
+    if "offset" in parsed:
+        values = parsed["offset"]
+        if len(values) != 1 or not re.fullmatch(r"-?[0-9]+", values[0] or ""):
+            raise ValueError("invalid offset")
+        offset = int(values[0])
+    if "limit" in parsed:
+        values = parsed["limit"]
+        if len(values) != 1 or not re.fullmatch(r"-?[0-9]+", values[0] or ""):
+            raise ValueError("invalid limit")
+        limit = int(values[0])
+    return offset, limit
+
 
 def _market_opportunity_id_from_path(decoded_path):
     """Return the opportunity_id if decoded_path is exactly
@@ -152,6 +207,31 @@ def _basket_detail_id_from_path(decoded_path):
     if not _BASKET_ID_PATTERN.fullmatch(candidate):
         return None
     return candidate
+
+def _is_known_api_path(decoded_path):
+    """True for every path this application ever serves on GET/HEAD --
+    used identically by ``do_HEAD`` and ``_method_not_allowed`` so a known
+    path always reports ``Allow: GET, HEAD`` and an unknown one always
+    reports ``Allow: GET`` (matching the existing static-route
+    convention)."""
+    return (
+        decoded_path in MARKET_API_ROUTES
+        or decoded_path in NEWS_API_ROUTES
+        or decoded_path in PAPER_API_ROUTES
+        or decoded_path in MODE_API_ROUTES
+        or decoded_path in SIGNAL_API_ROUTES
+        or decoded_path in EXECUTION_API_ROUTES
+        or decoded_path in BASKET_API_ROUTES
+        or _basket_detail_id_from_path(decoded_path) is not None
+        or decoded_path in MARKET_INTELLIGENCE_API_ROUTES
+        or _market_opportunity_id_from_path(decoded_path) is not None
+        or decoded_path in MARKET_DATA_API_ROUTES
+        or decoded_path in MARKET_DATA_PAGINATED_ROUTES
+        or _safe_id_from_path(decoded_path, _MARKET_DATASET_DETAIL_PATH_PREFIX, DATASET_ID_PATTERN) is not None
+        or _safe_id_from_path(decoded_path, _REPLAY_SESSION_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN) is not None
+        or _safe_id_from_path(decoded_path, _REPLAY_SNAPSHOT_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN) is not None
+    )
+
 
 SECURITY_HEADERS = {
     "Cache-Control": "no-store, max-age=0",
@@ -267,7 +347,8 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         if not self._local_host_header():
             self._send_json(421, {"error": "LOCAL_HOST_REQUIRED"}, include_body)
             return
-        raw_path = urlsplit(self.path).path
+        parsed_url = urlsplit(self.path)
+        raw_path = parsed_url.path
         decoded_path = unquote(raw_path)
         if decoded_path != raw_path or ".." in decoded_path or "\\" in decoded_path:
             self._send_json(400, {"error": "INVALID_PATH"}, include_body)
@@ -424,6 +505,83 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     include_body,
                 )
             return
+        mdr_function = MARKET_DATA_API_ROUTES.get(decoded_path)
+        if mdr_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    mdr_function(self.server.market_data_replay_service_instance),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_DATA_FABRIC_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
+        mdr_paginated_function = MARKET_DATA_PAGINATED_ROUTES.get(decoded_path)
+        if mdr_paginated_function is not None:
+            try:
+                offset, limit = _parse_pagination_query(parsed_url.query)
+            except ValueError:
+                self._send_json(400, {"error": "MARKET_DATA_PAGINATION_INVALID"}, include_body)
+                return
+            try:
+                document = mdr_paginated_function(self.server.market_data_replay_service_instance, offset, limit)
+                self._send_json(200, document, include_body)
+            except MarketDataServiceError as error:
+                self._send_json(400, {"error": error.reason_code}, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_DATA_FABRIC_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
+        dataset_id = _safe_id_from_path(decoded_path, _MARKET_DATASET_DETAIL_PATH_PREFIX, DATASET_ID_PATTERN)
+        if dataset_id is not None:
+            try:
+                offset, limit = _parse_pagination_query(parsed_url.query)
+            except ValueError:
+                self._send_json(400, {"error": "MARKET_DATA_PAGINATION_INVALID"}, include_body)
+                return
+            try:
+                document = service.market_dataset_document(self.server.market_data_replay_service_instance, dataset_id, offset, limit)
+                self._send_json(200 if document.get("found") else 404, document, include_body)
+            except MarketDataServiceError as error:
+                self._send_json(400, {"error": error.reason_code}, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_DATA_FABRIC_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
+        replay_session_id = _safe_id_from_path(decoded_path, _REPLAY_SESSION_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN)
+        if replay_session_id is not None:
+            try:
+                document = service.replay_session_document(self.server.market_data_replay_service_instance, replay_session_id)
+                self._send_json(200 if document.get("found") else 404, document, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_DATA_FABRIC_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
+        replay_snapshot_session_id = _safe_id_from_path(decoded_path, _REPLAY_SNAPSHOT_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN)
+        if replay_snapshot_session_id is not None:
+            try:
+                document = service.replay_snapshot_document(self.server.market_data_replay_service_instance, replay_snapshot_session_id)
+                self._send_json(200 if document.get("found") else 404, document, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_DATA_FABRIC_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
@@ -449,18 +607,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
     def do_HEAD(self):
         raw_path = urlsplit(self.path).path
         decoded_path = unquote(raw_path)
-        if (
-            decoded_path in MARKET_API_ROUTES
-            or decoded_path in NEWS_API_ROUTES
-            or decoded_path in PAPER_API_ROUTES
-            or decoded_path in MODE_API_ROUTES
-            or decoded_path in SIGNAL_API_ROUTES
-            or decoded_path in EXECUTION_API_ROUTES
-            or decoded_path in BASKET_API_ROUTES
-            or _basket_detail_id_from_path(decoded_path) is not None
-            or decoded_path in MARKET_INTELLIGENCE_API_ROUTES
-            or _market_opportunity_id_from_path(decoded_path) is not None
-        ):
+        if _is_known_api_path(decoded_path):
             self._handle_read(include_body=False)
             return
         self._method_not_allowed()
@@ -468,22 +615,7 @@ class ApplicationHandler(BaseHTTPRequestHandler):
     def _method_not_allowed(self):
         body = deterministic_json_bytes({"error": "METHOD_NOT_ALLOWED"})
         decoded_path = unquote(urlsplit(self.path).path)
-        allowed_methods = (
-            "GET, HEAD"
-            if (
-                decoded_path in MARKET_API_ROUTES
-                or decoded_path in NEWS_API_ROUTES
-                or decoded_path in PAPER_API_ROUTES
-                or decoded_path in MODE_API_ROUTES
-                or decoded_path in SIGNAL_API_ROUTES
-                or decoded_path in EXECUTION_API_ROUTES
-                or decoded_path in BASKET_API_ROUTES
-                or _basket_detail_id_from_path(decoded_path) is not None
-                or decoded_path in MARKET_INTELLIGENCE_API_ROUTES
-                or _market_opportunity_id_from_path(decoded_path) is not None
-            )
-            else "GET"
-        )
+        allowed_methods = "GET, HEAD" if _is_known_api_path(decoded_path) else "GET"
         self._send_bytes(
             405,
             body,
@@ -903,6 +1035,7 @@ def create_server(
     execution_service=None,
     basket_service=None,
     market_intelligence_service_instance=None,
+    market_data_replay_service_instance=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -921,5 +1054,8 @@ def create_server(
     local_server.basket_service = basket_service or disabled_basket_service()
     local_server.market_intelligence_service_instance = (
         market_intelligence_service_instance or disabled_market_intelligence_service()
+    )
+    local_server.market_data_replay_service_instance = (
+        market_data_replay_service_instance or disabled_market_data_replay_service()
     )
     return local_server

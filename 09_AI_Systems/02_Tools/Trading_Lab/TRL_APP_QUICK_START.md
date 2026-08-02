@@ -8,8 +8,8 @@
 |-------|-------|
 | Document ID | TRL-R2-005-QUICK-START-005 |
 | Document Type | Local Application Operator Guide |
-| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH; Section 16 added for TRL Phase 3 operating-mode state machine; Sections 3 and 16.2 corrected after Founder review removed the legacy-flag bypass; Section 17 added for Phase 4 signal intelligence; Section 18 added for Phase 5 MT5 execution adapter; Section 19 added for Phase 6 controlled basket execution; Section 20 added for TRL-R2-010 Market Intelligence V0 (TRL CORTEX V0) |
-| Version | 4.5 |
+| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH; Section 16 added for TRL Phase 3 operating-mode state machine; Sections 3 and 16.2 corrected after Founder review removed the legacy-flag bypass; Section 17 added for Phase 4 signal intelligence; Section 18 added for Phase 5 MT5 execution adapter; Section 19 added for Phase 6 controlled basket execution; Section 20 added for TRL-R2-010 Market Intelligence V0 (TRL CORTEX V0); Section 21 added for TRL-R2-011 Market Data Fabric and Replay V0 (TRL CORTEX DATA FABRIC V0) |
+| Version | 4.6 |
 | Date | 2026-08-02 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Project | PRJ-017 - ALSAKKAF Trading Research Lab |
@@ -585,3 +585,64 @@ separate, explicitly Founder-approved contract. See
 `TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md`.
 for full detail, including disclosed implementation-level design choices and
 limitations.
+
+## 21. Market Data Fabric and Replay V0 — TRL CORTEX DATA FABRIC V0 (TRL-R2-011, Phase 6B)
+
+Research-only, local-only, deterministic historical/synthetic market-data import and
+step-driven replay: a strict local CSV becomes a canonical, content-addressed dataset
+manifest, and a deterministic replay session advances through explicit governed steps
+producing read-only, non-executable snapshots. **Not live data, not broker-verified
+history, not execution approval.** Every replay snapshot always has `non_live: true` and
+`non_executable: true`. Uses its own separate journal and dataset storage — never the
+Phase 5/6 execution journal or the R2-010 Market Intelligence journal.
+
+### 21.1 Enter the mode
+
+`market_data_research` is granted in `RESEARCH`, `SYNTHETIC_PAPER`, and
+`MT5_DEMO_MANUAL` only:
+
+```
+python -m trading_lab_app.mode_cli request-mode RESEARCH
+```
+
+Read-only status/list/inspect/journal commands remain available at `OFF`.
+
+### 21.2 Local operator commands
+
+```
+python -B -W error -m trading_lab_app.market_data_replay_cli market-data-status
+python -B -W error -m trading_lab_app.market_data_replay_cli import-market-data <csv-path> --source-classification SYNTHETIC_FIXTURE --source-reference my-fixture
+python -B -W error -m trading_lab_app.market_data_replay_cli list-market-datasets --limit 20
+python -B -W error -m trading_lab_app.market_data_replay_cli inspect-market-dataset <dataset_id>
+python -B -W error -m trading_lab_app.market_data_replay_cli create-replay-session <dataset_id> --start-index 0 --end-index 9 --step-size 1
+python -B -W error -m trading_lab_app.market_data_replay_cli list-replay-sessions
+python -B -W error -m trading_lab_app.market_data_replay_cli inspect-replay-session <replay_session_id>
+python -B -W error -m trading_lab_app.market_data_replay_cli replay-next <replay_session_id>
+python -B -W error -m trading_lab_app.market_data_replay_cli inspect-replay-snapshot <replay_session_id>
+python -B -W error -m trading_lab_app.market_data_replay_cli cancel-replay-session <replay_session_id>
+python -B -W error -m trading_lab_app.market_data_replay_cli market-data-journal --tail 20
+```
+
+`import-market-data` accepts exactly one local CSV path with the exact header
+`instrument,timeframe,observed_at_utc,open,high,low,close,spread,tick_volume` (max 32
+MiB, strict UTF-8, no BOM, 2–250,000 data rows) — a working example is committed at
+`fixtures/trl_cortex_data_fabric_v0_synthetic.csv` (**SYNTHETIC RESEARCH EXAMPLE — NOT
+LIVE MARKET DATA — NON-EXECUTABLE**; 24 `XAUUSD`/`M5` bars with one exact-multiple gap).
+
+### 21.3 Inspecting Market Data Fabric over HTTP (read-only)
+
+`GET /api/market-data-status`, `GET /api/market-datasets` (paginated), `GET
+/api/market-dataset/<dataset_id>` (paginated bar references), `GET /api/replay-sessions`
+(paginated), `GET /api/replay-session/<replay_session_id>`, `GET
+/api/replay-snapshot/<replay_session_id>`. Same read-only rule as every other route:
+GET/HEAD only, `405` with `Allow: GET, HEAD` for POST/PUT/PATCH/DELETE. No HTTP route can
+import a dataset, create a replay session, advance replay, or cancel a replay session.
+
+### 21.4 Scope limitations
+
+No live market feed, no broker-history connector, no TradingView connector, no external
+API, no automatic evidence generation, no R2-010 handoff, no execution handoff of any
+kind — a future conversion of a replay window into an R2-010 analysis input or an
+execution artifact requires a separate, explicitly Founder-approved contract. See
+`TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` for full detail, including
+disclosed implementation-level design choices and limitations.

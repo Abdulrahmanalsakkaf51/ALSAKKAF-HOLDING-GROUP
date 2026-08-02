@@ -15,6 +15,7 @@ from .signal_service import disabled_service as disabled_signal_service
 from .mt5_execution_service import disabled_service as disabled_execution_service
 from .basket_execution_service import disabled_basket_service
 from .market_intelligence_service import disabled_service as disabled_market_intelligence_service
+from .market_data_replay_service import disabled_service as disabled_market_data_replay_service
 from .strategy_registry import load_registry
 
 
@@ -252,6 +253,40 @@ def virtual_opportunities_document(market_intelligence_service_instance=None):
 
 def market_intelligence_telemetry_document(market_intelligence_service_instance=None):
     return (market_intelligence_service_instance or disabled_market_intelligence_service()).telemetry_document()
+
+
+# TRL-R2-011 (Phase 6B): read-only only, exactly the same discipline as
+# MARKET_INTELLIGENCE_API_ROUTES above -- no HTTP route may import data,
+# create a replay session, advance replay, or cancel a replay session
+# (Section 22). "/api/market-dataset/<safe-id>", "/api/replay-session/
+# <safe-id>", and "/api/replay-snapshot/<safe-id>" each take a path
+# parameter, so they are matched separately in server.py using the exact
+# governed ID shapes -- no unvalidated path fragment ever reaches the
+# service. offset/limit are read-only, strictly validated pagination
+# filters (Section 19); they never mutate state.
+
+def market_data_status_document(market_data_replay_service_instance=None):
+    return (market_data_replay_service_instance or disabled_market_data_replay_service()).status_document()
+
+
+def market_datasets_document(market_data_replay_service_instance=None, offset=None, limit=None):
+    return (market_data_replay_service_instance or disabled_market_data_replay_service()).market_datasets_http_document(offset, limit)
+
+
+def market_dataset_document(market_data_replay_service_instance, dataset_id, offset=None, limit=None):
+    return (market_data_replay_service_instance or disabled_market_data_replay_service()).market_dataset_http_document(dataset_id, offset, limit)
+
+
+def replay_sessions_document(market_data_replay_service_instance=None, offset=None, limit=None):
+    return (market_data_replay_service_instance or disabled_market_data_replay_service()).replay_sessions_http_document(offset, limit)
+
+
+def replay_session_document(market_data_replay_service_instance, replay_session_id):
+    return (market_data_replay_service_instance or disabled_market_data_replay_service()).replay_session_http_document(replay_session_id)
+
+
+def replay_snapshot_document(market_data_replay_service_instance, replay_session_id):
+    return (market_data_replay_service_instance or disabled_market_data_replay_service()).replay_snapshot_http_document(replay_session_id)
 
 
 def strategy_registry_document():
