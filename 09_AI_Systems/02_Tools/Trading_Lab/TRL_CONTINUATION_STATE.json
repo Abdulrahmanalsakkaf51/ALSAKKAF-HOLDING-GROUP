@@ -128,6 +128,95 @@
     },
     "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md"
   },
+  "trl_r2_010_market_intelligence_v0_contract_checkpoint": {
+    "status": "Founder-approved governing contract for TRL CORTEX V0, reached through three correction passes; implementation not started; exact staged/committed/pushed state determined by Git directly",
+    "product_working_name": "TRL CORTEX V0",
+    "phase_table_placement": "Phase 6A - informational row in TRL_FULL_VISION_MASTER_PROGRAM.md, not part of the 0-14 phase sequence, does not gate or reorder Phases 7-14, is not Phase 7",
+    "document_added": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md",
+    "files_modified": [
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_FULL_VISION_MASTER_PROGRAM.md",
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.md",
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_CONTINUATION_STATE.json",
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_DECISION_LOG.md",
+      "09_AI_Systems/02_Tools/Trading_Lab/TRL_BLOCKERS.md"
+    ],
+    "schemas_defined": ["TRL_MARKET_SNAPSHOT.v1", "TRL_EVIDENCE_ITEM.v1", "TRL_OPPORTUNITY_CARD.v1", "TRL_VIRTUAL_OPPORTUNITY.v1", "TRL_OPPORTUNITY_DECISION.v1", "TRL_LEARNING_TELEMETRY.v1"],
+    "decision_statuses": ["TRADE_CANDIDATE", "WAIT", "REJECT", "BLOCKED", "EXPIRED"],
+    "non_circular_identity_design": "evidence_id scoped to snapshot_id + proposed_side + own fields (never opportunity_id, which does not exist yet); opportunity_id computed after from snapshot_id + concepts + sorted evidence_ids; decision_id and telemetry_id reference opportunity_id/decision_id forward only - no cycle",
+    "virtual_lattice_bounds": {"min": 1, "max": 6, "max_selected_for_preview": 1},
+    "execution_boundary": "no order_check, no order_send, no RealMT5ExecutionAdapter, no broker/MetaTrader5 connection, no Phase 6 basket construction or confirmation, no ModeService bypass, no live/automated mode activation",
+    "new_blockers_added": ["LIVE_MARKET_DATA_NOT_APPROVED", "INTELLIGENCE_SCORING_NOT_VALIDATED", "EXECUTION_HANDOFF_NOT_APPROVED", "AUTOMATIC_LEARNING_NOT_APPROVED", "STRATEGY_PROMOTION_NOT_APPROVED", "NEWS_SENTIMENT_SOURCE_NOT_APPROVED", "MACRO_DATA_SOURCE_NOT_APPROVED"],
+    "sma_001_status": "remains blocked (STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED); independently re-enforced by this contract's Section 9.2 gate",
+    "fib_001_status": "remains blocked (STRATEGY_PARAMETERS_NOT_APPROVED); independently re-enforced by this contract's Section 9.2 gate",
+    "phase_6_touched": false,
+    "phase_7_started": false,
+    "decision_log_entry": "2026-08-02-021"
+  },
+  "trl_r2_010_founder_correction_pass": {
+    "status": "applied to the same contract, now part of the Founder-approved governing contract; implementation not started; exact staged/committed/pushed state determined by Git directly",
+    "canonical_instrument_allowlist": ["XAUUSD", "NAS100", "EURUSD", "GBPUSD", "USDJPY"],
+    "canonical_timeframe_allowlist": ["M5", "M15", "H1", "H4", "D1"],
+    "evidence_opportunity_id_removed": true,
+    "evidence_completeness_rule": "exactly one non-expired evidence item per each of the 11 categories; duplicate or missing category fails closed",
+    "score_formulas": {
+      "effective_evidence_score": "quantize_4(normalized_strength * confidence)",
+      "directional_categories": ["MARKET_STRUCTURE", "TREND", "MOMENTUM", "MULTI_TIMEFRAME_ALIGNMENT", "CONTRADICTING_EVIDENCE"],
+      "supporting_score_denominator": 5,
+      "contradiction_score_denominator": 5,
+      "uncertainty_score_denominator": 11,
+      "severity_only_categories": ["EVENT_RISK", "EXECUTION_COST", "RISK_EXPOSURE"]
+    },
+    "new_thresholds": {
+      "HARD_EVENT_RISK_BLOCK_MIN": "0.9000",
+      "HARD_RISK_EXPOSURE_BLOCK_MIN": "0.9000",
+      "WAIT_EVENT_RISK_MIN": "0.6000",
+      "WAIT_RISK_EXPOSURE_MIN": "0.6000"
+    },
+    "decision_order_steps": 22,
+    "blocker_scoping": "STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED and STRATEGY_PARAMETERS_NOT_APPROVED now fire only when strategy_id is literally SMA-001/FIB-001, never globally; generic research uses default strategy_id CORTEX-V0-HEURISTIC version 1.0.0",
+    "capability_amendment": {
+      "file": "09_AI_Systems/02_Tools/Trading_Lab/TRL_PHASE_3_OPERATING_MODE_CONTRACT.md",
+      "section_added": "3.2",
+      "capability_name": "market_intelligence_research",
+      "granted_modes": ["RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"],
+      "mode_service_py_touched": false
+    },
+    "corrected_scope": {"new": 1, "modified": 6, "deleted": 0},
+    "phase_6_touched": false,
+    "phase_7_started": false,
+    "decision_log_entry": "2026-08-02-022"
+  },
+  "trl_r2_010_final_implementation_readiness_correction": {
+    "status": "applied to the same contract; this is the final, Founder-approved governing contract for TRL CORTEX V0; implementation not started; exact staged/committed/pushed state determined by Git directly",
+    "no_automatic_evidence_generator": true,
+    "new_transport_schema": "TRL_MARKET_INTELLIGENCE_ANALYSIS_INPUT.v1",
+    "governed_schema_count": 7,
+    "transport_only_schema_count": 1,
+    "new_governed_schema_this_pass": "TRL_MARKET_INTELLIGENCE_BASKET_PREVIEW.v1",
+    "numeric_policy": {
+      "decimal_type": "Decimal",
+      "rounding_mode": "ROUND_HALF_EVEN",
+      "quantize_4": "Decimal(value).quantize(Decimal('0.0001'), rounding=ROUND_HALF_EVEN)"
+    },
+    "virtual_candidate_geometry": {
+      "BUY": "stop_price < entry_trigger < strictly increasing target_prices",
+      "SELL": "stop_price > entry_trigger > strictly decreasing target_prices"
+    },
+    "reward_risk_formulas": ["risk_distance", "target_reward_distance", "weighted_reward_distance", "reward_risk_ratio", "distance_to_market", "snapshot_mid_price"],
+    "virtual_opportunity_id_excludes_rank": true,
+    "state_derivation_order": ["EXPIRED", "INVALIDATED", "REJECTED", "WATCHING", "ACTIVATED"],
+    "preview_quantity_conservation": "fail-closed, no redistribution; new reason code MARKET_INTELLIGENCE_PREVIEW_QUANTITY_NOT_EXACTLY_REPRESENTABLE",
+    "decision_order_steps": 23,
+    "new_reason_codes_this_pass": ["MARKET_INTELLIGENCE_EVIDENCE_EXPIRED", "MARKET_INTELLIGENCE_PREVIEW_QUANTITY_NOT_EXACTLY_REPRESENTABLE"],
+    "uncertainty_wait_comparison_corrected_to_strict_gt": true,
+    "cli_input_safety_rules_added": true,
+    "demonstration_fixture_required": true,
+    "files_requiring_no_further_change_this_pass": ["TRL_PHASE_3_OPERATING_MODE_CONTRACT.md", "TRL_BLOCKERS.md"],
+    "cumulative_scope": {"new": 1, "modified": 6, "deleted": 0},
+    "phase_6_touched": false,
+    "phase_7_started": false,
+    "decision_log_entry": "2026-08-02-023"
+  },
   "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\", run twice, post-correction-round",
   "tests_last_result": "900 tests both runs, identical: 0 failures, 0 errors. The originally reported 889-test/5-failure run is superseded (see founder_correction_round_2026_08_01_020.full_suite_recovery).",
   "active_processes": [],

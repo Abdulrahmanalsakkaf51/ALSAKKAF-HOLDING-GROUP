@@ -1274,3 +1274,357 @@ outcome, never `PARTIALLY_COMPLETED`, regardless of prior fills; and must run
 module, not only the full-suite discovery run. This entry, and the source/test/contract
 edits it describes, remain uncommitted and unpushed pending the same commit/push approval
 gate as every other change in this program (entry 2026-07-31-001).
+
+## 2026-08-02-021 — TRL-R2-010 Market Intelligence V0 contract-authoring checkpoint
+
+**What:** A new, accelerated, contract-first checkpoint was requested, translating useful
+concepts observed in Founder-provided trading videos into a governed research-intelligence
+design while explicitly refusing the videos' unsafe patterns (real pending-order grids,
+promotional win-rate claims, guaranteed-profit claims, automatic live trading, hidden
+black-box scoring). Startup verification passed before any drafting: branch
+`codex/TRL-R2-full-vision-execution`; local HEAD, upstream-tracking ref, and
+`origin/codex/TRL-R2-full-vision-execution` all equal `0d8b66e004bee2dc552e209f1942fd54eec8310e`;
+`main` equal to `8ada27f915091b91ddbc421aae06c7c5b36e068f`; working tree and index clean; no
+untracked files; port 8765 clear; no Trading Lab Python process running; no lock file
+present; Phase 6 confirmed complete (per this document's own entries 019–020 and
+`TRL_CONTINUATION_STATE.md`); no Phase 7 module, test, or contract found anywhere in the
+repository.
+
+**Numbering and placement decision:** Numbered TRL-R2-010 — the next unused `TRL-R2-0XX`
+slot (R2-008 governs the unrelated, still-not-started Phase 8 private/online checkpoint;
+R2-009 governs the complete Phase 6 controlled-basket checkpoint; neither was touched).
+Rather than inserting this checkpoint into the existing 0–14 phase sequence (which would
+require renumbering every phase from 7 onward — out of scope, not requested, and exactly
+the kind of numbering change `CLAUDE.md` requires approval for), it is recorded as an
+informational **Phase 6A** row in `TRL_FULL_VISION_MASTER_PROGRAM.md`, explicitly not a
+prerequisite for, and not a reordering of, Phases 7–14, and explicitly not Phase 7 itself.
+
+**Design decision worth recording — non-circular evidence/opportunity identity.** The
+governing prompt's own schema sketch lists `opportunity_id` as a field on
+`TRL_EVIDENCE_ITEM.v1`, while `TRL_OPPORTUNITY_CARD.v1` lists `evidence_ids` as a field —
+a naive reading would compute each ID from data containing the other, exactly the class of
+circularity Phase 6's entry 2026-08-01-020 (`basket_child_lookup_key` vs.
+`canonical_basket_plan_hash`) already found and fixed once this program. Resolved the same
+way: evidence identity is scoped to `(snapshot_id, proposed_side)` plus the evidence item's
+own fields — never to the not-yet-created `opportunity_id` — so every evidence ID is fully
+computable before any opportunity exists; `opportunity_id` is computed afterward from the
+snapshot, the proposed concepts, and the sorted (already-known) evidence IDs.
+`TRL_EVIDENCE_ITEM.v1`'s `opportunity_id` field is retained exactly as the prompt
+specified, but as a denormalized reference populated only after the opportunity is created,
+explicitly excluded from `canonical_evidence_hash` and from the `evidence_id` formula
+itself (`TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md` Section 7.2). The same non-circular,
+forward-only reference pattern is used for the decision and telemetry identities (Section
+7), each of which only ever references an already-computed parent hash, never one computed
+later. A dependency-order acceptance test is required in the future implementation
+checkpoint (Section 18) to guard this permanently, matching Phase 6's own precedent.
+
+**Design decision worth recording — exact deterministic decision thresholds.** The
+governing prompt required "exact bounded ranges and thresholds" without specifying values,
+so this checkpoint fixes them explicitly as named constants
+(`DATA_QUALITY_MIN = 0.6000`, `TRADE_CANDIDATE_SUPPORT_MIN = 0.6500`,
+`TRADE_CANDIDATE_CONTRADICTION_MAX = 0.3500`, `REJECT_CONTRADICTION_MIN = 0.6000`,
+`TRADE_CANDIDATE_UNCERTAINTY_MAX = 0.4000`, `TRADE_CANDIDATE_COST_MAX = 0.3000`,
+`REJECT_COST_MIN = 0.7000`) and a strict, sixteen-step, first-match evaluation order
+(Section 9.3) so `BLOCKED`/`REJECT`/`WAIT`/`EXPIRED`/`TRADE_CANDIDATE` are each reachable
+by exactly one deterministic path, with SMA-001/FIB-001 independently re-checked ahead of
+every other gate. These are stated as this contract's own governing values, not claimed as
+previously approved, exactly matching the standard already applied to FIB-001/SMA-001 in
+entry 2026-07-31-004.
+
+**Why:** the videos this checkpoint responds to demonstrate real, if crudely marketed,
+product concepts (a governed signal card, an internally-evaluated set of hypothetical
+levels, a multi-target preview, honest performance reporting, outcome learning) worth
+capturing on paper, precisely because the accompanying execution boundary (Section 5) and
+new blockers (Section 17) make sure none of the videos' unsafe habits — real broker grids,
+promotional claims, automatic live trading, hidden scoring, uncontrolled self-modification —
+can enter the codebase through this door.
+
+**How to apply:** This checkpoint is documentation-only. Exactly 1 new file
+(`TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md`) and 4 modified tracking files
+(`TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_CONTINUATION_STATE.md`,
+`TRL_CONTINUATION_STATE.json`, this document) plus `TRL_BLOCKERS.md` (7 new blocker rows,
+Section 17 of the new contract). No Python, JavaScript, HTML, CSS, or test file was
+touched; no Phase 6 source module was modified; no Phase 7 work was started; nothing was
+staged, committed, or pushed — awaiting Founder review per the 2026-07-31-001 approval-gate
+decision.
+
+## 2026-08-02-022 — Founder correction pass on the TRL-R2-010 draft contract
+
+**What:** The Founder reviewed the TRL-R2-010 draft recorded in entry 2026-08-02-021 and
+issued six corrections plus one scope expansion (authorizing a narrow amendment to
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`), all applied in place to
+`TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md`. Startup verification was re-run before any
+edit: branch, local HEAD, upstream-tracking ref, and `origin/codex/TRL-R2-full-vision-execution`
+all equal `0d8b66e004bee2dc552e209f1942fd54eec8310e`; `main` equal to
+`8ada27f915091b91ddbc421aae06c7c5b36e068f`; nothing staged; the working scope matched the
+expected 1-new/5-modified baseline from entry 021 exactly before this pass began; port 8765
+clear; no Trading Lab Python process; Phase 7 absent.
+
+**1. Canonical instrument/timeframe allowlists finalized.** Instruments:
+`XAUUSD, NAS100, EURUSD, GBPUSD, USDJPY`. Timeframes: `M5, M15, H1, H4, D1` (narrowed from the
+draft's eight-value timeframe list). Input aliases (`XAU/USD`, `GOLD`, `US100`, `USTEC`,
+`EUR/USD`, etc.) are explicitly never auto-normalized in V0 — an alias is simply unsupported
+input, failing closed with `MARKET_INTELLIGENCE_INSTRUMENT_NOT_ALLOWED`/
+`MARKET_INTELLIGENCE_TIMEFRAME_NOT_ALLOWED`. Expanding either list requires a later contract
+amendment (Section 16.1).
+
+**2. Final V0 data-input model recorded (Section 3.1).** A complete analysis input is exactly
+one snapshot, one proposed side, and exactly one evidence item per required category (no more,
+no fewer); no automatic raw-market evidence generator is implemented or approved — evidence may
+be manually prepared, fixture-produced, or produced later by a separately approved deterministic
+generator only.
+
+**3. Evidence↔opportunity identity cycle corrected by removing the field, not just excluding it
+from a hash.** The original draft (entry 021) kept an `opportunity_id` field on
+`TRL_EVIDENCE_ITEM.v1`, populated after the fact and excluded from `canonical_evidence_hash` —
+functionally non-circular, but the Founder correctly identified this as still carrying the field
+that invites circular reasoning later. The field is now removed from the schema entirely
+(Section 6.2): evidence binds only to `snapshot_id`/`canonical_snapshot_hash`/`proposed_side`/its
+own category fields. The reverse lookup (which opportunities cite a given evidence item) is
+answered by querying the Market Intelligence journal by `evidence_id`, never by a stored
+backward-reference field. The exact non-circular order (snapshot → evidence → opportunity →
+{virtual opportunity, decision} → telemetry) is unchanged and now stated as the literal Founder
+mandate it is.
+
+**4. Evidence completeness rule added (Section 8.1).** Exactly one active evidence item per
+category is now required — a duplicate active item for one category fails closed
+(`MARKET_INTELLIGENCE_EVIDENCE_CATEGORY_DUPLICATED`), a missing category fails closed
+(`MARKET_INTELLIGENCE_EVIDENCE_CATEGORY_MISSING`), and expired evidence is treated as
+unavailable. `TRL_OPPORTUNITY_CARD.v1.evidence_ids` changed from "1 or more" to "exactly 11, one
+per category, in the fixed Section 8 order."
+
+**5. Deterministic score aggregation formulas replaced the original looser weighted-mean
+language.** `effective_evidence_score(item) = quantize_4(normalized_strength * confidence)`.
+`supporting_score`/`contradiction_score` sum `effective_evidence_score` over exactly five
+directional categories (`MARKET_STRUCTURE, TREND, MOMENTUM, MULTI_TIMEFRAME_ALIGNMENT,
+CONTRADICTING_EVIDENCE`) with a fixed denominator of `5` regardless of how many items are
+`NEUTRAL`. `VOLATILITY` and `LIQUIDITY_AND_SPREAD` remain required categories (evidence
+completeness still needs one item each) but no longer feed any score directly in V0 — a
+correction from the original draft, which had blended them into support/contradiction/cost.
+`uncertainty_score` is now the mean of `(1 - confidence)` across all eleven required items
+(denominator `11`), replacing the original data-quality-times-coverage-ratio formula.
+`data_quality_score`/`estimated_cost_score`/`event_risk_score`/`risk_exposure_score` are each
+simply the `effective_evidence_score` of that category's one required item, with `EVENT_RISK`/
+`EXECUTION_COST`/`RISK_EXPOSURE` explicitly interpreted as severity (`0` = negligible/none, `1` =
+prohibitive/maximal), never mixed into `supporting_score`/`contradiction_score`.
+
+**6. Final decision thresholds and a rebuilt 22-step evaluation order.** Four new named
+constants: `HARD_EVENT_RISK_BLOCK_MIN = 0.9000`, `HARD_RISK_EXPOSURE_BLOCK_MIN = 0.9000`,
+`WAIT_EVENT_RISK_MIN = 0.6000`, `WAIT_RISK_EXPOSURE_MIN = 0.6000`, alongside the seven original
+constants (all retained unchanged). The evaluation order was rebuilt into the Founder's exact
+four-bucket authority (`BLOCKED` before any scoring → `REJECT` → `WAIT` → `TRADE_CANDIDATE`),
+with the opportunity's own clock-expiry check folded in as its own `EXPIRED` outcome evaluated
+immediately after the structural/completeness gates and before any scoring gate — `EXPIRED`
+remains its own `final_status` value, distinct from `BLOCKED`, since the schema's status enum
+was never asked to change. The original draft's relative "`contradiction_score >
+supporting_score`" dominance sub-condition on the `REJECT` rule was dropped, matching the
+Founder's exact absolute-threshold-only `REJECT` specification; a new `WAIT` rule
+(`contradiction_score > TRADE_CANDIDATE_CONTRADICTION_MAX`, marginal contradiction) was added
+symmetric to the existing marginal-cost `WAIT` rule, and the original `MULTI_TIMEFRAME_CONFLICT`
+`WAIT` rule was removed as redundant now that `MULTI_TIMEFRAME_ALIGNMENT` is folded directly into
+`supporting_score`/`contradiction_score`. Every reason code was renamed from the original draft's
+`MI_` prefix to the fuller `MARKET_INTELLIGENCE_` prefix, matching the Founder's own two example
+codes (`MARKET_INTELLIGENCE_INSTRUMENT_NOT_ALLOWED`/`MARKET_INTELLIGENCE_TIMEFRAME_NOT_ALLOWED`),
+for a consistent closed vocabulary.
+
+**7. Blocker scoping made precise; generic research heuristic identity introduced.**
+`STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`/`STRATEGY_PARAMETERS_NOT_APPROVED` now fire only when
+`strategy_id` is literally `"SMA-001"`/`"FIB-001"` — never as a global block on generic TRL CORTEX
+V0 research. A new `strategy_id`/`strategy_version` field pair was added to
+`TRL_OPPORTUNITY_CARD.v1` (and folded into the `opportunity_id`/`canonical_opportunity_hash`
+formulas), defaulting to the Founder-approved generic identifier `CORTEX-V0-HEURISTIC` version
+`1.0.0` — explicitly not a production strategy, not approved for execution, not evidence of
+profitability, not authorized for broker handoff. All seven new blockers in `TRL_BLOCKERS.md`
+were rewritten with an explicit "only blocks X; does not block Y" scope note, per the Founder's
+instruction that none of them act as a global blocker when its prohibited capability is not being
+attempted.
+
+**8. Capability-matrix amendment authorized and applied.** Unlike the original draft (scope-
+limited to 5 modified tracking files, deliberately not touching `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`),
+this correction explicitly authorizes and applies one narrow amendment there (new Section 3.2,
+alongside the existing R2-009 Section 3.1 `manual_basket_execution` amendment, left unchanged): a
+new capability `market_intelligence_research`, granted to `RESEARCH`, `SYNTHETIC_PAPER`, and
+`MT5_DEMO_MANUAL` only — granting no order/basket/execution authority of any kind, and not granted
+to `OFF` or to any of the three still-unavailable MT5 automated/live rows. `mode_service.py` was
+not touched; wiring the actual capability-matrix constant remains future implementation work.
+
+**Why:** each correction closes a gap between what the original draft *described* informally and
+what a future implementation could actually build deterministically and testably from — an
+evidence schema field that invites circularity, a support/contradiction formula without a fixed
+denominator, a blocker that reads as global when it should be strategy-specific, and a capability
+gate proposed but never actually authorized to be written into its governing document are all
+exactly the class of gap this program's review gates exist to catch before implementation, not
+after.
+
+**How to apply:** This checkpoint remains documentation-only. Corrected scope: 1 new file
+(`TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md`, revised in place) and 6 modified files
+(`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` — newly authorized this pass — plus the original 5:
+`TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_CONTINUATION_STATE.md`, `TRL_CONTINUATION_STATE.json`,
+this document, `TRL_BLOCKERS.md`), 0 deleted. No Python, JavaScript, HTML, CSS, or test file was
+touched; `mode_service.py` was not touched; no Phase 5/6 source was modified; no Phase 7 work was
+started; nothing was staged, committed, or pushed — awaiting Founder review per the
+2026-07-31-001 approval-gate decision.
+
+## 2026-08-02-023 — Founder final implementation-readiness correction on the TRL-R2-010 draft contract
+
+**What:** The Founder issued a third, final implementation-readiness correction to
+`TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md`, covering the analysis-input envelope, the
+final preview schema, an exact Decimal/`ROUND_HALF_EVEN` numeric policy, exact
+virtual-candidate geometry and reward/risk ranking formulas, exact quantity-conservation
+behavior, an exact 23-step decision order, exact CLI input-safety rules, and a bounded
+demonstration-fixture requirement. Startup verification was re-run before any edit: branch,
+local HEAD, upstream-tracking ref, and `origin/codex/TRL-R2-full-vision-execution` all equal
+`0d8b66e004bee2dc552e209f1942fd54eec8310e`; `main` equal to
+`8ada27f915091b91ddbc421aae06c7c5b36e068f`; nothing staged; the working scope matched the
+expected 1-new/6-modified baseline from entry 022 exactly; port 8765 clear; no Trading Lab
+Python process; Phase 7 absent.
+
+**1. Evidence-generation decision finalized — no automatic generator, ever, in V0.** Removed
+"exact evidence-generator implementation method" from the contract's own remaining-unresolved
+list. `analyze-market-snapshot` now has one exact accepted input shape: a new eighth schema,
+`TRL_MARKET_INTELLIGENCE_ANALYSIS_INPUT.v1` (Section 7) — a transport-only envelope (validated,
+never itself a governed record, never independently persisted, never accepted by Phase 5/6),
+containing one snapshot, one proposed side, strategy identity, exactly eleven evidence inputs,
+one-to-six virtual-candidate inputs, and opportunity-level activation/invalidation signals. The
+service derives the seven governed records from it; no raw-candle evidence inference, AI model
+call, external API call, broker call, MetaTrader5 call, TradingView call, news-provider call, or
+macro-provider call exists anywhere in this path.
+
+**2. Schema taxonomy corrected: seven governed records, not six.** The non-executable basket
+preview — previously defined informally inside the old Section 11 "basket preview" behavior
+section — is now formalized as its own closed schema, `TRL_MARKET_INTELLIGENCE_BASKET_PREVIEW.v1`
+(Section 6.7), bringing the governed-record count to seven, plus the one transport-only
+envelope above (eight documents total, one of which carries no persisted identity).
+
+**3. Exact Decimal/`ROUND_HALF_EVEN` numeric policy adopted.** All canonical scoring and ranking
+arithmetic must use Python `Decimal`, never binary floating-point; `quantize_4` is defined
+exactly as `Decimal(value).quantize(Decimal("0.0001"), rounding=ROUND_HALF_EVEN)`; intermediate
+sums are computed at full `Decimal` precision with only the final division result quantized,
+never re-quantized at undocumented intermediate steps; negative zero canonicalizes to
+`0.0000`; non-finite values fail closed (Section 10.1).
+
+**4. Exact virtual-candidate geometry and reward/risk ranking formulas added (Section 11).**
+BUY/SELL geometry validation (`stop_price`/`entry_trigger`/`target_prices` ordering) now has an
+exact rule; `risk_distance`, `target_reward_distance`, `weighted_reward_distance`,
+`reward_risk_ratio`, and `distance_to_market` (against a newly defined
+`snapshot_mid_price = quantize_4((high + low) / Decimal("2"))`) are all exact formulas
+replacing the prior draft's informal "deterministic geometry generator" language. `rank` was
+confirmed excluded from the `virtual_opportunity_id` formula (Section 8, item 4) — including it
+would have coupled one candidate's identity to the ranking outcome of every other candidate, an
+avoidable and undesirable circularity distinct from, but analogous in spirit to, the
+evidence↔opportunity cycle corrected in entry 022.
+
+**5. Exact first-match virtual-opportunity state derivation added (Section 12.2):** `EXPIRED` →
+`INVALIDATED` → `REJECTED` (geometry/consistency failure) → `WATCHING` → `ACTIVATED`, with
+selection for preview permitted only when the opportunity's own decision is `TRADE_CANDIDATE`,
+using an immutable state-change event rather than an in-place canonical rewrite — restated
+explicitly per Founder instruction not to let a "supposedly immutable" virtual record change in
+place.
+
+**6. Final closed preview schema (Section 6.7) replaces the prior informal field list.** Exact
+fields: `schema_version`, `preview_id`, `opportunity_id`/`canonical_opportunity_hash`,
+`selected_virtual_opportunity_id`/`canonical_virtual_opportunity_hash`, `instrument`,
+`proposed_side`, `entry_trigger`, `stop_price`, `ordered_target_prices`,
+`ordered_target_allocations`, `hypothetical_total_quantity`,
+`ordered_hypothetical_child_quantities`, `total_hypothetical_risk`, `non_executable`,
+`execution_handoff_status` (literal `"EXECUTION_HANDOFF_NOT_APPROVED"`), `created_at_utc`,
+`expires_at_utc`, `canonical_preview_hash`. **Quantity conservation is now fail-closed with no
+redistribution** — the prior draft's "remainder assigned to the last target" rule is removed
+entirely; allocations must already sum to exactly `100.0000` as an input constraint, and a
+derived child quantity that cannot be exactly represented at up to 8 decimal places, or a set
+that does not sum exactly to `hypothetical_total_quantity`, now fails preview creation closed
+with a new reason code, `MARKET_INTELLIGENCE_PREVIEW_QUANTITY_NOT_EXACTLY_REPRESENTABLE`, rather
+than silently rounding.
+
+**7. Decision order expanded from 22 to 23 exact steps (Section 10.4).** A new step 6,
+`MARKET_INTELLIGENCE_EVIDENCE_EXPIRED` (BLOCKED), distinguishes "a category's evidence item was
+submitted but has individually expired" from the pre-existing step 4 "missing category"
+condition. The opportunity's own clock-expiry check (its own `EXPIRED` status, distinct from
+`BLOCKED`) is confirmed as step 7, running immediately after the structural/completeness gates
+and explicitly noted to be driven solely by the opportunity's own `expiry_utc` — `TRL_MARKET_SNAPSHOT.v1`
+carries no independent expiry field in V0, so "expired snapshot or opportunity" resolves to the
+opportunity check alone, stated explicitly to avoid inventing an ungoverned new snapshot field.
+The `uncertainty_score` WAIT comparison was corrected from `>=` to strictly `>`
+`TRADE_CANDIDATE_UNCERTAINTY_MAX`, matching both this and the prior round's "exceeds" wording,
+which a transcription slip in the prior revision had rendered as `>=`. Step 13's structural-
+inconsistency REJECT condition is now precisely defined as "every virtual candidate derived from
+this opportunity is `REJECTED` under Section 12.2" (zero structurally valid candidates), rather
+than the prior draft's vaguer "target/stop ordering is structurally inconsistent."
+
+**8. Exact `analyze-market-snapshot` input-safety rules added (Section 15.2):** one path
+argument only; 262144-byte maximum; regular file only (no directory, device path, network/UNC
+path, URL, archive, or symlink/reparse-point traversal); strict UTF-8 JSON; duplicate JSON keys
+rejected; exact envelope schema required; input read once; no executable content evaluated;
+only a bounded logical source label stored, never the absolute input path.
+
+**9. Bounded demonstration-fixture requirement added (Section 21.1):** one committed synthetic
+bundle, all eleven evidence categories, a `TRADE_CANDIDATE` result, three-to-six virtual
+candidates, one selected three-target preview, prominently labeled "SYNTHETIC RESEARCH EXAMPLE —
+NOT LIVE MARKET DATA — NON-EXECUTABLE", with no fabricated broker account information.
+
+**10. `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` reviewed, no further change required.** This
+round's corrections (envelope, numeric policy, geometry/ranking, preview schema, decision order,
+CLI safety, demonstration fixture) do not touch capability grants — the Section 3.2
+`market_intelligence_research` amendment applied in entry 022 remains exactly correct and was
+not re-edited. `TRL_BLOCKERS.md`'s seven precisely-scoped blocker rows (also from entry 022)
+were reviewed and likewise required no further change.
+
+**Why:** each correction turns a previously informal or under-specified mechanism (evidence
+generation, quantity conservation, virtual-candidate ranking, decision-order edge cases) into an
+exact, testable rule — precisely the gap this program's review gates exist to close before
+implementation begins, not after a test suite surfaces it as a defect.
+
+**How to apply:** This checkpoint remains documentation-only. Scope for this pass: the contract
+document itself (rewritten in place) plus this Decision Log entry and the
+`TRL_CONTINUATION_STATE.md`/`.json` twin; `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`,
+`TRL_FULL_VISION_MASTER_PROGRAM.md`, and `TRL_BLOCKERS.md` were reviewed and required no further
+edit this pass (their entry-022 state remains correct). Cumulative scope across all three
+TRL-R2-010 passes remains 1 new file, 6 modified files, 0 deleted. No Python, JavaScript, HTML,
+CSS, or test file was touched; `mode_service.py` was not touched; no Phase 5/6 source was
+modified; no Phase 7 work was started; nothing was staged, committed, or pushed — awaiting
+Founder review per the 2026-07-31-001 approval-gate decision.
+
+## 2026-08-02-024 — Founder approval and local commit of the TRL-R2-010 contract
+
+**Decision:** The Founder reviewed the R2-010 contract through all three passes (entries
+2026-08-02-021 through -023) and approved:
+
+- `TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md` as the governing contract for TRL CORTEX
+  V0 — seven governed record schemas plus one transport-only analysis input envelope, no
+  automatic evidence generator, an exact Decimal/`ROUND_HALF_EVEN` numeric policy, exact
+  virtual-candidate geometry and reward/risk ranking formulas, the final closed
+  basket-preview schema with fail-closed (no-redistribution) quantity conservation, and the
+  exact 23-step first-match decision order.
+- The narrow capability amendment `market_intelligence_research`, granted only to
+  `RESEARCH`, `SYNTHETIC_PAPER`, and `MT5_DEMO_MANUAL` (`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`
+  Section 3.2), granting no order, basket, broker, or execution authority of any kind.
+- A local commit of exactly the 7 files that make up this contract-authoring checkpoint (1
+  new, 6 modified — the R2-010 contract itself plus the six tracking/governance documents
+  kept in sync with it).
+
+**Why:** The three passes closed every substantive gap found in successive drafts:
+canonical instrument/timeframe allowlists with no alias-guessing; a non-circular
+evidence↔opportunity identity model (evidence carries no `opportunity_id` field at all);
+exact, fixed-denominator score-aggregation formulas; precisely scoped blockers (SMA-001/
+FIB-001 gates fire only for their own literal `strategy_id`, never globally); an exact
+Decimal/`ROUND_HALF_EVEN` numeric policy with no binary-float canonical scoring; exact
+virtual-candidate geometry, reward/risk, and ranking formulas; a final closed preview schema
+with fail-closed quantity conservation instead of silent rounding; and an exact 23-step
+decision order with every status reachable via a dedicated rule. With no further
+contradictions found, the Founder authorized finalizing and committing this checkpoint
+locally.
+
+**How to apply:** This commit records the *contract*, not an *implementation* — TRL CORTEX
+V0 source code, tests, CLI, HTTP routes, and dashboard changes remain entirely unbuilt and
+are explicitly deferred to a separate, later checkpoint that must itself follow this
+contract without inventing business or safety rules. Remote push of this checkpoint's commit
+requires a separate, explicit Founder approval, per the standing commit/push policy
+(`TRL_DECISION_LOG.md` entry 2026-07-31-001) — this decision authorizes the local commit
+only, not the push. Phase 5 and Phase 6 remain completely unchanged, complete, and (Phase 6)
+committed at `0d8b66e004bee2dc552e209f1942fd54eec8310e`. SMA-001
+(`STRATEGY_EXECUTION_GEOMETRY_NOT_APPROVED`) and FIB-001
+(`STRATEGY_PARAMETERS_NOT_APPROVED`) remain fully blocked and are unaffected by this
+approval. Phase 7 was not started and is not referenced as available anywhere in the
+approved contract. This entry deliberately does not cite the resulting commit SHA — per the
+governing instruction not to guess it — it is authoritatively `git rev-parse HEAD` at any
+later point this document is read.

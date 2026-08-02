@@ -110,6 +110,60 @@ otherwise change the availability of `MT5_DEMO_AUTOMATED`,
 table, Section 4's transition matrix, and Section 6's startup-safety
 downgrade for those three modes are all unchanged by this amendment.
 
+### 3.2 Amendment (TRL-R2-010, contract-authoring checkpoint): `market_intelligence_research`
+
+*Added while authoring `TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md`
+(Market Intelligence V0, product name "TRL CORTEX V0" — an informational
+"Phase 6A" checkpoint, not part of the 0–14 phase sequence and not Phase 7).
+This is the one narrow, Founder-approved capability change that contract
+requires; every other rule in this document, including the 3.1 amendment
+above, is unchanged. No code implements this amendment yet — see the
+R2-010 contract Section 5.1/5.2 for the full rationale.*
+
+An eighteenth governed capability is added: `market_intelligence_research`.
+It is a read/analysis-only research capability: it grants no
+`order_check`, `order_send`, `manual_broker_execution`,
+`manual_basket_execution`, `basket_execution`, live execution, automated
+execution, or execution handoff of any kind — it gates only Market
+Intelligence record creation (snapshot analysis, evidence/opportunity/
+decision/lattice generation, basket-preview generation, and outcome-
+telemetry recording), never anything Phase 5/6 recognizes as broker
+authority.
+
+`market_intelligence_research` is granted to `RESEARCH`, `SYNTHETIC_PAPER`,
+and `MT5_DEMO_MANUAL`:
+
+| Mode | `market_intelligence_research` granted? |
+|---|---|
+| `OFF` | No |
+| `RESEARCH` | **Yes** |
+| `SYNTHETIC_PAPER` | **Yes** |
+| `MT5_DEMO_MANUAL` (available) | **Yes** |
+| `MT5_DEMO_AUTOMATED` (future) | No |
+| `MT5_LIVE_MANUAL` (future) | No |
+| `MT5_LIVE_AUTOMATED` (future) | No |
+
+It is granted to `MT5_DEMO_MANUAL` because research-only analysis running
+alongside a demo-manual execution mode creates no execution risk by
+itself — the capability grants no order/basket authority of any kind, so
+there is no reason to withhold it there the way the three still-unavailable
+MT5 rows are withheld from every other capability by virtue of remaining
+unavailable. It is not granted to `OFF` (which grants nothing, by design)
+or to `MT5_DEMO_AUTOMATED`/`MT5_LIVE_MANUAL`/`MT5_LIVE_AUTOMATED` (which
+remain fully unavailable, unchanged by this amendment). Granting this
+capability to `MT5_DEMO_MANUAL` does not, by itself, activate, arm, or
+otherwise change the availability of any of the three still-unavailable
+modes — Section 2's availability table, Section 4's transition matrix, and
+Section 6's startup-safety downgrade for those three modes are all
+unchanged by this amendment, exactly as the 3.1 amendment already
+established for `manual_basket_execution`.
+
+Read-only Market Intelligence operations (status, list, inspect, journal
+inspection, and every read-only HTTP route defined in the R2-010 contract)
+require no capability grant and remain available in every mode, including
+`OFF` — matching this document's own existing convention that pure-read
+commands like `show-mode`/`list-modes` never require a capability.
+
 ## 4. Exact transition matrix
 
 ```
