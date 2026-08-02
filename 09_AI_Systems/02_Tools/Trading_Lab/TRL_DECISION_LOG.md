@@ -1985,3 +1985,43 @@ policy (`TRL_DECISION_LOG.md` entry 2026-07-31-001). This entry deliberately doe
 a fixed commit SHA — per the governing instruction not to guess it — the exact
 committed/pushed state is authoritatively `git status`/`git rev-parse HEAD` at any later
 point this document is read.
+
+## 2026-08-03-001 — Founder-executed push of the TRL-R2-011 implementation commit; checkpoint formally closed
+
+**Decision:** The Founder pushed the locally-committed TRL-R2-011 implementation
+(`6e24194071e8776833e396745d19b45785ee6ce4`, "Implement TRL-R2-011 Data Fabric and Replay
+V0") to `origin/codex/TRL-R2-full-vision-execution`, range `5c53396..6e24194`. Independently
+re-verified via a fresh `git fetch origin codex/TRL-R2-full-vision-execution` (not merely
+trusted from the report): local HEAD, the live remote branch ref, and the
+upstream-tracking ref all equal `6e24194071e8776833e396745d19b45785ee6ce4`;
+`git rev-list --left-right --count HEAD...origin/codex/TRL-R2-full-vision-execution`
+reported `0 0`; the working tree and index were clean; no untracked file remained; and
+`refs/heads/main` remained unchanged at `8ada27f915091b91ddbc421aae06c7c5b36e068f`. The
+commit contains exactly the 26 authorized files (15 added, 11 modified, 0 deleted; 6806
+insertions, 87 deletions) recorded in `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md`.
+
+**Why:** Publishing this commit makes the complete TRL CORTEX DATA FABRIC V0 implementation
+— five governed schemas plus one non-governed storage-only envelope, immutable
+content-addressed dataset storage, a compact append-only lock-protected replay journal,
+deterministic replay sessions/steps/snapshots, restart-safe projection, bounded CLI/HTTP
+inspection, and read-only dashboard integration — available on the shared branch, closing
+this checkpoint as a completed, remotely verified implementation record. Full acceptance
+evidence (189 new R2-011 tests; 762-test/28-module combined targeted run; two consecutive
+1249-test complete-suite runs; all 29 governed reason codes conforming; every journal
+mutation lock-protected, reloaded-after-lock, atomically persisted, and
+owner-token-released with no unlocked fallback; separate-process concurrency proofs
+including a simultaneous invalid-import race; a full 35-step manual rehearsal) was recorded
+before this push in `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` and the prior two
+Decision Log entries documenting this checkpoint's correction passes.
+
+**How to apply:** TRL-R2-011's implementation is now formally closed and remotely
+verified — the checkpoint itself is complete. R2-010, Phase 5, and Phase 6 remain
+completely unaffected and unchanged; `main` remains unchanged. TRL-R2-012 has not been
+formally authorized or started; Phase 7 remains entirely absent. This documentation-closure
+pass (this entry plus the corresponding updates to `TRL_CONTINUATION_STATE.md`,
+`TRL_CONTINUATION_STATE.json`, `TRL_FULL_VISION_MASTER_PROGRAM.md`, and
+`TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md`) remains itself locally uncommitted
+and unpushed until its own separate Git checkpoint is completed — per the Git-authoritative
+model this document already uses throughout, the exact current staged/committed/pushed
+state of both the implementation publication and this closure pass is always read from
+`git status`/`git rev-parse HEAD` directly, not restated here as a fixed value.

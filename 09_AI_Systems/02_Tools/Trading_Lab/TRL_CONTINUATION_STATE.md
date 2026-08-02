@@ -560,13 +560,17 @@ session end or when session capacity drops below ~15%.
   authority, no duplicate step, and no lost rejection event) and a full
   35-step manual rehearsal (isolated `LOCALAPPDATA`, real
   CLI entry points, real HTTP server, real dashboard) both completed with
-  every assertion passing. **Founder-approved for local commit.** This
-  checkpoint's exact 26-file scope (15 new, 11 modified, 0 deleted) is
-  being locally committed as this checkpoint's commit; remote push is a
-  separate, later, Founder-authorized action, per the standing commit/push
-  policy (`TRL_DECISION_LOG.md` entry 2026-07-31-001). Per the
+  every assertion passing. **Founder-approved, committed, pushed, and
+  remotely verified.** This checkpoint's exact 26-file scope (15 new, 11
+  modified, 0 deleted) is committed as `6e24194071e8776833e396745d19b45785ee6ce4`
+  ("Implement TRL-R2-011 Data Fabric and Replay V0"), pushed range
+  `5c53396..6e24194`. Independently re-verified: local HEAD,
+  `origin/codex/TRL-R2-full-vision-execution`, and the upstream-tracking
+  ref all equal `6e24194071e8776833e396745d19b45785ee6ce4`; ahead/behind
+  `0 0`; working tree and index clean; no untracked file; `main`
+  unchanged. **TRL-R2-011 implementation is formally closed.** Per the
   Git-authoritative model this document already uses throughout, this
-  checkpoint's exact committed HEAD and push status are always read from
+  checkpoint's exact committed/pushed state is always read from
   `git rev-parse HEAD`/`git status` directly rather than restated here as
   a value that would otherwise go stale the moment either changes. See
   `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` for the complete
@@ -585,11 +589,13 @@ session end or when session capacity drops below ~15%.
   verified checkpoint. TRL-R2-011's governing contract is closed as a
   completed and remotely verified checkpoint (committed and pushed at
   `678de02d739a89a0fcc58765178bd8935f4db868`). **TRL-R2-011 implementation
-  is Founder-approved and locally committed as this checkpoint's commit**
-  — remote push is a separate, later, Founder-authorized action, not yet
-  taken. Separate, explicit Founder authorization is still needed for the
-  remote push of both this checkpoint and the already-locally-committed
-  Phase 6 implementation checkpoint
+  is now also closed as a completed and remotely verified checkpoint**
+  (committed and pushed at `6e24194071e8776833e396745d19b45785ee6ce4`,
+  range `5c53396..6e24194`); its next checkpoint (TRL-R2-012) has not been
+  formally authorized or started — a separate, later Founder decision is
+  required before it begins. Separate, explicit Founder authorization is
+  still needed for the remote push of the already-locally-committed Phase
+  6 implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`
