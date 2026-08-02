@@ -1695,3 +1695,37 @@ pushed** — per the standing commit/push policy (`TRL_DECISION_LOG.md` entry
 deliberately does not cite a fixed commit SHA — per the governing instruction not to guess
 it — the exact staged/committed/pushed state is authoritatively `git status`/
 `git rev-parse HEAD` at any later point this document is read.
+
+## 2026-08-02-026 — Founder-executed push of the TRL-R2-010 implementation commit; checkpoint formally closed
+
+**Decision:** The Founder manually executed `git push origin codex/TRL-R2-full-vision-execution`
+for the implementation commit recorded in entry 2026-08-02-025 (the automated push attempt in
+this session had been denied by the harness's own permission classifier). The push was
+independently re-verified afterward, not merely trusted from the Founder's report: a fresh
+`git fetch origin codex/TRL-R2-full-vision-execution` confirmed local HEAD, the live
+`origin/codex/TRL-R2-full-vision-execution` ref, and the upstream-tracking ref all equal
+`ea9cc3e7b159d6088f006fc121d1abf2c93b717a` ("Implement TRL-R2-010 Market Intelligence V0"),
+`git rev-list --left-right --count HEAD...origin/...` reported `0 0`, the working tree and
+index were clean, no untracked file remained, and `refs/heads/main` remained unchanged at
+`8ada27f915091b91ddbc421aae06c7c5b36e068f`. Verified pushed range: `b1fedab..ea9cc3e`.
+
+**Why:** The implementation commit (24 files: 13 added, 11 modified, 0 deleted; 6362
+insertions, 22 deletions) had already passed every acceptance gate — targeted tests 573/573,
+full suite 1060/1060 twice consecutively, reconciled arithmetic 900 + 160 = 1060, manual
+synthetic rehearsal, and the fully investigated intermittent Phase 5 disclosure (entry
+2026-08-02-025) — and was Founder-reviewed and locally committed. Publishing it makes TRL
+CORTEX V0's research-only, local-only, non-executing Market Intelligence V0 slice available on
+the shared branch for the rest of the full-vision program, with no execution or network
+boundary crossed at any point in the process.
+
+**How to apply:** TRL-R2-010 (Market Intelligence V0 / TRL CORTEX V0) is now closed as a
+completed and remotely verified checkpoint. Phase 5 and Phase 6 remain unaffected and
+unchanged (direct implementation/test files byte-identical throughout; shared integration
+files modified only additively). The next checkpoint has not yet been formally authorized or
+started; Phase 7 remains entirely absent. This documentation-closure pass (this entry plus the
+corresponding updates to `TRL_CONTINUATION_STATE.md`, `TRL_CONTINUATION_STATE.json`, and
+`TRL_FULL_VISION_MASTER_PROGRAM.md`) remains itself locally uncommitted and unpushed until its
+own separate Git checkpoint is completed — per the Git-authoritative model this document
+already uses throughout, the exact current staged/committed/pushed state of both the
+implementation and this closure pass is always read from `git status`/`git rev-parse HEAD`
+directly, not restated here as a fixed value.

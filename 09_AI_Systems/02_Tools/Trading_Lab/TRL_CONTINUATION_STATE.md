@@ -5,7 +5,7 @@
 | Document ID | TRL-CONT-001 |
 | Document Type | Continuation State |
 | Status | Active |
-| Version | 1.6 |
+| Version | 1.7 |
 | Date | 2026-08-02 |
 | Owner | Abdulrahman Alsakkaf |
 
@@ -348,8 +348,15 @@ session end or when session capacity drops below ~15%.
   was not started; this pass's exact staged/committed/pushed state is
   authoritatively determined by Git directly. See `TRL_DECISION_LOG.md`
   entry 2026-08-02-023.
-- **TRL-R2-010 implementation (TRL CORTEX V0) — complete, locally
-  committed as this checkpoint's commit, unpushed:**
+- **TRL-R2-010 implementation (TRL CORTEX V0) — complete, committed, and
+  pushed:** governing contract commit `b1fedab1f91b91b184434ff32fe0dcbddf8d9985`;
+  implementation commit `ea9cc3e7b159d6088f006fc121d1abf2c93b717a`
+  ("Implement TRL-R2-010 Market Intelligence V0"), pushed range
+  `b1fedab..ea9cc3e` on `codex/TRL-R2-full-vision-execution`. Verified at
+  push time: local HEAD, `origin/codex/TRL-R2-full-vision-execution`, and
+  the upstream-tracking ref all equal `ea9cc3e7...`; ahead/behind `0 0`;
+  working tree clean; index clean; no untracked file; `main` unchanged at
+  `8ada27f915091b91ddbc421aae06c7c5b36e068f`.
   built against the Founder-approved three-pass contract with no redesign.
   New: `market_intelligence_data.py` (seven governed schemas + transport
   envelope, deterministic identities, `Decimal`/`ROUND_HALF_EVEN` scoring,
@@ -385,10 +392,10 @@ session end or when session capacity drops below ~15%.
   --stat`); not modified per instruction, and not part of this
   checkpoint's own accepted clean run pair. Manually rehearsed end-to-end
   via the real CLI entry points against an isolated `LOCALAPPDATA`. **This
-  implementation is locally committed as this checkpoint's commit; it was
-  not pushed** — per the Git-authoritative model this document already
-  uses, its exact staged/committed/pushed state is always read from `git
-  status`/`git rev-parse HEAD` directly. See
+  implementation checkpoint is formally closed: committed and pushed** —
+  per the Git-authoritative model this document already uses, its exact
+  staged/committed/pushed state is always read from `git status`/`git
+  rev-parse HEAD` directly. See
   `TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md` for the complete record.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
@@ -400,9 +407,10 @@ session end or when session capacity drops below ~15%.
   - TradingView webhook signing secret / allowlist — not provided
   - FIB-001 exact numeric parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
   - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
-- **Next command:** Obtain separate, explicit Founder authorization for
-  the remote push of the locally committed TRL-R2-010 (TRL CORTEX V0)
-  implementation above and of the already-locally-committed Phase 6
+- **Next command:** TRL-R2-010 is closed as a completed and remotely
+  verified checkpoint. The next checkpoint has not yet been formally
+  authorized or started. Separate, explicit Founder authorization is still
+  needed for the remote push of the already-locally-committed Phase 6
   implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`

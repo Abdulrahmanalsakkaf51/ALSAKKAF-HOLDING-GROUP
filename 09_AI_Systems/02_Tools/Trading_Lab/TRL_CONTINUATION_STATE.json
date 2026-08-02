@@ -218,7 +218,21 @@
     "decision_log_entry": "2026-08-02-023"
   },
   "trl_r2_010_implementation": {
-    "status": "implementation complete against the Founder-approved TRL-R2-010 contract; locally committed as this checkpoint's commit; unpushed; remote push requires separate Founder authorization",
+    "status": "implementation complete, committed, and pushed; checkpoint formally closed; next checkpoint not yet authorized or started",
+    "implementation_commit": "ea9cc3e7b159d6088f006fc121d1abf2c93b717a",
+    "implementation_commit_message": "Implement TRL-R2-010 Market Intelligence V0",
+    "governing_contract_commit": "b1fedab1f91b91b184434ff32fe0dcbddf8d9985",
+    "pushed_range": "b1fedab..ea9cc3e",
+    "push_verification": {
+      "local_head": "ea9cc3e7b159d6088f006fc121d1abf2c93b717a",
+      "remote_branch_sha": "ea9cc3e7b159d6088f006fc121d1abf2c93b717a",
+      "upstream_tracking_sha": "ea9cc3e7b159d6088f006fc121d1abf2c93b717a",
+      "ahead_behind": "0 0",
+      "working_tree_clean": true,
+      "index_clean": true,
+      "untracked_files": 0,
+      "main_unchanged_at": "8ada27f915091b91ddbc421aae06c7c5b36e068f"
+    },
     "product_working_name": "TRL CORTEX V0",
     "baseline_head": "b1fedab1f91b91b184434ff32fe0dcbddf8d9985",
     "new_modules": ["market_intelligence_data.py", "market_intelligence_journal.py", "market_intelligence_service.py", "market_intelligence_cli.py"],
@@ -273,7 +287,7 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "Obtain separate, explicit Founder authorization for the remote push of the locally committed TRL-R2-010 (TRL CORTEX V0) implementation (see trl_r2_010_implementation above) and of the already-locally-committed Phase 6 implementation",
+  "next_command": "TRL-R2-010 is closed as a completed and remotely verified checkpoint (see trl_r2_010_implementation above); the next checkpoint has not yet been formally authorized or started. Obtain separate, explicit Founder authorization for the remote push of the already-locally-committed Phase 6 implementation",
   "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
@@ -283,5 +297,5 @@
     "--no-verify",
     "--no-gpg-sign"
   ],
-  "last_update": "2026-08-02T02:35:00Z"
+  "last_update": "2026-08-02T06:20:00Z"
 }

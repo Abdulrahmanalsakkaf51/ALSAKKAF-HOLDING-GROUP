@@ -4,8 +4,8 @@
 |-------|-------|
 | Document ID | TRL-R2-010-EVID-001 |
 | Document Type | Implementation Evidence |
-| Status | Active — implementation complete; Founder-approved and locally committed as this checkpoint's commit; remote push requires separate, explicit Founder authorization and has not occurred. Exact staged/committed/pushed state is always authoritative from `git status`/`git rev-parse HEAD` directly, not restated here as a fixed value that would go stale. |
-| Version | 1.1 — corrected Git-state and Phase 5/6 compatibility wording per Founder review (Section 4.3/9.3 below) |
+| Status | Closed — implementation complete, committed as `ea9cc3e7b159d6088f006fc121d1abf2c93b717a` ("Implement TRL-R2-010 Market Intelligence V0"), and pushed (range `b1fedab..ea9cc3e`) to `codex/TRL-R2-full-vision-execution`. Verified at push time: local HEAD, remote branch, and upstream-tracking ref all equal `ea9cc3e7...`; ahead/behind `0 0`; working tree and index clean; `main` unchanged. Exact current staged/committed/pushed state is always authoritative from `git status`/`git rev-parse HEAD` directly, not restated here as a fixed value that would go stale. |
+| Version | 1.2 — recorded verified push (this checkpoint is formally closed) |
 | Date | 2026-08-02 |
 | Owner | Abdulrahman Alsakkaf |
 | Related contract | `TRL_R2_010_MARKET_INTELLIGENCE_V0_CONTRACT.md` |
@@ -19,11 +19,12 @@ Records the accelerated V0 implementation of TRL-R2-010 Market
 Intelligence (product name **TRL CORTEX V0**) against the Founder-approved
 governing contract. This checkpoint is research-only, local-only,
 deterministic, non-live, non-automated, non-executing, and is explicitly
-not Phase 7. **This implementation is complete and, as of this checkpoint,
-locally committed; it was not pushed** (remote push requires separate,
-explicit Founder authorization, per the standing commit/push policy). All
-staged/committed/pushed state is authoritative from `git status` at any
-given moment, not restated here as a fixed value.
+not Phase 7. **This implementation is complete, committed
+(`ea9cc3e7b159d6088f006fc121d1abf2c93b717a`), and pushed** to
+`codex/TRL-R2-full-vision-execution` (range `b1fedab..ea9cc3e`) — this
+checkpoint is formally closed. All staged/committed/pushed state is
+authoritative from `git status` at any given moment, not restated here as
+a fixed value.
 
 # 2. Two accelerated-V0 implementation decisions (not literally specified by the contract's field tables)
 
@@ -580,14 +581,18 @@ document, `TRL_CONTINUATION_STATE.md`, `TRL_DECISION_LOG.md`,
   (762 tests) passing unchanged, not on byte-identity.
 - Phase 7 remains entirely absent (no file, no module, no test
   references a Phase 7 concept).
-- This implementation is **locally committed as this checkpoint's commit;
-  it was not pushed**. The commit contains exactly the intended 24
-  TRL-R2-010 files (Section 3.0, corrected count); no unrelated file is
-  part of it. Remote push requires separate, explicit Founder
-  authorization, per the standing commit/push policy
-  (`TRL_DECISION_LOG.md` entry 2026-07-31-001) — exact current
-  staged/committed/pushed state is always authoritative from `git status`/
-  `git rev-parse HEAD` directly, not restated here as a fixed value.
+- This implementation is **committed
+  (`ea9cc3e7b159d6088f006fc121d1abf2c93b717a`) and pushed** to
+  `codex/TRL-R2-full-vision-execution` (range `b1fedab..ea9cc3e`) — this
+  checkpoint is formally closed. The commit contains exactly the intended
+  24 TRL-R2-010 files (Section 3.0, corrected count); no unrelated file is
+  part of it. Push was verified: local HEAD, remote branch, and
+  upstream-tracking ref all equal `ea9cc3e7...`; ahead/behind `0 0`;
+  working tree and index clean; `main` unchanged. Exact current
+  staged/committed/pushed state remains always authoritative from `git
+  status`/`git rev-parse HEAD` directly, not restated here as a fixed
+  value. The next checkpoint has not yet been formally authorized or
+  started.
 
 See the accompanying final report in the session transcript for the
 complete Section 24 checklist (branch, HEAD, exact file/test counts,
