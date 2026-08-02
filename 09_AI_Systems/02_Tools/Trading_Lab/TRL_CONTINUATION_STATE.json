@@ -269,7 +269,23 @@
     "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md"
   },
   "trl_r2_011_market_data_fabric_replay_v0_contract_checkpoint": {
-    "status": "contract-only draft, awaiting final Founder review after one Founder correction pass; implementation not started; exact staged/committed/pushed state determined by Git directly",
+    "status": "governing contract publication complete: committed and pushed; formally closed and remotely verified governance checkpoint; implementation not started; exact staged/committed/pushed state determined by Git directly",
+    "contract_commit": "678de02d739a89a0fcc58765178bd8935f4db868",
+    "contract_commit_message": "Define TRL-R2-011 Data Fabric and Replay V0 contract",
+    "pushed_range": "e1ceaaf..678de02",
+    "push_verification": {
+      "local_head": "678de02d739a89a0fcc58765178bd8935f4db868",
+      "remote_branch_sha": "678de02d739a89a0fcc58765178bd8935f4db868",
+      "upstream_tracking_sha": "678de02d739a89a0fcc58765178bd8935f4db868",
+      "ahead_behind": "0 0",
+      "working_tree_clean": true,
+      "index_clean": true,
+      "untracked_files": 0,
+      "main_unchanged_at": "8ada27f915091b91ddbc421aae06c7c5b36e068f",
+      "verification_method": "fresh git fetch origin codex/TRL-R2-full-vision-execution, independently re-checked, not merely trusted from the Founder's report"
+    },
+    "implementation_authorized": false,
+    "implementation_authorization_note": "a separate, later Founder decision is required before implementation begins",
     "founder_correction_pass": {
       "issues_corrected": [
         "no separate content-addressed dataset store existed (a journal event would otherwise embed up to 250000 bar records) - fixed by a new non-governed TRL_MARKET_DATASET_STORAGE_ENVELOPE.v1 storage container (contract Section 10.6), immutable after acceptance, content-addressed by dataset_id, with a two-tier persistence architecture (Section 17) separating it from the compact journal",
@@ -344,7 +360,7 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "TRL-R2-010 is closed as a completed and remotely verified checkpoint (see trl_r2_010_implementation above). TRL-R2-011 (see trl_r2_011_market_data_fabric_replay_v0_contract_checkpoint above) is a contract-only draft awaiting Founder review; implementation has not started. Obtain separate, explicit Founder authorization for the remote push of the already-locally-committed Phase 6 implementation, and separately for TRL-R2-011 contract approval and any future implementation",
+  "next_command": "TRL-R2-010 is closed as a completed and remotely verified checkpoint (see trl_r2_010_implementation above). TRL-R2-011's governing contract is now also closed as a completed and remotely verified checkpoint (see trl_r2_011_market_data_fabric_replay_v0_contract_checkpoint above); its implementation has not been formally authorized or started - a separate, later Founder decision is required. Obtain separate, explicit Founder authorization for the remote push of the already-locally-committed Phase 6 implementation, and separately for any future TRL-R2-011 implementation",
   "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
@@ -354,5 +370,5 @@
     "--no-verify",
     "--no-gpg-sign"
   ],
-  "last_update": "2026-08-02T07:30:00Z"
+  "last_update": "2026-08-02T08:00:00Z"
 }

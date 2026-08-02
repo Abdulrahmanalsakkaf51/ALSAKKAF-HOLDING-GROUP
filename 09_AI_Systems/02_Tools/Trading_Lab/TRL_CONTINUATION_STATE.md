@@ -5,7 +5,7 @@
 | Document ID | TRL-CONT-001 |
 | Document Type | Continuation State |
 | Status | Active |
-| Version | 1.9 |
+| Version | 2.0 |
 | Date | 2026-08-02 |
 | Owner | Abdulrahman Alsakkaf |
 
@@ -462,10 +462,35 @@ session end or when session capacity drops below ~15%.
   blocker, or safety-boundary question remains open. Scope remains
   unchanged: 1 new file, the same 6 modified tracking/contract files, 0
   deleted; no Python, JavaScript, HTML, CSS, or test file was touched;
-  R2-010 was not modified; Phase 7 was not started. **TRL-R2-011
-  implementation has not started; Phase 7 has not started. Awaiting final
-  Founder approval after this correction.** See `TRL_DECISION_LOG.md`
-  entry 2026-08-02-027 (including its additive Founder-review amendment).
+  R2-010 was not modified; Phase 7 was not started. See
+  `TRL_DECISION_LOG.md` entry 2026-08-02-027 (including its additive
+  Founder-review amendment).
+- **TRL-R2-011 governing contract — committed and pushed; publication
+  complete:** Founder-approved after the correction pass above, committed
+  locally at `678de02d739a89a0fcc58765178bd8935f4db868` (commit message
+  "Define TRL-R2-011 Data Fabric and Replay V0 contract"), then manually
+  pushed by the Founder and independently re-verified by a fresh `git
+  fetch origin codex/TRL-R2-full-vision-execution`: local HEAD, the live
+  `origin/codex/TRL-R2-full-vision-execution` ref, and the upstream-
+  tracking ref all equal `678de02d739a89a0fcc58765178bd8935f4db868`;
+  `git rev-list --left-right --count HEAD...origin/...` reported `0 0`;
+  the working tree and index were clean; no untracked file remained; and
+  `refs/heads/main` remained unchanged at
+  `8ada27f915091b91ddbc421aae06c7c5b36e068f`. Verified pushed range:
+  `e1ceaaf..678de02`. The commit contains exactly the 7 authorized
+  documentation/governance files (1 added, 6 modified, 0 deleted; 1717
+  insertions, 3 deletions) — `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_CONTRACT.md`
+  (new) plus `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`,
+  `TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_CONTINUATION_STATE.md`,
+  `TRL_CONTINUATION_STATE.json`, `TRL_DECISION_LOG.md`, and
+  `TRL_BLOCKERS.md` (modified). **R2-011 governing-contract publication is
+  now formally closed and remotely verified. TRL-R2-011 implementation has
+  not started — implementation authorization is a separate, later Founder
+  decision. Phase 7 has not started.** R2-010 remains complete and
+  unchanged; `main` remains unchanged. Per the Git-authoritative model this
+  document already uses, the exact current staged/committed/pushed state
+  of this documentation-closure pass itself is always read from `git
+  status`/`git rev-parse HEAD` directly, not restated here.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
 - **Known defects:** None outstanding.
@@ -477,10 +502,13 @@ session end or when session capacity drops below ~15%.
   - FIB-001 exact numeric parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
   - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
 - **Next command:** TRL-R2-010 is closed as a completed and remotely
-  verified checkpoint. The next checkpoint has not yet been formally
-  authorized or started. Separate, explicit Founder authorization is still
-  needed for the remote push of the already-locally-committed Phase 6
-  implementation checkpoint
+  verified checkpoint. TRL-R2-011's governing contract is now also closed
+  as a completed and remotely verified checkpoint (committed and pushed at
+  `678de02d739a89a0fcc58765178bd8935f4db868`); its implementation has not
+  been formally authorized or started — a separate, later Founder decision
+  is required before implementation begins. Separate, explicit Founder
+  authorization is still needed for the remote push of the
+  already-locally-committed Phase 6 implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`
