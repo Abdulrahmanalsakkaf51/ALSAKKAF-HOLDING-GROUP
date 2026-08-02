@@ -164,6 +164,53 @@ require no capability grant and remain available in every mode, including
 `OFF` — matching this document's own existing convention that pure-read
 commands like `show-mode`/`list-modes` never require a capability.
 
+### 3.3 Amendment (TRL-R2-011, contract-authoring checkpoint): `market_data_research`
+
+*Added while authoring `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_CONTRACT.md`
+(TRL CORTEX DATA FABRIC V0 — an informational "Phase 6B" checkpoint, not
+part of the 0–14 phase sequence and not Phase 7). This is the one narrow,
+Founder-approved capability change that contract requires; every other rule
+in this document, including the 3.1 and 3.2 amendments above, is unchanged.
+No code implements this amendment yet — see the R2-011 contract Sections
+4/17/18/20/21/22 for the full rationale.*
+
+A nineteenth governed capability is added: `market_data_research`. It is a
+read/import/replay research capability: it grants no `order_check`,
+`order_send`, `manual_broker_execution`, `manual_basket_execution`,
+`basket_execution`, `market_intelligence_research`, live execution,
+automated execution, or execution handoff of any kind — it gates only
+local CSV market-data import and deterministic replay mutation (import a
+dataset, create a replay session, advance replay, cancel a replay
+session).
+
+`market_data_research` is granted to `RESEARCH`, `SYNTHETIC_PAPER`, and
+`MT5_DEMO_MANUAL`:
+
+| Mode | `market_data_research` granted? |
+|---|---|
+| `OFF` | No |
+| `RESEARCH` | **Yes** |
+| `SYNTHETIC_PAPER` | **Yes** |
+| `MT5_DEMO_MANUAL` (available) | **Yes** |
+| `MT5_DEMO_AUTOMATED` (future) | No |
+| `MT5_LIVE_MANUAL` (future) | No |
+| `MT5_LIVE_AUTOMATED` (future) | No |
+
+It is granted to `MT5_DEMO_MANUAL` for exactly the same reason
+`manual_basket_execution` and `market_intelligence_research` already are:
+local research alongside a demo-manual execution mode creates no
+execution risk by itself, since this capability grants no order/basket
+authority of any kind. Granting this capability to `MT5_DEMO_MANUAL` does
+not, by itself, activate, arm, or otherwise change the availability of any
+of the three still-unavailable MT5 modes — Section 2's availability table,
+Section 4's transition matrix, and Section 6's startup-safety downgrade for
+those three modes are all unchanged by this amendment.
+
+Read-only Market Data and Replay operations (status, list, inspect, journal
+inspection, and every read-only HTTP route defined in the R2-011 contract)
+require no capability grant and remain available in every mode, including
+`OFF` — matching this document's own existing convention.
+
 ## 4. Exact transition matrix
 
 ```

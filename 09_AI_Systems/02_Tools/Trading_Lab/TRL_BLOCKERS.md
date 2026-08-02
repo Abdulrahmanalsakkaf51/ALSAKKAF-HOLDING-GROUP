@@ -41,6 +41,12 @@ entry 2026-07-31-003.
 | `STRATEGY_PROMOTION_NOT_APPROVED` | Phase 6A (TRL-R2-010) | Active | Only blocks automatic promotion of a strategy or model from telemetry; future champion/challenger learning requires a separate contract |
 | `NEWS_SENTIMENT_SOURCE_NOT_APPROVED` | Phase 6A (TRL-R2-010) | Active | Only blocks a news/sentiment evidence source beyond the already-governed Phase 4 News/Event contract; does not block the `EVENT_RISK` evidence category using already-approved sources |
 | `MACRO_DATA_SOURCE_NOT_APPROVED` | Phase 6A (TRL-R2-010) | Active | Only blocks a macro/economic-calendar data source as an evidence input; does not block any of the eleven Section 8 evidence categories using already-approved local input |
+| `EXTERNAL_MARKET_DATA_FEED_NOT_APPROVED` | Phase 6B (TRL-R2-011) | Active | Precisely scoped (`TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_CONTRACT.md` Section 24): blocks external market-data APIs, websocket feeds, network polling, and vendor SDKs. Does not block approved local CSV import (`SYNTHETIC_FIXTURE`/`LOCAL_HISTORICAL_FILE`) |
+| `BROKER_HISTORY_IMPORT_NOT_APPROVED` | Phase 6B (TRL-R2-011) | Active | Only blocks direct MT5 history import, broker-terminal history extraction, and authenticated broker downloads. Does not block local CSV import |
+| `AUTOMATIC_EVIDENCE_GENERATION_NOT_APPROVED` | Phase 6B (TRL-R2-011) | Active | Only blocks converting replay bars into evidence automatically (technical-indicator, regime, liquidity, or signal-generation evidence). Does not block replay itself, or manual/governed evidence authoring under the existing R2-010 contract |
+| `REPLAY_TO_INTELLIGENCE_HANDOFF_NOT_APPROVED` | Phase 6B (TRL-R2-011) | Active | Only blocks automatic creation of R2-010 input bundles, automatic R2-010 analysis calls, or automatic Opportunity Cards from a replay window. Does not block replay generation, inspection, or display |
+| `REPLAY_TO_EXECUTION_HANDOFF_NOT_APPROVED` | Phase 6B (TRL-R2-011) | Active | Only blocks Phase 5 order intents, Phase 6 baskets, confirmations, or broker instructions derived from a replay window. Does not block replay generation, inspection, or display |
+| `DATASET_PROVENANCE_NOT_VERIFIED` | Phase 6B (TRL-R2-011) | Active | Means local user-supplied historical data is unverified; imported data must not be marketed as institutionally verified, and replay results inherit the source limitation. Does not block approved local import or replay itself |
 
 ## Update rule
 

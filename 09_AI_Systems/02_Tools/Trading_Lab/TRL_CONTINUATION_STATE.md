@@ -5,7 +5,7 @@
 | Document ID | TRL-CONT-001 |
 | Document Type | Continuation State |
 | Status | Active |
-| Version | 1.7 |
+| Version | 1.9 |
 | Date | 2026-08-02 |
 | Owner | Abdulrahman Alsakkaf |
 
@@ -397,6 +397,75 @@ session end or when session capacity drops below ~15%.
   staged/committed/pushed state is always read from `git status`/`git
   rev-parse HEAD` directly. See
   `TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md` for the complete record.
+- **TRL-R2-011 — Deterministic Market Data Fabric and Replay V0 (product
+  component working name "TRL CORTEX DATA FABRIC V0") contract-authoring
+  checkpoint:** a new, independent checkpoint — informationally recorded as
+  **Phase 6B** in `TRL_FULL_VISION_MASTER_PROGRAM.md`, not part of the 0–14
+  phase sequence and not a prerequisite for, or blocker of, Phases 7–14.
+  Startup verification (branch, local/tracking/remote HEAD equality at
+  `e1ceaafe9601dd53e1b579fcdd417a95a30a6d79`, main unchanged at
+  `8ada27f915091b91ddbc421aae06c7c5b36e068f`, clean tree, no untracked
+  files, port 8765 clear, no Trading Lab Python process, no relevant lock,
+  no Phase 7 artifact) passed before drafting.
+  `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_CONTRACT.md` was authored
+  defining five closed governed schemas (`TRL_MARKET_BAR.v1`,
+  `TRL_MARKET_DATASET_MANIFEST.v1`, `TRL_REPLAY_SESSION.v1`,
+  `TRL_REPLAY_STEP.v1`, `TRL_REPLAY_SNAPSHOT.v1`), non-circular
+  deterministic identities computed strictly in order (bar → dataset →
+  replay session → replay step → replay snapshot), two approved V0 data
+  sources (`SYNTHETIC_FIXTURE`, `LOCAL_HISTORICAL_FILE`), the same
+  canonical instrument/timeframe allowlists as R2-010 with no alias
+  auto-normalization, a strict single-file CSV import format with exact
+  header/size/row-count/bar-validation rules, a lossless `Decimal`-only
+  numeric policy with no silent correction, deterministic dataset-reuse
+  behavior (`source_reference` included in dataset identity per Founder
+  decision; individual bars remain reused regardless), exact-multiple-only
+  gap detection with no automatic filling, a deterministic step-driven
+  (never wall-clock-driven) replay model bounded to a 100-bar window, a
+  separate append-only hash-chained Market Data and Replay journal distinct
+  from both the Phase 5/6 execution journal and the R2-010 Market
+  Intelligence journal, a narrow nineteenth `market_data_research`
+  operating-mode capability amendment (`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`
+  Section 3.3; `mode_service.py` not touched), an 11-command CLI, six
+  read-only HTTP routes, and six new precisely scoped blockers. This
+  checkpoint is documentation-only: exactly 1 new file and up to 6 tracking
+  files modified (this document, its JSON twin,
+  `TRL_FULL_VISION_MASTER_PROGRAM.md`, `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`,
+  `TRL_DECISION_LOG.md`, `TRL_BLOCKERS.md`); no Python, JavaScript, HTML,
+  CSS, or test file was touched; R2-010 was not modified; Phase 7 was not
+  started; this pass's exact staged/committed/pushed state is
+  authoritatively determined by Git directly.
+- **TRL-R2-011 Founder-review correction pass (same checkpoint):** the
+  Founder reviewed the initial draft and found seven implementation-
+  readiness gaps, all corrected in place: (1) a new non-governed
+  `TRL_MARKET_DATASET_STORAGE_ENVELOPE.v1` storage container (contract
+  Section 10.6) separating complete bar/manifest storage from the compact
+  journal, so a journal event never embeds up to 250,000 bar records; (2)
+  every previously deferred numeric bound now fixed exactly (lock timeout
+  10.0s, lock poll interval 0.02s, journal max event count 100000, max
+  encoded event size 262144 bytes, max encoded journal/envelope size
+  268435456 bytes — Section 18.1); (3) an exact, explicitly ordered
+  identity/hash field table per governed schema plus an audit-timestamp
+  exclusion/protection policy (Section 11); (4) explicit replay-session-
+  reuse behavior for every projected status, plus a Founder decision that
+  cancelling a `COMPLETED` session appends no event (Sections 14.4/15.3);
+  (5) two distinct, safe corruption cases — journal-level (fail closed, no
+  append) versus dataset-storage-level (one bounded
+  `JOURNAL_INTEGRITY_FAILURE` event) — (Section 18.3); (6) bounded,
+  deterministic, paginated list/inspection everywhere (Section 19); (7) a
+  corrected replay-bounds summary plus a new projected-step-count cap of
+  10000 (Section 14.2). The contract's section numbering was restructured
+  throughout to accommodate this material; cross-references in
+  `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` Section 3.3 and
+  `TRL_BLOCKERS.md` were updated to match. No schema, identity, import
+  rule, validation rule, replay semantic, capability-matrix decision,
+  blocker, or safety-boundary question remains open. Scope remains
+  unchanged: 1 new file, the same 6 modified tracking/contract files, 0
+  deleted; no Python, JavaScript, HTML, CSS, or test file was touched;
+  R2-010 was not modified; Phase 7 was not started. **TRL-R2-011
+  implementation has not started; Phase 7 has not started. Awaiting final
+  Founder approval after this correction.** See `TRL_DECISION_LOG.md`
+  entry 2026-08-02-027 (including its additive Founder-review amendment).
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
 - **Known defects:** None outstanding.
