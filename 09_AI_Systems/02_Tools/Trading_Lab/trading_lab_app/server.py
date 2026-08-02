@@ -18,6 +18,7 @@ from .paper_service import DisabledPaperService
 from .signal_service import disabled_service as disabled_signal_service
 from .mt5_execution_service import disabled_service as disabled_execution_service
 from .basket_execution_service import disabled_basket_service
+from .market_intelligence_service import disabled_service as disabled_market_intelligence_service
 
 
 BIND_HOST = "127.0.0.1"
@@ -107,6 +108,35 @@ BASKET_API_ROUTES = {
 
 _BASKET_DETAIL_PATH_PREFIX = "/api/execution-basket/"
 _BASKET_ID_PATTERN = re.compile(r"^bsk_[0-9a-f]{32}$")
+
+# TRL-R2-010 (Phase 6A): strictly read-only routes, same discipline as
+# BASKET_API_ROUTES/EXECUTION_API_ROUTES above — no route here may create,
+# analyze, preview, or record any Market Intelligence mutation (Section
+# 15.3). "/api/market-opportunity/<safe-id>" takes a path parameter, so it
+# is matched separately by ``_market_opportunity_id_from_path`` below,
+# using the exact ``opportunity_id`` shape (``^opp_[0-9a-f]{32}$``, Section
+# 15.3) so no unvalidated path fragment ever reaches the service.
+MARKET_INTELLIGENCE_API_ROUTES = {
+    "/api/market-intelligence-status": service.market_intelligence_status_document,
+    "/api/market-opportunities": service.market_opportunities_document,
+    "/api/virtual-opportunities": service.virtual_opportunities_document,
+    "/api/market-intelligence-telemetry": service.market_intelligence_telemetry_document,
+}
+
+_MARKET_OPPORTUNITY_DETAIL_PATH_PREFIX = "/api/market-opportunity/"
+_OPPORTUNITY_ID_PATTERN = re.compile(r"^opp_[0-9a-f]{32}$")
+
+
+def _market_opportunity_id_from_path(decoded_path):
+    """Return the opportunity_id if decoded_path is exactly
+    "/api/market-opportunity/<valid-opportunity-id>", else None. Mirrors
+    ``_basket_detail_id_from_path`` exactly."""
+    if not decoded_path.startswith(_MARKET_OPPORTUNITY_DETAIL_PATH_PREFIX):
+        return None
+    candidate = decoded_path[len(_MARKET_OPPORTUNITY_DETAIL_PATH_PREFIX):]
+    if not _OPPORTUNITY_ID_PATTERN.fullmatch(candidate):
+        return None
+    return candidate
 
 
 def _basket_detail_id_from_path(decoded_path):
@@ -363,6 +393,37 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     include_body,
                 )
             return
+        mi_function = MARKET_INTELLIGENCE_API_ROUTES.get(decoded_path)
+        if mi_function is not None:
+            try:
+                self._send_json(
+                    200,
+                    mi_function(self.server.market_intelligence_service_instance),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_INTELLIGENCE_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
+        opportunity_id = _market_opportunity_id_from_path(decoded_path)
+        if opportunity_id is not None:
+            try:
+                document = service.market_opportunity_document(self.server.market_intelligence_service_instance, opportunity_id)
+                self._send_json(
+                    200 if document.get("found") else 404,
+                    document,
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(
+                    500,
+                    {"error": "LOCAL_MARKET_INTELLIGENCE_SERVICE_UNAVAILABLE"},
+                    include_body,
+                )
+            return
         api_function = API_ROUTES.get(decoded_path)
         if api_function is not None:
             try:
@@ -397,6 +458,8 @@ class ApplicationHandler(BaseHTTPRequestHandler):
             or decoded_path in EXECUTION_API_ROUTES
             or decoded_path in BASKET_API_ROUTES
             or _basket_detail_id_from_path(decoded_path) is not None
+            or decoded_path in MARKET_INTELLIGENCE_API_ROUTES
+            or _market_opportunity_id_from_path(decoded_path) is not None
         ):
             self._handle_read(include_body=False)
             return
@@ -416,6 +479,8 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                 or decoded_path in EXECUTION_API_ROUTES
                 or decoded_path in BASKET_API_ROUTES
                 or _basket_detail_id_from_path(decoded_path) is not None
+                or decoded_path in MARKET_INTELLIGENCE_API_ROUTES
+                or _market_opportunity_id_from_path(decoded_path) is not None
             )
             else "GET"
         )
@@ -837,6 +902,7 @@ def create_server(
     signal_service=None,
     execution_service=None,
     basket_service=None,
+    market_intelligence_service_instance=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -853,4 +919,7 @@ def create_server(
     local_server.signal_service = signal_service or disabled_signal_service()
     local_server.execution_service = execution_service or disabled_execution_service()
     local_server.basket_service = basket_service or disabled_basket_service()
+    local_server.market_intelligence_service_instance = (
+        market_intelligence_service_instance or disabled_market_intelligence_service()
+    )
     return local_server

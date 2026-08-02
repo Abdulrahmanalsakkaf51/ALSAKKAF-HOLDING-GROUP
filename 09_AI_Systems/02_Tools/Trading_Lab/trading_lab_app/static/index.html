@@ -27,6 +27,7 @@
       <a href="#overview" aria-current="page">Overview</a>
       <a href="#operating-mode">Operating mode</a>
       <a href="#signal-intelligence">Signal intelligence</a>
+      <a href="#market-intelligence">Market intelligence (CORTEX V0)</a>
       <a href="#paper-desk">Paper desk</a>
       <a href="#market-connection">Market connection</a>
       <a href="#official-news">Official news &amp; events</a>
@@ -189,6 +190,47 @@
               <div><dt>Rejection reasons</dt><dd id="basket-detail-rejection-reasons">-</dd></div>
             </dl>
             <div class="table-scroll"><table><caption>Children</caption><thead><tr><th scope="col">Child</th><th scope="col">Target price</th><th scope="col">Allocation %</th><th scope="col">Quantity</th><th scope="col">Check</th><th scope="col">Fresh</th><th scope="col">Send outcome</th><th scope="col">Execution state</th></tr></thead><tbody id="basket-children-table"></tbody></table></div>
+          </article>
+        </section>
+
+        <section id="market-intelligence" class="section" aria-labelledby="market-intelligence-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">RESEARCH-ONLY MARKET OPPORTUNITY ANALYSIS · CHECKPOINT TRL-R2-010</p><h2 id="market-intelligence-title">TRL CORTEX V0 — Market intelligence</h2></div>
+            <span id="mi-availability-badge" class="badge badge-neutral" aria-live="polite">LOADING</span>
+          </div>
+          <p class="disclosure">RESEARCH ONLY — LIVE EXECUTION DISABLED — NOT FINANCIAL ADVICE. A research classification heuristic, not a validated trading edge. Server-authoritative; no client-side value is authoritative. No HTTP route on this dashboard can analyze a snapshot, generate a preview, or record an outcome — every mutation is local-CLI-only.</p>
+          <div class="legal-notice"><strong>SMA-001 / FIB-001 BLOCKED · EXECUTION_HANDOFF_NOT_APPROVED</strong><span>SMA-001 and FIB-001 remain blocked identically to Phase 5/6. Every preview's <code>execution_handoff_status</code> is always <code>EXECUTION_HANDOFF_NOT_APPROVED</code> — no CORTEX V0 record may ever become a Phase 5 order intent or a Phase 6 basket.</span></div>
+          <div class="status-strip">
+            <div><span>Operating mode</span><strong id="mi-operating-mode">—</strong></div>
+            <div><span>market_intelligence_research</span><strong id="mi-capability-granted">—</strong></div>
+            <div><span>Opportunities recorded</span><strong id="mi-opportunity-count">—</strong></div>
+          </div>
+          <div class="table-scroll"><table><caption>Opportunities (this server process)</caption><thead><tr><th scope="col">Opportunity ID</th><th scope="col">Instrument / TF</th><th scope="col">Side</th><th scope="col">Decision</th><th scope="col">Regime</th></tr></thead><tbody id="mi-opportunity-table"></tbody></table></div>
+          <article class="panel">
+            <h3>Latest opportunity detail</h3>
+            <div id="mi-detail-empty" class="state-panel" role="status">No opportunity has been analyzed in this server process yet. Use the local CLI: python -m trading_lab_app.market_intelligence_cli analyze-market-snapshot &lt;input-json-path&gt;</div>
+            <dl class="parameter-list" id="mi-detail" hidden>
+              <div><dt>Opportunity ID</dt><dd id="mi-detail-id">-</dd></div>
+              <div><dt>Decision status</dt><dd id="mi-detail-status">-</dd></div>
+              <div><dt>Reason codes</dt><dd id="mi-detail-reasons">-</dd></div>
+              <div><dt>Supporting score</dt><dd id="mi-detail-supporting">-</dd></div>
+              <div><dt>Contradiction score</dt><dd id="mi-detail-contradiction">-</dd></div>
+              <div><dt>Uncertainty score</dt><dd id="mi-detail-uncertainty">-</dd></div>
+              <div><dt>Data-quality score</dt><dd id="mi-detail-data-quality">-</dd></div>
+              <div><dt>Transaction-cost score</dt><dd id="mi-detail-cost">-</dd></div>
+              <div><dt>Event-risk score</dt><dd id="mi-detail-event-risk">-</dd></div>
+              <div><dt>Risk-exposure score</dt><dd id="mi-detail-risk-exposure">-</dd></div>
+            </dl>
+            <div class="table-scroll"><table><caption>Supporting / opposing evidence</caption><thead><tr><th scope="col">Category</th><th scope="col">Direction</th><th scope="col">Effective score</th></tr></thead><tbody id="mi-evidence-table"></tbody></table></div>
+            <div class="table-scroll"><table><caption>Virtual opportunity lattice</caption><thead><tr><th scope="col">Rank</th><th scope="col">State</th><th scope="col">Entry</th><th scope="col">Stop</th><th scope="col">Reward/risk</th><th scope="col">Distance to market</th></tr></thead><tbody id="mi-lattice-table"></tbody></table></div>
+            <div id="mi-preview-empty" class="state-panel" role="status">No basket preview has been generated for this opportunity yet.</div>
+            <dl class="parameter-list" id="mi-preview-detail" hidden>
+              <div><dt>Preview ID</dt><dd id="mi-preview-id">-</dd></div>
+              <div><dt>Non-executable</dt><dd id="mi-preview-non-executable">-</dd></div>
+              <div><dt>Execution handoff</dt><dd id="mi-preview-handoff">-</dd></div>
+              <div><dt>Target allocations</dt><dd id="mi-preview-allocations">-</dd></div>
+            </dl>
+            <div class="table-scroll"><table><caption>Learning telemetry</caption><thead><tr><th scope="col">Telemetry ID</th><th scope="col">Original status</th><th scope="col">Outcome</th><th scope="col">Calibration</th></tr></thead><tbody id="mi-telemetry-table"></tbody></table></div>
           </article>
         </section>
 

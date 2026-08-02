@@ -24,6 +24,8 @@ from . import signal_service as signal_service_module
 from . import mt5_execution_adapter
 from . import mt5_execution_service
 from . import basket_execution_service
+from . import market_intelligence_data
+from . import market_intelligence_service
 from .server import BIND_HOST, DEFAULT_PORT, create_server
 
 
@@ -408,6 +410,66 @@ def _validate_basket_subsystem_consistency(current_mode, basket_service_instance
         )
 
 
+def _market_intelligence_service_preflight_for_mode(current_mode):
+    """Side-effect-free construction used ONLY to validate, during a
+    ModeService transition attempt, that a Market Intelligence V0 (TRL
+    CORTEX V0, TRL-R2-010) service *could* be constructed for the
+    requested mode. Discarded immediately afterward; never wired into
+    anything real, never touches the durable journal file. See
+    ``_market_intelligence_service_for_mode`` for the real runtime
+    construction path."""
+    if current_mode in ("RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"):
+        from .market_intelligence_journal import in_memory_mi_journal_writer
+        return market_intelligence_service.MarketIntelligenceService(journal=in_memory_mi_journal_writer())
+    if current_mode == "OFF":
+        return market_intelligence_service.disabled_service(operating_mode=current_mode)
+    raise ModeSubsystemConfigurationError(
+        "no Phase 6A Market Intelligence preflight rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _market_intelligence_service_for_mode(current_mode, mode_service_instance, journal=None):
+    """The real runtime Market Intelligence V0 service (TRL-R2-010),
+    granted in RESEARCH/SYNTHETIC_PAPER/MT5_DEMO_MANUAL exactly per the
+    ``market_intelligence_research`` capability grant
+    (``mode_service._CAPABILITY_MATRIX``) — never in OFF or any other MT5
+    mode. Uses its own dedicated, durable Market Intelligence journal file
+    (Section 17), wholly separate from the Phase 5/6 execution journal
+    ``_execution_service_for_mode``/``_basket_service_for_mode`` share."""
+    if current_mode in ("RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"):
+        from .market_intelligence_journal import MarketIntelligenceJournalWriter
+        return market_intelligence_service.MarketIntelligenceService(
+            mode_service=mode_service_instance,
+            journal=journal if journal is not None else MarketIntelligenceJournalWriter(),
+        )
+    if current_mode == "OFF":
+        return market_intelligence_service.disabled_service(operating_mode=current_mode)
+    raise ModeSubsystemConfigurationError(
+        "no Phase 6A Market Intelligence construction rule exists for mode {!r}".format(current_mode)
+    )
+
+
+def _validate_market_intelligence_subsystem_consistency(current_mode, mi_service_instance):
+    if current_mode == "OFF":
+        consistent = (
+            isinstance(mi_service_instance, market_intelligence_service.DisabledMarketIntelligenceService)
+            and not mi_service_instance.enabled
+        )
+    elif current_mode in ("RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"):
+        consistent = (
+            isinstance(mi_service_instance, market_intelligence_service.MarketIntelligenceService)
+            and mi_service_instance.enabled
+        )
+    else:
+        consistent = False
+    if not consistent:
+        raise ModeSubsystemConfigurationError(
+            "{}: mode={!r} constructed market_intelligence_service={}".format(
+                MODE_SUBSYSTEM_CONFIGURATION_MISMATCH, current_mode, type(mi_service_instance).__name__,
+            )
+        )
+
+
 def _subsystem_builder_for_mode(current_mode):
     """The combined subsystem builder ModeService actually calls: builds
     the paper service, a side-effect-free signal-intelligence *preflight*
@@ -422,7 +484,8 @@ def _subsystem_builder_for_mode(current_mode):
     paper_service = _paper_service_for_mode(current_mode)
     signal_service_instance = _signal_service_preflight_for_mode(current_mode)
     execution_service_instance = _execution_service_preflight_for_mode(current_mode)
-    return paper_service, signal_service_instance, execution_service_instance
+    market_intelligence_service_instance = _market_intelligence_service_preflight_for_mode(current_mode)
+    return paper_service, signal_service_instance, execution_service_instance, market_intelligence_service_instance
 
 
 def run_server(
@@ -435,6 +498,7 @@ def run_server(
     signal_service=None,
     execution_service=None,
     basket_service=None,
+    market_intelligence_service_instance=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -446,6 +510,7 @@ def run_server(
         signal_service=signal_service,
         execution_service=execution_service,
         basket_service=basket_service,
+        market_intelligence_service_instance=market_intelligence_service_instance,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -527,6 +592,16 @@ def run_server(
         )
     else:
         print("BASKET EXECUTION DISABLED | {} MODE".format(active_basket_service.operating_mode))
+    active_mi_service = market_intelligence_service_instance or vars(server).get("market_intelligence_service_instance")
+    if not isinstance(active_mi_service, (market_intelligence_service.MarketIntelligenceService, market_intelligence_service.DisabledMarketIntelligenceService)):
+        active_mi_service = market_intelligence_service.disabled_service()
+    if active_mi_service.enabled:
+        print(
+            "TRL CORTEX V0 MARKET INTELLIGENCE ENABLED | RESEARCH ONLY | LIVE EXECUTION DISABLED | "
+            + market_intelligence_data.EXECUTION_HANDOFF_STATUS
+        )
+    else:
+        print("TRL CORTEX V0 MARKET INTELLIGENCE DISABLED | {} MODE".format(active_mi_service.operating_mode))
     active_mode_service = mode_service or getattr(server, "mode_service", None)
     if not isinstance(active_mode_service, ModeService):
         active_mode_service = in_memory_mode_service()
@@ -576,15 +651,21 @@ def run_server(
                                 pass
                     finally:
                         try:
-                            news_service = getattr(server, "official_news_service", None)
-                            if news_service is not None:
-                                while news_service.shutdown() is False:
+                            active_mi = vars(server).get("market_intelligence_service_instance")
+                            if active_mi is not None:
+                                while active_mi.shutdown() is False:
                                     pass
                         finally:
                             try:
-                                active_mode_service.shutdown()
+                                news_service = getattr(server, "official_news_service", None)
+                                if news_service is not None:
+                                    while news_service.shutdown() is False:
+                                        pass
                             finally:
-                                server.server_close()
+                                try:
+                                    active_mode_service.shutdown()
+                                finally:
+                                    server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -694,11 +775,17 @@ def main(argv=None):
         operating_mode_service.current_mode, operating_mode_service,
         journal=shared_journal, account_fingerprint=shared_account_fingerprint,
     )
+    # Market Intelligence V0 (TRL-R2-010) uses its own dedicated, durable
+    # journal file (Section 17) — never the Phase 5/6 shared_journal above.
+    market_intelligence_service_instance = _market_intelligence_service_for_mode(
+        operating_mode_service.current_mode, operating_mode_service,
+    )
     try:
         _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
         _validate_signal_subsystem_consistency(operating_mode_service.current_mode, signal_service_instance)
         _validate_execution_subsystem_consistency(operating_mode_service.current_mode, execution_service_instance)
         _validate_basket_subsystem_consistency(operating_mode_service.current_mode, basket_service_instance)
+        _validate_market_intelligence_subsystem_consistency(operating_mode_service.current_mode, market_intelligence_service_instance)
     except ModeSubsystemConfigurationError as error:
         print(str(error), file=sys.stderr)
         return 2
@@ -713,6 +800,7 @@ def main(argv=None):
             signal_service=signal_service_instance,
             execution_service=execution_service_instance,
             basket_service=basket_service_instance,
+            market_intelligence_service_instance=market_intelligence_service_instance,
         )
     except OSError as error:
         print(

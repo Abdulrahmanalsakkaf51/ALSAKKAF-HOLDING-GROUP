@@ -14,6 +14,7 @@ from .paper_service import disabled_service as disabled_paper_service
 from .signal_service import disabled_service as disabled_signal_service
 from .mt5_execution_service import disabled_service as disabled_execution_service
 from .basket_execution_service import disabled_basket_service
+from .market_intelligence_service import disabled_service as disabled_market_intelligence_service
 from .strategy_registry import load_registry
 
 
@@ -231,6 +232,26 @@ def execution_basket_journal_document(basket_service=None):
     return (basket_service or disabled_basket_service()).basket_journal_document(
         limit=BASKET_JOURNAL_HTTP_MAX_EVENTS,
     )
+
+
+def market_intelligence_status_document(market_intelligence_service_instance=None):
+    return (market_intelligence_service_instance or disabled_market_intelligence_service()).status_document()
+
+
+def market_opportunities_document(market_intelligence_service_instance=None):
+    return (market_intelligence_service_instance or disabled_market_intelligence_service()).market_opportunities_http_document()
+
+
+def market_opportunity_document(market_intelligence_service_instance, opportunity_id):
+    return (market_intelligence_service_instance or disabled_market_intelligence_service()).market_opportunity_http_document(opportunity_id)
+
+
+def virtual_opportunities_document(market_intelligence_service_instance=None):
+    return (market_intelligence_service_instance or disabled_market_intelligence_service()).virtual_opportunities_http_document()
+
+
+def market_intelligence_telemetry_document(market_intelligence_service_instance=None):
+    return (market_intelligence_service_instance or disabled_market_intelligence_service()).telemetry_document()
 
 
 def strategy_registry_document():

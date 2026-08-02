@@ -101,6 +101,16 @@ CAPABILITIES = (
     # separately Founder-approved contract changes this
     # (TRL_R2_009_CONTROLLED_BASKET_EXECUTION_CONTRACT.md Section 6.1).
     "manual_basket_execution",
+    # Added in Phase 6A (TRL-R2-010): research-only Market Intelligence V0
+    # (TRL CORTEX V0) record generation — never order_check/order_send,
+    # never manual/automated broker or basket execution, never live/
+    # automated mode, never an execution handoff of any kind (Section
+    # 5.1/5.2/20). Granted to RESEARCH, SYNTHETIC_PAPER and
+    # MT5_DEMO_MANUAL only; denied to OFF and to every remaining MT5
+    # mode. Read-only Market Intelligence status/list/inspect/journal
+    # operations remain available regardless of mode (Section 5.1) and
+    # never require this capability.
+    "market_intelligence_research",
 )
 
 REASON_CODES = (
@@ -191,16 +201,16 @@ _CAPABILITY_MATRIX = {
     "RESEARCH": frozenset({
         "historical_research", "strategy_evaluation", "report_export",
         "mt5_read_only_access", "live_market_data_read",
-        "signal_proposal_generation",
+        "signal_proposal_generation", "market_intelligence_research",
     }),
     "SYNTHETIC_PAPER": frozenset({
         "synthetic_evidence", "forward_paper_fills", "report_export",
-        "signal_proposal_generation",
+        "signal_proposal_generation", "market_intelligence_research",
     }),
     "MT5_DEMO_MANUAL": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",
         "manual_broker_execution", "emergency_controls", "report_export",
-        "manual_basket_execution",
+        "manual_basket_execution", "market_intelligence_research",
     }),
     "MT5_DEMO_AUTOMATED": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",

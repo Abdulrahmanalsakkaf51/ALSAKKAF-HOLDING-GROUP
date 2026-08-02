@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, basket: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, basket: null, marketIntelligence: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -555,6 +555,114 @@ async function loadBasketExecution() {
   } catch (error) { return { error: error.message }; }
 }
 
+function renderMarketIntelligence(bundle) {
+  const badge = $("mi-availability-badge");
+  if (!bundle || bundle.error || !bundle.status) {
+    badge.textContent = "UNAVAILABLE"; badge.className = "badge badge-neutral";
+    setText("mi-operating-mode", "—"); setText("mi-capability-granted", "—"); setText("mi-opportunity-count", "—");
+    $("mi-opportunity-table").replaceChildren();
+    $("mi-detail-empty").hidden = false; $("mi-detail").hidden = true;
+    $("mi-preview-empty").hidden = false; $("mi-preview-detail").hidden = true;
+    $("mi-evidence-table").replaceChildren(); $("mi-lattice-table").replaceChildren(); $("mi-telemetry-table").replaceChildren();
+    return;
+  }
+  const { status, opportunities, telemetry, detail: latestDetail } = bundle;
+  badge.textContent = status.enabled ? "AVAILABLE (RESEARCH ONLY)" : "UNAVAILABLE";
+  badge.className = status.enabled ? "badge badge-warning" : "badge badge-neutral";
+  setText("mi-operating-mode", status.operating_mode);
+  setText("mi-capability-granted", status.market_intelligence_research_granted ? "GRANTED" : "NOT GRANTED");
+
+  const list = opportunities || [];
+  setText("mi-opportunity-count", list.length);
+  const listTable = $("mi-opportunity-table");
+  listTable.replaceChildren();
+  list.forEach((opportunity) => {
+    const tr = document.createElement("tr");
+    cell(tr, opportunity.opportunity_id || "—");
+    cell(tr, `${opportunity.instrument || "—"} / ${opportunity.timeframe || "—"}`);
+    cell(tr, opportunity.proposed_side || "—");
+    cell(tr, opportunity.decision_status || "—");
+    cell(tr, opportunity.market_regime || "—");
+    listTable.appendChild(tr);
+  });
+
+  const detailEmpty = $("mi-detail-empty");
+  const detail = $("mi-detail");
+  const previewEmpty = $("mi-preview-empty");
+  const previewDetail = $("mi-preview-detail");
+  const evidenceTable = $("mi-evidence-table");
+  const latticeTable = $("mi-lattice-table");
+  evidenceTable.replaceChildren();
+  latticeTable.replaceChildren();
+  if (!list.length) {
+    detailEmpty.hidden = false; detail.hidden = true;
+    previewEmpty.hidden = false; previewDetail.hidden = true;
+  } else {
+    detailEmpty.hidden = true; detail.hidden = false;
+    const latest = list[list.length - 1];
+    setText("mi-detail-id", latest.opportunity_id);
+    setText("mi-detail-status", latest.decision_status);
+    setText("mi-detail-reasons", (latest.decision_reason_codes || []).join(", ") || "—");
+    setText("mi-detail-supporting", latest.supporting_score);
+    setText("mi-detail-contradiction", latest.contradiction_score);
+    setText("mi-detail-uncertainty", latest.uncertainty_score);
+    setText("mi-detail-data-quality", latest.data_quality_score);
+    setText("mi-detail-cost", latest.estimated_cost_score);
+    setText("mi-detail-event-risk", latest.event_risk_score);
+    setText("mi-detail-risk-exposure", latest.risk_exposure_score);
+
+    ((latestDetail && latestDetail.virtual_opportunities) || []).slice().sort((a, b) => a.rank - b.rank).forEach((vop) => {
+      const tr = document.createElement("tr");
+      cell(tr, vop.rank); cell(tr, vop.state);
+      cell(tr, vop.hypothetical_entry_trigger); cell(tr, vop.stop);
+      cell(tr, vop.expected_reward_risk_ratio);
+      cell(tr, "—");
+      latticeTable.appendChild(tr);
+    });
+
+    const supporting = ((latestDetail && latestDetail.decision && latestDetail.decision.supporting_evidence_ids) || []);
+    const opposing = ((latestDetail && latestDetail.decision && latestDetail.decision.opposing_evidence_ids) || []);
+    supporting.forEach((id) => { const tr = document.createElement("tr"); cell(tr, id); cell(tr, "SUPPORTS"); cell(tr, "—"); evidenceTable.appendChild(tr); });
+    opposing.forEach((id) => { const tr = document.createElement("tr"); cell(tr, id); cell(tr, "OPPOSES"); cell(tr, "—"); evidenceTable.appendChild(tr); });
+
+    const preview = latestDetail && latestDetail.preview;
+    if (preview) {
+      previewEmpty.hidden = true; previewDetail.hidden = false;
+      setText("mi-preview-id", preview.preview_id);
+      setText("mi-preview-non-executable", preview.non_executable ? "TRUE (NON-EXECUTABLE)" : "—");
+      setText("mi-preview-handoff", preview.execution_handoff_status);
+      setText("mi-preview-allocations", (preview.ordered_target_allocations || []).join(", ") || "—");
+    } else {
+      previewEmpty.hidden = false; previewDetail.hidden = true;
+    }
+  }
+  const telemetryTable = $("mi-telemetry-table");
+  telemetryTable.replaceChildren();
+  (telemetry || []).forEach((record) => {
+    const tr = document.createElement("tr");
+    cell(tr, record.telemetry_id || "—");
+    cell(tr, record.original_decision_status || "—");
+    cell(tr, record.outcome_classification || "—");
+    cell(tr, record.calibration_bucket || "—");
+    telemetryTable.appendChild(tr);
+  });
+}
+
+async function loadMarketIntelligence() {
+  try {
+    const [status, opportunitiesDoc, telemetryDoc] = await Promise.all([
+      getJson("/api/market-intelligence-status"), getJson("/api/market-opportunities"), getJson("/api/market-intelligence-telemetry"),
+    ]);
+    const opportunities = opportunitiesDoc.opportunities || [];
+    let detail = null;
+    if (opportunities.length) {
+      const latestId = opportunities[opportunities.length - 1].opportunity_id;
+      detail = await getJson(`/api/market-opportunity/${encodeURIComponent(latestId)}`).catch(() => null);
+    }
+    return { status, opportunities, telemetry: telemetryDoc.telemetry, detail };
+  } catch (error) { return { error: error.message }; }
+}
+
 async function loadOfficialNews() {
   try {
     const [health, sources, items, events] = await Promise.all([getJson("/api/news-health"), getJson("/api/news-sources"), getJson("/api/news-items"), getJson("/api/economic-events")]);
@@ -569,7 +677,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderMt5Execution(state.mt5); renderBasketExecution(state.basket); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
+  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderMt5Execution(state.mt5); renderBasketExecution(state.basket); renderMarketIntelligence(state.marketIntelligence); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -578,7 +686,7 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5, state.basket] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution(), loadBasketExecution()]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5, state.basket, state.marketIntelligence] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution(), loadBasketExecution(), loadMarketIntelligence()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }

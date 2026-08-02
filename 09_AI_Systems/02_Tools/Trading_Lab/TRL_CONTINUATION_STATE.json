@@ -217,8 +217,45 @@
     "phase_7_started": false,
     "decision_log_entry": "2026-08-02-023"
   },
+  "trl_r2_010_implementation": {
+    "status": "implementation complete against the Founder-approved TRL-R2-010 contract; locally committed as this checkpoint's commit; unpushed; remote push requires separate Founder authorization",
+    "product_working_name": "TRL CORTEX V0",
+    "baseline_head": "b1fedab1f91b91b184434ff32fe0dcbddf8d9985",
+    "new_modules": ["market_intelligence_data.py", "market_intelligence_journal.py", "market_intelligence_service.py", "market_intelligence_cli.py"],
+    "additive_modules_modified": ["mode_service.py", "app.py", "server.py", "service.py", "static/index.html", "static/app.js"],
+    "phase5_6_files_touched": 0,
+    "new_test_files": ["test_market_intelligence_data.py", "test_market_intelligence_journal.py", "test_market_intelligence_service.py", "test_market_intelligence_cli.py", "test_market_intelligence_http.py", "test_market_intelligence_concurrency.py"],
+    "new_tests": 160,
+    "new_tests_by_module": {"data": 77, "journal": 13, "service": 30, "cli": 17, "http": 21, "concurrency": 2},
+    "shared_test_helper": "mi_test_support.py (not test_*-named, not discovered as an empty test module)",
+    "fixture": "fixtures/trl_cortex_v0_synthetic_trade_candidate.json",
+    "accelerated_v0_decisions": [
+      "Decision-engine steps 1-6 (schema validation, instrument/timeframe allowlist, evidence completeness/duplication/expiry) implemented as pre-flight admission gates producing MI_RECORD_REJECTED with no persisted Opportunity Card, rather than a persisted BLOCKED record - required because TRL_OPPORTUNITY_CARD.v1.evidence_ids and the opportunity_id identity formula both require exactly eleven non-expired evidence items to exist structurally; steps 7-23 remain the fully auditable in-engine evaluator over an always-validly-constructed opportunity",
+      "Five additional required envelope fields (market_regime, entry_concept, invalidation_concept, stop_concept, ordered_target_concepts) added as closed, operator-authored fields - Section 7.1's table names no source for fields Section 6.3 requires on every Opportunity Card",
+      "TRL_OPPORTUNITY_CARD.v1.expiry_utc default lifetime: created_at_utc + 24 hours (OPPORTUNITY_DEFAULT_LIFETIME_HOURS), no contract-specified formula existed"
+    ],
+    "real_bugs_found_and_fixed": [
+      "cross-process journal event-ID collision: two racing processes computing byte-identical governed-record content at a coinciding occurred_at_utc minted identical event IDs and crashed on the journal's duplicate-ID guard; fixed by checking for an existing opportunity in memory before persisting anything, and implementing decision reuse (Section 8.5) and opportunity reuse (Section 22) as the same mechanism that prevents the collision",
+      "DisabledMarketIntelligenceService was missing market_opportunities_http_document/market_opportunity_http_document/virtual_opportunities_http_document, causing an uncaught AttributeError (and a crashed HTTP connection) on three read-only routes at OFF; fixed by adding the three delegating methods",
+      "mode_service.py capability wiring for SMA-001 initially only re-checked signal_strategy_registry.executable_status (which returns True for SMA-001's registry-level geometry-direction parity); corrected to also require mt5_execution_service.EXECUTION_GEOMETRY_APPROVED_STRATEGIES membership (currently empty), mirroring basket_execution_service.build_basket's own dual gate exactly"
+    ],
+    "targeted_test_result": "573 tests (6 new MI modules + ModeService + app/server + Phase 5 execution incl. concurrency + Phase 6 basket), 0 failures, 0 errors",
+    "full_suite_runs": {
+      "reconciled_arithmetic": "900 (baseline) + 160 (new) = 1060",
+      "accepted_pair": {"run_a": "1060 tests, 0 failures, 0 errors", "run_b": "1060 tests, 0 failures, 0 errors"},
+      "pre_existing_intermittent_flake_investigated": {
+        "test": "test_mt5_execution_concurrency.ConcurrentSendTests.test_two_processes_racing_confirm_and_send_send_at_most_once",
+        "observed_in": "2 of 6 full-suite runs across this checkpoint (same failure both times)",
+        "root_cause": "pre-existing Phase 5 true-separate-process timing sensitivity, unrelated to this checkpoint",
+        "evidence": ["file byte-identical to committed baseline (exact git hash-object blob comparison, not git diff --stat inference)", "passes 3/3 in isolation", "does not reproduce from the 900-test baseline run alone", "intermittent (2 of 6 full-suite attempts), not deterministic"],
+        "action_taken": "reported transparently; no Phase 5 source or test modified"
+      }
+    },
+    "manual_rehearsal": "completed via real CLI entry points (market_intelligence_cli, mode_cli) against an isolated temporary LOCALAPPDATA; OFF read-only status/mutation-denied verified; RESEARCH transition; synthetic fixture analyzed to TRADE_CANDIDATE with 4 virtual opportunities matching contract ranking; 3-target preview with exact quantity conservation and EXECUTION_HANDOFF_NOT_APPROVED; telemetry recorded with unchanged canonical_opportunity_hash afterward (fresh-process restart check); 12-event hash-chain-valid journal; mode returned to OFF; isolated store, port, and process state all clean afterward",
+    "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md"
+  },
   "tests_last_run": "python -B -W error -m unittest discover -s . -p \"test_*.py\", run twice, post-correction-round",
-  "tests_last_result": "900 tests both runs, identical: 0 failures, 0 errors. The originally reported 889-test/5-failure run is superseded (see founder_correction_round_2026_08_01_020.full_suite_recovery).",
+  "tests_last_result": "900 tests both runs, identical: 0 failures, 0 errors. The originally reported 889-test/5-failure run is superseded (see founder_correction_round_2026_08_01_020.full_suite_recovery). TRL-R2-010 implementation (see trl_r2_010_implementation above) separately reconciles to 1060 tests (900 + 160 new).",
   "active_processes": [],
   "active_ports": {
     "8765": "confirmed no listener as of last check"
@@ -236,7 +273,7 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "Obtain Founder review and separate commit/push authorization for the completed Phase 6 implementation (currently uncommitted)",
+  "next_command": "Obtain separate, explicit Founder authorization for the remote push of the locally committed TRL-R2-010 (TRL CORTEX V0) implementation (see trl_r2_010_implementation above) and of the already-locally-committed Phase 6 implementation",
   "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
@@ -246,5 +283,5 @@
     "--no-verify",
     "--no-gpg-sign"
   ],
-  "last_update": "2026-08-01T21:15:00Z"
+  "last_update": "2026-08-02T02:35:00Z"
 }

@@ -1,0 +1,198 @@
+{
+  "schema_version": "TRL_MARKET_INTELLIGENCE_ANALYSIS_INPUT.v1",
+  "snapshot": {
+    "instrument": "XAUUSD",
+    "timeframe": "H1",
+    "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+    "open": "2400.00",
+    "high": "2410.00",
+    "low": "2395.00",
+    "close": "2405.00",
+    "spread": "0.30",
+    "volatility_measure": "5.20",
+    "volatility_method": "SYNTHETIC-ATR14-DEMO",
+    "session": "LONDON",
+    "data_source_classification": "COMMITTED_FIXTURE",
+    "data_quality_status": "SUFFICIENT",
+    "event_risk_classification": "LOW"
+  },
+  "proposed_side": "BUY",
+  "strategy_id": "CORTEX-V0-HEURISTIC",
+  "strategy_version": "1.0.0",
+  "market_regime": "TRENDING",
+  "entry_concept": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical buy-the-dip entry concept for research demonstration only; not a real trade signal.",
+  "invalidation_concept": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical invalidation if structure breaks decisively below the demonstration swing low.",
+  "stop_concept": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical stop concept below the demonstration swing low.",
+  "ordered_target_concepts": [
+    "SYNTHETIC target 1 (research only, non-executable)",
+    "SYNTHETIC target 2 (research only, non-executable)",
+    "SYNTHETIC target 3 (research only, non-executable)"
+  ],
+  "evidence_inputs": [
+    {
+      "category": "MARKET_STRUCTURE",
+      "evidence_direction": "SUPPORTS",
+      "normalized_strength": "0.9000",
+      "confidence": "0.9500",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#market_structure",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical higher-high/higher-low structural read supporting the proposed BUY side, for research demonstration only."
+    },
+    {
+      "category": "TREND",
+      "evidence_direction": "SUPPORTS",
+      "normalized_strength": "0.9000",
+      "confidence": "0.9500",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#trend",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical directional bias over the snapshot timeframe supporting the proposed BUY side, for research demonstration only."
+    },
+    {
+      "category": "MOMENTUM",
+      "evidence_direction": "SUPPORTS",
+      "normalized_strength": "0.9000",
+      "confidence": "0.9500",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#momentum",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical rate-of-change read supporting the proposed BUY side, for research demonstration only."
+    },
+    {
+      "category": "VOLATILITY",
+      "evidence_direction": "NEUTRAL",
+      "normalized_strength": "0.5000",
+      "confidence": "0.9000",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#volatility",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical fit between volatility_measure and the proposed geometry; recorded for display/regime context only, per contract Section 9."
+    },
+    {
+      "category": "LIQUIDITY_AND_SPREAD",
+      "evidence_direction": "NEUTRAL",
+      "normalized_strength": "0.6000",
+      "confidence": "0.9000",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#liquidity_and_spread",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical spread-versus-ceiling read; recorded for display context only, per contract Section 9."
+    },
+    {
+      "category": "MULTI_TIMEFRAME_ALIGNMENT",
+      "evidence_direction": "SUPPORTS",
+      "normalized_strength": "0.9000",
+      "confidence": "0.9500",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#multi_timeframe_alignment",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical higher-timeframe alignment supporting the proposed BUY side, for research demonstration only."
+    },
+    {
+      "category": "EVENT_RISK",
+      "evidence_direction": "NEUTRAL",
+      "normalized_strength": "0.1000",
+      "confidence": "0.9500",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#event_risk",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical low event-risk severity classification for research demonstration only; not a real economic-calendar read."
+    },
+    {
+      "category": "EXECUTION_COST",
+      "evidence_direction": "NEUTRAL",
+      "normalized_strength": "0.1500",
+      "confidence": "0.9000",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#execution_cost",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical low transaction-cost severity for research demonstration only; no broker connection exists."
+    },
+    {
+      "category": "RISK_EXPOSURE",
+      "evidence_direction": "NEUTRAL",
+      "normalized_strength": "0.1000",
+      "confidence": "0.9000",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#risk_exposure",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Hypothetical low risk-exposure severity for research demonstration only; no registry/geometry blocker applies to CORTEX-V0-HEURISTIC."
+    },
+    {
+      "category": "CONTRADICTING_EVIDENCE",
+      "evidence_direction": "NEUTRAL",
+      "normalized_strength": "0.1000",
+      "confidence": "0.9000",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#contradicting_evidence",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. No material counter-thesis observation identified in this hypothetical research demonstration."
+    },
+    {
+      "category": "DATA_QUALITY",
+      "evidence_direction": "NEUTRAL",
+      "normalized_strength": "0.9500",
+      "confidence": "0.9500",
+      "source_classification": "SYNTHETIC_FIXTURE",
+      "source_reference": "SYNTHETIC RESEARCH EXAMPLE — fixture:trl_cortex_v0_synthetic_trade_candidate#data_quality",
+      "observed_at_utc": "2026-08-01T10:00:00.000000Z",
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z",
+      "explanation": "SYNTHETIC RESEARCH EXAMPLE — NOT LIVE MARKET DATA — NON-EXECUTABLE. Committed-fixture data source classification with SUFFICIENT data_quality_status, for research demonstration only."
+    }
+  ],
+  "virtual_candidate_inputs": [
+    {
+      "entry_trigger": "2401.00",
+      "stop_price": "2396.00",
+      "target_prices": ["2410.00", "2415.00", "2420.00"],
+      "target_allocations": ["40.0000", "30.0000", "30.0000"],
+      "hypothetical_total_quantity": "1.00000000",
+      "activation_satisfied": true,
+      "invalidation_satisfied": false,
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z"
+    },
+    {
+      "entry_trigger": "2402.00",
+      "stop_price": "2398.00",
+      "target_prices": ["2406.00", "2408.00"],
+      "target_allocations": ["50.0000", "50.0000"],
+      "hypothetical_total_quantity": null,
+      "activation_satisfied": true,
+      "invalidation_satisfied": false,
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z"
+    },
+    {
+      "entry_trigger": "2400.50",
+      "stop_price": "2397.00",
+      "target_prices": ["2405.00", "2408.00", "2411.00", "2414.00"],
+      "target_allocations": ["25.0000", "25.0000", "25.0000", "25.0000"],
+      "hypothetical_total_quantity": null,
+      "activation_satisfied": true,
+      "invalidation_satisfied": false,
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z"
+    },
+    {
+      "entry_trigger": "2403.00",
+      "stop_price": "2399.00",
+      "target_prices": ["2408.00", "2412.00"],
+      "target_allocations": ["60.0000", "40.0000"],
+      "hypothetical_total_quantity": null,
+      "activation_satisfied": false,
+      "invalidation_satisfied": false,
+      "expires_at_utc": "2035-01-01T00:00:00.000000Z"
+    }
+  ],
+  "activation_satisfied": true,
+  "invalidation_satisfied": false
+}

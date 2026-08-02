@@ -8,9 +8,9 @@
 |-------|-------|
 | Document ID | TRL-R2-005-QUICK-START-005 |
 | Document Type | Local Application Operator Guide |
-| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH; Section 16 added for TRL Phase 3 operating-mode state machine; Sections 3 and 16.2 corrected after Founder review removed the legacy-flag bypass; Section 17 added for Phase 4 signal intelligence; Section 18 added for Phase 5 MT5 execution adapter |
-| Version | 4.3 |
-| Date | 2026-08-01 |
+| Status | ACTIVE FOR TRL-R2-005 SOURCE LAUNCH; Section 16 added for TRL Phase 3 operating-mode state machine; Sections 3 and 16.2 corrected after Founder review removed the legacy-flag bypass; Section 17 added for Phase 4 signal intelligence; Section 18 added for Phase 5 MT5 execution adapter; Section 19 added for Phase 6 controlled basket execution; Section 20 added for TRL-R2-010 Market Intelligence V0 (TRL CORTEX V0) |
+| Version | 4.5 |
+| Date | 2026-08-02 |
 | Owner | Abdulrahman Yaseen Alsakkaf |
 | Project | PRJ-017 - ALSAKKAF Trading Research Lab |
 | Checkpoint | TRL-R2-005 - Causal Market Timeline and Forward Paper Engine |
@@ -523,5 +523,65 @@ No live or automated basket execution (Phase 9); a `FROZEN`/`PARTIALLY_COMPLETED
 basket requires the same manual, human-operator reconciliation path a frozen single
 order already does today — Phase 6 detects and freezes these states truthfully but does
 not resolve them (Phase 10). See `TRL_R2_009_CONTROLLED_BASKET_EXECUTION_EVIDENCE.md`
+
+## 20. Market Intelligence V0 — TRL CORTEX V0 (TRL-R2-010, Phase 6A)
+
+Research-only, local-only, deterministic market-opportunity analysis: a validated local
+JSON snapshot becomes an evidence-scored Opportunity Card, a `TRADE_CANDIDATE`/`WAIT`/
+`REJECT`/`BLOCKED`/`EXPIRED` decision, a bounded (1–6) Virtual Opportunity Lattice, and
+an optional non-executable multi-target basket preview. **Not financial advice, not a
+profitability claim, not execution approval.** `EXECUTION_HANDOFF_NOT_APPROVED` is
+always present on every preview; nothing here can ever construct a Phase 5 order intent
+or a Phase 6 basket. Uses its own separate journal file — never the Phase 5/6 execution
+journal.
+
+### 20.1 Enter the mode
+
+`market_intelligence_research` is granted in `RESEARCH`, `SYNTHETIC_PAPER`, and
+`MT5_DEMO_MANUAL` only:
+
+```
+python -m trading_lab_app.mode_cli request-mode RESEARCH
+```
+
+Read-only status/list/inspect/journal commands remain available at `OFF`.
+
+### 20.2 Local operator commands
+
+```
+python -B -W error -m trading_lab_app.market_intelligence_cli market-intelligence-status
+python -B -W error -m trading_lab_app.market_intelligence_cli analyze-market-snapshot <input-json-path>
+python -B -W error -m trading_lab_app.market_intelligence_cli list-opportunities --status TRADE_CANDIDATE
+python -B -W error -m trading_lab_app.market_intelligence_cli inspect-opportunity <opportunity_id>
+python -B -W error -m trading_lab_app.market_intelligence_cli list-virtual-opportunities <opportunity_id>
+python -B -W error -m trading_lab_app.market_intelligence_cli inspect-virtual-opportunity <virtual_opportunity_id>
+python -B -W error -m trading_lab_app.market_intelligence_cli preview-opportunity-basket <opportunity_id>
+python -B -W error -m trading_lab_app.market_intelligence_cli record-opportunity-outcome <opportunity_id> <outcome-fixture-path>
+python -B -W error -m trading_lab_app.market_intelligence_cli market-intelligence-journal --limit 20
+```
+
+`analyze-market-snapshot` accepts exactly one local path to a
+`TRL_MARKET_INTELLIGENCE_ANALYSIS_INPUT.v1` JSON file (max 262144 bytes, strict UTF-8,
+no duplicate keys, no `NaN`/`Infinity`) — a working example is committed at
+`fixtures/trl_cortex_v0_synthetic_trade_candidate.json` (**SYNTHETIC RESEARCH EXAMPLE —
+NOT LIVE MARKET DATA — NON-EXECUTABLE**; deterministically produces `TRADE_CANDIDATE`
+with a 3-target preview).
+
+### 20.3 Inspecting Market Intelligence over HTTP (read-only)
+
+`GET /api/market-intelligence-status`, `GET /api/market-opportunities`,
+`GET /api/market-opportunity/<opportunity_id>`, `GET /api/virtual-opportunities`,
+`GET /api/market-intelligence-telemetry`. Same read-only rule as every other route:
+GET/HEAD only, `405` with `Allow: GET, HEAD` for POST/PUT/PATCH/DELETE. No HTTP route
+can analyze a snapshot, generate a preview, or record an outcome.
+
+### 20.4 Scope limitations
+
+No automatic evidence generator, no live/streaming market data, no news/macro evidence
+source beyond the already-governed Phase 4 source, no automatic threshold/rule/strategy
+change from telemetry, and no execution handoff of any kind — a future conversion of a
+virtual opportunity or preview into a real Phase 5/6 execution artifact requires a
+separate, explicitly Founder-approved contract. See
+`TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md`.
 for full detail, including disclosed implementation-level design choices and
 limitations.

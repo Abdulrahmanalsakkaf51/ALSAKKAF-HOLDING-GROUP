@@ -1628,3 +1628,70 @@ approval. Phase 7 was not started and is not referenced as available anywhere in
 approved contract. This entry deliberately does not cite the resulting commit SHA — per the
 governing instruction not to guess it — it is authoritatively `git rev-parse HEAD` at any
 later point this document is read.
+
+## 2026-08-02-025 — Accelerated TRL-R2-010 implementation built against the approved contract; two engineering decisions where the contract's field tables named no source
+
+**Decision:** Implemented TRL CORTEX V0 completely as a controlled, local, research-only
+vertical slice on top of baseline `b1fedab1f91b91b184434ff32fe0dcbddf8d9985`, without
+redesigning the approved contract: `market_intelligence_data.py` (seven governed schemas,
+transport envelope, deterministic identities, `Decimal`/`ROUND_HALF_EVEN` scoring, the
+23-step decision engine, lattice geometry/ranking, preview quantity conservation),
+`market_intelligence_journal.py` (a wholly separate hash-chained journal), `market_intelligence_service.py`,
+`market_intelligence_cli.py` (nine commands), a committed synthetic demonstration fixture,
+160 new tests across six modules, additive wiring into `mode_service.py`/`app.py`/`server.py`/
+`service.py`/`static/index.html`/`static/app.js`, and a new evidence document. Two
+engineering decisions were required where the contract's literal field tables named no
+source, both recorded in `market_intelligence_data.py`'s module docstring and in
+`TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md` Section 2:
+
+1. Decision-engine steps 1–6 (schema validation, instrument/timeframe allowlist, evidence
+   completeness/duplication/expiry) run as pre-flight admission gates — producing an
+   `MI_RECORD_REJECTED` journal event with the contract's exact named reason code and no
+   persisted Opportunity Card — rather than a persisted BLOCKED record, because
+   `TRL_OPPORTUNITY_CARD.v1.evidence_ids` (Section 6.3) and the `opportunity_id` identity
+   formula (Section 8.3) both require exactly eleven non-expired evidence items to exist
+   structurally before a card can even be constructed. Steps 7–23 remain the real,
+   always-fully-auditable in-engine evaluator, running only over a validly constructed
+   opportunity.
+2. Five additional required top-level envelope fields (`market_regime`, `entry_concept`,
+   `invalidation_concept`, `stop_concept`, `ordered_target_concepts`) were added as closed,
+   bounded, operator-authored plain-language fields, since Section 7.1's nine-field envelope
+   table names no source for what Section 6.3 requires on every Opportunity Card. Never
+   automatically generated from evidence — Section 3.1's "no automatic evidence generator"
+   guarantee is preserved exactly.
+
+A third, narrower decision: `TRL_OPPORTUNITY_CARD.v1.expiry_utc` defaults to
+`created_at_utc + 24 hours` (no contract-specified formula existed); Section 8's
+`decision_input_hash` already includes `expiry_status`, so this needs no special-casing to
+remain correct across the expiry boundary.
+
+**Why:** The Founder's accelerated-implementation directive explicitly authorized building
+the complete V0 vertical slice in one pass without redesigning the contract, and explicitly
+authorized documented engineering judgment calls within Section 21's "tonight-ready"
+boundary where the contract left a genuine gap rather than an ambiguity resolvable by
+re-reading it more carefully. Both gaps above are genuine (verified by reading Section 6.3
+against Section 7.1's exact field list, and Section 8.3's exact identity-formula inputs
+against Section 9.1's completeness rule) — not shortcuts taken for convenience — and both
+keep every Section 22 acceptance-test requirement independently satisfiable (every BLOCKED
+reason code from steps 1–6 remains reachable via a dedicated fixture; the envelope and every
+governed schema remain closed).
+
+**How to apply:** This implementation is complete, targeted-tested (566 tests, 0
+failures/errors), full-suite-tested twice with zero failures/errors (1060 tests each,
+reconciling exactly to 900 baseline + 160 new), and manually rehearsed end-to-end via the
+real CLI entry points against an isolated `LOCALAPPDATA` — see
+`TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md` for the complete record, including a genuine
+cross-process journal event-ID collision found and fixed (implementing the contract's own
+Section 8.5/Section 22 reuse idempotency as the fix), a missing-method HTTP crash found and
+fixed, and a fully investigated, pre-existing, untouched Phase 5 concurrency-test
+intermittent timing flake (`test_mt5_execution_concurrency.ConcurrentSendTests.test_two_processes_racing_confirm_and_send_send_at_most_once`)
+that is unrelated to this checkpoint and was not worked around. Phase 5 and Phase 6 remain
+completely unchanged (`git diff --stat` confirms zero changes to any `mt5_execution_*`/
+`basket_execution_*` file); the only Phase-3-adjacent file touched is `mode_service.py`
+(13 insertions, 3 deletions, purely additive capability wiring). Phase 7 was not started.
+**This implementation is locally committed as this checkpoint's commit; it was not
+pushed** — per the standing commit/push policy (`TRL_DECISION_LOG.md` entry
+2026-07-31-001), remote push awaits separate, explicit Founder authorization. This entry
+deliberately does not cite a fixed commit SHA — per the governing instruction not to guess
+it — the exact staged/committed/pushed state is authoritatively `git status`/
+`git rev-parse HEAD` at any later point this document is read.

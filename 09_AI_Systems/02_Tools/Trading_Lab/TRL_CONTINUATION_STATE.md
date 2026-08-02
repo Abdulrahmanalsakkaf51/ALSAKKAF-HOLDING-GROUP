@@ -5,8 +5,8 @@
 | Document ID | TRL-CONT-001 |
 | Document Type | Continuation State |
 | Status | Active |
-| Version | 1.5 |
-| Date | 2026-08-01 |
+| Version | 1.6 |
+| Date | 2026-08-02 |
 | Owner | Abdulrahman Alsakkaf |
 
 # TRL Continuation State
@@ -348,6 +348,48 @@ session end or when session capacity drops below ~15%.
   was not started; this pass's exact staged/committed/pushed state is
   authoritatively determined by Git directly. See `TRL_DECISION_LOG.md`
   entry 2026-08-02-023.
+- **TRL-R2-010 implementation (TRL CORTEX V0) — complete, locally
+  committed as this checkpoint's commit, unpushed:**
+  built against the Founder-approved three-pass contract with no redesign.
+  New: `market_intelligence_data.py` (seven governed schemas + transport
+  envelope, deterministic identities, `Decimal`/`ROUND_HALF_EVEN` scoring,
+  the 23-step decision engine, lattice geometry/ranking, preview quantity
+  conservation), `market_intelligence_journal.py` (separate hash-chained
+  journal, mirroring `mt5_execution_journal.py`'s architecture),
+  `market_intelligence_service.py`, `market_intelligence_cli.py` (nine
+  commands), `fixtures/trl_cortex_v0_synthetic_trade_candidate.json`.
+  Additive: `mode_service.py` (`market_intelligence_research` granted to
+  `RESEARCH`/`SYNTHETIC_PAPER`/`MT5_DEMO_MANUAL` only — the only
+  Phase-3-adjacent file touched, 13 insertions/3 deletions), `app.py`,
+  `server.py`, `service.py`, `static/index.html`, `static/app.js`. Two
+  accelerated-V0 engineering decisions were required where the contract's
+  field tables did not literally specify a source (decision steps 1–6 run
+  as pre-flight admission gates; five additional envelope fields carry the
+  Opportunity Card's concept/regime text) — both documented in
+  `market_intelligence_data.py`'s module docstring and in
+  `TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md` Section 2. 160 new tests
+  across six new test modules (`test_market_intelligence_data.py` 77,
+  `_journal.py` 13, `_service.py` 30, `_cli.py` 17, `_http.py` 21,
+  `_concurrency.py` 2); targeted run (566 tests, including ModeService,
+  app/server, Phase 5, and Phase 6 suites) and two consecutive clean
+  full-suite runs (1060 tests each — reconciling exactly to 900 + 160) both
+  passed with zero failures/errors. A genuine cross-process journal
+  event-ID collision and a missing-method HTTP crash were found and fixed
+  during this pass (see the evidence document Section 9). One pre-existing,
+  untouched Phase 5 concurrency test
+  (`test_mt5_execution_concurrency.ConcurrentSendTests.test_two_processes_racing_confirm_and_send_send_at_most_once`)
+  showed an intermittent timing flake in 2 of 6 full-suite attempts across
+  this checkpoint — confirmed absent from the 900-test baseline alone,
+  confirmed passing 3/3 in isolation, confirmed unmodified via exact Git
+  blob-hash comparison against the baseline (not inferred from `git diff
+  --stat`); not modified per instruction, and not part of this
+  checkpoint's own accepted clean run pair. Manually rehearsed end-to-end
+  via the real CLI entry points against an isolated `LOCALAPPDATA`. **This
+  implementation is locally committed as this checkpoint's commit; it was
+  not pushed** — per the Git-authoritative model this document already
+  uses, its exact staged/committed/pushed state is always read from `git
+  status`/`git rev-parse HEAD` directly. See
+  `TRL_R2_010_MARKET_INTELLIGENCE_V0_EVIDENCE.md` for the complete record.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
 - **Known defects:** None outstanding.
@@ -358,7 +400,10 @@ session end or when session capacity drops below ~15%.
   - TradingView webhook signing secret / allowlist — not provided
   - FIB-001 exact numeric parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
   - SMA-001 exact execution-geometry parameters — not provided; blocker remains active, independently re-enforced by the R2-009 contract (Section 7) for basket construction specifically (`TRL_BLOCKERS.md`)
-- **Next command:** Obtain separate, explicit Founder authorization for the remote push of the locally committed Phase 6 implementation checkpoint
+- **Next command:** Obtain separate, explicit Founder authorization for
+  the remote push of the locally committed TRL-R2-010 (TRL CORTEX V0)
+  implementation above and of the already-locally-committed Phase 6
+  implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`
