@@ -542,7 +542,7 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "TRL-R2-011 implementation remains closed as a completed and remotely verified checkpoint (committed and pushed at 6e24194071e8776833e396745d19b45785ee6ce4, range 5c53396..6e24194). TRL-R2-012 (ALSAKKAF SCALPING Demo Automation V0) is now contract-and-implementation complete and locally committed at 791ea98118539b6bf30f37e5eaf81ffd85d3589c -- see trl_r2_012_implementation below. Separate, explicit Founder authorization is still needed for the remote push of the already-locally-committed Phase 6 implementation checkpoint and for pushing TRL-R2-012.",
+  "next_command": "TRL-R2-011 implementation remains closed as a completed and remotely verified checkpoint (committed and pushed at 6e24194071e8776833e396745d19b45785ee6ce4, range 5c53396..6e24194). TRL-R2-012 (ALSAKKAF SCALPING Demo Automation V0) implementation is now also closed as a completed and remotely verified checkpoint (committed and pushed at 791ea98118539b6bf30f37e5eaf81ffd85d3589c and 0edd4adf2019e8162011ada58f3e5962555271eb, range 02c48e0..0edd4ad) -- see trl_r2_012_implementation below. Its next checkpoint (TRL-R2-013) has not been formally authorized or started. Separate, explicit Founder authorization is still needed for the remote push of the already-locally-committed Phase 6 implementation checkpoint.",
   "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
@@ -552,7 +552,7 @@
     "--no-verify",
     "--no-gpg-sign"
   ],
-  "last_update": "2026-08-03T22:30:00Z",
+  "last_update": "2026-08-03T23:00:00Z",
   "trl_r2_011_implementation": {
     "status": "implementation complete, committed, pushed, and remotely verified; checkpoint formally closed; next checkpoint (TRL-R2-012) not yet authorized or started",
     "governing_contract_commit": "678de02d739a89a0fcc58765178bd8935f4db868",
@@ -761,8 +761,10 @@
     "synthetic_rehearsal": "all 27 mega-prompt-mandated steps passed against the fake MT5 adapter, an isolated LOCALAPPDATA, and the committed fixture -- TRADE_CANDIDATE on both this module's own 90/100 score and R2-010's independent MARKET_INTELLIGENCE_ALL_GATES_PASSED gate; Precision Scalping plan (risk 25.0000, lots 0.13); Breakout Ladder (3 BUY_STOP orders, exact risk conservation 25.0000 == 8.333...x3, OCO cancellation exercised); no lot escalation after a simulated $25 loss (0.13 -> 0.13); order_check then order_send via the fake adapter reaching cycle state ACTIVE; restart reconciliation via a fresh ScalpingService against the same durable journal; daily-loss block triggered at a simulated 2% drop; emergency stop cancelling only the one owned ticket (501) and never referencing a deliberately-present unrelated ticket (999); return to product state OFF and operating mode OFF; isolated LOCALAPPDATA removed with zero lock files remaining",
     "real_mt5_demo_rehearsal": "performed under explicit Founder authorization: read-only preflight passed 20/20 (real terminal, real DEMO account, real XAUUSD); governed local mutations performed (symbol map saved, product state OFF->ANALYZE_ONLY, risk_per_cycle_pct reduced to 0.10% for the proof); real market evaluation returned direction=NONE, score=0/100, classification=WAIT -- no TRADE_CANDIDATE existed, so order_check/order_send/DEMO_AUTO were never reached; result not overridden; product state returned to OFF; zero broker state change; verdict ONE CONTROLLED 4T DEMO PROOF CYCLE NOT EXECUTED (correctly gated, not a defect)",
     "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_EVIDENCE.md",
-    "commit_status": "locally committed at 791ea98118539b6bf30f37e5eaf81ffd85d3589c (\"Implement TRL-R2-012 ALSAKKAF SCALPING Demo Automation V0\"; 25 added, 14 modified, 0 deleted, 39 total files)",
-    "push_status": "not pushed",
+    "commit_status": "committed and pushed: implementation commit 791ea98118539b6bf30f37e5eaf81ffd85d3589c (\"Implement TRL-R2-012 ALSAKKAF SCALPING Demo Automation V0\"; 25 added, 14 modified, 0 deleted, 39 total files) and consecutive-suite verification commit 0edd4adf2019e8162011ada58f3e5962555271eb (\"Record TRL-R2-012 consecutive suite verification\"; 4 documentation files modified)",
+    "push_status": "pushed, range 02c48e0..0edd4ad, independently re-verified via fresh git fetch: local HEAD, remote branch ref, and upstream-tracking ref all equal 0edd4adf2019e8162011ada58f3e5962555271eb, ahead/behind 0 0",
+    "implementation_checkpoint_status": "formally closed: committed, pushed, and remotely verified",
+    "remaining_operational_validation_item": "an actual broker-verified order_check/order_send round trip on the real 4T demo terminal, achievable only when a genuine TRADE_CANDIDATE occurs during a further, separately authorized bounded rehearsal -- not an implementation defect",
     "final_product_state": "OFF",
     "final_operating_mode": "OFF",
     "port_8765": "clear",

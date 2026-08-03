@@ -6,13 +6,23 @@
 |---|---|
 | Founder | Abdulrahman Yaseen Alsakkaf |
 | Checkpoint | TRL-R2-012 (accelerated contract-and-implementation checkpoint, single sprint) |
-| Status | Implementation complete for Founder review; uncommitted, unpushed |
+| Status | **Formally closed: committed and pushed, remotely verified** |
 | Related contract | `TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md` |
 
-> Implementation is **uncommitted and unpushed**. This document records what
-> was built, tested, and rehearsed against the governing contract in this
-> single accelerated checkpoint. It does not claim commit or push status —
-> that is read from `git status` directly (Section 15).
+> Implementation commit `791ea98118539b6bf30f37e5eaf81ffd85d3589c`
+> ("Implement TRL-R2-012 ALSAKKAF SCALPING Demo Automation V0") and
+> consecutive-suite verification commit
+> `0edd4adf2019e8162011ada58f3e5962555271eb` ("Record TRL-R2-012
+> consecutive suite verification") are both **committed and pushed**,
+> range `02c48e0..0edd4ad`, independently re-verified via a fresh `git
+> fetch`: local HEAD, the live remote branch ref, and the
+> upstream-tracking ref all equal `0edd4adf2019e8162011ada58f3e5962555271eb`;
+> ahead/behind `0 0`; working tree and index clean; no untracked file;
+> `main` unchanged. This document records what was built, tested, and
+> rehearsed against the governing contract. Per this program's
+> Git-authoritative convention, the exact current state is always read
+> from `git status`/`git rev-parse HEAD` directly, not restated here as a
+> value that would otherwise go stale the moment either changes.
 
 ## 1. Governing contract
 
@@ -496,16 +506,32 @@ journaled, or returned by any CLI/HTTP response
 
 ## 27. Remaining blockers
 
-None for the synthetic/demo-automation scope completed in this
-checkpoint. The real 4T MT5 demo rehearsal (Section 23) remains blocked
-only on explicit, real-time Founder authorization to proceed, per this
-session's agreed pacing — not on any missing implementation.
+None for the implementation. The real 4T MT5 demo rehearsal (Section 23)
+was performed under explicit Founder authorization and passed every gate
+up to and including the point where a genuine `TRADE_CANDIDATE` is
+required — none existed at that moment, so `order_check`/`order_send`
+were correctly never reached. **One operational validation item remains
+open: an actual broker-verified `order_check`/`order_send` round trip on
+the real 4T demo terminal**, achievable only during a further, separately
+authorized bounded rehearsal at a moment when the real market presents a
+qualifying setup. This is not an implementation defect, not a reason to
+weaken the strategy or lower its thresholds, and not permission to
+manufacture a signal, trade a real account, or run unattended continuous
+automation.
 
 ## 28. Final state
 
-Final product state: `OFF` (never entered outside isolated rehearsal
-state). Final operating mode: `OFF`. Port `8765`: confirmed clear.
-Process: no `python.exe` running. Lock files: none remaining (isolated
-rehearsal directory removed). Git: nothing staged, nothing committed,
-nothing pushed — see `git status` directly for the exact current
-working-tree state.
+Final product state: `OFF` (never entered outside the bounded real proof
+rehearsal, which itself never left `ANALYZE_ONLY`). Final operating mode:
+`OFF`. Port `8765`: confirmed clear. Process: no `python.exe` running.
+Lock files: none remaining. Git: **committed and pushed** — implementation
+commit `791ea98...`, consecutive-suite verification commit `0edd4ad...`,
+both independently re-verified equal to the live remote branch and
+upstream-tracking ref via a fresh `git fetch`, ahead/behind `0 0`, working
+tree and index clean, no untracked file, `main` unchanged. Broker-server
+execution proof (an actual `order_check`/`order_send` round trip) remains
+an open **operational validation item** — not an implementation defect —
+pending a genuine `TRADE_CANDIDATE` during a further, separately
+authorized bounded rehearsal. See `git status`/`git rev-parse HEAD`
+directly for the exact current working-tree state at any later point this
+document is read.

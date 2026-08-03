@@ -2221,3 +2221,52 @@ changed; the implementation commit `791ea98...` is unchanged and not amended. Br
 execution proof remains pending (real evaluation was `WAIT`/`NONE`/`0`; `order_check`/
 `order_send` counts remain zero); real-money automation remains locked; product state and
 operating mode remain `OFF`; Phase 7 has not started.
+
+## 2026-08-03-003 — Verified publication of both TRL-R2-012 commits; implementation checkpoint formally closed
+
+**Decision:** The Founder pushed both TRL-R2-012 commits — the implementation commit
+`791ea98118539b6bf30f37e5eaf81ffd85d3589c` ("Implement TRL-R2-012 ALSAKKAF SCALPING Demo
+Automation V0") and the consecutive-suite verification commit
+`0edd4adf2019e8162011ada58f3e5962555271eb` ("Record TRL-R2-012 consecutive suite
+verification") — to `origin/codex/TRL-R2-full-vision-execution`, push range
+`02c48e0..0edd4ad`. Independently re-verified via a fresh `git fetch origin
+codex/TRL-R2-full-vision-execution` (not merely trusted from a prior report): local HEAD,
+the live remote branch ref, and the upstream-tracking ref all equal
+`0edd4adf2019e8162011ada58f3e5962555271eb`; `git rev-list --left-right --count
+HEAD...origin/codex/TRL-R2-full-vision-execution` reported `0 0`; the working tree and
+index were clean; no untracked file remained; and `refs/heads/main` remained unchanged at
+`8ada27f915091b91ddbc421aae06c7c5b36e068f`.
+
+**Why:** Publishing both commits makes the complete TRL-R2-012 ALSAKKAF SCALPING Demo
+Automation V0 checkpoint — the governing contract, eight new source modules, 173 new tests
+across 11 modules, additive wiring into `mode_service.py`/`app.py`/`server.py`/`service.py`/
+the dashboard, two launcher scripts, and the corrected consecutive-suite test evidence —
+available on the shared branch, closing this checkpoint as a completed, remotely verified
+implementation record. The accepted consecutive complete-suite pair (second Run B attempt
+and Run C, both `1422/1422` with zero failures/errors) was recorded before this push in
+`TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_EVIDENCE.md` and the prior two addenda to
+this entry; the first Run B attempt's one intermittent failure in the untouched
+`test_mt5_execution_concurrency.py` (confirmed passing 3/3 in isolation) remains honestly
+disclosed and was never counted as an accepted run. All 20 governed preflight checks passed
+against the Founder's real 4T demo terminal; the real market evaluation at that moment
+returned `WAIT`/`NONE`/`0`, so `order_check` and `order_send` counts both remain zero and no
+broker state was ever changed.
+
+**How to apply:** **The TRL-R2-012 implementation checkpoint is now formally closed:
+committed, pushed, and remotely verified.** Real-money automation remains locked
+(`MT5_LIVE_MANUAL`/`MT5_LIVE_AUTOMATED` unavailable; independent adapter-level demo-account
+lock on every `order_check`/`order_send` call). One operational validation item remains
+open — an actual broker-verified `order_check`/`order_send` round trip on the real 4T demo
+terminal, achievable only when a genuine `TRADE_CANDIDATE` occurs during a further,
+separately authorized bounded rehearsal — this is explicitly not an implementation defect,
+not a reason to weaken the strategy's thresholds, not permission to manufacture a signal,
+and not permission to trade a real account or run unattended continuous automation.
+Product state and operating mode both remain `OFF`. TRL-R2-013 has not been formally
+authorized or started; Phase 7 remains entirely absent. This documentation-closure pass
+(this entry plus the corresponding updates to `TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_EVIDENCE.md`,
+`TRL_CONTINUATION_STATE.md`, `TRL_CONTINUATION_STATE.json`, `TRL_FULL_VISION_MASTER_PROGRAM.md`,
+and `TRL_BLOCKERS.md`) remains itself locally uncommitted and unpushed until its own separate
+Git checkpoint is completed — per the Git-authoritative model this document already uses
+throughout, the exact current staged/committed/pushed state of both the implementation
+publication and this closure pass is always read from `git status`/`git rev-parse HEAD`
+directly, not restated here as a fixed value.

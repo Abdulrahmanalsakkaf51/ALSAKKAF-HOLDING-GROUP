@@ -598,7 +598,7 @@ session end or when session capacity drops below ~15%.
   mutation routes, CSRF-token-gated; two launcher scripts). One
   implementation-discovered contract correction was applied in place
   (Section 16: the `market_intelligence_research` grant above, found while
-  building the bridge). **Implementation complete and locally committed**
+  building the bridge). **Implementation complete, committed, and pushed**
   at `791ea98118539b6bf30f37e5eaf81ffd85d3589c` ("Implement TRL-R2-012
   ALSAKKAF SCALPING Demo Automation V0"; 25 added, 14 modified, 0 deleted,
   39 total files, staged by explicit path): eight new
@@ -649,12 +649,30 @@ session end or when session capacity drops below ~15%.
   EXECUTED** — a safety/strategy gate correctly prevented the entry, not a
   defect. Final product state `OFF`; final
   operating mode `OFF`; port 8765 clear; no Python process; no lock file;
-  **locally committed at `791ea98118539b6bf30f37e5eaf81ffd85d3589c`, not
-  pushed**; `main` unchanged; Phase 7 not
+  **committed and pushed** (implementation commit `791ea98118539b6bf30f37e5eaf81ffd85d3589c`,
+  consecutive-suite verification commit `0edd4adf2019e8162011ada58f3e5962555271eb`,
+  push range `02c48e0..0edd4ad`, independently re-verified equal to the
+  live remote/upstream ref via a fresh `git fetch`, ahead/behind `0 0`);
+  `main` unchanged; Phase 7 not
   started. See `TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md`
   and `_EVIDENCE.md` for the complete record. Per this document's own
   Git-authoritative convention, the exact current staged/committed/pushed
   state is always read from `git status`/`git rev-parse HEAD` directly.
+- **TRL-R2-012 implementation checkpoint — formally closed, committed,
+  pushed, and remotely verified:** the Founder authorized and pushed both
+  the implementation commit and the consecutive-suite verification commit
+  (see the entry above for full detail). Independently re-verified via a
+  fresh `git fetch origin codex/TRL-R2-full-vision-execution`: local HEAD,
+  the live remote branch ref, and the upstream-tracking ref all equal
+  `0edd4adf2019e8162011ada58f3e5962555271eb`; ahead/behind `0 0`; working
+  tree and index clean; no untracked file; `main` unchanged at
+  `8ada27f915091b91ddbc421aae06c7c5b36e068f`. **One operational validation
+  item remains open** (not an implementation defect): an actual
+  broker-verified `order_check`/`order_send` round trip on the real 4T
+  demo terminal, achievable only when a genuine `TRADE_CANDIDATE` occurs
+  during a further, separately authorized bounded rehearsal. Real-money
+  automation remains locked. TRL-R2-013 has not started. Phase 7 has not
+  started.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
 - **Known defects:** None outstanding.
@@ -672,9 +690,12 @@ session end or when session capacity drops below ~15%.
   is now also closed as a completed and remotely verified checkpoint**
   (committed and pushed at `6e24194071e8776833e396745d19b45785ee6ce4`,
   range `5c53396..6e24194`). **TRL-R2-012 (ALSAKKAF SCALPING Demo
-  Automation V0) is now contract-and-implementation complete and locally
-  committed** at `791ea98118539b6bf30f37e5eaf81ffd85d3589c` (see the
-  dedicated entry above); it is **not pushed**. Separate, explicit Founder authorization is
+  Automation V0) implementation is now also closed as a completed and
+  remotely verified checkpoint** (committed and pushed at
+  `791ea98118539b6bf30f37e5eaf81ffd85d3589c` and
+  `0edd4adf2019e8162011ada58f3e5962555271eb`, range `02c48e0..0edd4ad` —
+  see the dedicated entries above). Its next checkpoint (TRL-R2-013) has
+  not been formally authorized or started. Separate, explicit Founder authorization is
   still needed for the remote push of the already-locally-committed Phase
   6 implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
