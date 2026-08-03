@@ -304,37 +304,125 @@
 
         <section id="alsakkaf-scalping" class="section" aria-labelledby="alsakkaf-scalping-title">
           <div class="section-heading">
-            <div><p class="eyebrow">DEMO AUTOMATION V0 · TRL-R2-012</p><h2 id="alsakkaf-scalping-title">ALSAKKAF SCALPING</h2></div>
+            <div><p class="eyebrow">OPERATIONAL DASHBOARD HOTFIX · TRL-R2-013</p><h2 id="alsakkaf-scalping-title">ALSAKKAF SCALPING</h2></div>
             <span id="scalping-state-badge" class="badge badge-neutral" aria-live="polite">LOADING</span>
           </div>
           <div class="status-strip">
             <span class="badge badge-warning">DEMO ACCOUNT ONLY</span>
-            <span id="scalping-automation-badge" class="badge badge-neutral">AUTOMATION STATUS: —</span>
+            <span id="scalping-local-badge" class="badge badge-neutral">LOCAL</span>
+            <span id="scalping-mt5-demo-badge" class="badge badge-neutral">MT5 DEMO: —</span>
+            <span id="scalping-analyze-only-badge" class="badge badge-neutral">ANALYZE ONLY: —</span>
             <span class="badge badge-warning">LIVE MONEY LOCKED</span>
+            <span id="scalping-automation-badge" class="badge badge-neutral">AUTOMATION STATUS: —</span>
             <span id="scalping-emergency-badge" class="badge badge-neutral">EMERGENCY STOP: —</span>
           </div>
           <p class="disclosure">Server-authoritative. The automation engine runs only on this Windows PC; owned demo orders/positions are also visible in the MT5 mobile app for the same 4T demo account. No client, browser, or dashboard value is authoritative — every control below calls a governed local endpoint.</p>
           <div class="status-strip">
             <div><span>MT5 connection</span><strong id="scalping-mt5-connection">—</strong></div>
+            <div><span>Journal health</span><strong id="scalping-journal-health">—</strong></div>
             <div><span>Demo verified</span><strong id="scalping-demo-verified">—</strong></div>
+            <div><span>Currency</span><strong id="scalping-currency">—</strong></div>
+            <div><span>Balance</span><strong id="scalping-balance">—</strong></div>
             <div><span>Equity</span><strong id="scalping-equity">—</strong></div>
             <div><span>Daily P&amp;L</span><strong id="scalping-daily-pnl">—</strong></div>
+            <div><span>Session drawdown</span><strong id="scalping-drawdown">—</strong></div>
             <div><span>Current profile</span><strong id="scalping-profile">—</strong></div>
+            <div><span>Side</span><strong id="scalping-side">—</strong></div>
+            <div><span>Event-risk block</span><strong id="scalping-event-risk">—</strong></div>
             <div><span>Last decision</span><strong id="scalping-decision">—</strong></div>
           </div>
           <div class="two-column">
             <article class="panel">
-              <h3>Controls</h3>
+              <h3>Connection and symbol configuration</h3>
               <div class="control-row">
-                <button type="button" id="scalping-btn-start">Start demo auto</button>
+                <button type="button" id="scalping-btn-recheck">Recheck connection</button>
+                <label for="scalping-instrument-select">Canonical instrument</label>
+                <select id="scalping-instrument-select">
+                  <option value="XAUUSD">XAUUSD</option>
+                  <option value="NAS100">NAS100</option>
+                  <option value="EURUSD">EURUSD</option>
+                  <option value="GBPUSD">GBPUSD</option>
+                  <option value="USDJPY">USDJPY</option>
+                </select>
+                <button type="button" id="scalping-btn-discover">Discover broker symbols</button>
+              </div>
+              <div class="control-row">
+                <label for="scalping-symbol-candidates">Broker-symbol candidate</label>
+                <select id="scalping-symbol-candidates"><option value="">— none discovered —</option></select>
+                <button type="button" id="scalping-btn-save-map">Save mapping</button>
+              </div>
+              <p class="disclosure" id="scalping-mapping-result"></p>
+            </article>
+            <article class="panel">
+              <h3>Profile, risk and monitoring configuration</h3>
+              <div class="control-row">
+                <label for="scalping-profile-select">Profile</label>
+                <select id="scalping-profile-select">
+                  <option value="ALSAKKAF_PRECISION_SCALPING">ALSAKKAF PRECISION SCALPING</option>
+                  <option value="ALSAKKAF_BREAKOUT_LADDER">ALSAKKAF BREAKOUT LADDER</option>
+                  <option value="ALSAKKAF_INTRADAY">ALSAKKAF INTRADAY</option>
+                </select>
+                <label for="scalping-side-select">Side</label>
+                <select id="scalping-side-select">
+                  <option value="BOTH">BOTH</option>
+                  <option value="BUY_ONLY">BUY ONLY</option>
+                  <option value="SELL_ONLY">SELL ONLY</option>
+                </select>
+              </div>
+              <div class="control-row">
+                <label for="scalping-risk-input">Risk per cycle %</label>
+                <input type="text" id="scalping-risk-input" inputmode="decimal" placeholder="0.25">
+                <label for="scalping-spread-input">Max spread (points)</label>
+                <input type="text" id="scalping-spread-input" inputmode="numeric" placeholder="200">
+                <label for="scalping-monitoring-interval-input">Monitoring interval (s)</label>
+                <input type="text" id="scalping-monitoring-interval-input" inputmode="numeric" placeholder="15">
+              </div>
+              <div class="control-row">
+                <label for="scalping-event-risk-checkbox"><input type="checkbox" id="scalping-event-risk-checkbox"> Manual event-risk block</label>
+                <button type="button" id="scalping-btn-save-configuration">Save configuration</button>
+              </div>
+              <p class="disclosure" id="scalping-configuration-result"></p>
+            </article>
+          </div>
+          <div class="two-column">
+            <article class="panel">
+              <h3>Live analysis</h3>
+              <div class="control-row">
+                <button type="button" id="scalping-btn-analyze-now">Run Analysis Now</button>
+                <button type="button" id="scalping-btn-monitoring-start">Start Read-Only Monitoring</button>
+                <button type="button" id="scalping-btn-monitoring-stop">Stop Read-Only Monitoring</button>
+              </div>
+              <p class="disclosure" id="scalping-analysis-status">Analysis not yet run.</p>
+              <div class="status-strip">
+                <div><span>Mapped symbol</span><strong id="scalping-analysis-symbol">—</strong></div>
+                <div><span>Bid / Ask / Spread</span><strong id="scalping-analysis-quote">—</strong></div>
+                <div><span>ATR</span><strong id="scalping-analysis-atr">—</strong></div>
+                <div><span>RSI</span><strong id="scalping-analysis-rsi">—</strong></div>
+                <div><span>ADX</span><strong id="scalping-analysis-adx">—</strong></div>
+                <div><span>Support / Resistance</span><strong id="scalping-analysis-sr">—</strong></div>
+                <div><span>Direction</span><strong id="scalping-analysis-direction">—</strong></div>
+                <div><span>Total score</span><strong id="scalping-analysis-score">—</strong></div>
+                <div><span>Classification</span><strong id="scalping-analysis-classification">—</strong></div>
+                <div><span>Last analysis time</span><strong id="scalping-analysis-time">—</strong></div>
+              </div>
+              <div class="table-scroll"><table><caption>Score categories</caption><thead><tr><th scope="col">Category</th><th scope="col">Score</th></tr></thead><tbody id="scalping-score-table"></tbody></table></div>
+              <p class="disclosure" id="scalping-analysis-reasons"></p>
+              <div class="status-strip">
+                <div><span>Monitoring status</span><strong id="scalping-monitoring-status">—</strong></div>
+              </div>
+            </article>
+            <article class="panel">
+              <h3>Product state and safety controls</h3>
+              <div class="control-row">
+                <button type="button" id="scalping-btn-start" disabled title="Locked pending a separately governed broker execution proof">DEMO AUTO — LOCKED PENDING BROKER EXECUTION PROOF</button>
+              </div>
+              <div class="control-row">
                 <button type="button" id="scalping-btn-pause">Pause</button>
                 <button type="button" id="scalping-btn-resume">Resume (analyze only)</button>
                 <button type="button" id="scalping-btn-emergency-stop" class="danger">Emergency stop</button>
                 <button type="button" id="scalping-btn-emergency-reset">Reset emergency stop</button>
               </div>
               <p class="disclosure" id="scalping-control-result"></p>
-            </article>
-            <article class="panel">
               <h3>Owned cycles, orders and positions</h3>
               <div class="table-scroll"><table><caption>Recent cycles</caption><thead><tr><th scope="col">Cycle</th><th scope="col">Symbol</th><th scope="col">Profile</th><th scope="col">State</th></tr></thead><tbody id="scalping-cycle-table"></tbody></table></div>
               <div class="table-scroll"><table><caption>Owned pending orders</caption><thead><tr><th scope="col">Ticket</th><th scope="col">Symbol</th></tr></thead><tbody id="scalping-orders-table"></tbody></table></div>
@@ -345,7 +433,7 @@
             <summary>Recent journal events</summary>
             <ul id="scalping-journal-list" class="check-list"></ul>
           </details>
-          <div class="legal-notice"><strong>REAL-MONEY AUTOMATION IS HARD-LOCKED OUT</strong><span>MT5_LIVE_MANUAL and MT5_LIVE_AUTOMATED remain fully unavailable. Every automated order additionally requires an independent, unconditional demo-account proof at the adapter layer on every single order_check/order_send call, regardless of this dashboard's own state.</span></div>
+          <div class="legal-notice"><strong>REAL-MONEY AUTOMATION IS HARD-LOCKED OUT</strong><span>MT5_LIVE_MANUAL and MT5_LIVE_AUTOMATED remain fully unavailable. Demo Auto is additionally locked in this dashboard pending a separately governed broker execution proof. Every automated order additionally requires an independent, unconditional demo-account proof at the adapter layer on every single order_check/order_send call, regardless of this dashboard's own state.</span></div>
         </section>
 
         <section id="paper-desk" class="section" aria-labelledby="paper-desk-title">

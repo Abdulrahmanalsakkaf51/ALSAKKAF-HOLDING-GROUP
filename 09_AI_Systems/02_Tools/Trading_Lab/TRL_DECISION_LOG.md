@@ -2270,3 +2270,113 @@ Git checkpoint is completed — per the Git-authoritative model this document al
 throughout, the exact current staged/committed/pushed state of both the implementation
 publication and this closure pass is always read from `git status`/`git rev-parse HEAD`
 directly, not restated here as a fixed value.
+
+## 2026-08-03-004 — Accelerated Founder authorization: TRL-R2-013 ALSAKKAF SCALPING Operational Dashboard Hotfix, uncommitted
+
+**Decision:** Under the Founder's TRL-R2-013 accelerated operational-hotfix prompt, authored
+`TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_CONTRACT.md` and implemented it in
+the same uncommitted checkpoint, correcting the operational gap the Founder found during the
+first real launch of the closed R2-012 dashboard: the server started and the HTML shell
+rendered, but operating mode and product state stayed `OFF`/`OFF` (the launcher never
+requested any `ModeService`/`ScalpingService` transition); the `MT5 CONNECTION: OK` badge was
+derived from `journal_startup_diagnostic_code`, not a real terminal/account read; Demo
+Verified/Equity/Daily P&L/Last Decision were placeholders because no server-side analysis had
+ever run (no code fetched OHLC bars from MT5 at all); profile/side/risk/spread configuration
+was held only in `ScalpingService` process memory and lost on every restart; the only
+analysis route required the browser to supply raw candle JSON, which it never did; no
+read-only monitoring loop existed; and `Start demo auto` rendered as an ordinary enabled
+button ahead of any of this being proven. The Founder stopped the application safely; no
+broker action occurred.
+
+**Why:** R2-012's own test suite passing did not prove the dashboard was usable for real MT5
+demo analysis — the accelerated-V0 boundary decision documented in R2-012's evidence (bars
+supplied by "the caller") was never actually implemented by any real caller, and the
+launcher never wired the governed mode/state transitions at all. This checkpoint closes that
+gap without reopening R2-012's execution model, risk policy, ladder logic, or journal event
+vocabulary, and without granting, widening, or exercising `DEMO_AUTO`, `order_check`, or
+`order_send` anywhere in its new code, tests, or rehearsals.
+
+**How to apply:** Corrected `Start_ALSAKKAF_SCALPING_DEMO.ps1` now requests `RESEARCH` then
+`ANALYZE_ONLY` through the existing governed CLI and runs a real read-only `scalping-recheck`
+before starting the server, opening directly at `#alsakkaf-scalping`; `Stop_ALSAKKAF_SCALPING_DEMO.ps1`
+additionally stops monitoring and requests `OFF`/`OFF` (a new `scalping-stop` CLI command
+deliberately refuses while `EMERGENCY_STOP` is latched, since only `reset_emergency_stop()`
+may take that path). New `trading_lab_app/alsakkaf_scalping_runtime.py` (`ScalpingRuntime`)
+adds a server-authoritative `analyze_now` (new `RealScalpingMT5Adapter.fetch_completed_bars`
+using `copy_rates_from_pos` with `start_pos=1` to always exclude the forming bar), the
+sanitized `TRL_SCALPING_LIVE_STATUS.v1` document with explicit unavailable-reason codes, and
+bounded single-thread read-only monitoring. A new `TRL_SCALPING_CONFIG.v1` store persists
+profile/side/risk/spread/monitoring-interval across restarts. `/api/scalping-run-cycle`
+(browser-supplied market data) is removed from the dashboard-facing route set and replaced by
+`/api/scalping-analyze-now`, which rejects any client-supplied market-data key. `Start demo
+auto` is replaced by a permanently disabled `DEMO AUTO — LOCKED PENDING BROKER EXECUTION
+PROOF` control; no code path in `static/app.js` invokes it; the R2-012 backend transition
+remains implemented and unit-tested. `app.py`'s real `_scalping_service_for_mode` call site
+now always supplies a real `scratch_directory` (previously never passed at all, which would
+have raised `TypeError` the first time a real `TRADE_CANDIDATE` reached the R2-010 bridge in
+production — found while building this checkpoint, not previously triggered). Two further
+genuine defects were found and fixed during this pass's own hardening: a self-deadlock in the
+monitor loop (it and `analyze_now`'s result-cache write originally shared one non-reentrant
+lock; split into two distinct locks) and a tick-timestamp precision mismatch surfaced by the
+real-terminal rehearsal (the real adapter's millisecond-precision tick timestamp did not
+satisfy this repository's strict six-fractional-digit UTC format; reformatted through
+`format_utc`). 55 net-new tests across two new modules; complete-suite arithmetic
+`1422 + 55 = 1477`; two consecutive clean full-suite runs recorded in
+`TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_EVIDENCE.md` (re-run after every
+fix in this entry, per this program's established convention that the accepted consecutive
+pair must occur after the final source/test change). A synthetic rehearsal against the fake
+adapter and a real read-only rehearsal against the Founder's already-authenticated 4T MT5
+DEMO terminal (real DEMO account confirmed, redacted login `...1837`, balance/equity
+`125248.83 USD`; real `XAUUSD` discovered and mapped; a real `Analyze Now` call computed real
+indicators and returned a genuine `WAIT` classification, not manufactured or overridden;
+`order_check`/`order_send` counts both zero throughout) both passed — see the evidence
+document for full detail. Implementation remains uncommitted and unpushed; nothing has been
+staged. Phase 7 remains not started. The exact current staged/committed/pushed state is
+always read from `git status`/`git rev-parse HEAD` directly, not restated here as a fixed
+value.
+
+**Addendum (same session) — Founder shutdown correction:** The Founder visually accepted the
+operational dashboard above (real MT5 connection, DEMO verification, live balance/equity,
+`XAUUSD` mapping, real quotes/indicators, `Run Analysis Now`, repeated 15-second monitoring,
+`WAIT`/`NONE` refusal behavior, `Demo Auto` locked, zero broker orders/positions), then the
+first corrected-stop attempt exposed a real shutdown defect: `Stop_ALSAKKAF_SCALPING_DEMO.ps1`
+called `scalping-pause` unconditionally first, but the R2-012 `_TRANSITIONS` table never
+allows `ANALYZE_ONLY -> PAUSED` at all (`PAUSED` is reachable only from `DEMO_AUTO`/`PAUSED`
+itself), so pause deterministically failed from exactly the state the launcher establishes,
+and the script's fallback latched an unnecessary `EMERGENCY_STOP` on every ordinary shutdown
+— confirmed directly against the Founder's real session (`product_state: EMERGENCY_STOP`,
+zero owned orders/positions, journal showing `ANALYZE_ONLY -> EMERGENCY_STOP` then
+`EMERGENCY_STOP_ACTIVATED` with nothing cancelled/closed). Fixed with new, deterministic,
+idempotent `ScalpingService.graceful_stop()` (state-aware: `OFF` no-ops; `ANALYZE_ONLY`/
+`PAUSED` request `OFF` directly; `DEMO_AUTO`/`EMERGENCY_STOP` require a confirmed
+zero-owned-orders-and-positions state before the governed `reset_emergency_stop()` — never a
+bare `EMERGENCY_STOP -> OFF` shortcut) and `recover_stale_emergency_stop()` (startup-only,
+acts only on a latched `EMERGENCY_STOP` with zero owned state, never on `DEMO_AUTO`). New CLI
+commands `scalping-stop` (now calling `graceful_stop()`) and `scalping-startup-recover`; both
+launcher scripts corrected accordingly, with `Stop_ALSAKKAF_SCALPING_DEMO.ps1` now verifying
+final `OFF`/`OFF` before ever printing its success line. The Founder's actual persisted
+real state was corrected in place (`scalping-stop` against the real store: `EMERGENCY_STOP`
+with zero owned state `-> OFF`) before the real rehearsal below began. 20 further net-new
+tests (updated net-new total `75`; complete-suite arithmetic `1422 + 75 = 1497`); two further
+consecutive clean full-suite runs (`1497/1497`, zero failures/errors, no intervening edit
+between them) re-run after this correction, per this program's established convention. A
+synthetic shutdown rehearsal (all 8 required steps, fake adapter, zero
+`order_check`/`order_send`) and a real local read-only shutdown rehearsal against the
+Founder's actual running dashboard server and the real 4T MT5 DEMO terminal (9 real
+monitoring iterations observed, each a genuine `WAIT`; the corrected stop script produced no
+emergency-stop activation and a verified `OFF`/`OFF`; port confirmed clear; no process; broker
+positions/orders `0`/`0` throughout; `order_check`/`order_send` counts both zero) both passed
+— see `TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_EVIDENCE.md` Section 19 for
+full detail. Implementation remains uncommitted and unpushed; nothing staged. Phase 7 remains
+not started.
+
+**Second addendum (same session) — Founder-authorized local commit:** The Founder visually
+accepted the operational dashboard and, separately, the corrected shutdown flow above, then
+authorized exactly one local implementation commit of this checkpoint's full approved 22-file
+scope (5 added, 17 modified, 0 deleted), message `Implement TRL-R2-013 ALSAKKAF SCALPING
+Operational Dashboard Hotfix`. This checkpoint (including this Decision Log entry) is
+therefore locally committed as of that commit. Remote push was not authorized in this pass and
+did not occur; it remains a separate, later, Founder-authorized step. `main` is unaffected. Per
+this program's Git-authoritative convention, the exact current committed/pushed state is
+always read from `git status`/`git rev-parse HEAD`/`git log -1` directly, not restated here as
+a fixed SHA (this entry is itself part of the commit it describes).

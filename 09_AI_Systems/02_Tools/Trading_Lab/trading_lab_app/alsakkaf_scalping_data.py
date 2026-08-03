@@ -357,15 +357,171 @@ class InMemorySymbolMapStore:
         self._document = validate_symbol_map_document(document)
 
 
+# --------------------------------------------------------------------------
+# TRL_SCALPING_CONFIG.v1 (TRL-R2-013 Section 8): profile/side/risk/spread/
+# monitoring-interval persistence -- previously held only in ScalpingService
+# process memory and lost on every restart.
+# --------------------------------------------------------------------------
+
+CONFIG_SCHEMA = "TRL_SCALPING_CONFIG.v1"
+MIN_MONITORING_INTERVAL_SECONDS = 5
+MAX_MONITORING_INTERVAL_SECONDS = 300
+DEFAULT_MONITORING_INTERVAL_SECONDS = 15
+
+
+def default_config_path():
+    local_data = os.environ.get("LOCALAPPDATA")
+    root = Path(local_data) if local_data else Path.home() / "AppData" / "Local"
+    return root / "ALSAKKAF" / "TradingLab" / "scalping-configuration-v1.json"
+
+
+def default_scratch_directory():
+    """TRL-R2-013 root cause 5: the real running service never passed a
+    ``scratch_directory`` to ``strategy.run_r2010_bridge`` at all, which
+    would raise ``TypeError`` the first time a real ``TRADE_CANDIDATE``
+    reached the bridge in production. Same ``%LOCALAPPDATA%`` root as the
+    symbol-map/config stores, never a network/UNC path."""
+    local_data = os.environ.get("LOCALAPPDATA")
+    root = Path(local_data) if local_data else Path.home() / "AppData" / "Local"
+    return str(root / "ALSAKKAF" / "TradingLab" / "scratch")
+
+
+def empty_config_document():
+    return {
+        "schema_version": CONFIG_SCHEMA,
+        "profiles": {},
+        "side_restrictions": {},
+        "max_spread_points": {},
+        "risk_settings": {},
+        "monitoring_interval_seconds": DEFAULT_MONITORING_INTERVAL_SECONDS,
+    }
+
+
+def validate_config_document(document):
+    if not isinstance(document, dict) or set(document) != {
+        "schema_version", "profiles", "side_restrictions", "max_spread_points",
+        "risk_settings", "monitoring_interval_seconds",
+    }:
+        raise ScalpingDataValidationError("configuration has an invalid field set")
+    if document["schema_version"] != CONFIG_SCHEMA:
+        raise ScalpingDataValidationError("configuration schema is unsupported")
+    profiles = document["profiles"]
+    if not isinstance(profiles, dict):
+        raise ScalpingDataValidationError("profiles must be an object")
+    clean_profiles = {}
+    for instrument, profile_id in profiles.items():
+        validate_canonical_instrument(instrument)
+        clean_profiles[instrument] = validate_profile_id(profile_id)
+    side_restrictions = document["side_restrictions"]
+    if not isinstance(side_restrictions, dict):
+        raise ScalpingDataValidationError("side_restrictions must be an object")
+    clean_sides = {}
+    for instrument, side in side_restrictions.items():
+        validate_canonical_instrument(instrument)
+        clean_sides[instrument] = _require_choice(side, SIDE_RESTRICTIONS, "side_restriction")
+    spreads = document["max_spread_points"]
+    if not isinstance(spreads, dict):
+        raise ScalpingDataValidationError("max_spread_points must be an object")
+    clean_spreads = {}
+    for instrument, points in spreads.items():
+        validate_canonical_instrument(instrument)
+        if not isinstance(points, int) or isinstance(points, bool) or points <= 0:
+            raise ScalpingDataValidationError("max_spread_points value must be a positive integer")
+        clean_spreads[instrument] = points
+    risk_settings = document["risk_settings"]
+    if not isinstance(risk_settings, dict):
+        raise ScalpingDataValidationError("risk_settings must be an object")
+    interval = document["monitoring_interval_seconds"]
+    if (
+        not isinstance(interval, int) or isinstance(interval, bool)
+        or not MIN_MONITORING_INTERVAL_SECONDS <= interval <= MAX_MONITORING_INTERVAL_SECONDS
+    ):
+        raise ScalpingDataValidationError("monitoring_interval_seconds is out of bounds")
+    return {
+        "schema_version": CONFIG_SCHEMA,
+        "profiles": clean_profiles,
+        "side_restrictions": clean_sides,
+        "max_spread_points": clean_spreads,
+        "risk_settings": dict(risk_settings),
+        "monitoring_interval_seconds": interval,
+    }
+
+
+class ScalpingConfigStore:
+    """Atomic single-document local store (same temp-file + os.replace
+    technique as ``SymbolMapStore``)."""
+
+    def __init__(self, path=None):
+        self.path = Path(path) if path is not None else default_config_path()
+
+    def load(self):
+        if not self.path.exists():
+            return empty_config_document()
+        try:
+            raw = self.path.read_bytes()
+            text = raw.decode("utf-8", errors="strict")
+            document = json.loads(text)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise ScalpingDataValidationError("configuration storage is not strict UTF-8 JSON") from error
+        return validate_config_document(document)
+
+    def save(self, document):
+        clean = validate_config_document(document)
+        raw = (deterministic_json_text(clean) + "\n").encode("utf-8")
+        temporary_path = None
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                mode="wb", prefix=".{}-".format(self.path.name), suffix=".tmp",
+                dir=str(self.path.parent), delete=False,
+            ) as handle:
+                temporary_path = Path(handle.name)
+                handle.write(raw)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(str(temporary_path), str(self.path))
+            temporary_path = None
+        except OSError as error:
+            raise ScalpingDataValidationError("configuration storage atomic write failed") from error
+        finally:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink()
+                except FileNotFoundError:
+                    pass
+                except OSError:
+                    pass
+
+
+class InMemoryScalpingConfigStore:
+    def __init__(self, initial_document=None):
+        self._document = (
+            validate_config_document(initial_document)
+            if initial_document is not None else empty_config_document()
+        )
+
+    def load(self):
+        return deepcopy(self._document)
+
+    def save(self, document):
+        self._document = validate_config_document(document)
+
+
 __all__ = (
     "ALSAKKAF_SCALPING_MAGIC",
     "CANONICAL_INSTRUMENTS",
+    "CONFIG_SCHEMA",
     "COMMENT_PREFIX",
     "CYCLE_STATES",
+    "DEFAULT_MONITORING_INTERVAL_SECONDS",
+    "InMemoryScalpingConfigStore",
     "InMemorySymbolMapStore",
+    "MAX_MONITORING_INTERVAL_SECONDS",
+    "MIN_MONITORING_INTERVAL_SECONDS",
     "ORDER_PLAN_TYPES",
     "PRODUCT_STATES",
     "PROFILE_IDS",
+    "ScalpingConfigStore",
     "ScalpingDataValidationError",
     "SIDES",
     "SIDE_RESTRICTIONS",
@@ -374,10 +530,14 @@ __all__ = (
     "broker_comment",
     "build_cycle",
     "build_order_plan",
+    "default_config_path",
     "default_symbol_map_path",
+    "empty_config_document",
     "empty_symbol_map_document",
     "quantize_4",
     "validate_canonical_instrument",
+    "default_scratch_directory",
+    "validate_config_document",
     "validate_cycle",
     "validate_order_plan",
     "validate_profile_id",

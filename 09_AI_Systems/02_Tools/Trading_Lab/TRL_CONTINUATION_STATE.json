@@ -769,5 +769,30 @@
     "final_operating_mode": "OFF",
     "port_8765": "clear",
     "python_process": "none"
+  },
+  "trl_r2_013_implementation": {
+    "status": "implementation complete this session, uncommitted, pending Founder review",
+    "root_causes_fixed": [
+      "launcher never requested any ModeService/product-state transition -- operating mode and product state always resolved to OFF/OFF",
+      "MT5 CONNECTION badge was derived from journal_startup_diagnostic_code, never from a real terminal/account read",
+      "profile/side/risk/spread configuration was held only in ScalpingService process memory, never persisted",
+      "no server-side bar/quote fetch existed (RealScalpingMT5Adapter never implemented copy_rates_from_pos); the only analysis route required the browser to supply raw candle JSON",
+      "the real running _scalping_service_for_mode call site never passed a scratch_directory, which would raise TypeError the first time a real TRADE_CANDIDATE reached the R2-010 bridge in production",
+      "no read-only monitoring loop existed; Start demo auto was rendered as an ordinary enabled button ahead of any of the above being proven"
+    ],
+    "new_files": [
+      "trading_lab_app/alsakkaf_scalping_runtime.py",
+      "TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_CONTRACT.md",
+      "TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_EVIDENCE.md",
+      "test_alsakkaf_scalping_live_analysis.py",
+      "test_alsakkaf_scalping_operational_dashboard.py"
+    ],
+    "net_new_tests": 75,
+    "complete_suite_arithmetic": "1422 + 75 = 1497",
+    "shutdown_correction_addendum": "same-session Founder shutdown correction: Stop_ALSAKKAF_SCALPING_DEMO.ps1 unconditionally called scalping-pause, which R2-012's own _TRANSITIONS table never allows from ANALYZE_ONLY, so it deterministically fell back to scalping-emergency-stop on every ordinary shutdown; fixed with new deterministic ScalpingService.graceful_stop()/recover_stale_emergency_stop(), 20 further net-new tests, real rehearsal against the Founder's actual running server confirmed no unnecessary emergency-stop activation and a verified OFF/OFF -- see evidence document Section 19",
+    "demo_auto": "not entered anywhere in this checkpoint's new code, tests, or rehearsals; dashboard control permanently disabled and locked",
+    "order_check_order_send": "not called anywhere in this checkpoint's new code, tests, or rehearsals",
+    "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_EVIDENCE.md",
+    "commit_status": "Founder-accepted (dashboard and corrected shutdown) and locally committed this session (message: \"Implement TRL-R2-013 ALSAKKAF SCALPING Operational Dashboard Hotfix\"; 5 added, 17 modified, 0 deleted, 22 total files); not pushed -- see git status/git rev-parse HEAD directly for the exact current state"
   }
 }

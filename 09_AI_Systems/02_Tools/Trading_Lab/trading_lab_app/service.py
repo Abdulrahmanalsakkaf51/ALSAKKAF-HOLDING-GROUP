@@ -349,6 +349,39 @@ def scalping_journal_document(scalping_service_instance=None, limit=None):
     return {"events": service_instance.journal_tail(limit=limit if limit is not None else 100)}
 
 
+_DEFAULT_SCALPING_RUNTIME = None
+
+
+def _default_scalping_runtime():
+    """TRL-R2-013: mirrors ``_default_scalping_service`` -- a side-effect-
+    free runtime wrapping the same disabled/in-memory default service, used
+    only when no real instance is wired in."""
+    global _DEFAULT_SCALPING_RUNTIME
+    if _DEFAULT_SCALPING_RUNTIME is None:
+        from .alsakkaf_scalping_runtime import ScalpingRuntime
+        _DEFAULT_SCALPING_RUNTIME = ScalpingRuntime(_default_scalping_service())
+    return _DEFAULT_SCALPING_RUNTIME
+
+
+def scalping_live_status_document(scalping_runtime_instance=None, canonical_instrument=None):
+    return (scalping_runtime_instance or _default_scalping_runtime()).live_status_document(canonical_instrument)
+
+
+def scalping_configuration_document(scalping_service_instance=None):
+    return (scalping_service_instance or _default_scalping_service()).configuration_document()
+
+
+def scalping_latest_analysis_document(scalping_runtime_instance=None, canonical_instrument=None):
+    runtime_instance = scalping_runtime_instance or _default_scalping_runtime()
+    if canonical_instrument is None:
+        return {"ok": False, "reason_code": "SYMBOL_NOT_MAPPED"}
+    return runtime_instance.latest_analysis(canonical_instrument)
+
+
+def scalping_monitoring_status_document(scalping_runtime_instance=None):
+    return (scalping_runtime_instance or _default_scalping_runtime()).monitoring_status()
+
+
 def strategy_registry_document():
     """Return the governed local registry without running financial evaluation."""
     return load_registry(copy.deepcopy(DEMO_STRATEGY)).document()

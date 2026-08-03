@@ -34,8 +34,23 @@ PROVIDER_METHOD_ALLOWLIST = frozenset((
     "order_send",
     "positions_get",
     "orders_get",
+    "copy_rates_from_pos",
 ))
 _PROVIDER_SESSION_LOCK = threading.Lock()
+
+# TRL-R2-013 Section 5: bar timeframes needed for entry/confirmation/context
+# analysis (R2-012 only ever needed symbol/tick metadata). Private to this
+# adapter -- ``mt5_connector.py``'s own constant allowlist is unmodified.
+BAR_TIMEFRAMES = ("M1", "M5", "M15", "H1", "H4")
+_BAR_TIMEFRAME_CONSTANT_NAMES = {
+    "M1": "TIMEFRAME_M1",
+    "M5": "TIMEFRAME_M5",
+    "M15": "TIMEFRAME_M15",
+    "H1": "TIMEFRAME_H1",
+    "H4": "TIMEFRAME_H4",
+}
+_MAX_PROVIDER_TIMEFRAME_IDENTIFIER = (2 ** 31) - 1
+MAX_BAR_FETCH_COUNT = 500
 
 _ACCOUNT_TRADE_MODE_DEMO = 0
 _ACCOUNT_TRADE_MODE_CONTEST = 1
@@ -84,6 +99,7 @@ class DisabledScalpingAdapter:
         return {
             "available": False, "login_last4": None, "trade_mode": None,
             "trade_mode_name": None, "trade_allowed": False, "equity": None,
+            "balance": None, "currency": None, "leverage": None,
             "reason_code": "ADAPTER_DISABLED",
         }
 
@@ -95,6 +111,9 @@ class DisabledScalpingAdapter:
 
     def discover_symbols(self, canonical_instrument):
         return []
+
+    def fetch_completed_bars(self, symbol, timeframe, count):
+        return {"available": False, "bars": [], "reason_code": "ADAPTER_DISABLED"}
 
     def owned_orders(self, magic_number):
         return []
@@ -129,10 +148,12 @@ class FakeScalpingAdapter:
         self.account = {
             "available": True, "login_last4": "0100", "trade_mode": _ACCOUNT_TRADE_MODE_DEMO,
             "trade_mode_name": "DEMO", "trade_allowed": True, "equity": "10000",
+            "balance": "10000", "currency": "USD", "leverage": 100,
             "reason_code": None,
         }
         self.symbols = {}
         self.symbol_candidates = {}
+        self._bars = {}
         self._check_queue = []
         self._send_queue = []
         self._positions = []
@@ -156,6 +177,12 @@ class FakeScalpingAdapter:
 
     def set_symbol_candidates(self, canonical_instrument, candidates):
         self.symbol_candidates[canonical_instrument] = list(candidates)
+
+    def set_bars(self, symbol, timeframe, bars):
+        """``bars`` is a list of closed-bar dicts (oldest first), each with
+        open/high/low/close/time_utc -- the deterministic fixture shape
+        tests build directly, never touching MetaTrader5."""
+        self._bars[(symbol, timeframe)] = list(bars)
 
     def set_owned_positions(self, positions):
         self._positions = list(positions)
@@ -188,6 +215,14 @@ class FakeScalpingAdapter:
 
     def discover_symbols(self, canonical_instrument):
         return list(self.symbol_candidates.get(canonical_instrument, []))
+
+    def fetch_completed_bars(self, symbol, timeframe, count):
+        bars = self._bars.get((symbol, timeframe))
+        if not bars:
+            return {"available": False, "bars": [], "reason_code": "HISTORY_INSUFFICIENT"}
+        if len(bars) < count:
+            return {"available": False, "bars": [], "reason_code": "HISTORY_INSUFFICIENT"}
+        return {"available": True, "bars": deepcopy(bars[-count:]), "reason_code": None}
 
     def owned_orders(self, magic_number):
         return [order for order in self._orders if order.get("magic") == magic_number]
@@ -308,6 +343,15 @@ class RealScalpingMT5Adapter:
             equity = None
             if isinstance(equity_value, numbers.Real) and not isinstance(equity_value, bool):
                 equity = str(Decimal(str(equity_value)))
+            balance_value = market_data._field(info, "balance")
+            balance = None
+            if isinstance(balance_value, numbers.Real) and not isinstance(balance_value, bool):
+                balance = str(Decimal(str(balance_value)))
+            leverage_value = market_data._field(info, "leverage")
+            leverage = None
+            if isinstance(leverage_value, numbers.Integral) and not isinstance(leverage_value, bool):
+                leverage = int(leverage_value)
+            currency = market_data._safe_optional_text(market_data._field(info, "currency"), 8)
             return {
                 "available": login_last4 is not None,
                 "login_last4": login_last4,
@@ -315,6 +359,9 @@ class RealScalpingMT5Adapter:
                 "trade_mode_name": ACCOUNT_TRADE_MODE_NAMES.get(trade_mode),
                 "trade_allowed": bool(market_data._field(info, "trade_allowed", False)),
                 "equity": equity,
+                "balance": balance,
+                "currency": currency,
+                "leverage": leverage,
                 "reason_code": None,
             }
         result, reason = self._with_session(body)
@@ -322,6 +369,7 @@ class RealScalpingMT5Adapter:
             return {
                 "available": False, "login_last4": None, "trade_mode": None,
                 "trade_mode_name": None, "trade_allowed": False, "equity": None,
+                "balance": None, "currency": None, "leverage": None,
                 "reason_code": reason or "ACCOUNT_UNAVAILABLE",
             }
         return result
@@ -352,7 +400,18 @@ class RealScalpingMT5Adapter:
                     tick = None
                 if tick is not None:
                     bid, ask = tick["bid"], tick["ask"]
-                    tick_time = tick["source_timestamp_utc"]
+                    # ``market_data.normalize_tick`` formats to millisecond
+                    # precision (3 fractional digits); this repo's own
+                    # ``timeline_data.validate_utc_timestamp`` (used by
+                    # every preflight/analysis quote-age check) requires
+                    # exactly 6 -- reformatted here so a real broker tick
+                    # is never rejected by that stricter, unrelated
+                    # convention (found during the R2-013 real-terminal
+                    # rehearsal; never triggered by the fake adapter, whose
+                    # timestamps already come from ``format_utc``).
+                    seconds, millisecond_seconds = market_data.normalized_tick_source_seconds(tick)
+                    precise_seconds = millisecond_seconds if millisecond_seconds is not None else seconds
+                    tick_time = format_utc(datetime.fromtimestamp(precise_seconds, tz=timezone.utc))
             trade_mode = specification["trade_mode"]
             tradeable = trade_mode not in (_SYMBOL_TRADE_MODE_DISABLED, _SYMBOL_TRADE_MODE_CLOSEONLY)
             return {
@@ -378,6 +437,79 @@ class RealScalpingMT5Adapter:
                 "trade_mode": None, "tradeable": False, "reason_code": reason or "SYMBOL_UNAVAILABLE",
             }
         return result
+
+    def _bar_timeframe_constants(self, provider):
+        resolved = {}
+        for timeframe, constant_name in _BAR_TIMEFRAME_CONSTANT_NAMES.items():
+            try:
+                value = getattr(provider, constant_name)
+            except AttributeError:
+                return None
+            if (
+                isinstance(value, bool) or not isinstance(value, numbers.Integral)
+                or value <= 0 or value > _MAX_PROVIDER_TIMEFRAME_IDENTIFIER
+            ):
+                return None
+            resolved[timeframe] = int(value)
+        if len(set(resolved.values())) != len(resolved):
+            return None
+        return resolved
+
+    @staticmethod
+    def _normalize_bar_rows(rows, count):
+        """Self-contained OHLC normalization (mirrors
+        ``market_data.normalize_bars``'s validation exactly, without that
+        function's per-timeframe FORMING-bar bookkeeping, which does not
+        apply here since ``start_pos=1`` already excludes the forming
+        bar). Returns closed bars oldest-first, or ``None`` if fewer than
+        ``count`` valid rows were returned."""
+        if rows is None:
+            return None
+        previous_seconds = None
+        normalized = []
+        for source in rows:
+            try:
+                seconds = market_data._finite_number(market_data._field(source, "time"), "MT5_INVALID_BAR_DATA")
+                open_value = market_data._finite_number(market_data._field(source, "open"), "MT5_INVALID_BAR_DATA")
+                high = market_data._finite_number(market_data._field(source, "high"), "MT5_INVALID_BAR_DATA")
+                low = market_data._finite_number(market_data._field(source, "low"), "MT5_INVALID_BAR_DATA")
+                close = market_data._finite_number(market_data._field(source, "close"), "MT5_INVALID_BAR_DATA")
+            except market_data.MarketDataValidationError:
+                return None
+            if high < max(open_value, low, close) or low > min(open_value, high, close):
+                return None
+            if previous_seconds is not None and seconds <= previous_seconds:
+                return None
+            timestamp_utc, _ = market_data._timestamp_parts(seconds, reason_code="MT5_INVALID_BAR_DATA")
+            normalized.append({
+                "timestamp_utc": timestamp_utc, "open": open_value, "high": high,
+                "low": low, "close": close, "bar_state": "CLOSED",
+            })
+            previous_seconds = seconds
+        if len(normalized) < count:
+            return None
+        return normalized
+
+    def fetch_completed_bars(self, symbol, timeframe, count):
+        """Server-authoritative closed-bar fetch (contract Section 5/8.1):
+        ``start_pos=1`` always skips the currently-forming bar, so the
+        returned ``count`` bars are all closed -- never the current
+        unfinished candle."""
+        if timeframe not in BAR_TIMEFRAMES:
+            return {"available": False, "bars": [], "reason_code": "HISTORY_INSUFFICIENT"}
+        if not isinstance(count, numbers.Integral) or isinstance(count, bool) or not 1 <= count <= MAX_BAR_FETCH_COUNT:
+            return {"available": False, "bars": [], "reason_code": "HISTORY_INSUFFICIENT"}
+
+        def body(provider):
+            constants = self._bar_timeframe_constants(provider)
+            if constants is None:
+                return None
+            rows = self._call(provider, "copy_rates_from_pos", symbol, constants[timeframe], 1, count)
+            return self._normalize_bar_rows(rows, count)
+        result, reason = self._with_session(body)
+        if reason is not None or result is None:
+            return {"available": False, "bars": [], "reason_code": "HISTORY_INSUFFICIENT"}
+        return {"available": True, "bars": result, "reason_code": None}
 
     def discover_symbols(self, canonical_instrument):
         aliases = INSTRUMENT_ALIASES.get(canonical_instrument, ())
@@ -618,9 +750,11 @@ def _preflight_result(results, blocking_reason_code):
 __all__ = (
     "ACCOUNT_TRADE_MODE_DEMO",
     "ACCOUNT_TRADE_MODE_NAMES",
+    "BAR_TIMEFRAMES",
     "DisabledScalpingAdapter",
     "FakeScalpingAdapter",
     "INSTRUMENT_ALIASES",
+    "MAX_BAR_FETCH_COUNT",
     "MAX_QUOTE_STALENESS_SECONDS",
     "PREFLIGHT_CHECK_IDS",
     "PROVIDER_METHOD_ALLOWLIST",

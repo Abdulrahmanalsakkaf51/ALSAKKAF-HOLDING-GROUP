@@ -700,11 +700,18 @@ HTTP/dashboard-only in this V0 CLI. One-click launchers:
 Read-only: `GET /api/scalping-status` (also carries the local CSRF-style
 action token), `-cycles`, `-owned-orders`, `-owned-positions`, `-journal`,
 `-preflight/<INSTRUMENT>`, `-symbol-candidates/<INSTRUMENT>`,
-`-cycle/<cycle_id>`. Mutation (POST only, local-host-gated, requiring the
+`-cycle/<cycle_id>`, and — added in TRL-R2-013, Section 22A —
+`-live-status`, `-configuration`, `-latest-analysis`,
+`-monitoring-status`. Mutation (POST only, local-host-gated, requiring the
 exact `X-Scalping-Action-Token` header): `-start-demo-auto`, `-pause`,
 `-resume`, `-emergency-stop`, `-emergency-reset`, `-save-symbol-map`,
-`-configure-profile`, `-run-cycle`. GET on a mutation route returns `405`
-with `Allow: POST`.
+`-configure-profile`, and — added in TRL-R2-013 — `-recheck`,
+`-save-configuration`, `-analyze-now`, `-monitoring-start`,
+`-monitoring-stop`. GET on a mutation route returns `405` with
+`Allow: POST`. **`-run-cycle` (browser-supplied bars/price/spread) was
+removed from this set in TRL-R2-013** — `-analyze-now` is the
+dashboard-facing analysis path now, and rejects any client-supplied
+market-data key outright.
 
 ### 22.4 Scope limitations
 
@@ -714,3 +721,41 @@ go/no-go (`TRL_BLOCKERS.md`). See
 `TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_EVIDENCE.md` for full
 detail, including two genuine implementation defects found and fixed
 during this checkpoint's own test hardening.
+
+## 22A. ALSAKKAF SCALPING Operational Dashboard Hotfix (TRL-R2-013, Phase 6C-1)
+
+Corrects the operational gap the Founder found during the first real
+launch of the R2-012 dashboard: the launcher never requested a mode/
+product-state transition, the MT5 connection badge was journal-health-
+derived, configuration was never persisted, and no server-side bar/quote
+fetch existed. `Start_ALSAKKAF_SCALPING_DEMO.ps1` now requests `RESEARCH`
+then `ANALYZE_ONLY` and runs a real read-only recheck before starting the
+server, and opens directly at `#alsakkaf-scalping`. `Demo Auto` is
+permanently disabled in the dashboard — locked pending a separately
+governed broker execution proof; the backend transition remains
+implemented and unit-tested, only the dashboard's ability to invoke it is
+removed.
+
+New CLI commands:
+
+```
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-live-status --instrument XAUUSD
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-recheck
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-save-configuration XAUUSD --profile-id ALSAKKAF_PRECISION_SCALPING --side-restriction BOTH
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-show-configuration
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-analyze-now XAUUSD
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-monitoring-start XAUUSD --interval-seconds 15
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-monitoring-stop
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-monitoring-status
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-latest-analysis XAUUSD
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-stop
+```
+
+`scalping-analyze-now` fetches its own completed bars and a fresh quote
+from the real (or fake, in tests) MT5 adapter server-side — no operator
+ever constructs a candle JSON array by hand. Read-only monitoring invoked
+via the CLI is process-scoped (ends when that one CLI process exits); the
+intended continuous-monitoring path is the long-running dashboard server's
+own `/api/scalping-monitoring-start`. See
+`TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_CONTRACT.md` and
+`_EVIDENCE.md` for full detail.

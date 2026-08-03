@@ -46,6 +46,22 @@ CONFIRMATION_TIMEFRAME_FOR_PROFILE = {
     "ALSAKKAF_INTRADAY": "H1",
 }
 
+# TRL-R2-013 Section 5: the entry timeframe each profile analyzes on --
+# needed by the new server-authoritative bar fetch, which R2-012 never
+# implemented (bars were always supplied by the caller).
+ENTRY_TIMEFRAME_FOR_PROFILE = {
+    "ALSAKKAF_PRECISION_SCALPING": "M1",
+    "ALSAKKAF_BREAKOUT_LADDER": "M1",
+    "ALSAKKAF_INTRADAY": "M15",
+}
+
+# Minimum closed bars needed to compute every Section 8.1 indicator without
+# an artificial shortfall (EMA50 is the tallest requirement); the
+# confirmation timeframe only needs enough for multi_timeframe_direction's
+# 21-period EMA.
+MIN_ENTRY_BARS = 60
+MIN_CONFIRMATION_BARS = 30
+
 
 class ScalpingStrategyError(ScalpingDataValidationError):
     """Raised when a setup cannot be evaluated safely."""
@@ -346,6 +362,9 @@ def run_r2010_bridge(market_intelligence_service, analysis_input, scratch_direct
 __all__ = (
     "CATEGORY_CAPS",
     "CONFIRMATION_TIMEFRAME_FOR_PROFILE",
+    "ENTRY_TIMEFRAME_FOR_PROFILE",
+    "MIN_CONFIRMATION_BARS",
+    "MIN_ENTRY_BARS",
     "ScalpingStrategyError",
     "TOTAL_SCORE_CAP",
     "TRADE_CANDIDATE_MIN",

@@ -140,6 +140,15 @@ def build_parser():
         action="store_true",
         help="do not open the local dashboard in the default browser",
     )
+    parser.add_argument(
+        "--open-fragment",
+        default="",
+        help=(
+            "optional URL fragment (e.g. 'alsakkaf-scalping') appended as #fragment "
+            "to the browser URL this process opens -- TRL-R2-013 Section 4, so a "
+            "product-specific launcher can open directly at its own dashboard section"
+        ),
+    )
     parser.add_argument("--version", action="version", version=APPLICATION_VERSION)
     return parser
 
@@ -569,7 +578,7 @@ def _scalping_service_for_mode(
     construction time. This keeps read-only status/list/inspect/journal
     operations available in every mode, matching contract Section 5.2."""
     from .alsakkaf_scalping_journal import ScalpingJournalWriter
-    from .alsakkaf_scalping_data import SymbolMapStore
+    from .alsakkaf_scalping_data import SymbolMapStore, ScalpingConfigStore, default_scratch_directory
 
     return alsakkaf_scalping_service.ScalpingService(
         journal=journal if journal is not None else ScalpingJournalWriter(),
@@ -577,7 +586,12 @@ def _scalping_service_for_mode(
         symbol_map_store=symbol_map_store if symbol_map_store is not None else SymbolMapStore(),
         mode_service=mode_service_instance,
         market_intelligence_service=market_intelligence_service_instance,
-        scratch_directory=scratch_directory,
+        # TRL-R2-013 root cause 5: a real scratch directory is always
+        # supplied now -- the R2-012 real call site never passed one,
+        # which would have raised TypeError the first time a real
+        # TRADE_CANDIDATE reached the R2-010 bridge in production.
+        scratch_directory=scratch_directory if scratch_directory is not None else default_scratch_directory(),
+        config_store=ScalpingConfigStore(),
     )
 
 
@@ -624,6 +638,7 @@ def _subsystem_builder_for_mode(current_mode):
 def run_server(
     port=DEFAULT_PORT,
     open_browser=True,
+    open_fragment="",
     market_data_service=None,
     official_news_service=None,
     paper_service=None,
@@ -634,6 +649,7 @@ def run_server(
     market_intelligence_service_instance=None,
     market_data_replay_service_instance=None,
     scalping_service_instance=None,
+    scalping_runtime_instance=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -648,9 +664,11 @@ def run_server(
         market_intelligence_service_instance=market_intelligence_service_instance,
         market_data_replay_service_instance=market_data_replay_service_instance,
         scalping_service_instance=scalping_service_instance,
+        scalping_runtime_instance=scalping_runtime_instance,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
+    browser_url = url + "#{}".format(open_fragment) if open_fragment else url
     print("{} {}".format(APPLICATION_NAME, APPLICATION_VERSION))
     active_market_service = market_data_service or getattr(
         server, "market_data_service", None
@@ -761,11 +779,26 @@ def run_server(
         print(
             "  Mode startup recovery: {}".format(mode_status["startup_diagnostic_code"])
         )
+    active_scalping_service = vars(server).get("scalping_service_instance")
+    if active_scalping_service is not None:
+        try:
+            mt5_connected = active_scalping_service.mt5_connected()
+        except Exception:
+            mt5_connected = False
+        print(
+            "ALSAKKAF SCALPING | PRODUCT STATE: {} | MT5 CONNECTION: {} | "
+            "DEMO VERIFIED: {} | ORDER_CHECK/ORDER_SEND: PROHIBITED UNLESS DEMO_AUTO | "
+            "LIVE MONEY LOCKED".format(
+                active_scalping_service.current_state,
+                "OK" if mt5_connected else "NOT CONNECTED",
+                "YES" if mt5_connected else "NO",
+            )
+        )
     print("Local dashboard: {}".format(url))
     print("Press Ctrl+C to stop.")
     try:
         if open_browser:
-            webbrowser.open(url, new=2)
+            webbrowser.open(browser_url, new=2)
         server.serve_forever(poll_interval=0.25)
     except KeyboardInterrupt:
         print("\nShutdown requested.")
@@ -815,7 +848,22 @@ def run_server(
                                     try:
                                         active_mode_service.shutdown()
                                     finally:
-                                        server.server_close()
+                                        try:
+                                            # TRL-R2-013 Section 10: the
+                                            # read-only monitoring thread
+                                            # must never survive server
+                                            # shutdown -- stopped before the
+                                            # journal courtesy event below.
+                                            active_scalping_runtime = vars(server).get("scalping_runtime_instance")
+                                            if active_scalping_runtime is not None:
+                                                active_scalping_runtime.shutdown()
+                                        finally:
+                                            try:
+                                                active_scalping_service = vars(server).get("scalping_service_instance")
+                                                if active_scalping_service is not None:
+                                                    active_scalping_service.shutdown()
+                                            finally:
+                                                server.server_close()
         print("Local dashboard stopped.")
     return 0
 
@@ -947,6 +995,8 @@ def main(argv=None):
         operating_mode_service.current_mode, operating_mode_service,
         market_intelligence_service_instance=market_intelligence_service_instance,
     )
+    from .alsakkaf_scalping_runtime import ScalpingRuntime
+    scalping_runtime_instance = ScalpingRuntime(scalping_service_instance)
     try:
         _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
         _validate_signal_subsystem_consistency(operating_mode_service.current_mode, signal_service_instance)
@@ -961,6 +1011,7 @@ def main(argv=None):
         return run_server(
             port=args.port,
             open_browser=not args.no_browser,
+            open_fragment=args.open_fragment,
             market_data_service=market_service,
             official_news_service=official_news_service,
             paper_service=paper_service,
@@ -971,6 +1022,7 @@ def main(argv=None):
             market_intelligence_service_instance=market_intelligence_service_instance,
             market_data_replay_service_instance=market_data_replay_service_instance,
             scalping_service_instance=scalping_service_instance,
+            scalping_runtime_instance=scalping_runtime_instance,
         )
     except OSError as error:
         print(

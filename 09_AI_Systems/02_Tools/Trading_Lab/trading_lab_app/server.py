@@ -24,6 +24,7 @@ from .market_data_replay_data import DATASET_ID_PATTERN, REPLAY_SESSION_ID_PATTE
 from .market_data_replay_service import MarketDataServiceError
 from .alsakkaf_scalping_data import CANONICAL_INSTRUMENTS
 from .alsakkaf_scalping_service import ScalpingServiceError
+from .alsakkaf_scalping_runtime import ScalpingRuntimeError
 import secrets
 
 
@@ -168,7 +169,15 @@ SCALPING_STATUS_API_ROUTES = {
     "/api/scalping-cycles": service.scalping_cycles_document,
     "/api/scalping-owned-orders": service.scalping_owned_orders_document,
     "/api/scalping-owned-positions": service.scalping_owned_positions_document,
+    "/api/scalping-configuration": service.scalping_configuration_document,
 }
+# TRL-R2-013: these read routes are assembled by ``ScalpingRuntime`` (not
+# ``ScalpingService`` directly) and optionally take a ``?instrument=`` query
+# parameter -- handled specially in ``_handle_read`` rather than through the
+# fixed-signature ``SCALPING_STATUS_API_ROUTES`` dict above.
+_SCALPING_LIVE_STATUS_PATH = "/api/scalping-live-status"
+_SCALPING_LATEST_ANALYSIS_PATH = "/api/scalping-latest-analysis"
+_SCALPING_MONITORING_STATUS_PATH = "/api/scalping-monitoring-status"
 _SCALPING_PREFLIGHT_PATH_PREFIX = "/api/scalping-preflight/"
 _SCALPING_SYMBOL_CANDIDATES_PATH_PREFIX = "/api/scalping-symbol-candidates/"
 _SCALPING_CYCLE_DETAIL_PATH_PREFIX = "/api/scalping-cycle/"
@@ -178,11 +187,27 @@ _SCALPING_INSTRUMENT_PATTERN = re.compile(
 )
 _SCALPING_CYCLE_ID_PATTERN = re.compile(r"^cyc_[0-9a-f]{32}$")
 
+# TRL-R2-013 Section 5/11: ``/api/scalping-run-cycle`` (browser-supplied
+# bars/price/spread) is removed from the dashboard-facing mutation set --
+# the operator-facing analysis path is now the server-authoritative
+# ``/api/scalping-analyze-now`` below, which never accepts a market-data
+# field as an authoritative input.
 SCALPING_MUTATION_API_ROUTES = frozenset({
     "/api/scalping-start-demo-auto", "/api/scalping-pause", "/api/scalping-resume",
     "/api/scalping-emergency-stop", "/api/scalping-emergency-reset",
     "/api/scalping-save-symbol-map", "/api/scalping-configure-profile",
-    "/api/scalping-run-cycle",
+    "/api/scalping-recheck", "/api/scalping-save-configuration",
+    "/api/scalping-analyze-now", "/api/scalping-monitoring-start",
+    "/api/scalping-monitoring-stop",
+})
+
+# Any of these keys present in a mutation body is treated as an attempted
+# client-authoritative market-data injection and rejected outright
+# (contract Section 5) -- a raw candle/price/spread value must never
+# become execution-relevant input again.
+_SCALPING_REJECTED_CLIENT_MARKET_DATA_KEYS = frozenset({
+    "entry_bars", "confirmation_bars", "current_price", "spread", "bars",
+    "price", "bid", "ask", "candles",
 })
 
 
@@ -215,6 +240,18 @@ def _parse_pagination_query(query_string):
             raise ValueError("invalid limit")
         limit = int(values[0])
     return offset, limit
+
+
+def _single_query_value(query_string, key):
+    """Return the single value of ``key`` in ``query_string``, or ``None``
+    if absent. Raises no exception on a malformed/repeated value -- the
+    caller treats any non-``None``-but-invalid result as a validation
+    failure via the governed instrument pattern, never a silent fallback."""
+    parsed = parse_qs(query_string, keep_blank_values=True, strict_parsing=False)
+    values = parsed.get(key)
+    if not values or len(values) != 1:
+        return None
+    return values[0]
 
 
 def _market_opportunity_id_from_path(decoded_path):
@@ -266,6 +303,9 @@ def _is_known_api_path(decoded_path):
         or _safe_id_from_path(decoded_path, _REPLAY_SESSION_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN) is not None
         or _safe_id_from_path(decoded_path, _REPLAY_SNAPSHOT_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN) is not None
         or decoded_path in SCALPING_STATUS_API_ROUTES
+        or decoded_path == _SCALPING_LIVE_STATUS_PATH
+        or decoded_path == _SCALPING_LATEST_ANALYSIS_PATH
+        or decoded_path == _SCALPING_MONITORING_STATUS_PATH
         or decoded_path == _SCALPING_JOURNAL_PATH
         or _safe_id_from_path(decoded_path, _SCALPING_PREFLIGHT_PATH_PREFIX, _SCALPING_INSTRUMENT_PATTERN) is not None
         or _safe_id_from_path(decoded_path, _SCALPING_SYMBOL_CANDIDATES_PATH_PREFIX, _SCALPING_INSTRUMENT_PATTERN) is not None
@@ -413,6 +453,42 @@ class ApplicationHandler(BaseHTTPRequestHandler):
                     document = dict(document)
                     document["action_token"] = self.server.scalping_action_token
                 self._send_json(200, document, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
+            return
+        if decoded_path == _SCALPING_LIVE_STATUS_PATH:
+            query_instrument = _single_query_value(parsed_url.query, "instrument")
+            if query_instrument is not None and not _SCALPING_INSTRUMENT_PATTERN.fullmatch(query_instrument):
+                self._send_json(400, {"error": "SCALPING_INSTRUMENT_INVALID"}, include_body)
+                return
+            try:
+                self._send_json(
+                    200,
+                    service.scalping_live_status_document(self.server.scalping_runtime_instance, query_instrument),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
+            return
+        if decoded_path == _SCALPING_LATEST_ANALYSIS_PATH:
+            query_instrument = _single_query_value(parsed_url.query, "instrument")
+            if query_instrument is None or not _SCALPING_INSTRUMENT_PATTERN.fullmatch(query_instrument):
+                self._send_json(400, {"error": "SCALPING_INSTRUMENT_INVALID"}, include_body)
+                return
+            try:
+                self._send_json(
+                    200,
+                    service.scalping_latest_analysis_document(self.server.scalping_runtime_instance, query_instrument),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
+            return
+        if decoded_path == _SCALPING_MONITORING_STATUS_PATH:
+            try:
+                self._send_json(
+                    200, service.scalping_monitoring_status_document(self.server.scalping_runtime_instance), include_body,
+                )
             except (OSError, ValueError, TypeError, RuntimeError):
                 self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
             return
@@ -814,10 +890,15 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             self._send_json(400, {"error": "SCALPING_REQUEST_INVALID"})
             return
+        if any(key in body for key in _SCALPING_REJECTED_CLIENT_MARKET_DATA_KEYS):
+            self._send_json(400, {"error": "SCALPING_CLIENT_MARKET_DATA_REJECTED"})
+            return
         try:
-            document = _dispatch_scalping_mutation(self.server.scalping_service_instance, decoded_path, body)
+            document = _dispatch_scalping_mutation(
+                self.server.scalping_service_instance, self.server.scalping_runtime_instance, decoded_path, body,
+            )
             self._send_json(200, document)
-        except ScalpingServiceError as error:
+        except (ScalpingServiceError, ScalpingRuntimeError) as error:
             self._send_json(400, {"error": error.reason_code})
         except ValueError:
             self._send_json(400, {"error": "SCALPING_REQUEST_INVALID"})
@@ -836,12 +917,12 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         return
 
 
-def _dispatch_scalping_mutation(scalping_service_instance, path, body):
+def _dispatch_scalping_mutation(scalping_service_instance, scalping_runtime_instance, path, body):
     """The sole mapping from a governed ALSAKKAF SCALPING mutation path to
-    a ``ScalpingService`` call. Every branch here corresponds to exactly
-    one entry in ``SCALPING_MUTATION_API_ROUTES`` -- there is no
-    fallthrough default that could route an unrecognized path to a
-    mutating call."""
+    a ``ScalpingService``/``ScalpingRuntime`` call. Every branch here
+    corresponds to exactly one entry in ``SCALPING_MUTATION_API_ROUTES`` --
+    there is no fallthrough default that could route an unrecognized path
+    to a mutating call."""
     if path == "/api/scalping-start-demo-auto":
         return {"product_state": scalping_service_instance.request_state_change("DEMO_AUTO")}
     if path == "/api/scalping-pause":
@@ -860,11 +941,35 @@ def _dispatch_scalping_mutation(scalping_service_instance, path, body):
         return scalping_service_instance.configure_profile(
             body.get("canonical_instrument"), body.get("profile_id"),
         )
-    if path == "/api/scalping-run-cycle":
-        return scalping_service_instance.run_cycle(
-            body.get("canonical_instrument"), body.get("entry_bars"),
-            body.get("confirmation_bars"), body.get("current_price"), body.get("spread"),
+    if path == "/api/scalping-recheck":
+        return {
+            "dependency": scalping_service_instance.dependency_status(),
+            "terminal": scalping_service_instance.terminal_status(),
+            "account": scalping_service_instance.account_status(),
+            "mt5_connected": scalping_service_instance.mt5_connected(),
+        }
+    if path == "/api/scalping-save-configuration":
+        instrument = body.get("canonical_instrument")
+        if "profile_id" in body:
+            scalping_service_instance.configure_profile(
+                instrument, body.get("profile_id"), risk_overrides=body.get("risk_overrides"),
+                max_spread_points=body.get("max_spread_points"),
+            )
+        if "side_restriction" in body:
+            scalping_service_instance.configure_side(instrument, body.get("side_restriction"))
+        if "monitoring_interval_seconds" in body:
+            scalping_service_instance.set_monitoring_interval_seconds(body.get("monitoring_interval_seconds"))
+        if "event_risk_blocked" in body:
+            scalping_service_instance.set_event_risk_block(instrument, body.get("event_risk_blocked"))
+        return scalping_service_instance.configuration_document()
+    if path == "/api/scalping-analyze-now":
+        return scalping_runtime_instance.analyze_now(body.get("canonical_instrument"))
+    if path == "/api/scalping-monitoring-start":
+        return scalping_runtime_instance.start_monitoring(
+            body.get("canonical_instrument"), body.get("interval_seconds"),
         )
+    if path == "/api/scalping-monitoring-stop":
+        return scalping_runtime_instance.stop_monitoring()
     raise RuntimeError("unregistered ALSAKKAF SCALPING mutation path")
 
 
@@ -1269,6 +1374,7 @@ def create_server(
     market_intelligence_service_instance=None,
     market_data_replay_service_instance=None,
     scalping_service_instance=None,
+    scalping_runtime_instance=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -1299,5 +1405,13 @@ def create_server(
     # /api/scalping-status response, never logged, and never derived from
     # or adjacent to any broker credential.
     local_server.scalping_service_instance = scalping_service_instance
+    # TRL-R2-013: the runtime wraps whatever service instance is in force so
+    # every caller that already wires a real ``scalping_service_instance``
+    # (app.py, and every pre-existing test) automatically gets a working
+    # ``ScalpingRuntime`` without having to construct one separately.
+    if scalping_runtime_instance is None and scalping_service_instance is not None:
+        from .alsakkaf_scalping_runtime import ScalpingRuntime
+        scalping_runtime_instance = ScalpingRuntime(scalping_service_instance)
+    local_server.scalping_runtime_instance = scalping_runtime_instance
     local_server.scalping_action_token = secrets.token_urlsafe(32)
     return local_server

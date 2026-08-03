@@ -671,8 +671,25 @@ session end or when session capacity drops below ~15%.
   broker-verified `order_check`/`order_send` round trip on the real 4T
   demo terminal, achievable only when a genuine `TRADE_CANDIDATE` occurs
   during a further, separately authorized bounded rehearsal. Real-money
-  automation remains locked. TRL-R2-013 has not started. Phase 7 has not
-  started.
+  automation remains locked.
+- **TRL-R2-013 — ALSAKKAF SCALPING Operational Dashboard Hotfix (Phase
+  6C-1) — implementation complete, Founder visually accepted (dashboard
+  and corrected shutdown), locally committed this session.** Remote push
+  remains a separate, later, Founder-authorized step. Corrects the
+  operational gap the Founder found on the
+  first real launch of the R2-012 dashboard (launcher never requested a
+  mode/product-state transition; MT5 connection badge was journal-health-
+  derived; configuration never persisted; no server-side bar/quote fetch
+  existed). New `alsakkaf_scalping_runtime.py` (`ScalpingRuntime`);
+  corrected launchers; new `TRL_SCALPING_CONFIG.v1` persistence; new/
+  changed HTTP routes and CLI commands; `Demo Auto` locked in the
+  dashboard. 75 net-new tests, including a same-session Founder shutdown
+  correction addendum (1422 + 75 = 1497). See
+  `TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_CONTRACT.md`
+  and `_EVIDENCE.md` for exact test/rehearsal results. Does not touch
+  R2-012's execution model, risk policy, ladder logic, or journal schema;
+  does not enter `DEMO_AUTO`; does not call `order_check`/`order_send`.
+  Phase 7 has not started.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
 - **Known defects:** None outstanding.
@@ -694,10 +711,13 @@ session end or when session capacity drops below ~15%.
   remotely verified checkpoint** (committed and pushed at
   `791ea98118539b6bf30f37e5eaf81ffd85d3589c` and
   `0edd4adf2019e8162011ada58f3e5962555271eb`, range `02c48e0..0edd4ad` —
-  see the dedicated entries above). Its next checkpoint (TRL-R2-013) has
-  not been formally authorized or started. Separate, explicit Founder authorization is
-  still needed for the remote push of the already-locally-committed Phase
-  6 implementation checkpoint
+  see the dedicated entries above). **TRL-R2-013 (ALSAKKAF SCALPING
+  Operational Dashboard Hotfix) implementation, including the same-session
+  Founder shutdown-correction addendum, is Founder-accepted and locally
+  committed this session** — remote push has not occurred; that remains a
+  separate, later, Founder-authorized step, exactly like the already-
+  locally-committed Phase 6 implementation checkpoint described earlier
+  in this document
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch
 - **Prohibited commands:** `git reset --hard`, `git clean`, broad `git restore`, force-push, `--no-verify`
 - **Last update timestamp:** see `TRL_CONTINUATION_STATE.json` -> `last_update`

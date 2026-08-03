@@ -49,12 +49,34 @@ _TRANSITIONS = {
 DEFAULT_MAX_SPREAD_POINTS = 200
 DEFAULT_MAX_CONSECUTIVE_LOSSES = risk.DEFAULT_MAX_CONSECUTIVE_LOSSES
 
+_DECIMAL_RISK_SETTING_KEYS = frozenset((
+    "risk_per_cycle_pct", "max_total_active_risk_pct",
+    "max_daily_loss_pct", "max_session_drawdown_pct",
+))
+
+
+def _serialize_risk_settings(settings):
+    return {
+        key: (str(value) if key in _DECIMAL_RISK_SETTING_KEYS else int(value))
+        for key, value in settings.items()
+    }
+
+
+def _deserialize_risk_settings(settings):
+    result = {}
+    for key, value in settings.items():
+        if key in _DECIMAL_RISK_SETTING_KEYS:
+            result[key] = Decimal(str(value))
+        else:
+            result[key] = int(value)
+    return result
+
 
 class ScalpingService:
     def __init__(
         self, journal=None, adapter=None, symbol_map_store=None,
         mode_service=None, market_intelligence_service=None, clock=None,
-        scratch_directory=None,
+        scratch_directory=None, config_store=None,
     ):
         from .alsakkaf_scalping_journal import in_memory_journal_writer
         self._journal = journal if journal is not None else in_memory_journal_writer()
@@ -64,14 +86,42 @@ class ScalpingService:
         self._mi_service = market_intelligence_service
         self._clock = clock or (lambda: datetime.now(timezone.utc))
         self._scratch_directory = scratch_directory
-        self._risk_settings = risk.validate_risk_settings(risk.default_risk_settings())
+        # TRL-R2-013 Section 8: profile/side/risk/spread/monitoring-interval
+        # configuration is now durably persisted (previously process-memory
+        # only, lost on every restart -- root cause 3 of the operational
+        # hotfix contract).
+        self._config_store = config_store if config_store is not None else data.InMemoryScalpingConfigStore()
+        persisted = self._config_store.load()
+        persisted_risk = _deserialize_risk_settings(persisted.get("risk_settings", {})) if persisted.get("risk_settings") else {}
+        self._risk_settings = risk.validate_risk_settings(
+            {**risk.default_risk_settings(), **persisted_risk}
+        )
         self._max_spread_points = {instrument: DEFAULT_MAX_SPREAD_POINTS for instrument in data.CANONICAL_INSTRUMENTS}
-        self._profiles = {}
+        self._max_spread_points.update(persisted.get("max_spread_points", {}))
+        self._profiles = dict(persisted.get("profiles", {}))
+        self._side_restrictions = dict(persisted.get("side_restrictions", {}))
+        self._monitoring_interval_seconds = persisted.get(
+            "monitoring_interval_seconds", data.DEFAULT_MONITORING_INTERVAL_SECONDS,
+        )
         self._start_of_day_equity = None
         self._peak_equity = None
         self._consecutive_losses = 0
         self._cooldown_until_utc = None
         self._last_symbol_cycle_at_utc = {}
+
+    def _persist_config(self):
+        self._config_store.save({
+            "schema_version": data.CONFIG_SCHEMA,
+            "profiles": dict(self._profiles),
+            "side_restrictions": dict(self._side_restrictions),
+            "max_spread_points": dict(self._max_spread_points),
+            "risk_settings": _serialize_risk_settings(self._risk_settings),
+            "monitoring_interval_seconds": self._monitoring_interval_seconds,
+        })
+
+    def _require_non_demo_auto_for_config(self):
+        if self.current_state == "DEMO_AUTO":
+            raise ScalpingServiceError("SCALPING_CONFIG_REQUIRES_NON_AUTO_STATE")
 
     def _now(self):
         return format_utc(self._clock())
@@ -182,6 +232,7 @@ class ScalpingService:
     # ------------------------------------------------------------------
 
     def configure_profile(self, canonical_instrument, profile_id, risk_overrides=None, max_spread_points=None):
+        self._require_non_demo_auto_for_config()
         data.validate_canonical_instrument(canonical_instrument)
         data.validate_profile_id(profile_id)
         settings = dict(self._risk_settings)
@@ -202,10 +253,89 @@ class ScalpingService:
                 "risk_settings": {key: str(value) for key, value in settings.items()},
                 "max_spread_points": str(self._max_spread_points.get(canonical_instrument, DEFAULT_MAX_SPREAD_POINTS)),
             }, occurred_at_utc=self._now())
+        self._persist_config()
         return {"profile_id": profile_id, "risk_settings": {k: str(v) for k, v in settings.items()}}
 
     def profile_for(self, canonical_instrument):
         return self._profiles.get(canonical_instrument, "ALSAKKAF_PRECISION_SCALPING")
+
+    def configure_side(self, canonical_instrument, side_restriction):
+        self._require_non_demo_auto_for_config()
+        data.validate_canonical_instrument(canonical_instrument)
+        data._require_choice(side_restriction, data.SIDE_RESTRICTIONS, "side_restriction")
+        self._side_restrictions[canonical_instrument] = side_restriction
+        self._persist_config()
+        return {"canonical_instrument": canonical_instrument, "side_restriction": side_restriction}
+
+    def side_restriction_for(self, canonical_instrument):
+        return self._side_restrictions.get(canonical_instrument, "BOTH")
+
+    def set_monitoring_interval_seconds(self, seconds):
+        self._require_non_demo_auto_for_config()
+        if (
+            not isinstance(seconds, int) or isinstance(seconds, bool)
+            or not data.MIN_MONITORING_INTERVAL_SECONDS <= seconds <= data.MAX_MONITORING_INTERVAL_SECONDS
+        ):
+            raise ScalpingServiceError("SCALPING_MONITORING_INTERVAL_OUT_OF_BOUNDS")
+        self._monitoring_interval_seconds = seconds
+        self._persist_config()
+        return self._monitoring_interval_seconds
+
+    @property
+    def monitoring_interval_seconds(self):
+        return self._monitoring_interval_seconds
+
+    def configuration_document(self):
+        mapping_document = self._symbol_map_store.load()
+        return {
+            "schema_version": data.CONFIG_SCHEMA,
+            "mappings": dict(mapping_document["mappings"]),
+            "event_risk_blocked": dict(mapping_document["event_risk_blocked"]),
+            "profiles": dict(self._profiles),
+            "side_restrictions": dict(self._side_restrictions),
+            "max_spread_points": dict(self._max_spread_points),
+            "risk_settings": {key: str(value) for key, value in self._risk_settings.items()},
+            "monitoring_interval_seconds": self._monitoring_interval_seconds,
+        }
+
+    # ------------------------------------------------------------------
+    # Adapter passthroughs (TRL-R2-013 Section 6/7): thin, read-only
+    # delegation so ``alsakkaf_scalping_runtime.py`` can assemble the live
+    # status/analysis documents without reaching into a private attribute.
+    # ------------------------------------------------------------------
+
+    def dependency_status(self):
+        return self._adapter.dependency_status()
+
+    def terminal_status(self):
+        return self._adapter.terminal_status()
+
+    def account_status(self):
+        return self._adapter.account_status()
+
+    def symbol_status(self, broker_symbol):
+        return self._adapter.symbol_status(broker_symbol)
+
+    def fetch_completed_bars(self, broker_symbol, timeframe, count):
+        return self._adapter.fetch_completed_bars(broker_symbol, timeframe, count)
+
+    @property
+    def adapter_tier(self):
+        return getattr(self._adapter, "tier", "UNKNOWN")
+
+    @property
+    def mode_service(self):
+        return self._mode_service
+
+    def mt5_connected(self):
+        """Contract Section 7: true only when the terminal AND the demo
+        account are both independently, freshly proven -- never derived
+        from journal health (root cause 2 of the operational hotfix)."""
+        terminal = self.terminal_status()
+        if not terminal.get("connected"):
+            return False
+        account = self.account_status()
+        return bool(account.get("available")) and account.get("trade_mode") == mt5_adapter.ACCOUNT_TRADE_MODE_DEMO
 
     # ------------------------------------------------------------------
     # Preflight (Section 6)
@@ -225,6 +355,25 @@ class ScalpingService:
             self.is_emergency_stopped, self.event_risk_blocked_for(canonical_instrument),
             daily_loss_ok, session_open=True, quote_age_seconds=quote_age_seconds,
         )
+
+    def daily_pnl_and_drawdown(self):
+        """Read-only view for the live-status document (TRL-R2-013 Section
+        6); establishes the same start-of-day/peak-equity tracking
+        ``_daily_loss_ok`` uses, without requiring a full preflight call."""
+        ok = self._daily_loss_ok()
+        if self._start_of_day_equity is None or self._peak_equity is None:
+            return {"daily_pnl": None, "session_drawdown_pct": None, "within_limits": ok}
+        account = self._adapter.account_status()
+        equity = account.get("equity")
+        if equity is None:
+            return {"daily_pnl": None, "session_drawdown_pct": None, "within_limits": ok}
+        equity = Decimal(equity)
+        daily_pnl = equity - self._start_of_day_equity
+        drawdown_pct = (
+            ((self._peak_equity - equity) / self._peak_equity) * Decimal("100")
+            if self._peak_equity > 0 else Decimal("0")
+        )
+        return {"daily_pnl": str(daily_pnl), "session_drawdown_pct": str(drawdown_pct), "within_limits": ok}
 
     def _daily_loss_ok(self):
         account = self._adapter.account_status()
@@ -450,6 +599,54 @@ class ScalpingService:
                 "from_state": "EMERGENCY_STOP", "to_state": "OFF", "reason": "emergency_reset",
             }, occurred_at_utc=self._now())
         return "OFF"
+
+    # ------------------------------------------------------------------
+    # TRL-R2-013 Founder shutdown correction: deterministic, idempotent,
+    # state-aware stop. The R2-012 transition table only ever allowed
+    # ``ANALYZE_ONLY -> PAUSED`` never at all (``PAUSED`` is reachable only
+    # from ``DEMO_AUTO``/``PAUSED`` itself) -- a plain ``scalping-pause``
+    # call therefore always failed from the exact state the corrected
+    # R2-013 launcher establishes (``ANALYZE_ONLY``), and a naive fallback
+    # to ``EMERGENCY_STOP`` on that failure latched an unnecessary
+    # emergency stop on every ordinary shutdown. This method never uses
+    # ``EMERGENCY_STOP`` as a generic fallback, and never attempts a bare
+    # ``EMERGENCY_STOP -> OFF`` transition (which the R2-012 transition
+    # table technically allows but which would bypass the zero-owned-
+    # pending-orders gate ``reset_emergency_stop`` alone enforces).
+    # ------------------------------------------------------------------
+
+    def graceful_stop(self):
+        current = self.current_state
+        if current == "OFF":
+            return {"outcome": "ALREADY_OFF", "product_state": "OFF"}
+        if current in ("ANALYZE_ONLY", "PAUSED"):
+            return {"outcome": "STOPPED", "product_state": self.request_state_change("OFF")}
+        if current == "DEMO_AUTO":
+            self.request_state_change("EMERGENCY_STOP")
+            self._require_zero_owned_state_or_raise("SCALPING_GRACEFUL_STOP_OWNED_STATE_REMAINS")
+            return {"outcome": "STOPPED", "product_state": self.reset_emergency_stop()}
+        if current == "EMERGENCY_STOP":
+            self._require_zero_owned_state_or_raise("SCALPING_GRACEFUL_STOP_OWNED_STATE_REMAINS")
+            return {"outcome": "STOPPED", "product_state": self.reset_emergency_stop()}
+        raise ScalpingServiceError("SCALPING_GRACEFUL_STOP_UNKNOWN_STATE")
+
+    def recover_stale_emergency_stop(self):
+        """TRL-R2-013 Section 4: startup-only recovery for a latched
+        ``EMERGENCY_STOP`` left over from a prior session. Never acts on
+        any other state (in particular, never force-stops a genuinely
+        active ``DEMO_AUTO`` -- that is the shutdown path's job, not
+        startup's). Fails closed, without resetting anything, when owned
+        broker state is non-zero or uncertain."""
+        current = self.current_state
+        if current != "EMERGENCY_STOP":
+            return {"outcome": "NO_ACTION_NEEDED", "product_state": current}
+        self._require_zero_owned_state_or_raise("SCALPING_STARTUP_RECOVERY_OWNED_STATE_REMAINS")
+        return {"outcome": "RECOVERED", "product_state": self.reset_emergency_stop()}
+
+    def _require_zero_owned_state_or_raise(self, reason_code):
+        reconciled = self.reconcile()
+        if reconciled["owned_orders"] or reconciled["owned_positions"]:
+            raise ScalpingServiceError(reason_code)
 
     # ------------------------------------------------------------------
     # Reconciliation and read-only views

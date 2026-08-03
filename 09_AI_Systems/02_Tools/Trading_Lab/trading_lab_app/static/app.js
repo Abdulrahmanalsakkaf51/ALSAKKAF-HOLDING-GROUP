@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, basket: null, marketIntelligence: null, marketDataFabric: null, scalping: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, basket: null, marketIntelligence: null, marketDataFabric: null, scalping: null, scalpingLive: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -722,12 +722,32 @@ async function loadMarketDataFabric() {
 
 async function loadScalping() {
   try {
-    const [status, cycles, orders, positions, journal] = await Promise.all([
+    const [status, cycles, orders, positions, journal, configuration] = await Promise.all([
       getJson("/api/scalping-status"), getJson("/api/scalping-cycles"),
       getJson("/api/scalping-owned-orders"), getJson("/api/scalping-owned-positions"),
-      getJson("/api/scalping-journal"),
+      getJson("/api/scalping-journal"), getJson("/api/scalping-configuration"),
     ]);
-    return { status, cycles: cycles.cycles, orders: orders.owned_orders, positions: positions.owned_positions, journal: journal.events };
+    return {
+      status, cycles: cycles.cycles, orders: orders.owned_orders, positions: positions.owned_positions,
+      journal: journal.events, configuration,
+    };
+  } catch (error) { return { error: error.message }; }
+}
+
+function scalpingSelectedInstrument() {
+  const select = $("scalping-instrument-select");
+  return select && select.value ? select.value : "XAUUSD";
+}
+
+async function loadScalpingLive() {
+  const instrument = scalpingSelectedInstrument();
+  try {
+    const [liveStatus, latestAnalysis, monitoringStatus] = await Promise.all([
+      getJson(`/api/scalping-live-status?instrument=${encodeURIComponent(instrument)}`),
+      getJson(`/api/scalping-latest-analysis?instrument=${encodeURIComponent(instrument)}`),
+      getJson("/api/scalping-monitoring-status"),
+    ]);
+    return { liveStatus, latestAnalysis, monitoringStatus };
   } catch (error) { return { error: error.message }; }
 }
 
@@ -753,17 +773,26 @@ function renderScalping(bundle) {
     emergencyBadge.textContent = "EMERGENCY STOP: UNKNOWN";
     return;
   }
-  const { status, cycles, orders, positions, journal } = bundle;
+  const { status, cycles, orders, positions, journal, configuration } = bundle;
   stateBadge.textContent = status.product_state;
   automationBadge.textContent = `AUTOMATION STATUS: ${status.product_state}`;
   emergencyBadge.textContent = status.emergency_stop_active ? "EMERGENCY STOP: ACTIVE" : "EMERGENCY STOP: INACTIVE";
-  const profileEntries = Object.entries(status.profiles || {});
-  setText("scalping-profile", profileEntries.length ? profileEntries.map(([symbol, profile]) => `${symbol}: ${profile}`).join(", ") : "—");
-  setText("scalping-mt5-connection", status.journal_startup_diagnostic_code === "OK" ? "OK" : status.journal_startup_diagnostic_code);
-  setText("scalping-demo-verified", "—");
-  setText("scalping-equity", "—");
-  setText("scalping-daily-pnl", "—");
-  setText("scalping-decision", "—");
+
+  if (configuration && !configuration.error) {
+    const instrument = scalpingSelectedInstrument();
+    const profileSelect = $("scalping-profile-select");
+    const sideSelect = $("scalping-side-select");
+    if (profileSelect && configuration.profiles && configuration.profiles[instrument]) profileSelect.value = configuration.profiles[instrument];
+    if (sideSelect && configuration.side_restrictions && configuration.side_restrictions[instrument]) sideSelect.value = configuration.side_restrictions[instrument];
+    const riskInput = $("scalping-risk-input");
+    if (riskInput && configuration.risk_settings && configuration.risk_settings.risk_per_cycle_pct) riskInput.value = configuration.risk_settings.risk_per_cycle_pct;
+    const spreadInput = $("scalping-spread-input");
+    if (spreadInput && configuration.max_spread_points && configuration.max_spread_points[instrument] != null) spreadInput.value = configuration.max_spread_points[instrument];
+    const intervalInput = $("scalping-monitoring-interval-input");
+    if (intervalInput && configuration.monitoring_interval_seconds != null) intervalInput.value = configuration.monitoring_interval_seconds;
+    const eventRiskBox = $("scalping-event-risk-checkbox");
+    if (eventRiskBox && configuration.event_risk_blocked) eventRiskBox.checked = Boolean(configuration.event_risk_blocked[instrument]);
+  }
 
   const cycleTable = $("scalping-cycle-table");
   cycleTable.replaceChildren();
@@ -810,26 +839,205 @@ function renderScalping(bundle) {
   });
 }
 
+const SCALPING_SCORE_CATEGORIES = [
+  ["trend", "Trend"], ["momentum", "Momentum"], ["market_structure", "Market structure"],
+  ["volatility_suitability", "Volatility suitability"], ["spread_and_cost", "Spread and cost"],
+  ["multi_timeframe_alignment", "Multi-timeframe alignment"],
+];
+
+function renderScalpingLive(bundle) {
+  if (!bundle || bundle.error) {
+    setText("scalping-mt5-connection", "UNAVAILABLE");
+    setText("scalping-journal-health", "UNAVAILABLE");
+    return;
+  }
+  const { liveStatus, latestAnalysis, monitoringStatus } = bundle;
+  $("scalping-local-badge").textContent = "LOCAL";
+  $("scalping-mt5-demo-badge").textContent = `MT5 DEMO: ${liveStatus.mt5_connected ? "CONNECTED" : "NOT CONNECTED"}`;
+  $("scalping-analyze-only-badge").textContent = `ANALYZE ONLY: ${liveStatus.product_state === "ANALYZE_ONLY" ? "ACTIVE" : liveStatus.product_state}`;
+  setText("scalping-mt5-connection", liveStatus.mt5_connected ? "OK" : "NOT CONNECTED");
+  setText("scalping-journal-health", liveStatus.journal_health);
+  setText("scalping-demo-verified", liveStatus.demo_verified ? "YES" : "NO");
+  setText("scalping-currency", liveStatus.currency);
+  setText("scalping-balance", liveStatus.balance != null ? number(liveStatus.balance, 2) : "—");
+  setText("scalping-equity", liveStatus.equity != null ? number(liveStatus.equity, 2) : "—");
+  setText("scalping-daily-pnl", liveStatus.daily_pnl != null ? signed(liveStatus.daily_pnl) : "ANALYSIS_NOT_RUN");
+  setText("scalping-drawdown", liveStatus.session_drawdown_pct != null ? `${number(liveStatus.session_drawdown_pct, 2)}%` : "ANALYSIS_NOT_RUN");
+  setText("scalping-profile", liveStatus.profile || "SYMBOL_NOT_MAPPED");
+  setText("scalping-side", liveStatus.side_restriction || "SYMBOL_NOT_MAPPED");
+  setText("scalping-event-risk", liveStatus.event_risk_blocked == null ? "SYMBOL_NOT_MAPPED" : (liveStatus.event_risk_blocked ? "BLOCKED" : "CLEAR"));
+
+  setText("scalping-analysis-symbol", liveStatus.broker_symbol || liveStatus.mapping_status);
+  setText("scalping-analysis-quote", liveStatus.bid != null ? `${liveStatus.bid} / ${liveStatus.ask} / ${liveStatus.spread_points} pts` : liveStatus.quote_status);
+  setText("scalping-monitoring-status", monitoringStatus.running ? `RUNNING (${monitoringStatus.instrument}, every ${monitoringStatus.interval_seconds}s, ${monitoringStatus.tick_count} ticks)` : `STOPPED${monitoringStatus.stopped_reason ? " — " + monitoringStatus.stopped_reason : ""}`);
+
+  const scoreTable = $("scalping-score-table");
+  scoreTable.replaceChildren();
+  if (!latestAnalysis || !latestAnalysis.ok) {
+    setText("scalping-analysis-status", latestAnalysis ? `Not run: ${latestAnalysis.reason_code}${latestAnalysis.detail ? " (" + latestAnalysis.detail + ")" : ""}` : "Analysis not yet run.");
+    ["scalping-analysis-atr", "scalping-analysis-rsi", "scalping-analysis-adx", "scalping-analysis-sr", "scalping-analysis-direction", "scalping-analysis-score", "scalping-analysis-classification", "scalping-analysis-time"].forEach((id) => setText(id, "—"));
+    setText("scalping-analysis-reasons", "");
+    return;
+  }
+  const evaluation = latestAnalysis.evaluation;
+  const bundleData = evaluation.bundle;
+  setText("scalping-analysis-status", `Analysis complete (${latestAnalysis.final_status}).`);
+  setText("scalping-analysis-atr", bundleData.atr);
+  setText("scalping-analysis-rsi", bundleData.rsi);
+  setText("scalping-analysis-adx", bundleData.adx);
+  setText("scalping-analysis-sr", `${bundleData.nearest_support ?? "—"} / ${bundleData.nearest_resistance ?? "—"}`);
+  setText("scalping-analysis-direction", evaluation.direction);
+  setText("scalping-analysis-score", `${evaluation.total_score}/100`);
+  setText("scalping-analysis-classification", latestAnalysis.final_status);
+  setText("scalping-analysis-time", latestAnalysis.analyzed_at_utc);
+  setText("scalping-analysis-reasons", (latestAnalysis.reasons || []).join(", ") || (evaluation.classification === "WAIT" ? "WAIT: no reason codes recorded by the R2-010 bridge for this cycle." : ""));
+  SCALPING_SCORE_CATEGORIES.forEach(([key, label]) => {
+    const tr = document.createElement("tr");
+    const nameCell = document.createElement("td");
+    nameCell.textContent = label;
+    const scoreCell = document.createElement("td");
+    scoreCell.textContent = escapeText(evaluation.scores[key]);
+    tr.append(nameCell, scoreCell);
+    scoreTable.appendChild(tr);
+  });
+}
+
+async function refreshScalpingLive() {
+  state.scalpingLive = await loadScalpingLive();
+  renderScalpingLive(state.scalpingLive);
+}
+
+async function refreshScalpingAfterMutation() {
+  state.scalping = await loadScalping();
+  renderScalping(state.scalping);
+  await refreshScalpingLive();
+}
+
 function wireScalpingControls() {
   const resultLine = $("scalping-control-result");
-  const bind = (id, path, body) => {
+  const mappingResult = $("scalping-mapping-result");
+  const configurationResult = $("scalping-configuration-result");
+  const analysisStatus = $("scalping-analysis-status");
+
+  // TRL-R2-013 Section 9: Demo Auto has no click handler anywhere in this
+  // file -- the control is rendered permanently disabled in index.html and
+  // no code path here ever calls /api/scalping-start-demo-auto. The R2-012
+  // backend transition remains implemented and unit-tested; only the
+  // dashboard's ability to invoke it is removed.
+  const bind = (id, path, body, resultTarget) => {
     $(id).addEventListener("click", async () => {
-      resultLine.textContent = "Working...";
+      (resultTarget || resultLine).textContent = "Working...";
       try {
         const document_ = await postScalping(path, body);
-        resultLine.textContent = `OK: ${JSON.stringify(document_)}`;
-        state.scalping = await loadScalping();
-        renderScalping(state.scalping);
+        (resultTarget || resultLine).textContent = `OK: ${JSON.stringify(document_)}`;
+        await refreshScalpingAfterMutation();
       } catch (error) {
-        resultLine.textContent = `REJECTED: ${error.message}`;
+        (resultTarget || resultLine).textContent = `REJECTED: ${error.message}`;
       }
     });
   };
-  bind("scalping-btn-start", "/api/scalping-start-demo-auto");
   bind("scalping-btn-pause", "/api/scalping-pause");
   bind("scalping-btn-resume", "/api/scalping-resume");
   bind("scalping-btn-emergency-stop", "/api/scalping-emergency-stop");
   bind("scalping-btn-emergency-reset", "/api/scalping-emergency-reset");
+
+  $("scalping-btn-recheck").addEventListener("click", async () => {
+    resultLine.textContent = "Rechecking...";
+    try {
+      const document_ = await postScalping("/api/scalping-recheck", {});
+      resultLine.textContent = `OK: MT5 connected = ${document_.mt5_connected}`;
+      await refreshScalpingAfterMutation();
+    } catch (error) { resultLine.textContent = `REJECTED: ${error.message}`; }
+  });
+
+  $("scalping-btn-discover").addEventListener("click", async () => {
+    const instrument = scalpingSelectedInstrument();
+    mappingResult.textContent = "Discovering...";
+    try {
+      const document_ = await getJson(`/api/scalping-symbol-candidates/${encodeURIComponent(instrument)}`);
+      const select = $("scalping-symbol-candidates");
+      select.replaceChildren();
+      const candidates = document_.candidates || [];
+      if (!candidates.length) {
+        const option = document.createElement("option");
+        option.value = ""; option.textContent = "— no candidates found —";
+        select.appendChild(option);
+      }
+      candidates.forEach((symbol) => {
+        const option = document.createElement("option");
+        option.value = symbol; option.textContent = symbol;
+        select.appendChild(option);
+      });
+      mappingResult.textContent = `Found ${candidates.length} candidate(s).`;
+    } catch (error) { mappingResult.textContent = `REJECTED: ${error.message}`; }
+  });
+
+  $("scalping-btn-save-map").addEventListener("click", async () => {
+    const instrument = scalpingSelectedInstrument();
+    const brokerSymbol = $("scalping-symbol-candidates").value;
+    if (!brokerSymbol) { mappingResult.textContent = "Select a broker-symbol candidate first."; return; }
+    mappingResult.textContent = "Saving...";
+    try {
+      await postScalping("/api/scalping-save-symbol-map", { canonical_instrument: instrument, broker_symbol: brokerSymbol });
+      mappingResult.textContent = `Saved mapping ${instrument} -> ${brokerSymbol}.`;
+      await refreshScalpingAfterMutation();
+    } catch (error) { mappingResult.textContent = `REJECTED: ${error.message}`; }
+  });
+
+  $("scalping-btn-save-configuration").addEventListener("click", async () => {
+    const instrument = scalpingSelectedInstrument();
+    configurationResult.textContent = "Saving...";
+    const body = {
+      canonical_instrument: instrument,
+      profile_id: $("scalping-profile-select").value,
+      side_restriction: $("scalping-side-select").value,
+      event_risk_blocked: $("scalping-event-risk-checkbox").checked,
+    };
+    const riskValue = $("scalping-risk-input").value;
+    if (riskValue) body.risk_overrides = { risk_per_cycle_pct: riskValue };
+    const spreadValue = $("scalping-spread-input").value;
+    if (spreadValue) body.max_spread_points = Number(spreadValue);
+    const intervalValue = $("scalping-monitoring-interval-input").value;
+    if (intervalValue) body.monitoring_interval_seconds = Number(intervalValue);
+    try {
+      await postScalping("/api/scalping-save-configuration", body);
+      configurationResult.textContent = "Configuration saved.";
+      await refreshScalpingAfterMutation();
+    } catch (error) { configurationResult.textContent = `REJECTED: ${error.message}`; }
+  });
+
+  $("scalping-btn-analyze-now").addEventListener("click", async () => {
+    const instrument = scalpingSelectedInstrument();
+    analysisStatus.textContent = "Analyzing (fetching live MT5 bars/quote server-side)...";
+    try {
+      await postScalping("/api/scalping-analyze-now", { canonical_instrument: instrument });
+      await refreshScalpingLive();
+    } catch (error) { analysisStatus.textContent = `REJECTED: ${error.message}`; }
+  });
+
+  $("scalping-btn-monitoring-start").addEventListener("click", async () => {
+    const instrument = scalpingSelectedInstrument();
+    const intervalValue = $("scalping-monitoring-interval-input").value;
+    const body = { canonical_instrument: instrument };
+    if (intervalValue) body.interval_seconds = Number(intervalValue);
+    try {
+      await postScalping("/api/scalping-monitoring-start", body);
+      await refreshScalpingLive();
+    } catch (error) { setText("scalping-monitoring-status", `REJECTED: ${error.message}`); }
+  });
+
+  $("scalping-btn-monitoring-stop").addEventListener("click", async () => {
+    try {
+      await postScalping("/api/scalping-monitoring-stop", {});
+      await refreshScalpingLive();
+    } catch (error) { setText("scalping-monitoring-status", `REJECTED: ${error.message}`); }
+  });
+
+  $("scalping-instrument-select").addEventListener("change", refreshScalpingLive);
+
+  // Section 13: live status refreshes every 5 seconds; heavy analysis
+  // (Run Analysis Now / monitoring ticks) never runs on this timer itself.
+  setInterval(refreshScalpingLive, 5000);
 }
 
 async function loadOfficialNews() {
@@ -857,6 +1065,7 @@ async function loadDashboard() {
   try {
     [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5, state.basket, state.marketIntelligence, state.marketDataFabric, state.scalping] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution(), loadBasketExecution(), loadMarketIntelligence(), loadMarketDataFabric(), loadScalping()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
+    await refreshScalpingLive();
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }
 
