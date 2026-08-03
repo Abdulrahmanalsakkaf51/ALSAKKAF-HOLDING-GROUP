@@ -646,3 +646,71 @@ kind — a future conversion of a replay window into an R2-010 analysis input or
 execution artifact requires a separate, explicitly Founder-approved contract. See
 `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` for full detail, including
 disclosed implementation-level design choices and limitations.
+
+## 22. ALSAKKAF SCALPING Demo Automation V0 (TRL-R2-012, Phase 6C)
+
+**DEMO ACCOUNT ONLY.** Automated MT5-demo scalping and intraday execution
+built on Phase 5's adapter pattern, R2-010's decision engine, and a new
+deterministic technical-evidence bridge. Automated `order_check`/`order_send`
+require both `MT5_DEMO_AUTOMATED` (`alsakkaf_scalping_demo_automation`) and
+an independent, adapter-level demo-account proof re-verified on every
+single call — real-money automation is not created, granted, or implied
+anywhere in this checkpoint.
+
+### 22.1 Enter the mode
+
+`alsakkaf_scalping_demo_automation` is granted only to `MT5_DEMO_AUTOMATED`,
+reachable only from `RESEARCH`:
+
+```
+python -m trading_lab_app.mode_cli request-mode RESEARCH
+python -m trading_lab_app.mode_cli request-mode MT5_DEMO_AUTOMATED
+```
+
+Read-only status/list/inspect/journal commands remain available at `OFF`.
+The product itself has its own separate state machine (`OFF` / `ANALYZE_ONLY`
+/ `DEMO_AUTO` / `PAUSED` / `EMERGENCY_STOP`), always starting `OFF`.
+
+### 22.2 Local operator commands
+
+```
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-status
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-preflight XAUUSD
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-discover-symbols XAUUSD
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-save-symbol-map XAUUSD XAUUSDm
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-configure-profile XAUUSD ALSAKKAF_PRECISION_SCALPING
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-start-demo-auto
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-pause
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-emergency-stop
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-reset-emergency-stop
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-list-cycles
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-list-owned-orders
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-list-owned-positions
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-reconcile
+python -B -W error -m trading_lab_app.alsakkaf_scalping_cli scalping-journal --limit 20
+```
+
+`scalping-analyze`/`scalping-run-cycle` require bar/quote input and are
+HTTP/dashboard-only in this V0 CLI. One-click launchers:
+`Start_ALSAKKAF_SCALPING_DEMO.ps1` / `Stop_ALSAKKAF_SCALPING_DEMO.ps1`
+(never enable `DEMO_AUTO` automatically; leave product state `OFF`).
+
+### 22.3 HTTP (read-only status, plus this program's first mutation routes)
+
+Read-only: `GET /api/scalping-status` (also carries the local CSRF-style
+action token), `-cycles`, `-owned-orders`, `-owned-positions`, `-journal`,
+`-preflight/<INSTRUMENT>`, `-symbol-candidates/<INSTRUMENT>`,
+`-cycle/<cycle_id>`. Mutation (POST only, local-host-gated, requiring the
+exact `X-Scalping-Action-Token` header): `-start-demo-auto`, `-pause`,
+`-resume`, `-emergency-stop`, `-emergency-reset`, `-save-symbol-map`,
+`-configure-profile`, `-run-cycle`. GET on a mutation route returns `405`
+with `Allow: POST`.
+
+### 22.4 Scope limitations
+
+No live-account order path exists anywhere. Real 4T MT5 demo rehearsal is
+deliberately deferred pending a separate, explicit, real-time Founder
+go/no-go (`TRL_BLOCKERS.md`). See
+`TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_EVIDENCE.md` for full
+detail, including two genuine implementation defects found and fixed
+during this checkpoint's own test hardening.

@@ -2025,3 +2025,167 @@ and unpushed until its own separate Git checkpoint is completed — per the Git-
 model this document already uses throughout, the exact current staged/committed/pushed
 state of both the implementation publication and this closure pass is always read from
 `git status`/`git rev-parse HEAD` directly, not restated here as a fixed value.
+
+## 2026-08-03-002 — Accelerated Founder authorization: TRL-R2-012 ALSAKKAF SCALPING Demo Automation V0 contract-and-implementation, uncommitted
+
+**Decision:** The Founder issued an accelerated, single-session authorization for
+TRL-R2-012, official checkpoint **ALSAKKAF SCALPING Demo Automation V0** (product name
+displayed everywhere: **ALSAKKAF SCALPING**), narrowly authorizing — for MT5 demo accounts
+only — automated `order_check`/`order_send`, deterministic technical evidence generation,
+scalping/intraday decisions, bounded pending-order ladders, automated demo-position
+management, dashboard controls, emergency shutdown, and complete audit evidence. Real-money
+trading, live-account `order_check`/`order_send`, martingale, uncontrolled grid trading,
+recovery lot escalation, unlimited pending orders/positions, credential storage,
+guaranteed-profit claims, and Phase 7 were explicitly not authorized. The session agreed a
+pacing split at the outset: contract, implementation, full test suite (twice), and a
+synthetic (fake-adapter) rehearsal would run through without a further check-in; the real
+4T MT5 demo terminal connection and any actual `order_check`/`order_send` call would wait
+for a separate, explicit, real-time Founder go/no-go — because that is the one step in this
+checkpoint that reaches an external system (the Founder's live MT5 terminal) that no amount
+of automated testing can independently verify from inside the same rushed session.
+
+Three governed strategy profiles were implemented: **ALSAKKAF PRECISION SCALPING**
+(M1/M5/M15, one active cycle per symbol, market/stop entry, mandatory stop, three bounded
+take-profit allocations, breakeven/ATR-trailing management, 15-minute post-loss cooldown),
+**ALSAKKAF BREAKOUT LADDER** (up to six bounded Buy-Stop/Sell-Stop orders sharing one
+fixed cycle-risk budget, an exact ladder-distance floor formula, unconditional
+opposite-direction OCO cancellation on first fill, no replacement orders ever created
+automatically), and **ALSAKKAF INTRADAY** (M15/H1/H4, wider structural stops, longer
+holding time, no rapid ladder by default). Automatic technical evidence bridges into
+R2-010's **unmodified** `market_intelligence_service.analyze_market_snapshot` — only an
+R2-010 `TRADE_CANDIDATE` result may proceed to a demo order plan. Hard risk caps (0.50%
+max risk-per-cycle, 1.00% max total active risk, 2.00% max daily loss, 3.00% max session
+drawdown, 5 max open positions, 8 max pending orders) are enforced fail-closed, never
+clamped; lot sizing is structurally incapable of martingale (`calculate_lots`'s signature
+has no loss/streak input at all). A new, separate, hash-chained journal
+(`TRL_SCALPING_JOURNAL.v1`) mirrors the existing `mt5_execution_journal.py` architecture
+with cross-process owner-token locking, real separate-process lock contention proven via
+two live OS processes. One narrow, implementation-discovered amendment to
+`TRL_PHASE_3_OPERATING_MODE_CONTRACT.md` was applied in place (Section 3.4): a twentieth
+governed capability, `alsakkaf_scalping_demo_automation`, granted only to
+`MT5_DEMO_AUTOMATED` (which becomes reachable — from `RESEARCH` only, returning only to
+`OFF`/`RESEARCH` — for the first time in this program), plus granting the existing
+`market_intelligence_research` capability to that same mode so the R2-010 evidence bridge
+does not fail closed with `MARKET_INTELLIGENCE_CAPABILITY_DENIED` while `DEMO_AUTO` is
+active. Every automated order additionally requires an independent, adapter-level,
+unconditional demo-account proof (`trade_mode == ACCOUNT_TRADE_MODE_DEMO`, re-verified on
+every single `order_check`/`order_send` call, never cached, never inferred from
+`ModeService` alone) — real-money automation remains hard-locked out regardless of mode
+state. `MT5_LIVE_MANUAL`/`MT5_LIVE_AUTOMATED` remain fully unavailable, unchanged.
+
+**Why:** This delivers a visibly operational, professionally branded, MT5-demo-automated
+scalping product tonight while keeping every real-money safeguard this program has already
+established fully intact and, in the account-type check's case, independently re-enforced
+at a second, lower layer than `ModeService` alone. Reusing the proven Phase 5 adapter
+pattern, R2-010's unmodified decision engine, and the established journal/lock/CLI/HTTP
+conventions kept the accelerated pace safe: two genuine defects were still found and fixed
+during this checkpoint's own test-suite hardening (a duplicate-journal-event-ID collision
+risk on a coarse system clock in `configure_profile`, and an intermittent Windows TCP
+abortive-reset race in the new HTTP oversized-body-rejection path — the first HTTP mutation
+routes this program has ever exposed) — both are documented in full in
+`TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_EVIDENCE.md` Sections 16 and 21, and both
+are now structurally prevented rather than merely disclosed.
+
+**How to apply:** 173 new tests across 11 modules; a 928-test/37-module targeted combined
+run (zero failures/errors); two consecutive clean full-suite runs reconciling exactly to
+`1249 + 173 = 1422` (zero failures/errors both times); a full 27-step synthetic rehearsal
+against the fake MT5 adapter and a committed synthetic fixture, proving `TRADE_CANDIDATE`
+on both this module's own score and R2-010's independent gate, exact ladder total-risk
+conservation, OCO cancellation, no lot escalation after a simulated loss,
+`order_check`/`order_send` reaching an `ACTIVE` cycle, restart reconciliation, a daily-loss
+block, and an emergency stop that cancelled only its own owned order while leaving a
+deliberately-present unrelated order untouched. **This implementation is uncommitted and
+unpushed; Founder review is pending.** Phase 7 has not started. The real 4T MT5 demo
+rehearsal remains a distinct, later step requiring its own explicit, real-time Founder
+authorization (`TRL_BLOCKERS.md`) — it is not implied or pre-authorized by this entry. Per
+this document's own Git-authoritative convention, the exact current
+staged/committed/pushed state of this checkpoint is always read from `git status`/`git
+rev-parse HEAD` directly, not restated here as a fixed value.
+
+**Addendum (same entry, additive, following a Founder scope-review-and-read-only-preflight
+pass):** The Founder reviewed the uncommitted scope above and approved the one out-of-list
+modification (`test_operating_mode.py`) only conditionally — on proof that its diff tests
+both `alsakkaf_scalping_demo_automation` and `market_intelligence_research` explicitly,
+confirms each capability's exact granted-mode boundary (true only for `MT5_DEMO_AUTOMATED`;
+`market_intelligence_research` additionally true for `RESEARCH`/`SYNTHETIC_PAPER`/
+`MT5_DEMO_MANUAL`, unchanged from R2-010), and neither deletes nor weakens any existing
+assertion. The original diff (renaming
+`test_mt5_demo_automated_represented_but_unavailable` to
+`test_mt5_demo_automated_available_since_r2_012`, and extending
+`test_exact_transition_matrix`) proved the availability/reachability change but did not yet
+explicitly assert the `market_intelligence_research` grant or an exhaustive per-mode
+true/false boundary for either capability. Both gaps were closed in place, in the same
+method, before this addendum: an explicit `assertIn("market_intelligence_research", ...)`,
+a per-mode `subTest` loop proving `alsakkaf_scalping_demo_automation` is granted to exactly
+`MT5_DEMO_AUTOMATED` and denied everywhere else, an equivalent per-mode loop for
+`market_intelligence_research`'s four-mode grant set, and a disjointness assertion proving
+neither new/amended capability intersects `mt5_order_check`/`mt5_order_send`/
+`manual_broker_execution`/`automated_broker_execution`/`manual_basket_execution`/
+`basket_execution`. Baseline blob `1f2a6b953a160078e075478d3dd694ee5046a368` vs. working-tree
+blob (post-addendum) — method count unchanged at 53 `def test_` methods before and after (one
+renamed, one extended, none added or removed at the method level); full suite for this one
+file: 53/53 passing, zero failures.
+
+The `market_intelligence_research` amendment boundary was independently re-audited against
+source, not just re-asserted in tests: `market_intelligence_research` and
+`alsakkaf_scalping_demo_automation` each appear exactly once in `mode_service.CAPABILITIES`
+(21 total governed capabilities); `market_intelligence_service.py`/`market_intelligence_data.py`
+contain zero references to `order_check`/`order_send`/`RealMT5ExecutionAdapter` outside one
+docstring sentence describing what R2-010 does *not* do; `alsakkaf_scalping_service.py`'s own
+`_has_capability()` checks only `alsakkaf_scalping_demo_automation` (never
+`market_intelligence_research`) before permitting a `DEMO_AUTO` transition, and `run_cycle`'s
+`order_check`/`order_send` block is structurally unreachable unless the product state is
+already `DEMO_AUTO` — so `market_intelligence_research` alone can never authorize an order
+regardless of mode or capability state, exactly as approved.
+
+An order-send structural audit found exactly one `order_check` call site and exactly one
+`order_send` call site, both in `alsakkaf_scalping_service.py`, both inside the `DEMO_AUTO`-
+gated branch of `run_cycle`, neither inside a retry loop; no thread/timer/automation-loop
+construction exists anywhere in the eight new modules or at module import time; the launcher
+script never requests `DEMO_AUTO`.
+
+A read-only preflight then connected to the Founder's already-authenticated local 4T MT5
+terminal using only `initialize`/`version`/`terminal_info`/`account_info`/`symbols_get`/
+`symbol_info`/`symbol_info_tick`/`copy_rates_from_pos`/`orders_get`/`positions_get`/
+`shutdown` — no `login`, `symbol_select`, `order_check`, `order_send`, or any other
+state-changing call was made. Result: terminal connected and demo account confirmed
+(`trade_mode` `0`/`DEMO`, redacted login suffix `1837`), zero existing open positions or
+pending orders, `XAUUSD` uniquely discovered with a fresh tick and sufficient completed-bar
+history on every required timeframe — but **terminal-level Algo Trading (`trade_allowed` on
+`terminal_info`) is currently `False`**, which independently and correctly fails preflight
+check 8 of the R2-012 twenty-check gate (`SCALPING_ALGO_TRADING_DISABLED`) regardless of
+every other passing check. `NAS100`/`NQ100` resolved to exactly one candidate (`NQ100`) but
+is not currently visible/subscribed in Market Watch, so no live quote could be read without
+calling `symbol_select` — out of scope for this read-only pass, and therefore correctly left
+unresolved rather than forced. `mt5.shutdown()` was called; the connection left no lock, no
+running process, and no broker-state change. **Verdict: TRL-R2-012 NOT READY FOR 4T DEMO
+PROOF CYCLE** — blocked on one external, Founder-side action (enabling AutoTrading in the
+terminal), not on any missing or defective implementation. See the corresponding session
+report for the complete 48-item checklist.
+
+**Second addendum (same entry, additive, following Founder authorization for exactly one
+bounded real 4T demo proof cycle on `XAUUSD`/ALSAKKAF PRECISION SCALPING, minimum volume,
+0.10% max proof risk):** AutoTrading was reconfirmed enabled on a fresh read-only preflight
+(all twenty governed checks passing against real observed values). The governed local
+mutations were then performed for real: `XAUUSD -> XAUUSD` symbol mapping saved while
+product state `OFF`; product state transitioned `OFF -> ANALYZE_ONLY`; `risk_per_cycle_pct`
+reduced to `0.10%` for this one proof cycle. Real completed M1/M5 bars were fetched and
+evaluated through the unmodified, already-tested `evaluate_setup`/`analyze` pipeline.
+**Real result: `direction = NONE`, score `0/100`, classification `WAIT` — no `TRADE_CANDIDATE`
+existed at the moment of this rehearsal, so the R2-010 bridge was never even called.** Per
+the Founder's explicit instruction, this result was not overridden, not retried, and no
+threshold was adjusted. Operating mode was never transitioned to `MT5_DEMO_AUTOMATED`
+(no reason to, since `DEMO_AUTO` is only requested once a `TRADE_CANDIDATE` exists);
+`order_check`, `order_send`, and the governed emergency-stop closure sequence were
+consequently never reached — there was nothing valid to trade. Product state was returned
+to `OFF` immediately. A minimum-volume risk pre-check was still computed for completeness:
+one `0.01`-lot `XAUUSD` position's implied risk was `$1.4835` against a `0.10%`-of-equity
+cap of `$125.25` (real equity `$125,248.83`) — comfortably within bound, confirming the
+proof-cycle risk plan itself was sound; only the market setup was absent at this moment.
+Final broker state unchanged (`0`/`0` positions/orders, before and after); no credential
+read, stored, or logged; final product state `OFF`; final operating mode `OFF`; port `8765`
+clear; no Python process; no lock file; no code defect found or corrected. **Verdict:
+TRL-R2-012 ONE CONTROLLED 4T DEMO PROOF CYCLE NOT EXECUTED** — a safety/strategy gate
+(no qualifying `TRADE_CANDIDATE`) correctly prevented the entry before `order_send`, exactly
+as designed. The implementation remains fully ready; a further attempt may be made whenever
+the Founder chooses, whenever a genuine setup exists.

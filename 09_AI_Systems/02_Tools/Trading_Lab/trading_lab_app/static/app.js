@@ -1,6 +1,6 @@
 "use strict";
 
-const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, basket: null, marketIntelligence: null, marketDataFabric: null, charts: [] };
+const state = { result: null, market: null, report: null, version: null, registry: null, liveMarket: null, news: null, paper: null, mode: null, signal: null, mt5: null, basket: null, marketIntelligence: null, marketDataFabric: null, scalping: null, charts: [] };
 const $ = (id) => document.getElementById(id);
 const number = (value, digits = 4) => Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const signed = (value, suffix = "") => `${Number(value) >= 0 ? "+" : ""}${number(value)}${suffix}`;
@@ -720,6 +720,118 @@ async function loadMarketDataFabric() {
   } catch (error) { return { error: error.message }; }
 }
 
+async function loadScalping() {
+  try {
+    const [status, cycles, orders, positions, journal] = await Promise.all([
+      getJson("/api/scalping-status"), getJson("/api/scalping-cycles"),
+      getJson("/api/scalping-owned-orders"), getJson("/api/scalping-owned-positions"),
+      getJson("/api/scalping-journal"),
+    ]);
+    return { status, cycles: cycles.cycles, orders: orders.owned_orders, positions: positions.owned_positions, journal: journal.events };
+  } catch (error) { return { error: error.message }; }
+}
+
+async function postScalping(path, body) {
+  const token = state.scalping && state.scalping.status ? state.scalping.status.action_token : null;
+  const response = await fetch(path, {
+    method: "POST", cache: "no-store", credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-Scalping-Action-Token": token || "" },
+    body: JSON.stringify(body || {}),
+  });
+  const document_ = await response.json();
+  if (!response.ok) throw new Error(document_.error || `${path} returned HTTP ${response.status}`);
+  return document_;
+}
+
+function renderScalping(bundle) {
+  const stateBadge = $("scalping-state-badge");
+  const automationBadge = $("scalping-automation-badge");
+  const emergencyBadge = $("scalping-emergency-badge");
+  if (!bundle || bundle.error) {
+    stateBadge.textContent = "UNAVAILABLE";
+    automationBadge.textContent = "AUTOMATION STATUS: UNAVAILABLE";
+    emergencyBadge.textContent = "EMERGENCY STOP: UNKNOWN";
+    return;
+  }
+  const { status, cycles, orders, positions, journal } = bundle;
+  stateBadge.textContent = status.product_state;
+  automationBadge.textContent = `AUTOMATION STATUS: ${status.product_state}`;
+  emergencyBadge.textContent = status.emergency_stop_active ? "EMERGENCY STOP: ACTIVE" : "EMERGENCY STOP: INACTIVE";
+  const profileEntries = Object.entries(status.profiles || {});
+  setText("scalping-profile", profileEntries.length ? profileEntries.map(([symbol, profile]) => `${symbol}: ${profile}`).join(", ") : "—");
+  setText("scalping-mt5-connection", status.journal_startup_diagnostic_code === "OK" ? "OK" : status.journal_startup_diagnostic_code);
+  setText("scalping-demo-verified", "—");
+  setText("scalping-equity", "—");
+  setText("scalping-daily-pnl", "—");
+  setText("scalping-decision", "—");
+
+  const cycleTable = $("scalping-cycle-table");
+  cycleTable.replaceChildren();
+  (cycles || []).forEach((cycle) => {
+    const tr = document.createElement("tr");
+    [cycle.cycle_id, cycle.canonical_instrument, cycle.profile_id, cycle.state].forEach((value) => {
+      const td = document.createElement("td");
+      td.textContent = escapeText(value);
+      tr.appendChild(td);
+    });
+    cycleTable.appendChild(tr);
+  });
+
+  const ordersTable = $("scalping-orders-table");
+  ordersTable.replaceChildren();
+  (orders || []).forEach((order) => {
+    const tr = document.createElement("tr");
+    [order.ticket, order.symbol].forEach((value) => {
+      const td = document.createElement("td");
+      td.textContent = escapeText(value);
+      tr.appendChild(td);
+    });
+    ordersTable.appendChild(tr);
+  });
+
+  const positionsTable = $("scalping-positions-table");
+  positionsTable.replaceChildren();
+  (positions || []).forEach((position) => {
+    const tr = document.createElement("tr");
+    [position.ticket, position.symbol].forEach((value) => {
+      const td = document.createElement("td");
+      td.textContent = escapeText(value);
+      tr.appendChild(td);
+    });
+    positionsTable.appendChild(tr);
+  });
+
+  const journalList = $("scalping-journal-list");
+  journalList.replaceChildren();
+  (journal || []).slice(-20).reverse().forEach((event) => {
+    const li = document.createElement("li");
+    li.textContent = `${event.occurred_at_utc} · ${event.event_type}`;
+    journalList.appendChild(li);
+  });
+}
+
+function wireScalpingControls() {
+  const resultLine = $("scalping-control-result");
+  const bind = (id, path, body) => {
+    $(id).addEventListener("click", async () => {
+      resultLine.textContent = "Working...";
+      try {
+        const document_ = await postScalping(path, body);
+        resultLine.textContent = `OK: ${JSON.stringify(document_)}`;
+        state.scalping = await loadScalping();
+        renderScalping(state.scalping);
+      } catch (error) {
+        resultLine.textContent = `REJECTED: ${error.message}`;
+      }
+    });
+  };
+  bind("scalping-btn-start", "/api/scalping-start-demo-auto");
+  bind("scalping-btn-pause", "/api/scalping-pause");
+  bind("scalping-btn-resume", "/api/scalping-resume");
+  bind("scalping-btn-emergency-stop", "/api/scalping-emergency-stop");
+  bind("scalping-btn-emergency-reset", "/api/scalping-emergency-reset");
+}
+
 async function loadOfficialNews() {
   try {
     const [health, sources, items, events] = await Promise.all([getJson("/api/news-health"), getJson("/api/news-sources"), getJson("/api/news-items"), getJson("/api/economic-events")]);
@@ -734,7 +846,7 @@ function download(filename, content, type) { const blob = new Blob([content], { 
 function wireDownloads() { $("download-json").addEventListener("click", () => download("TRL-R2-001-synthetic-result.json", `${JSON.stringify(state.result, null, 2)}\n`, "application/json;charset=utf-8")); $("download-markdown").addEventListener("click", () => download(state.report.filename, state.report.content, "text/markdown;charset=utf-8")); }
 
 function renderAll() {
-  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderMt5Execution(state.mt5); renderBasketExecution(state.basket); renderMarketIntelligence(state.marketIntelligence); renderMarketDataFabric(state.marketDataFabric); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
+  renderOverview(state.result, state.market); renderModeStatus(state.mode); renderSignalIntelligence(state.signal); renderMt5Execution(state.mt5); renderBasketExecution(state.basket); renderMarketIntelligence(state.marketIntelligence); renderMarketDataFabric(state.marketDataFabric); renderScalping(state.scalping); renderPaperDesk(state.paper); renderTables(state.market, state.result); renderSignals(state.result, state.market); renderStrategyAndReports(state.result, state.report, state.version); renderRegistry(state.registry); renderMarketConnection(state.liveMarket); renderOfficialNews(state.news);
   chart("market-canvas", "market-tooltip", state.market.points, [{ key: "close", label: "Close", color: "#eef3f6", width: 2 }, { key: "fast_sma", label: "Fast SMA", color: "#36d1c4" }, { key: "slow_sma", label: "Slow SMA", color: "#67a6ff" }], { signals: true });
   chart("equity-canvas", "equity-tooltip", state.result.equity_curve, [{ key: "total_marked_equity", label: "Marked equity", color: "#36d1c4", width: 2 }]);
   chart("drawdown-canvas", "drawdown-tooltip", state.result.equity_curve, [{ key: "drawdown_pct", label: "Drawdown", color: "#ef6e72", format: (v) => `${number(v, 4)}%` }], { min: -15, max: 0, reference: -15, percent: true });
@@ -743,10 +855,10 @@ function renderAll() {
 async function loadDashboard() {
   $("loading-state").hidden = false; $("error-state").hidden = true; $("dashboard-content").hidden = true;
   try {
-    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5, state.basket, state.marketIntelligence, state.marketDataFabric] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution(), loadBasketExecution(), loadMarketIntelligence(), loadMarketDataFabric()]);
+    [state.result, state.market, state.report, state.version, state.registry, state.liveMarket, state.news, state.paper, state.mode, state.signal, state.mt5, state.basket, state.marketIntelligence, state.marketDataFabric, state.scalping] = await Promise.all([getJson("/api/demo/result"), getJson("/api/demo/market-data"), getJson("/api/demo/report"), getJson("/api/version"), getJson("/api/strategy-registry"), getJson("/api/market-snapshot").catch(() => null), loadOfficialNews(), loadPaperDesk(), loadModeStatus(), loadSignalIntelligence(), loadMt5Execution(), loadBasketExecution(), loadMarketIntelligence(), loadMarketDataFabric(), loadScalping()]);
     renderAll(); $("loading-state").hidden = true; $("dashboard-content").hidden = false;
   } catch (error) { $("loading-state").hidden = true; $("error-state").hidden = false; setText("error-message", error.message); }
 }
 
 window.addEventListener("resize", () => state.charts.forEach(drawChart));
-$("retry-button").addEventListener("click", loadDashboard); wireTabs(); wireDownloads(); loadDashboard();
+$("retry-button").addEventListener("click", loadDashboard); wireTabs(); wireDownloads(); wireScalpingControls(); loadDashboard();

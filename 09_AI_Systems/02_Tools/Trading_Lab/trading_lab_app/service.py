@@ -17,6 +17,7 @@ from .basket_execution_service import disabled_basket_service
 from .market_intelligence_service import disabled_service as disabled_market_intelligence_service
 from .market_data_replay_service import disabled_service as disabled_market_data_replay_service
 from .strategy_registry import load_registry
+from . import alsakkaf_scalping_service
 
 
 TRADING_LAB_DIRECTORY = Path(__file__).resolve().parent.parent
@@ -287,6 +288,65 @@ def replay_session_document(market_data_replay_service_instance, replay_session_
 
 def replay_snapshot_document(market_data_replay_service_instance, replay_session_id):
     return (market_data_replay_service_instance or disabled_market_data_replay_service()).replay_snapshot_http_document(replay_session_id)
+
+
+_DEFAULT_SCALPING_SERVICE = None
+
+
+def _default_scalping_service():
+    """A side-effect-free, in-memory-backed ALSAKKAF SCALPING service used
+    only when no real instance is wired in (mirrors every other
+    ``disabled_*()`` fallback in this module) -- never touches the
+    filesystem, never imports MetaTrader5."""
+    global _DEFAULT_SCALPING_SERVICE
+    if _DEFAULT_SCALPING_SERVICE is None:
+        from .alsakkaf_scalping_journal import in_memory_journal_writer
+        from .alsakkaf_scalping_data import InMemorySymbolMapStore
+        from .alsakkaf_scalping_mt5 import disabled_adapter
+        _DEFAULT_SCALPING_SERVICE = alsakkaf_scalping_service.ScalpingService(
+            journal=in_memory_journal_writer(), adapter=disabled_adapter(),
+            symbol_map_store=InMemorySymbolMapStore(),
+        )
+    return _DEFAULT_SCALPING_SERVICE
+
+
+def scalping_status_document(scalping_service_instance=None):
+    return (scalping_service_instance or _default_scalping_service()).status_document()
+
+
+def scalping_cycles_document(scalping_service_instance=None):
+    return {"cycles": (scalping_service_instance or _default_scalping_service()).list_cycles()}
+
+
+def scalping_cycle_document(scalping_service_instance, cycle_id):
+    service_instance = scalping_service_instance or _default_scalping_service()
+    try:
+        return {"found": True, "cycle": service_instance.inspect_cycle(cycle_id)}
+    except alsakkaf_scalping_service.ScalpingServiceError:
+        return {"found": False, "cycle_id": cycle_id}
+
+
+def scalping_owned_orders_document(scalping_service_instance=None):
+    return {"owned_orders": (scalping_service_instance or _default_scalping_service()).list_owned_orders()}
+
+
+def scalping_owned_positions_document(scalping_service_instance=None):
+    return {"owned_positions": (scalping_service_instance or _default_scalping_service()).list_owned_positions()}
+
+
+def scalping_preflight_document(scalping_service_instance, canonical_instrument):
+    service_instance = scalping_service_instance or _default_scalping_service()
+    return service_instance.run_preflight(canonical_instrument)
+
+
+def scalping_symbol_candidates_document(scalping_service_instance, canonical_instrument):
+    service_instance = scalping_service_instance or _default_scalping_service()
+    return {"candidates": service_instance.discover_symbols(canonical_instrument)}
+
+
+def scalping_journal_document(scalping_service_instance=None, limit=None):
+    service_instance = scalping_service_instance or _default_scalping_service()
+    return {"events": service_instance.journal_tail(limit=limit if limit is not None else 100)}
 
 
 def strategy_registry_document():

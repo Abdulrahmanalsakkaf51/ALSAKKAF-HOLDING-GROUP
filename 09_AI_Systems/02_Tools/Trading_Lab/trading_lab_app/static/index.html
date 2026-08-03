@@ -27,6 +27,7 @@
       <a href="#overview" aria-current="page">Overview</a>
       <a href="#operating-mode">Operating mode</a>
       <a href="#signal-intelligence">Signal intelligence</a>
+      <a href="#alsakkaf-scalping">ALSAKKAF SCALPING</a>
       <a href="#market-intelligence">Market intelligence (CORTEX V0)</a>
       <a href="#paper-desk">Paper desk</a>
       <a href="#market-connection">Market connection</a>
@@ -299,6 +300,52 @@
             </article>
           </div>
           <div class="table-scroll"><table><caption>Six-role pipeline results (most recent proposal)</caption><thead><tr><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Reasons</th></tr></thead><tbody id="signal-role-table"></tbody></table></div>
+        </section>
+
+        <section id="alsakkaf-scalping" class="section" aria-labelledby="alsakkaf-scalping-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">DEMO AUTOMATION V0 · TRL-R2-012</p><h2 id="alsakkaf-scalping-title">ALSAKKAF SCALPING</h2></div>
+            <span id="scalping-state-badge" class="badge badge-neutral" aria-live="polite">LOADING</span>
+          </div>
+          <div class="status-strip">
+            <span class="badge badge-warning">DEMO ACCOUNT ONLY</span>
+            <span id="scalping-automation-badge" class="badge badge-neutral">AUTOMATION STATUS: —</span>
+            <span class="badge badge-warning">LIVE MONEY LOCKED</span>
+            <span id="scalping-emergency-badge" class="badge badge-neutral">EMERGENCY STOP: —</span>
+          </div>
+          <p class="disclosure">Server-authoritative. The automation engine runs only on this Windows PC; owned demo orders/positions are also visible in the MT5 mobile app for the same 4T demo account. No client, browser, or dashboard value is authoritative — every control below calls a governed local endpoint.</p>
+          <div class="status-strip">
+            <div><span>MT5 connection</span><strong id="scalping-mt5-connection">—</strong></div>
+            <div><span>Demo verified</span><strong id="scalping-demo-verified">—</strong></div>
+            <div><span>Equity</span><strong id="scalping-equity">—</strong></div>
+            <div><span>Daily P&amp;L</span><strong id="scalping-daily-pnl">—</strong></div>
+            <div><span>Current profile</span><strong id="scalping-profile">—</strong></div>
+            <div><span>Last decision</span><strong id="scalping-decision">—</strong></div>
+          </div>
+          <div class="two-column">
+            <article class="panel">
+              <h3>Controls</h3>
+              <div class="control-row">
+                <button type="button" id="scalping-btn-start">Start demo auto</button>
+                <button type="button" id="scalping-btn-pause">Pause</button>
+                <button type="button" id="scalping-btn-resume">Resume (analyze only)</button>
+                <button type="button" id="scalping-btn-emergency-stop" class="danger">Emergency stop</button>
+                <button type="button" id="scalping-btn-emergency-reset">Reset emergency stop</button>
+              </div>
+              <p class="disclosure" id="scalping-control-result"></p>
+            </article>
+            <article class="panel">
+              <h3>Owned cycles, orders and positions</h3>
+              <div class="table-scroll"><table><caption>Recent cycles</caption><thead><tr><th scope="col">Cycle</th><th scope="col">Symbol</th><th scope="col">Profile</th><th scope="col">State</th></tr></thead><tbody id="scalping-cycle-table"></tbody></table></div>
+              <div class="table-scroll"><table><caption>Owned pending orders</caption><thead><tr><th scope="col">Ticket</th><th scope="col">Symbol</th></tr></thead><tbody id="scalping-orders-table"></tbody></table></div>
+              <div class="table-scroll"><table><caption>Owned open positions</caption><thead><tr><th scope="col">Ticket</th><th scope="col">Symbol</th></tr></thead><tbody id="scalping-positions-table"></tbody></table></div>
+            </article>
+          </div>
+          <details class="paper-expert-details">
+            <summary>Recent journal events</summary>
+            <ul id="scalping-journal-list" class="check-list"></ul>
+          </details>
+          <div class="legal-notice"><strong>REAL-MONEY AUTOMATION IS HARD-LOCKED OUT</strong><span>MT5_LIVE_MANUAL and MT5_LIVE_AUTOMATED remain fully unavailable. Every automated order additionally requires an independent, unconditional demo-account proof at the adapter layer on every single order_check/order_send call, regardless of this dashboard's own state.</span></div>
         </section>
 
         <section id="paper-desk" class="section" aria-labelledby="paper-desk-title">

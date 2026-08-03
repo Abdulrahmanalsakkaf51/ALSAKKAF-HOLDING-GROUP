@@ -27,6 +27,8 @@ from . import basket_execution_service
 from . import market_intelligence_data
 from . import market_intelligence_service
 from . import market_data_replay_service
+from . import alsakkaf_scalping_mt5
+from . import alsakkaf_scalping_service
 from .server import BIND_HOST, DEFAULT_PORT, create_server
 
 
@@ -537,6 +539,64 @@ def _validate_market_data_replay_subsystem_consistency(current_mode, mdr_service
         )
 
 
+def _scalping_adapter_for_mode(current_mode):
+    """TRL-R2-012: the single path from a resolved mode to an ALSAKKAF
+    SCALPING MT5 adapter TIER. Real for every mode that already implies
+    MT5 read access in this program (RESEARCH, MT5_DEMO_MANUAL,
+    MT5_DEMO_AUTOMATED) so ANALYZE_ONLY can read live demo quotes/bars in
+    any of them (contract Section 3 does not gate ANALYZE_ONLY on a
+    ModeService capability, only DEMO_AUTO is capability-gated); disabled
+    everywhere else (OFF, SYNTHETIC_PAPER). Constructing
+    ``RealScalpingMT5Adapter`` here is side-effect-free -- it never
+    imports MetaTrader5 or opens a broker session merely by being
+    instantiated, mirroring ``_execution_adapter_for_mode``."""
+    if current_mode in ("RESEARCH", "MT5_DEMO_MANUAL", "MT5_DEMO_AUTOMATED"):
+        return alsakkaf_scalping_mt5.RealScalpingMT5Adapter()
+    return alsakkaf_scalping_mt5.disabled_adapter()
+
+
+def _scalping_service_for_mode(
+    current_mode, mode_service_instance, journal=None, symbol_map_store=None,
+    market_intelligence_service_instance=None, scratch_directory=None,
+):
+    """The real runtime ALSAKKAF SCALPING service (TRL-R2-012). Unlike
+    Phase 5/6/6A/6B's disabled-vs-enabled services, this service is always
+    constructed and always enabled -- its own product state machine
+    (Section 3) is independent of ``ModeService.current_mode`` and starts
+    at ``OFF`` regardless; only a transition into ``DEMO_AUTO`` performs a
+    live capability check against ``mode_service_instance`` at request
+    time (``ScalpingService.request_state_change``), never at
+    construction time. This keeps read-only status/list/inspect/journal
+    operations available in every mode, matching contract Section 5.2."""
+    from .alsakkaf_scalping_journal import ScalpingJournalWriter
+    from .alsakkaf_scalping_data import SymbolMapStore
+
+    return alsakkaf_scalping_service.ScalpingService(
+        journal=journal if journal is not None else ScalpingJournalWriter(),
+        adapter=_scalping_adapter_for_mode(current_mode),
+        symbol_map_store=symbol_map_store if symbol_map_store is not None else SymbolMapStore(),
+        mode_service=mode_service_instance,
+        market_intelligence_service=market_intelligence_service_instance,
+        scratch_directory=scratch_directory,
+    )
+
+
+def _scalping_service_preflight_for_mode(current_mode):
+    """Side-effect-free construction used ONLY to validate, during a
+    ModeService transition attempt, that an ALSAKKAF SCALPING service
+    *could* be constructed for the requested mode. In-memory journal and
+    symbol-map store; discarded immediately afterward; never wired into
+    anything real."""
+    from .alsakkaf_scalping_journal import in_memory_journal_writer
+    from .alsakkaf_scalping_data import InMemorySymbolMapStore
+
+    return alsakkaf_scalping_service.ScalpingService(
+        journal=in_memory_journal_writer(),
+        adapter=_scalping_adapter_for_mode(current_mode),
+        symbol_map_store=InMemorySymbolMapStore(),
+    )
+
+
 def _subsystem_builder_for_mode(current_mode):
     """The combined subsystem builder ModeService actually calls: builds
     the paper service, a side-effect-free signal-intelligence *preflight*
@@ -553,9 +613,11 @@ def _subsystem_builder_for_mode(current_mode):
     execution_service_instance = _execution_service_preflight_for_mode(current_mode)
     market_intelligence_service_instance = _market_intelligence_service_preflight_for_mode(current_mode)
     market_data_replay_service_instance = _market_data_replay_service_preflight_for_mode(current_mode)
+    scalping_service_instance = _scalping_service_preflight_for_mode(current_mode)
     return (
         paper_service, signal_service_instance, execution_service_instance,
         market_intelligence_service_instance, market_data_replay_service_instance,
+        scalping_service_instance,
     )
 
 
@@ -571,6 +633,7 @@ def run_server(
     basket_service=None,
     market_intelligence_service_instance=None,
     market_data_replay_service_instance=None,
+    scalping_service_instance=None,
 ):
     """Run until Ctrl+C, always closing the listening socket on exit."""
     server = create_server(
@@ -584,6 +647,7 @@ def run_server(
         basket_service=basket_service,
         market_intelligence_service_instance=market_intelligence_service_instance,
         market_data_replay_service_instance=market_data_replay_service_instance,
+        scalping_service_instance=scalping_service_instance,
     )
     actual_port = server.server_address[1]
     url = "http://{}:{}/".format(BIND_HOST, actual_port)
@@ -873,6 +937,16 @@ def main(argv=None):
     market_data_replay_service_instance = _market_data_replay_service_for_mode(
         operating_mode_service.current_mode, operating_mode_service,
     )
+    # ALSAKKAF SCALPING (TRL-R2-012) uses its own dedicated, durable
+    # journal file and symbol-map store -- never the Phase 5/6
+    # shared_journal, never the R2-010/R2-011 journals. It reuses the same
+    # market_intelligence_service_instance already built above so the
+    # Section 8.3 bridge and a direct R2-010 caller always agree on which
+    # journal/mode-service authority is in force.
+    scalping_service_instance = _scalping_service_for_mode(
+        operating_mode_service.current_mode, operating_mode_service,
+        market_intelligence_service_instance=market_intelligence_service_instance,
+    )
     try:
         _validate_subsystem_consistency(operating_mode_service.current_mode, paper_service)
         _validate_signal_subsystem_consistency(operating_mode_service.current_mode, signal_service_instance)
@@ -896,6 +970,7 @@ def main(argv=None):
             basket_service=basket_service_instance,
             market_intelligence_service_instance=market_intelligence_service_instance,
             market_data_replay_service_instance=market_data_replay_service_instance,
+            scalping_service_instance=scalping_service_instance,
         )
     except OSError as error:
         print(

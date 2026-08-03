@@ -221,14 +221,51 @@ class CapabilityMatrixTests(unittest.TestCase):
         self.assertEqual(ms.allowed_destinations("OFF") & {"MT5_DEMO_MANUAL"}, {"MT5_DEMO_MANUAL"})
         self.assertEqual(ms.allowed_destinations("MT5_DEMO_MANUAL"), frozenset({"OFF"}))
 
-    def test_mt5_demo_automated_represented_but_unavailable(self):
-        # Item 9
+    def test_mt5_demo_automated_available_since_r2_012(self):
+        # Item 9, updated for TRL-R2-012 (ALSAKKAF SCALPING Demo Automation
+        # V0): the alsakkaf_scalping_demo_automation capability and its
+        # independent adapter-level demo-account hard lock now exist, so
+        # MT5_DEMO_AUTOMATED is no longer blocked on MISSING_MT5_ADAPTER/
+        # MISSING_LIVE_ARMING. It has no unavailable_reasons and is
+        # reachable only from RESEARCH, returning only to OFF/RESEARCH.
         self.assertIn("MT5_DEMO_AUTOMATED", ms.MODES)
-        self.assertFalse(ms.is_available("MT5_DEMO_AUTOMATED"))
-        self.assertEqual(
-            ms.unavailable_reasons("MT5_DEMO_AUTOMATED"),
-            ("MISSING_MT5_ADAPTER", "MISSING_LIVE_ARMING"),
-        )
+        self.assertTrue(ms.is_available("MT5_DEMO_AUTOMATED"))
+        self.assertEqual(ms.unavailable_reasons("MT5_DEMO_AUTOMATED"), ())
+        self.assertIn("alsakkaf_scalping_demo_automation", ms.capabilities_for("MT5_DEMO_AUTOMATED"))
+        self.assertEqual(ms.allowed_destinations("MT5_DEMO_AUTOMATED"), frozenset({"OFF", "RESEARCH"}))
+        # alsakkaf_scalping_demo_automation is granted to exactly one mode:
+        # True for MT5_DEMO_AUTOMATED, False for every other mode including
+        # both remaining MT5 modes and every non-MT5 mode.
+        for mode in ms.MODES:
+            with self.subTest(capability="alsakkaf_scalping_demo_automation", mode=mode):
+                granted = "alsakkaf_scalping_demo_automation" in ms.capabilities_for(mode)
+                self.assertEqual(granted, mode == "MT5_DEMO_AUTOMATED")
+        # market_intelligence_research (Section 3.2) is additionally granted
+        # to MT5_DEMO_AUTOMATED as of this same TRL-R2-012 amendment
+        # (Section 3.4) -- narrowly, so the R2-010 evidence bridge does not
+        # fail closed with MARKET_INTELLIGENCE_CAPABILITY_DENIED while
+        # DEMO_AUTO is active. Its grant to RESEARCH/SYNTHETIC_PAPER/
+        # MT5_DEMO_MANUAL (established by R2-010) is unchanged, and it
+        # remains denied to OFF, MT5_LIVE_MANUAL, and MT5_LIVE_AUTOMATED.
+        self.assertIn("market_intelligence_research", ms.capabilities_for("MT5_DEMO_AUTOMATED"))
+        expected_market_intelligence_research_modes = {
+            "RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL", "MT5_DEMO_AUTOMATED",
+        }
+        for mode in ms.MODES:
+            with self.subTest(capability="market_intelligence_research", mode=mode):
+                granted = "market_intelligence_research" in ms.capabilities_for(mode)
+                self.assertEqual(granted, mode in expected_market_intelligence_research_modes)
+        # market_intelligence_research grants no order/basket/execution
+        # authority of any kind, by itself or in combination with
+        # alsakkaf_scalping_demo_automation -- neither capability implies
+        # mt5_order_check/mt5_order_send/manual_broker_execution/
+        # automated_broker_execution/manual_basket_execution/basket_execution.
+        no_execution_authority_capabilities = {
+            "mt5_order_check", "mt5_order_send", "manual_broker_execution",
+            "automated_broker_execution", "manual_basket_execution", "basket_execution",
+        }
+        research_bridge_capabilities = {"alsakkaf_scalping_demo_automation", "market_intelligence_research"}
+        self.assertEqual(research_bridge_capabilities & no_execution_authority_capabilities, set())
 
     def test_mt5_live_manual_represented_but_unavailable(self):
         # Item 10
@@ -348,17 +385,23 @@ class TransitionRuleTests(unittest.TestCase):
 
     def test_exact_transition_matrix(self):
         # MT5_DEMO_MANUAL joined the reachable set in Phase 5 (TRL-R2-007),
-        # reachable only from OFF and returning only to OFF; the three
-        # remaining MT5 modes stay fully unreachable.
+        # reachable only from OFF and returning only to OFF. MT5_DEMO_AUTOMATED
+        # joined the reachable set in TRL-R2-012, reachable only from
+        # RESEARCH and returning only to OFF/RESEARCH. The two remaining
+        # live MT5 modes stay fully unreachable.
         self.assertEqual(
             ms.allowed_destinations("OFF"),
             frozenset({"RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"}),
         )
-        self.assertEqual(ms.allowed_destinations("RESEARCH"), frozenset({"OFF", "SYNTHETIC_PAPER"}))
+        self.assertEqual(
+            ms.allowed_destinations("RESEARCH"),
+            frozenset({"OFF", "SYNTHETIC_PAPER", "MT5_DEMO_AUTOMATED"}),
+        )
         self.assertEqual(ms.allowed_destinations("SYNTHETIC_PAPER"), frozenset({"OFF", "RESEARCH"}))
         self.assertEqual(ms.allowed_destinations("MT5_DEMO_MANUAL"), frozenset({"OFF"}))
+        self.assertEqual(ms.allowed_destinations("MT5_DEMO_AUTOMATED"), frozenset({"OFF", "RESEARCH"}))
         for mt5_mode in ms.MT5_MODES:
-            if mt5_mode == "MT5_DEMO_MANUAL":
+            if mt5_mode in ("MT5_DEMO_MANUAL", "MT5_DEMO_AUTOMATED"):
                 continue
             self.assertEqual(ms.allowed_destinations(mt5_mode), frozenset())
 

@@ -22,11 +22,15 @@ from .market_intelligence_service import disabled_service as disabled_market_int
 from .market_data_replay_service import disabled_service as disabled_market_data_replay_service
 from .market_data_replay_data import DATASET_ID_PATTERN, REPLAY_SESSION_ID_PATTERN
 from .market_data_replay_service import MarketDataServiceError
+from .alsakkaf_scalping_data import CANONICAL_INSTRUMENTS
+from .alsakkaf_scalping_service import ScalpingServiceError
+import secrets
 
 
 BIND_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
 MAX_HTTP_REQUEST_WORKERS = 16
+_MAX_DRAINABLE_REJECTED_BODY_BYTES = 4 * 1024 * 1024
 CLIENT_REQUEST_READ_TIMEOUT_SECONDS = 5.0
 CLIENT_SHUTDOWN_BOUND_SECONDS = 6.0
 CLIENT_REQUEST_HEADER_DEADLINE_SECONDS = 10.0
@@ -150,6 +154,37 @@ _MARKET_DATASET_DETAIL_PATH_PREFIX = "/api/market-dataset/"
 _REPLAY_SESSION_DETAIL_PATH_PREFIX = "/api/replay-session/"
 _REPLAY_SNAPSHOT_DETAIL_PATH_PREFIX = "/api/replay-snapshot/"
 
+# TRL-R2-012 (ALSAKKAF SCALPING Demo Automation V0): the first checkpoint
+# in this program to expose HTTP mutation routes at all -- every earlier
+# checkpoint enforces "no HTTP mutation route" as a hard invariant, and
+# that invariant still holds for every route outside this exact set.
+# Mutation routes accept POST only (rejecting GET with 405/Allow: POST,
+# contract Section 18.2), require the local-only Host header exactly like
+# every read route, and additionally require the exact per-process
+# ``X-Scalping-Action-Token`` bearer value minted by ``create_server`` --
+# a value never derived from, or logged alongside, any credential.
+SCALPING_STATUS_API_ROUTES = {
+    "/api/scalping-status": service.scalping_status_document,
+    "/api/scalping-cycles": service.scalping_cycles_document,
+    "/api/scalping-owned-orders": service.scalping_owned_orders_document,
+    "/api/scalping-owned-positions": service.scalping_owned_positions_document,
+}
+_SCALPING_PREFLIGHT_PATH_PREFIX = "/api/scalping-preflight/"
+_SCALPING_SYMBOL_CANDIDATES_PATH_PREFIX = "/api/scalping-symbol-candidates/"
+_SCALPING_CYCLE_DETAIL_PATH_PREFIX = "/api/scalping-cycle/"
+_SCALPING_JOURNAL_PATH = "/api/scalping-journal"
+_SCALPING_INSTRUMENT_PATTERN = re.compile(
+    "^(" + "|".join(CANONICAL_INSTRUMENTS) + ")$"
+)
+_SCALPING_CYCLE_ID_PATTERN = re.compile(r"^cyc_[0-9a-f]{32}$")
+
+SCALPING_MUTATION_API_ROUTES = frozenset({
+    "/api/scalping-start-demo-auto", "/api/scalping-pause", "/api/scalping-resume",
+    "/api/scalping-emergency-stop", "/api/scalping-emergency-reset",
+    "/api/scalping-save-symbol-map", "/api/scalping-configure-profile",
+    "/api/scalping-run-cycle",
+})
+
 
 def _safe_id_from_path(decoded_path, prefix, pattern):
     if not decoded_path.startswith(prefix):
@@ -230,6 +265,11 @@ def _is_known_api_path(decoded_path):
         or _safe_id_from_path(decoded_path, _MARKET_DATASET_DETAIL_PATH_PREFIX, DATASET_ID_PATTERN) is not None
         or _safe_id_from_path(decoded_path, _REPLAY_SESSION_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN) is not None
         or _safe_id_from_path(decoded_path, _REPLAY_SNAPSHOT_DETAIL_PATH_PREFIX, REPLAY_SESSION_ID_PATTERN) is not None
+        or decoded_path in SCALPING_STATUS_API_ROUTES
+        or decoded_path == _SCALPING_JOURNAL_PATH
+        or _safe_id_from_path(decoded_path, _SCALPING_PREFLIGHT_PATH_PREFIX, _SCALPING_INSTRUMENT_PATTERN) is not None
+        or _safe_id_from_path(decoded_path, _SCALPING_SYMBOL_CANDIDATES_PATH_PREFIX, _SCALPING_INSTRUMENT_PATTERN) is not None
+        or _safe_id_from_path(decoded_path, _SCALPING_CYCLE_DETAIL_PATH_PREFIX, _SCALPING_CYCLE_ID_PATTERN) is not None
     )
 
 
@@ -352,6 +392,77 @@ class ApplicationHandler(BaseHTTPRequestHandler):
         decoded_path = unquote(raw_path)
         if decoded_path != raw_path or ".." in decoded_path or "\\" in decoded_path:
             self._send_json(400, {"error": "INVALID_PATH"}, include_body)
+            return
+        if decoded_path in SCALPING_MUTATION_API_ROUTES:
+            self._send_bytes(
+                405, deterministic_json_bytes({"error": "METHOD_NOT_ALLOWED"}),
+                "application/json; charset=utf-8", extra={"Allow": "POST"}, include_body=include_body,
+            )
+            return
+        scalping_function = SCALPING_STATUS_API_ROUTES.get(decoded_path)
+        if scalping_function is not None:
+            try:
+                document = scalping_function(self.server.scalping_service_instance)
+                if decoded_path == "/api/scalping-status":
+                    # The CSRF-style local action token is exposed only
+                    # here (local-host-gated, never in a log line, never
+                    # adjacent to a credential) so the served dashboard JS
+                    # can read it once and attach it to every mutation
+                    # POST -- a foreign origin cannot read this response
+                    # body (no CORS allow-origin header is ever sent).
+                    document = dict(document)
+                    document["action_token"] = self.server.scalping_action_token
+                self._send_json(200, document, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
+            return
+        if decoded_path == _SCALPING_JOURNAL_PATH:
+            try:
+                _offset, limit = _parse_pagination_query(parsed_url.query)
+            except ValueError:
+                self._send_json(400, {"error": "SCALPING_PAGINATION_INVALID"}, include_body)
+                return
+            try:
+                self._send_json(
+                    200, service.scalping_journal_document(self.server.scalping_service_instance, limit), include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
+            return
+        scalping_instrument = _safe_id_from_path(
+            decoded_path, _SCALPING_PREFLIGHT_PATH_PREFIX, _SCALPING_INSTRUMENT_PATTERN,
+        )
+        if scalping_instrument is not None:
+            try:
+                self._send_json(
+                    200, service.scalping_preflight_document(self.server.scalping_service_instance, scalping_instrument),
+                    include_body,
+                )
+            except ScalpingServiceError as error:
+                self._send_json(400, {"error": error.reason_code}, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
+            return
+        scalping_candidate_instrument = _safe_id_from_path(
+            decoded_path, _SCALPING_SYMBOL_CANDIDATES_PATH_PREFIX, _SCALPING_INSTRUMENT_PATTERN,
+        )
+        if scalping_candidate_instrument is not None:
+            try:
+                self._send_json(
+                    200,
+                    service.scalping_symbol_candidates_document(self.server.scalping_service_instance, scalping_candidate_instrument),
+                    include_body,
+                )
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
+            return
+        scalping_cycle_id = _safe_id_from_path(decoded_path, _SCALPING_CYCLE_DETAIL_PATH_PREFIX, _SCALPING_CYCLE_ID_PATTERN)
+        if scalping_cycle_id is not None:
+            try:
+                document = service.scalping_cycle_document(self.server.scalping_service_instance, scalping_cycle_id)
+                self._send_json(200 if document.get("found") else 404, document, include_body)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"}, include_body)
             return
         market_function = MARKET_API_ROUTES.get(decoded_path)
         if market_function is not None:
@@ -615,7 +726,12 @@ class ApplicationHandler(BaseHTTPRequestHandler):
     def _method_not_allowed(self):
         body = deterministic_json_bytes({"error": "METHOD_NOT_ALLOWED"})
         decoded_path = unquote(urlsplit(self.path).path)
-        allowed_methods = "GET, HEAD" if _is_known_api_path(decoded_path) else "GET"
+        if decoded_path in SCALPING_MUTATION_API_ROUTES:
+            allowed_methods = "POST"
+        elif _is_known_api_path(decoded_path):
+            allowed_methods = "GET, HEAD"
+        else:
+            allowed_methods = "GET"
         self._send_bytes(
             405,
             body,
@@ -623,7 +739,91 @@ class ApplicationHandler(BaseHTTPRequestHandler):
             extra={"Allow": allowed_methods},
         )
 
-    do_POST = _method_not_allowed
+    def _read_json_body(self, max_bytes=65536):
+        """Strict, bounded, UTF-8 JSON body parse for a mutation request.
+        Sends its own error response and returns ``None`` on any failure
+        -- callers must check for ``None`` and stop."""
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            self.close_connection = True
+            self._send_json(400, {"error": "SCALPING_INVALID_CONTENT_LENGTH"})
+            return None
+        if length < 0 or length > max_bytes:
+            # Drain up to a bounded ceiling before responding: leaving a
+            # merely-oversized-for-this-app (but still small) body unread
+            # and then closing the socket causes an abortive TCP reset on
+            # some platforms (observed on Windows) that can race the
+            # client's read of this very error response. A truly enormous
+            # declared length (well past any real client's payload) is
+            # never drained -- an abortive reset is the correct, cheap
+            # response to that case.
+            self.close_connection = True
+            if 0 <= length <= _MAX_DRAINABLE_REJECTED_BODY_BYTES:
+                try:
+                    self.rfile.read(length)
+                except OSError:
+                    pass
+            self._send_json(413, {"error": "SCALPING_REQUEST_BODY_TOO_LARGE"})
+            return None
+        raw = self.rfile.read(length) if length else b""
+        try:
+            text = raw.decode("utf-8", errors="strict")
+            return json.loads(text) if text else {}
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            self._send_json(400, {"error": "SCALPING_INVALID_JSON_BODY"})
+            return None
+
+    def _drain_body(self):
+        """Discard any request body bytes without validating them -- used
+        only on an error path taken before a body would otherwise be read,
+        so an unread body can never corrupt this connection's response
+        framing."""
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            length = 0
+        if length > 0:
+            try:
+                self.rfile.read(min(length, 10 * 1024 * 1024))
+            except OSError:
+                pass
+
+    def do_POST(self):
+        if not self._local_host_header():
+            self._drain_body()
+            self._send_json(421, {"error": "LOCAL_HOST_REQUIRED"})
+            return
+        decoded_path = unquote(urlsplit(self.path).path)
+        if decoded_path not in SCALPING_MUTATION_API_ROUTES:
+            self._drain_body()
+            self._method_not_allowed()
+            return
+        if self.server.scalping_service_instance is None:
+            self._drain_body()
+            self._send_json(503, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"})
+            return
+        token = self.headers.get("X-Scalping-Action-Token", "")
+        if not token or not secrets.compare_digest(token, self.server.scalping_action_token):
+            self._drain_body()
+            self._send_json(403, {"error": "SCALPING_ACTION_TOKEN_INVALID"})
+            return
+        body = self._read_json_body()
+        if body is None:
+            return
+        if not isinstance(body, dict):
+            self._send_json(400, {"error": "SCALPING_REQUEST_INVALID"})
+            return
+        try:
+            document = _dispatch_scalping_mutation(self.server.scalping_service_instance, decoded_path, body)
+            self._send_json(200, document)
+        except ScalpingServiceError as error:
+            self._send_json(400, {"error": error.reason_code})
+        except ValueError:
+            self._send_json(400, {"error": "SCALPING_REQUEST_INVALID"})
+        except (OSError, TypeError, RuntimeError):
+            self._send_json(500, {"error": "LOCAL_SCALPING_SERVICE_UNAVAILABLE"})
+
     do_PUT = _method_not_allowed
     do_PATCH = _method_not_allowed
     do_DELETE = _method_not_allowed
@@ -634,6 +834,38 @@ class ApplicationHandler(BaseHTTPRequestHandler):
     def log_message(self, format_string, *args):
         """Keep local requests quiet; startup and shutdown remain explicit."""
         return
+
+
+def _dispatch_scalping_mutation(scalping_service_instance, path, body):
+    """The sole mapping from a governed ALSAKKAF SCALPING mutation path to
+    a ``ScalpingService`` call. Every branch here corresponds to exactly
+    one entry in ``SCALPING_MUTATION_API_ROUTES`` -- there is no
+    fallthrough default that could route an unrecognized path to a
+    mutating call."""
+    if path == "/api/scalping-start-demo-auto":
+        return {"product_state": scalping_service_instance.request_state_change("DEMO_AUTO")}
+    if path == "/api/scalping-pause":
+        return {"product_state": scalping_service_instance.request_state_change("PAUSED")}
+    if path == "/api/scalping-resume":
+        return {"product_state": scalping_service_instance.request_state_change("ANALYZE_ONLY")}
+    if path == "/api/scalping-emergency-stop":
+        return {"product_state": scalping_service_instance.request_state_change("EMERGENCY_STOP")}
+    if path == "/api/scalping-emergency-reset":
+        return {"product_state": scalping_service_instance.reset_emergency_stop()}
+    if path == "/api/scalping-save-symbol-map":
+        return scalping_service_instance.save_symbol_map(
+            body.get("canonical_instrument"), body.get("broker_symbol"),
+        )
+    if path == "/api/scalping-configure-profile":
+        return scalping_service_instance.configure_profile(
+            body.get("canonical_instrument"), body.get("profile_id"),
+        )
+    if path == "/api/scalping-run-cycle":
+        return scalping_service_instance.run_cycle(
+            body.get("canonical_instrument"), body.get("entry_bars"),
+            body.get("confirmation_bars"), body.get("current_price"), body.get("spread"),
+        )
+    raise RuntimeError("unregistered ALSAKKAF SCALPING mutation path")
 
 
 class _DeadlineOwnership:
@@ -1036,6 +1268,7 @@ def create_server(
     basket_service=None,
     market_intelligence_service_instance=None,
     market_data_replay_service_instance=None,
+    scalping_service_instance=None,
 ):
     """Create, but do not start, a server bound exclusively to loopback."""
     if type(port) is not int or not 0 <= port <= 65535:
@@ -1058,4 +1291,13 @@ def create_server(
     local_server.market_data_replay_service_instance = (
         market_data_replay_service_instance or disabled_market_data_replay_service()
     )
+    # TRL-R2-012: a fresh, per-process, unguessable local action token is
+    # minted on every server construction and required (via the
+    # X-Scalping-Action-Token header) on every ALSAKKAF SCALPING mutation
+    # route -- the CSRF-style local guard contract Section 18.2 requires.
+    # It is served back only through the local-host-gated
+    # /api/scalping-status response, never logged, and never derived from
+    # or adjacent to any broker credential.
+    local_server.scalping_service_instance = scalping_service_instance
+    local_server.scalping_action_token = secrets.token_urlsafe(32)
     return local_server

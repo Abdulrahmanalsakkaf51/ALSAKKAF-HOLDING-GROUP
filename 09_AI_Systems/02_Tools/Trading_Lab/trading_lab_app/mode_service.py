@@ -124,6 +124,16 @@ CAPABILITIES = (
     # status/list/inspect/journal operations remain available regardless
     # of mode and never require this capability.
     "market_data_research",
+    # Added in TRL-R2-012 (ALSAKKAF SCALPING Demo Automation V0): the
+    # first capability in this program that permits *automated*
+    # order_check/order_send without a human confirming each individual
+    # order -- narrowly granted only to MT5_DEMO_AUTOMATED (Section 5.1/16
+    # of TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md).
+    # Every automated order additionally requires an independent,
+    # unconditional demo-account proof at the adapter layer
+    # (alsakkaf_scalping_mt5.py) on every single order_check/order_send
+    # call -- this capability alone is never sufficient to place an order.
+    "alsakkaf_scalping_demo_automation",
 )
 
 REASON_CODES = (
@@ -188,9 +198,14 @@ MODE_DESCRIPTIONS = {
         "never connects to a broker."
     ),
     "MT5_DEMO_AUTOMATED": (
-        "Represents future governed automated MT5 demo execution. "
-        "Unavailable until the Phase 5 MT5 execution adapter and Phase 9 "
-        "automation-arming controls exist."
+        "Governed automated MT5 demo execution (TRL-R2-012, ALSAKKAF "
+        "SCALPING Demo Automation V0). Available only for the narrowly "
+        "scoped alsakkaf_scalping_demo_automation capability -- grants no "
+        "live-account authority whatsoever, independently enforced at the "
+        "adapter layer on every order_check/order_send call regardless of "
+        "this mode's own state. A persisted completion of this mode is "
+        "never resumed across a restart (Section 6 startup-safety "
+        "downgrade); the ALSAKKAF SCALPING product state always starts OFF."
     ),
     "MT5_LIVE_MANUAL": (
         "Represents future Founder-confirmed, one-proposal-at-a-time live "
@@ -232,6 +247,19 @@ _CAPABILITY_MATRIX = {
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",
         "manual_broker_execution", "automated_broker_execution",
         "basket_execution", "emergency_controls", "report_export",
+        # TRL-R2-012 additions (Section 5.1/16 of the R2-012 contract):
+        # alsakkaf_scalping_demo_automation is the sole grant that
+        # actually matters here -- automated_broker_execution/
+        # basket_execution above were already reserved for this mode by
+        # Phase 3 and remain unexercised until a future checkpoint
+        # implements a general automated-broker/basket path.
+        # market_intelligence_research is additionally granted so the
+        # ALSAKKAF SCALPING R2-010 evidence bridge (contract Section 8.3)
+        # does not fail closed with MARKET_INTELLIGENCE_CAPABILITY_DENIED
+        # while DEMO_AUTO is active -- it grants no order/basket/execution
+        # authority of any kind, identical to its existing grant to
+        # MT5_DEMO_MANUAL.
+        "alsakkaf_scalping_demo_automation", "market_intelligence_research",
     }),
     "MT5_LIVE_MANUAL": frozenset({
         "mt5_read_only_access", "mt5_order_check", "mt5_order_send",
@@ -252,10 +280,15 @@ _CAPABILITY_MATRIX = {
 # MODES/_CAPABILITY_MATRIX/MODE_DESCRIPTIONS but are still never available,
 # because no live-arming capability (Phase 9) or automated-execution design
 # (Phase 9) has been implemented yet.
-_AVAILABLE_MODES = frozenset({"OFF", "RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"})
+# MT5_DEMO_AUTOMATED became available in TRL-R2-012 (ALSAKKAF SCALPING Demo
+# Automation V0) -- the alsakkaf_scalping_demo_automation capability and its
+# adapter-level demo-account hard lock now exist. MT5_LIVE_MANUAL and
+# MT5_LIVE_AUTOMATED remain fully unavailable, unchanged.
+_AVAILABLE_MODES = frozenset({
+    "OFF", "RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL", "MT5_DEMO_AUTOMATED",
+})
 
 _UNAVAILABLE_REASONS = {
-    "MT5_DEMO_AUTOMATED": ("MISSING_MT5_ADAPTER", "MISSING_LIVE_ARMING"),
     "MT5_LIVE_MANUAL": ("MISSING_MT5_ADAPTER",),
     "MT5_LIVE_AUTOMATED": ("MISSING_MT5_ADAPTER", "MISSING_LIVE_ARMING"),
 }
@@ -270,9 +303,13 @@ _UNAVAILABLE_REASONS = {
 # earlier, during the availability check.
 _ALLOWED_TRANSITIONS = {
     "OFF": frozenset({"RESEARCH", "SYNTHETIC_PAPER", "MT5_DEMO_MANUAL"}),
-    "RESEARCH": frozenset({"OFF", "SYNTHETIC_PAPER"}),
+    "RESEARCH": frozenset({"OFF", "SYNTHETIC_PAPER", "MT5_DEMO_AUTOMATED"}),
     "SYNTHETIC_PAPER": frozenset({"OFF", "RESEARCH"}),
     "MT5_DEMO_MANUAL": frozenset({"OFF"}),
+    # TRL-R2-012: MT5_DEMO_AUTOMATED is reachable only from RESEARCH and
+    # only returns to OFF/RESEARCH -- a deliberate, single, local-operator
+    # step, mirroring MT5_DEMO_MANUAL's own OFF-only reachability pattern.
+    "MT5_DEMO_AUTOMATED": frozenset({"OFF", "RESEARCH"}),
 }
 
 

@@ -575,6 +575,76 @@ session end or when session capacity drops below ~15%.
   a value that would otherwise go stale the moment either changes. See
   `TRL_R2_011_MARKET_DATA_FABRIC_REPLAY_V0_EVIDENCE.md` for the complete
   record.
+- **TRL-R2-012 — ALSAKKAF SCALPING Demo Automation V0 (Phase 6C,
+  informational, not part of the 0-14 sequence) — accelerated contract and
+  implementation, uncommitted, pending Founder review:** Founder-authorized
+  this session via the accelerated TRL-R2-012 prompt. Startup verification
+  (branch/local/remote/upstream all equal `02c48e0b83eb5c738506551fb4f11c39bca33330`,
+  ahead/behind `0 0`, clean tree, no untracked files, port 8765 clear, no
+  Trading Lab Python process, R2-012 absent, Phase 7 absent) passed before
+  authoring. `TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md`
+  authored in one pass (five product states; three strategy profiles; a
+  twenty-check demo-only MT5 safety gate; broker-symbol discovery; nine
+  `Decimal`-only technical indicators feeding a six-category 100-point
+  score; an R2-010 evidence bridge where only `TRADE_CANDIDATE` proceeds to
+  an order plan; hard risk caps and lot sizing structurally incapable of
+  martingale; a bounded six-order Breakout Ladder with OCO cancellation; an
+  execution model with a governed `order_check`/`order_send`-at-most-once
+  sequence, uncertain-result freeze, and restart reconciliation; a new,
+  separate, hash-chained journal; a narrow `TRL_PHASE_3_OPERATING_MODE_CONTRACT.md`
+  amendment, Section 3.4, granting `alsakkaf_scalping_demo_automation` and
+  `market_intelligence_research` to the now-reachable `MT5_DEMO_AUTOMATED`
+  mode; a dashboard section; 18 CLI commands; this program's first HTTP
+  mutation routes, CSRF-token-gated; two launcher scripts). One
+  implementation-discovered contract correction was applied in place
+  (Section 16: the `market_intelligence_research` grant above, found while
+  building the bridge). **Implementation complete, uncommitted:** eight new
+  `alsakkaf_scalping_*.py` source modules; additive `mode_service.py`
+  (twentieth capability + new transition-matrix row),
+  `app.py`/`server.py`/`service.py`/`static/index.html`/`static/app.js`;
+  `test_operating_mode.py` updated (not weakened) for the newly authorized
+  `MT5_DEMO_AUTOMATED` availability, mirroring the identical precedent
+  R2-009 set for `MT5_DEMO_MANUAL`. 173 new tests across 11 modules; a
+  928-test/37-module targeted combined run (zero failures/errors); two
+  consecutive clean full-suite runs reconciling exactly to `1249 + 173 =
+  1422` (zero failures/errors both times); a real separate-process
+  journal-lock proof; a full 27-step synthetic rehearsal against the fake
+  MT5 adapter and a committed synthetic fixture (TRADE_CANDIDATE on both
+  this module's own score and R2-010's independent gate; a Precision
+  Scalping plan; a Breakout Ladder with exact total-risk conservation and
+  OCO cancellation; no lot escalation after a simulated loss;
+  order_check/order_send via the fake adapter; restart reconciliation;
+  a daily-loss block; an emergency stop that cancelled only the owned
+  ticket and left a deliberately-present unrelated ticket untouched;
+  return to `OFF`/`OFF`; isolated state removed). Two genuine defects were
+  found and fixed during this checkpoint's own hardening pass: a
+  duplicate-journal-event-ID collision risk in `configure_profile` on a
+  coarse system clock (fixed by including effective settings in the
+  payload), and an intermittent Windows TCP abortive-reset race in the new
+  HTTP oversized-body-rejection path (fixed by draining a bounded amount
+  before responding, reconfirmed clean across 8 repeated runs). **Real 4T
+  MT5 demo rehearsal was subsequently performed** under three separate,
+  explicit Founder authorizations (read-only scope review and preflight;
+  an AutoTrading-recheck preflight after the Founder enabled it in the
+  terminal; then one bounded real proof-cycle authorization): a real
+  read-only preflight passed all twenty governed checks (real DEMO
+  account, redacted login `...1837`, real `XAUUSD`); the governed local
+  mutations were performed for real (symbol map saved, product state
+  `OFF -> ANALYZE_ONLY`, proof risk reduced to `0.10%`); the real market
+  evaluation returned `direction=NONE`, score `0/100`, classification
+  `WAIT` — no `TRADE_CANDIDATE` existed at that moment, so the R2-010
+  bridge, `DEMO_AUTO`, `order_check`, and `order_send` were never reached.
+  This result was not overridden or retried, per explicit Founder
+  instruction; product state was returned to `OFF` immediately; zero
+  broker state changed. **Verdict: ONE CONTROLLED 4T DEMO PROOF CYCLE NOT
+  EXECUTED** — a safety/strategy gate correctly prevented the entry, not a
+  defect. Final product state `OFF`; final
+  operating mode `OFF`; port 8765 clear; no Python process; no lock file;
+  nothing staged, committed, or pushed; `main` unchanged; Phase 7 not
+  started. See `TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md`
+  and `_EVIDENCE.md` for the complete record. Per this document's own
+  Git-authoritative convention, the exact current staged/committed/pushed
+  state is always read from `git status`/`git rev-parse HEAD` directly.
 - **Active processes:** None
 - **Active ports:** 8765 confirmed clear (no listener) as of last check
 - **Known defects:** None outstanding.
@@ -591,9 +661,10 @@ session end or when session capacity drops below ~15%.
   `678de02d739a89a0fcc58765178bd8935f4db868`). **TRL-R2-011 implementation
   is now also closed as a completed and remotely verified checkpoint**
   (committed and pushed at `6e24194071e8776833e396745d19b45785ee6ce4`,
-  range `5c53396..6e24194`); its next checkpoint (TRL-R2-012) has not been
-  formally authorized or started — a separate, later Founder decision is
-  required before it begins. Separate, explicit Founder authorization is
+  range `5c53396..6e24194`). **TRL-R2-012 (ALSAKKAF SCALPING Demo
+  Automation V0) is now contract-and-implementation complete, uncommitted,
+  and awaiting Founder review** (see the dedicated entry above); it is not
+  committed and not pushed. Separate, explicit Founder authorization is
   still needed for the remote push of the already-locally-committed Phase
   6 implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch

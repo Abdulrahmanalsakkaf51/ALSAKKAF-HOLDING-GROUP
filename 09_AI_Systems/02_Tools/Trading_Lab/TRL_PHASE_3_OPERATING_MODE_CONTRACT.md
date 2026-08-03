@@ -33,13 +33,18 @@ build against.
 | `RESEARCH` | Yes | Historical research and deterministic strategy analysis/reports only. No forward-paper fills, no broker execution. |
 | `SYNTHETIC_PAPER` | Yes | The existing R2-005 synthetic demonstration. Synthetic evidence only; no live data, no broker, no credentials, no external network call. |
 | `MT5_DEMO_MANUAL` | **No** | Future manually confirmed MT5 demo execution. Fails closed with `MISSING_MT5_ADAPTER`. |
-| `MT5_DEMO_AUTOMATED` | **No** | Future governed automated MT5 demo execution. Fails closed with `MISSING_MT5_ADAPTER` and `MISSING_LIVE_ARMING`. |
+| `MT5_DEMO_AUTOMATED` | **Yes, since TRL-R2-012 (Section 3.4)** | Governed automated MT5 demo execution (ALSAKKAF SCALPING). Reachable only from `RESEARCH`, returns only to `OFF`/`RESEARCH`. Grants no live-account authority; see Section 3.4. |
 | `MT5_LIVE_MANUAL` | **No** | Future Founder-confirmed, one-proposal-at-a-time live execution. Fails closed with `MISSING_MT5_ADAPTER`. No Phase 3 code connects to MT5 or submits an order. |
 | `MT5_LIVE_AUTOMATED` | **No** | Future armed automated live execution. Fails closed with `MISSING_MT5_ADAPTER` and `MISSING_LIVE_ARMING`. Never activates merely because a stored value says so — see Section 6. |
 
 **All four MT5 modes are represented in the schema, the capability matrix,
-the CLI, and the dashboard — and are unavailable in this checkpoint.** No
-software path in this checkpoint can make one of them the current mode.
+the CLI, and the dashboard.** As originally authored in this checkpoint
+(Phase 3), none of them could be entered. Two have since become available
+through later, narrowly scoped Founder-approved amendments recorded in
+this section and in Section 3: `MT5_DEMO_MANUAL` (Phase 5, TRL-R2-007) and
+`MT5_DEMO_AUTOMATED` (TRL-R2-012, Section 3.4). `MT5_LIVE_MANUAL` and
+`MT5_LIVE_AUTOMATED` remain fully unavailable — no software path in this
+program can make either of them the current mode.
 
 ## 3. Governed capability matrix
 
@@ -210,6 +215,56 @@ Read-only Market Data and Replay operations (status, list, inspect, journal
 inspection, and every read-only HTTP route defined in the R2-011 contract)
 require no capability grant and remain available in every mode, including
 `OFF` — matching this document's own existing convention.
+
+### 3.4 Amendment (TRL-R2-012, accelerated contract-and-implementation checkpoint): `alsakkaf_scalping_demo_automation` and `MT5_DEMO_AUTOMATED` becomes available
+
+*Added while authoring and implementing
+`TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md` (ALSAKKAF
+SCALPING Demo Automation V0, an informational "Phase 6C" checkpoint, not
+part of the 0–14 phase sequence and not Phase 7). Unlike the 3.1/3.2/3.3
+amendments above, which only ever granted a research-only capability to
+already-available modes, this amendment does two things: it adds a
+twentieth governed capability, and — for the first time in this program —
+it makes one of the four MT5 modes reserved by Section 2
+(`MT5_DEMO_AUTOMATED`) actually reachable.*
+
+A twentieth governed capability, `alsakkaf_scalping_demo_automation`, is
+added. It is the first capability in this program that permits automated
+`order_check`/`order_send` without a human confirming each individual
+order. It is granted **only** to `MT5_DEMO_AUTOMATED`:
+
+| Mode | `alsakkaf_scalping_demo_automation` granted? |
+|---|---|
+| `OFF` | No |
+| `RESEARCH` | No |
+| `SYNTHETIC_PAPER` | No |
+| `MT5_DEMO_MANUAL` | No |
+| `MT5_DEMO_AUTOMATED` | **Yes** |
+| `MT5_LIVE_MANUAL` | No |
+| `MT5_LIVE_AUTOMATED` | No |
+
+`market_intelligence_research` (Section 3.2) is additionally granted to
+`MT5_DEMO_AUTOMATED` — a narrow, implementation-discovered correction
+found while building the R2-012 evidence bridge (that bridge calls
+R2-010's own `analyze_market_snapshot` while `DEMO_AUTO` is active, which
+would otherwise fail closed with `MARKET_INTELLIGENCE_CAPABILITY_DENIED`
+on every cycle) — for exactly the reasoning Section 3.2 already gave for
+`MT5_DEMO_MANUAL`: the capability grants no order/basket/execution
+authority of any kind by itself.
+
+**`MT5_DEMO_AUTOMATED` is now available**, reachable only from `RESEARCH`
+and returning only to `OFF`/`RESEARCH` (Section 4). `MT5_LIVE_MANUAL` and
+`MT5_LIVE_AUTOMATED` remain fully unavailable and unchanged — Section 2's
+availability table is updated for `MT5_DEMO_AUTOMATED` only; Section 6's
+startup-safety downgrade for `MT5_DEMO_AUTOMATED` (it remains listed in
+`AUTOMATED_OR_LIVE_MT5_MODES`) is unchanged and continues to force `OFF`
+on any restart that finds a persisted completion targeting it — becoming
+*available* does not exempt it from that guarantee. `MT5_DEMO_AUTOMATED`
+grants no live-account authority whatsoever: the R2-012 contract
+additionally requires an independent, adapter-level, unconditional
+demo-account proof on every single `order_check`/`order_send` call,
+regardless of this mode's own state (`TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md`
+Section 2).
 
 ## 4. Exact transition matrix
 
