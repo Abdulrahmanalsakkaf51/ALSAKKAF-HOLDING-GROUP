@@ -2189,3 +2189,35 @@ TRL-R2-012 ONE CONTROLLED 4T DEMO PROOF CYCLE NOT EXECUTED** — a safety/strate
 (no qualifying `TRADE_CANDIDATE`) correctly prevented the entry before `order_send`, exactly
 as designed. The implementation remains fully ready; a further attempt may be made whenever
 the Founder chooses, whenever a genuine setup exists.
+
+**Third addendum (same entry, additive):** The Founder reviewed the complete uncommitted
+scope (25 added, 14 modified, 0 deleted, 39 total files) and authorized exactly one local
+implementation commit, `791ea98118539b6bf30f37e5eaf81ffd85d3589c` ("Implement TRL-R2-012
+ALSAKKAF SCALPING Demo Automation V0"), staged by explicit path (never `git add -A`) after
+a full Section 7-equivalent quality/security/scope validation pass (Markdown Audit clean,
+`git diff --check` clean, no credential/secret/absolute-path exposure, no duplicate
+`order_check`/`order_send` call site, no martingale/grid keyword, no new `innerHTML`, no
+outbound HTTP client/websocket, PowerShell syntax valid, Phase 7 absent). This commit is
+**locally committed, not pushed.**
+
+A subsequent post-commit consecutive-suite verification found that the previously reported
+Run A/Run B full-suite pair did not qualify as a genuinely consecutive clean pair for the
+final committed state, because `test_operating_mode.py` was strengthened (the
+market_intelligence_research/alsakkaf_scalping_demo_automation boundary assertions,
+addendum one above) *after* that original pair. All three test layers were rerun: the
+11-module R2-012 suite (173/173), the 37-module targeted suite (928/928), and the full
+discovered suite three times — Run A (1422/1422 clean), Run B first attempt (1422 tests,
+**one intermittent failure** in `test_mt5_execution_concurrency.ConcurrentSendTests.test_journal_has_exactly_one_send_reservation_after_race`,
+a real separate-process race test confirmed untouched by this checkpoint via `git diff
+--stat` and confirmed passing 3/3 in isolation — the same class of pre-existing,
+system-load-timing-sensitive flake already disclosed in this exact test area by the
+R2-010/R2-011 evidence documents; not worked around by modifying the test; not counted as
+an accepted run), Run B second attempt (1422/1422 clean), and Run C (1422/1422 clean). **The
+accepted consecutive pair is Run B (second attempt) and Run C**, both clean, both occurring
+after the final source/test change, with no intervening edit between them. Net-new (173),
+targeted (928), and complete-suite arithmetic (`1249 + 173 = 1422`) are all unchanged. This
+correction is documentation-only: no source, test, fixture, frontend, or contract file
+changed; the implementation commit `791ea98...` is unchanged and not amended. Broker
+execution proof remains pending (real evaluation was `WAIT`/`NONE`/`0`; `order_check`/
+`order_send` counts remain zero); real-money automation remains locked; product state and
+operating mode remain `OFF`; Phase 7 has not started.

@@ -598,16 +598,25 @@ session end or when session capacity drops below ~15%.
   mutation routes, CSRF-token-gated; two launcher scripts). One
   implementation-discovered contract correction was applied in place
   (Section 16: the `market_intelligence_research` grant above, found while
-  building the bridge). **Implementation complete, uncommitted:** eight new
+  building the bridge). **Implementation complete and locally committed**
+  at `791ea98118539b6bf30f37e5eaf81ffd85d3589c` ("Implement TRL-R2-012
+  ALSAKKAF SCALPING Demo Automation V0"; 25 added, 14 modified, 0 deleted,
+  39 total files, staged by explicit path): eight new
   `alsakkaf_scalping_*.py` source modules; additive `mode_service.py`
   (twentieth capability + new transition-matrix row),
   `app.py`/`server.py`/`service.py`/`static/index.html`/`static/app.js`;
   `test_operating_mode.py` updated (not weakened) for the newly authorized
   `MT5_DEMO_AUTOMATED` availability, mirroring the identical precedent
   R2-009 set for `MT5_DEMO_MANUAL`. 173 new tests across 11 modules; a
-  928-test/37-module targeted combined run (zero failures/errors); two
-  consecutive clean full-suite runs reconciling exactly to `1249 + 173 =
-  1422` (zero failures/errors both times); a real separate-process
+  928-test/37-module targeted combined run (zero failures/errors). A
+  post-commit consecutive-suite verification found the originally
+  reported full-suite pair predated a later `test_operating_mode.py`
+  strengthening and therefore did not qualify; all layers were rerun and
+  the accepted consecutive pair is a second full-suite attempt (after one
+  disclosed, pre-existing, untouched intermittent flake in
+  `test_mt5_execution_concurrency.py`, confirmed passing 3/3 in isolation)
+  plus one further verification run, both `1422/1422` clean, reconciling
+  exactly to `1249 + 173 = 1422`; a real separate-process
   journal-lock proof; a full 27-step synthetic rehearsal against the fake
   MT5 adapter and a committed synthetic fixture (TRADE_CANDIDATE on both
   this module's own score and R2-010's independent gate; a Precision
@@ -640,7 +649,8 @@ session end or when session capacity drops below ~15%.
   EXECUTED** — a safety/strategy gate correctly prevented the entry, not a
   defect. Final product state `OFF`; final
   operating mode `OFF`; port 8765 clear; no Python process; no lock file;
-  nothing staged, committed, or pushed; `main` unchanged; Phase 7 not
+  **locally committed at `791ea98118539b6bf30f37e5eaf81ffd85d3589c`, not
+  pushed**; `main` unchanged; Phase 7 not
   started. See `TRL_R2_012_ALSAKKAF_SCALPING_DEMO_AUTOMATION_V0_CONTRACT.md`
   and `_EVIDENCE.md` for the complete record. Per this document's own
   Git-authoritative convention, the exact current staged/committed/pushed
@@ -662,9 +672,9 @@ session end or when session capacity drops below ~15%.
   is now also closed as a completed and remotely verified checkpoint**
   (committed and pushed at `6e24194071e8776833e396745d19b45785ee6ce4`,
   range `5c53396..6e24194`). **TRL-R2-012 (ALSAKKAF SCALPING Demo
-  Automation V0) is now contract-and-implementation complete, uncommitted,
-  and awaiting Founder review** (see the dedicated entry above); it is not
-  committed and not pushed. Separate, explicit Founder authorization is
+  Automation V0) is now contract-and-implementation complete and locally
+  committed** at `791ea98118539b6bf30f37e5eaf81ffd85d3589c` (see the
+  dedicated entry above); it is **not pushed**. Separate, explicit Founder authorization is
   still needed for the remote push of the already-locally-committed Phase
   6 implementation checkpoint
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch

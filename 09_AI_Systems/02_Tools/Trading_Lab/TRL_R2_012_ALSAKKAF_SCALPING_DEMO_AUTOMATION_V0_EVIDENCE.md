@@ -309,18 +309,44 @@ tests, 0 failures, 0 errors.**
 Complete-suite arithmetic: `1249` (prior baseline) `+ 173` (net-new) `=
 1422`.
 
+**Exact chronology (corrected during post-commit consecutive-suite
+verification):** `test_operating_mode.py` was strengthened (Section 6/16
+Founder-review addendum, adding explicit per-mode capability-boundary
+assertions) *after* the original Run A/Run B pair below, which therefore
+do not qualify as the accepted consecutive pair for the final committed
+state. All three layers were rerun afterward:
+
 | Run | Command | Tests | Result |
 |---|---|---|---|
-| A | `python -B -W error -m unittest discover -s . -p "test_*.py"` | 1422 | 0 failures, 0 errors |
-| B | same, repeated | 1422 | 0 failures, 0 errors |
+| 11-module R2-012 suite (rerun) | `python -B -W error -m unittest test_alsakkaf_scalping_{data,indicators,strategy,risk,journal,mt5,service,cli,http,concurrency,safety}` | 173 | 0 failures, 0 errors |
+| 37-module targeted suite (rerun) | same modules as Section above | 928 | 0 failures, 0 errors |
+| Full-suite Run A (rerun) | `python -B -W error -m unittest discover -s . -p "test_*.py"` | 1422 | 0 failures, 0 errors |
+| Full-suite Run B, first attempt | same | 1422 | **1 failure**: `test_mt5_execution_concurrency.ConcurrentSendTests.test_journal_has_exactly_one_send_reservation_after_race` |
+| `test_mt5_execution_concurrency.py` in isolation | `python -B -W error -m unittest test_mt5_execution_concurrency` | 7 | 0 failures, 0 errors (×3 consecutive runs) |
+| Full-suite Run B, second attempt | same as Run A | 1422 | 0 failures, 0 errors |
+| Full-suite Run C (post-commit verification) | same as Run A | 1422 | 0 failures, 0 errors |
 
-Both runs executed with the working directory set to
-`09_AI_Systems/02_Tools/Trading_Lab`, matching the R2-011 precedent. No
-intermittent failure occurred in either full-suite run. The two genuine
-defects found and fixed during this checkpoint's own hardening pass
-(Section 16) were caught and corrected *before* these two accepted clean
-runs — neither is a disclosed-but-unfixed pre-existing flake; both are
-now structurally prevented.
+The one intermittent failure is in `test_mt5_execution_concurrency.py`, a
+real separate-process race test, confirmed **untouched by this
+checkpoint** (`git diff --stat` against that path reports zero changes)
+and confirmed passing 3/3 in isolation — the same class of pre-existing,
+system-load-timing-sensitive flake this repository's own R2-010/R2-011
+evidence documents already disclosed in the identical test area. It was
+not worked around by modifying the test, and the first Run B attempt is
+**not** counted as an accepted clean run.
+
+**The accepted consecutive pair is: Run B (second attempt) and Run C,
+both 1422/1422 with zero failures/errors, both occurring after the final
+source/test change in this checkpoint (`test_operating_mode.py`'s Founder-
+review strengthening) and with no intervening source/test edit between
+them.** All full-suite runs above used the working directory
+`09_AI_Systems/02_Tools/Trading_Lab`, matching the R2-011 precedent. The
+two genuine defects found and fixed during this checkpoint's own
+hardening pass (Section 16) were caught and corrected before any of the
+runs in this table — neither is a disclosed-but-unfixed pre-existing
+flake; both are structurally prevented. The one disclosed intermittent
+failure above is a pre-existing Phase 5 test-timing sensitivity, not an
+R2-012 defect.
 
 ## 22. Synthetic rehearsal
 
