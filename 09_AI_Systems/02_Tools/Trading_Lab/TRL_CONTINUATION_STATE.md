@@ -673,10 +673,16 @@ session end or when session capacity drops below ~15%.
   during a further, separately authorized bounded rehearsal. Real-money
   automation remains locked.
 - **TRL-R2-013 — ALSAKKAF SCALPING Operational Dashboard Hotfix (Phase
-  6C-1) — implementation complete, Founder visually accepted (dashboard
-  and corrected shutdown), locally committed this session.** Remote push
-  remains a separate, later, Founder-authorized step. Corrects the
-  operational gap the Founder found on the
+  6C-1) implementation checkpoint — formally closed, committed, pushed,
+  and remotely verified.** Founder visually accepted the operational
+  dashboard and the corrected shutdown. Implementation commit
+  `d369bf8f46ad282ef5876bea2ed44aaf957e2ea9` ("Implement TRL-R2-013
+  ALSAKKAF SCALPING Operational Dashboard Hotfix") is committed and
+  pushed, range `29aab34..d369bf8`, independently re-verified via a fresh
+  `git fetch`: local HEAD, the live remote branch ref, and the upstream-
+  tracking ref all equal `d369bf8f46ad282ef5876bea2ed44aaf957e2ea9`;
+  ahead/behind `0 0`; working tree and index clean; no untracked file;
+  `main` unchanged. Corrects the operational gap the Founder found on the
   first real launch of the R2-012 dashboard (launcher never requested a
   mode/product-state transition; MT5 connection badge was journal-health-
   derived; configuration never persisted; no server-side bar/quote fetch
@@ -713,9 +719,12 @@ session end or when session capacity drops below ~15%.
   `0edd4adf2019e8162011ada58f3e5962555271eb`, range `02c48e0..0edd4ad` —
   see the dedicated entries above). **TRL-R2-013 (ALSAKKAF SCALPING
   Operational Dashboard Hotfix) implementation, including the same-session
-  Founder shutdown-correction addendum, is Founder-accepted and locally
-  committed this session** — remote push has not occurred; that remains a
-  separate, later, Founder-authorized step, exactly like the already-
+  Founder shutdown-correction addendum, is now also closed as a completed
+  and remotely verified checkpoint** (committed and pushed at
+  `d369bf8f46ad282ef5876bea2ed44aaf957e2ea9`, range `29aab34..d369bf8` —
+  see the dedicated entry above). Its next checkpoint (R2-014) has not
+  been formally authorized or started. Separate, explicit Founder
+  authorization is still needed for the remote push of the already-
   locally-committed Phase 6 implementation checkpoint described earlier
   in this document
 - **Next verification:** Markdown Audit, `git diff --check`, UTF-8/BOM/whitespace checks, JSON parse, secret-pattern scan, and conflict-marker scan — the governing pre-commit/pre-push checks for any future change to this branch

@@ -2380,3 +2380,58 @@ did not occur; it remains a separate, later, Founder-authorized step. `main` is 
 this program's Git-authoritative convention, the exact current committed/pushed state is
 always read from `git status`/`git rev-parse HEAD`/`git log -1` directly, not restated here as
 a fixed SHA (this entry is itself part of the commit it describes).
+
+## 2026-08-03-005 — Verified publication of the TRL-R2-013 implementation commit; checkpoint formally closed
+
+**Decision:** The Founder pushed the TRL-R2-013 implementation commit
+`d369bf8f46ad282ef5876bea2ed44aaf957e2ea9` ("Implement TRL-R2-013 ALSAKKAF SCALPING
+Operational Dashboard Hotfix") to `origin/codex/TRL-R2-full-vision-execution`, push range
+`29aab34..d369bf8`. Independently re-verified via a fresh `git fetch origin
+codex/TRL-R2-full-vision-execution` (not merely trusted from a prior report): local HEAD, the
+live remote branch ref, and the upstream-tracking ref all equal
+`d369bf8f46ad282ef5876bea2ed44aaf957e2ea9`; `git rev-list --left-right --count
+HEAD...origin/codex/TRL-R2-full-vision-execution` reported `0 0`; the working tree and index
+were clean; no untracked file remained; and `refs/heads/main` remained unchanged at
+`8ada27f915091b91ddbc421aae06c7c5b36e068f`.
+
+**Why:** Publishing this commit makes the complete TRL-R2-013 ALSAKKAF SCALPING Operational
+Dashboard Hotfix checkpoint — the governing contract, the new server-authoritative
+`ScalpingRuntime`, corrected launchers, persisted configuration, the corrected MT5-connection-
+vs-journal-health indicator, the Demo Auto dashboard lock, the same-session Founder shutdown-
+correction addendum (`graceful_stop()`/`recover_stale_emergency_stop()`), 75 net-new tests
+across two new modules, and both the synthetic and real read-only rehearsals — available on
+the shared branch, closing this checkpoint as a completed, remotely verified implementation
+record. The accepted consecutive complete-suite pair (Run A and Run B, both `1497/1497` with
+zero failures/errors, no intervening source/test edit between them) was recorded before this
+push in `TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_EVIDENCE.md`. The Founder
+personally, visually accepted the operational dashboard (real MT5 connection, DEMO
+verification, live balance/equity, `XAUUSD` mapping, real quotes/indicators, `Run Analysis
+Now`, 15-second read-only monitoring with multiple observed iterations, `WAIT`/`NONE` refusal
+behavior, `Demo Auto` visibly locked, zero broker orders/positions) and, separately, the
+corrected shutdown flow (a real rehearsal against the Founder's own running dashboard server
+observed nine real monitoring iterations, then the corrected stop script produced no
+unnecessary emergency-stop activation and reached a verified `OFF`/`OFF` on the first attempt).
+`order_check` and `order_send` counts both remain zero throughout every test and rehearsal in
+this checkpoint; broker positions and pending orders remained zero before and after.
+
+**How to apply:** **The TRL-R2-013 implementation checkpoint is now formally closed:
+committed, pushed, and remotely verified.** Real-money automation remains locked
+(`MT5_LIVE_MANUAL`/`MT5_LIVE_AUTOMATED` unavailable; independent adapter-level demo-account
+lock on every `order_check`/`order_send` call, unchanged from R2-012). `Demo Auto` remains
+dashboard-locked (`DEMO AUTO — LOCKED PENDING BROKER EXECUTION PROOF`) — the R2-012 backend
+transition remains implemented and unit-tested; only the dashboard's ability to invoke it is
+removed. One operational validation item remains open, unchanged and not newly introduced by
+this checkpoint — an actual broker-verified `order_check`/`order_send` round trip on the real
+4T demo terminal, achievable only when a genuine `TRADE_CANDIDATE` occurs during a further,
+separately authorized bounded rehearsal — this is explicitly not an implementation defect, not
+a reason to weaken any strategy gate, not permission to manufacture a signal, not permission to
+unlock live money, and not permission to run uncontrolled automation. Product state and
+operating mode both remain `OFF`. R2-014 has not been formally authorized or started; Phase 7
+remains entirely absent. This documentation-closure pass (this entry plus the corresponding
+updates to `TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_EVIDENCE.md`,
+`TRL_CONTINUATION_STATE.md`, `TRL_CONTINUATION_STATE.json`, `TRL_FULL_VISION_MASTER_PROGRAM.md`,
+and `TRL_BLOCKERS.md`) remains itself locally uncommitted and unpushed until its own separate
+Git checkpoint is completed — per the Git-authoritative model this document already uses
+throughout, the exact current staged/committed/pushed state of both the implementation
+publication and this closure pass is always read from `git status`/`git rev-parse HEAD`
+directly, not restated here as a fixed value.

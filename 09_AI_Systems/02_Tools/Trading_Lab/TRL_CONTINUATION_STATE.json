@@ -542,7 +542,7 @@
     "FIB-001 exact numeric parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)",
     "SMA-001 exact execution-geometry parameters (blocker remains active; now also independently re-enforced by the R2-009 contract for basket construction)"
   ],
-  "next_command": "TRL-R2-011 implementation remains closed as a completed and remotely verified checkpoint (committed and pushed at 6e24194071e8776833e396745d19b45785ee6ce4, range 5c53396..6e24194). TRL-R2-012 (ALSAKKAF SCALPING Demo Automation V0) implementation is now also closed as a completed and remotely verified checkpoint (committed and pushed at 791ea98118539b6bf30f37e5eaf81ffd85d3589c and 0edd4adf2019e8162011ada58f3e5962555271eb, range 02c48e0..0edd4ad) -- see trl_r2_012_implementation below. Its next checkpoint (TRL-R2-013) has not been formally authorized or started. Separate, explicit Founder authorization is still needed for the remote push of the already-locally-committed Phase 6 implementation checkpoint.",
+  "next_command": "TRL-R2-011 implementation remains closed as a completed and remotely verified checkpoint (committed and pushed at 6e24194071e8776833e396745d19b45785ee6ce4, range 5c53396..6e24194). TRL-R2-012 (ALSAKKAF SCALPING Demo Automation V0) implementation is now also closed as a completed and remotely verified checkpoint (committed and pushed at 791ea98118539b6bf30f37e5eaf81ffd85d3589c and 0edd4adf2019e8162011ada58f3e5962555271eb, range 02c48e0..0edd4ad) -- see trl_r2_012_implementation below. TRL-R2-013 (ALSAKKAF SCALPING Operational Dashboard Hotfix) implementation is now also closed as a completed and remotely verified checkpoint (committed and pushed at d369bf8f46ad282ef5876bea2ed44aaf957e2ea9, range 29aab34..d369bf8) -- see trl_r2_013_implementation below. Its next checkpoint (R2-014) has not been formally authorized or started. Separate, explicit Founder authorization is still needed for the remote push of the already-locally-committed Phase 6 implementation checkpoint.",
   "next_verification": "Markdown Audit, git diff --check, UTF-8/BOM/whitespace, JSON parse, secret-pattern scan, conflict-marker scan - the governing pre-commit/pre-push checks for any future change to this branch",
   "prohibited_commands": [
     "git reset --hard",
@@ -771,7 +771,7 @@
     "python_process": "none"
   },
   "trl_r2_013_implementation": {
-    "status": "implementation complete this session, uncommitted, pending Founder review",
+    "status": "formally closed: committed, pushed, and remotely verified",
     "root_causes_fixed": [
       "launcher never requested any ModeService/product-state transition -- operating mode and product state always resolved to OFF/OFF",
       "MT5 CONNECTION badge was derived from journal_startup_diagnostic_code, never from a real terminal/account read",
@@ -793,6 +793,8 @@
     "demo_auto": "not entered anywhere in this checkpoint's new code, tests, or rehearsals; dashboard control permanently disabled and locked",
     "order_check_order_send": "not called anywhere in this checkpoint's new code, tests, or rehearsals",
     "evidence_document": "09_AI_Systems/02_Tools/Trading_Lab/TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_EVIDENCE.md",
-    "commit_status": "Founder-accepted (dashboard and corrected shutdown) and locally committed this session (message: \"Implement TRL-R2-013 ALSAKKAF SCALPING Operational Dashboard Hotfix\"; 5 added, 17 modified, 0 deleted, 22 total files); not pushed -- see git status/git rev-parse HEAD directly for the exact current state"
+    "commit_status": "committed and pushed: implementation commit d369bf8f46ad282ef5876bea2ed44aaf957e2ea9 (\"Implement TRL-R2-013 ALSAKKAF SCALPING Operational Dashboard Hotfix\"; 5 added, 17 modified, 0 deleted, 22 total files)",
+    "push_status": "pushed, range 29aab34..d369bf8, independently re-verified via fresh git fetch: local HEAD, remote branch ref, and upstream-tracking ref all equal d369bf8f46ad282ef5876bea2ed44aaf957e2ea9, ahead/behind 0 0",
+    "implementation_checkpoint_status": "formally closed: committed, pushed, and remotely verified"
   }
 }

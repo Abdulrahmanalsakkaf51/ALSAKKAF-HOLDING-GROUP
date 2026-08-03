@@ -6,7 +6,7 @@
 |---|---|
 | Founder | Abdulrahman Yaseen Alsakkaf |
 | Checkpoint | TRL-R2-013 (accelerated operational hotfix, single sprint) |
-| Status | Implementation complete, including the same-session Founder shutdown-correction addendum (Section 19). Founder visually accepted the operational dashboard and the corrected shutdown. **Locally committed this session; remote push remains a separate, later, Founder-authorized step.** See `git status`/`git rev-parse HEAD` directly for the exact current state. |
+| Status | **Formally closed: committed and pushed, remotely verified.** Implementation complete, including the same-session Founder shutdown-correction addendum (Section 19). Founder visually accepted the operational dashboard and the corrected shutdown. See `git status`/`git rev-parse HEAD` directly for the exact current state. |
 | Related contract | `TRL_R2_013_ALSAKKAF_SCALPING_OPERATIONAL_DASHBOARD_HOTFIX_CONTRACT.md` |
 
 ---
@@ -583,10 +583,44 @@ Following Founder visual acceptance of both the operational dashboard
 the Founder separately authorized exactly one local implementation commit
 of this checkpoint's full approved 22-file scope (5 added, 17 modified, 0
 deleted — Section 11) with the message `Implement TRL-R2-013 ALSAKKAF
-SCALPING Operational Dashboard Hotfix`. This checkpoint (including this
-document) is therefore **locally committed** as of that commit; **remote
-push remains a separate, later, Founder-authorized step**, not performed
-in this pass. `main` is unaffected by a local commit on this feature
-branch. See `git status`/`git rev-parse HEAD`/`git log -1` directly for
-the exact current committed state, rather than a SHA restated here (this
-document is itself part of the commit it describes).
+SCALPING Operational Dashboard Hotfix` (commit
+`d369bf8f46ad282ef5876bea2ed44aaf957e2ea9`). `main` is unaffected by a
+commit on this feature branch.
+
+## 21. Verified publication
+
+The Founder pushed the implementation commit
+`d369bf8f46ad282ef5876bea2ed44aaf957e2ea9` ("Implement TRL-R2-013
+ALSAKKAF SCALPING Operational Dashboard Hotfix") to
+`origin/codex/TRL-R2-full-vision-execution`, push range `29aab34..d369bf8`.
+Independently re-verified via a fresh `git fetch origin
+codex/TRL-R2-full-vision-execution` (not merely trusted from a prior
+report): local HEAD, the live remote branch ref, and the upstream-
+tracking ref all equal `d369bf8f46ad282ef5876bea2ed44aaf957e2ea9`; `git
+rev-list --left-right --count HEAD...origin/codex/TRL-R2-full-vision-execution`
+reported `0 0`; the working tree and index were clean; no untracked file
+remained; and `refs/heads/main` remained unchanged at
+`8ada27f915091b91ddbc421aae06c7c5b36e068f`.
+
+**The TRL-R2-013 implementation checkpoint is now formally closed:
+committed, pushed, and remotely verified.** Real-money automation remains
+locked (`MT5_LIVE_MANUAL`/`MT5_LIVE_AUTOMATED` unavailable; independent
+adapter-level demo-account lock on every `order_check`/`order_send` call,
+unchanged from R2-012). `Demo Auto` remains dashboard-locked ("`DEMO AUTO
+— LOCKED PENDING BROKER EXECUTION PROOF`"). The one remaining operational
+validation item is unchanged and not newly introduced by this checkpoint:
+an actual broker-verified `order_check`/`order_send` round trip on the
+real 4T demo terminal, achievable only when a genuine `TRADE_CANDIDATE`
+occurs during a further, separately authorized bounded rehearsal — not an
+R2-013 implementation defect, not permission to weaken any strategy gate,
+manufacture a signal, unlock live money, or run uncontrolled automation.
+Product state and operating mode both remain `OFF`. R2-014 has not been
+formally authorized or started; Phase 7 remains entirely absent. This
+documentation-closure pass (this section plus the corresponding updates to
+`TRL_CONTINUATION_STATE.md`, `TRL_CONTINUATION_STATE.json`,
+`TRL_FULL_VISION_MASTER_PROGRAM.md`, and `TRL_DECISION_LOG.md`) remains
+itself locally uncommitted and unpushed until its own separate Git
+checkpoint is completed — per the Git-authoritative model this program
+already uses throughout, the exact current staged/committed/pushed state
+is always read from `git status`/`git rev-parse HEAD` directly, not
+restated here as a fixed value.
